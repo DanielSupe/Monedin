@@ -8,7 +8,7 @@
 
 - [x] 2.1 Crear `package.json` raíz y `pnpm-workspace.yaml` declarando `apps/*` y `packages/*`
 - [x] 2.2 Crear `turbo.json` con las tareas `dev`, `build`, `lint`, `test` y `typecheck`, declarando entradas y salidas de cada una para que la caché no enmascare fallos
-- [ ] 2.3 Verificar que existe un comando de verificación sin caché y que `typecheck` falla de verdad cuando se introduce un error de tipos a propósito — **parcial**: el comando existe (`pnpm verify`, con `--force`) y se comprobó que `typecheck` falla señalando archivo y línea ante un error de tipos introducido a propósito; queda pendiente ejecutarlo *a través de Turborepo*, que no arranca en esta máquina (ver nota al final)
+- [x] 2.3 Verificar que existe un comando de verificación sin caché y que `typecheck` falla de verdad cuando se introduce un error de tipos a propósito — *`pnpm verify` ejecuta las 12 tareas con `0 cached`. Con un error de tipos introducido a propósito, Turborepo NO sirve de caché el paquete afectado: lo reejecuta y falla señalando archivo y línea, mientras los otros tres siguen cacheados legítimamente*
 - [x] 2.4 Crear el `.env.example` versionado con todas las variables previstas y valores de ejemplo no sensibles
 
 ## 3. Infraestructura local
@@ -70,28 +70,28 @@
 
 - [x] 10.1 Redactar el `CLAUDE.md` sobre lo que quedó realmente construido: rol asignado, prohibición de hardcodear, centralización de configuración y constantes, anatomía obligatoria de módulo, patrón de actor, reglas de atomicidad e idempotencia para el saldo y las transiciones de estado, prefijo de rutas, idiomas, paginación por defecto y exigencia de tests por change
 - [x] 10.2 Escribir el `README` con el arranque en dos comandos y los requisitos previos (Docker, Node, pnpm)
-- [ ] 10.3 Verificación de extremo a extremo sobre un clon limpio: `docker compose up`, `pnpm install`, `pnpm dev`, `GET /api/v1/health` responde, el front muestra el resultado, quitar una variable del `.env` impide arrancar con mensaje claro, y `pnpm test` pasa entero — **parcial**: verificado todo sobre el repositorio actual (contenedores arriba, `pnpm install`, API y front levantados, `health` respondiendo por el proxy de Vite, el front pintando el resultado, quitar `WEB_ORIGIN` impide arrancar con salida 1 y mensaje claro, y los 55 tests en verde). Queda pendiente hacerlo con `pnpm dev` sobre un **clon limpio**, porque `pnpm dev` pasa por Turborepo (ver nota)
+- [x] 10.3 Verificación de extremo a extremo sobre un clon limpio: `docker compose up`, `pnpm install`, `pnpm dev`, `GET /api/v1/health` responde, el front muestra el resultado, quitar una variable del `.env` impide arrancar con mensaje claro, y `pnpm test` pasa entero — *hecho sobre un clon recién sacado del repositorio: `pnpm install` sin errores, 55 tests en verde sin build previo, `pnpm dev` levantando API y front, `health` respondiendo directo y por el proxy de Vite, `/health` sin prefijo devolviendo 404 con el cuerpo estándar, el front pintando el resultado en el navegador, y quitar dos variables del `.env` deteniendo el arranque con salida 1 y los dos problemas nombrados*
 - [x] 10.4 Commit final del change
 
 ---
 
-## Nota: Turborepo bloqueado por el antivirus
+## Nota: Turborepo estuvo bloqueado por el antivirus
 
-`turbo` no se puede ejecutar en esta máquina. **360 Total Security** impide crear `turbo.exe`
-(50 MB, sin firmar): ni pnpm, ni npm, ni `tar` consiguen escribir el archivo, y el instalador de
-Turborepo informa de éxito aunque el binario nunca llegue a existir. El fallo aparece después como
+Durante la ejecución de este change, **360 Total Security** impedía crear `turbo.exe` (50 MB, sin
+firmar): ni pnpm, ni npm, ni `tar` conseguían escribir el archivo, y el instalador de Turborepo
+informaba de éxito aunque el binario nunca llegara a existir. El fallo aparecía después como
 `spawn EPERM`.
 
-No es un problema del código ni de la configuración: `turbo.json` está escrito y los scripts raíz
-están cableados. En cuanto haya una exclusión en el antivirus para la carpeta del proyecto y para
-`%LOCALAPPDATA%\pnpm\store`, basta con borrar `node_modules` y reinstalar.
+**Resuelto**: con la exclusión puesta en el antivirus y tras borrar `node_modules` y reinstalar, el
+binario sobrevive y `turbo` funciona. Queda anotado en el README, porque le va a pasar a cualquiera
+que clone el proyecto en una máquina con un antivirus agresivo.
 
-Mientras tanto, todo se verificó ejecutando cada paquete directamente:
+Estado final de la verificación, todo a través de Turborepo:
 
-| Paquete              | lint | typecheck | tests |
-| -------------------- | ---- | --------- | ----- |
-| `@monedin/contracts` | ✓    | ✓         | 8     |
-| `@monedin/api`       | ✓    | ✓         | 38    |
-| `@monedin/web`       | ✓    | ✓         | 9     |
+| Paquete              | lint | typecheck | build | tests |
+| -------------------- | ---- | --------- | ----- | ----- |
+| `@monedin/contracts` | ✓    | ✓         | ✓     | 8     |
+| `@monedin/api`       | ✓    | ✓         | ✓     | 38    |
+| `@monedin/web`       | ✓    | ✓         | ✓     | 9     |
 
-Las tareas 2.3 y 10.3 quedan sin marcar porque su parte pendiente depende exclusivamente de esto.
+`pnpm verify`: 12 tareas, 12 correctas, 0 desde caché.

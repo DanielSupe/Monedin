@@ -261,12 +261,13 @@ máquina y no viajan con el repositorio: quien clone el proyecto en otro equipo 
 problema sin enterarse. La decisión se tomó **antes** de la primera instalación de dependencias.
 
 **El antivirus puede bloquear los binarios de las herramientas** → apareció durante la ejecución de
-este change: 360 Total Security impide crear `turbo.exe` (50 MB, sin firmar) al instalar, y ni pnpm
+este change y quedó **resuelto** con una exclusión: 360 Total Security impide crear `turbo.exe` (50 MB, sin firmar) al instalar, y ni pnpm
 ni npm ni `tar` consiguen escribirlo. El síntoma engaña, porque la instalación parece terminar bien
 y el fallo aparece luego como `spawn EPERM` al ejecutar `turbo`. Mitigación: excluir la carpeta del
 proyecto y el store de pnpm (`%LOCALAPPDATA%\\pnpm\\store`) en el antivirus. Queda anotado en el
 README, porque le va a pasar a cualquiera que clone el proyecto en una máquina con un antivirus
-agresivo.
+agresivo. Tras poner la exclusión hay que borrar `node_modules` y reinstalar: pnpm da la instalación
+por buena y no vuelve a extraer el binario que falta.
 
 **El repositorio no está bajo git** → todo el trabajo hecho hasta ahora es irrecuperable ante un
 error. Mitigación: `git init` y primer commit como primera tarea del change, antes de instalar nada.
