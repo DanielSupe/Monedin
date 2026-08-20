@@ -1,0 +1,10 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Paquetes autorizados a ejecutar scripts de instalacion. esbuild los necesita
+# para colocar su binario nativo; sin esto vite, vitest y tsx no arrancan.
+# Cualquier entrada nueva aqui es codigo de terceros ejecutandose al instalar:
+# se anade a conciencia, no por quitarse un aviso de encima.
+allowBuilds:
+  esbuild: true

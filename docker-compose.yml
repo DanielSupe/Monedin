@@ -1,0 +1,50 @@
+# Infraestructura local de desarrollo.
+#
+# Decision 8 del design: Docker sirve SOLO la infraestructura. La API y el front
+# corren en el host con `pnpm dev`, porque montar volumenes con recarga en
+# caliente sobre Windows es lento y fragil.
+#
+# Las credenciales salen del `.env`; aqui no hay ningun valor incrustado.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: monedin-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - monedin-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------------------
+  # ADMINER ES EXCLUSIVO DE DESARROLLO.
+  #
+  # Es un cliente de base de datos con acceso total y sin restricciones de red.
+  # NUNCA se incluye en el compose de produccion ni se expone en un servidor
+  # accesible desde internet. Si aparece en un despliegue, es un incidente de
+  # seguridad, no una comodidad.
+  # ---------------------------------------------------------------------------
+  adminer:
+    image: adminer:4
+    container_name: monedin-adminer
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${ADMINER_PORT}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+
+volumes:
+  monedin-postgres-data:
+    name: monedin-postgres-data

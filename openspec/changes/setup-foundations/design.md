@@ -8,9 +8,9 @@ caro dentro de seis módulos.
 Ver `proposal.md` para la motivación. Este documento cubre cómo se monta el andamio y por qué se
 eligió cada pieza.
 
-Dos restricciones del entorno condicionan varias decisiones: el proyecto vive en una carpeta
-sincronizada por OneDrive en Windows, y el objetivo declarado de despliegue es un servidor propio o
-EC2 gestionado a mano, no una plataforma administrada.
+Dos restricciones del entorno condicionan varias decisiones: el desarrollo es en Windows, y el
+objetivo declarado de despliegue es un servidor propio o EC2 gestionado a mano, no una plataforma
+administrada.
 
 ## Goals / Non-Goals
 
@@ -197,20 +197,82 @@ Lo que sí se adopta desde el día uno es la **disciplina**: cero textos visible
 un catálogo centralizado a una librería el día que haya un segundo idioma es mecánico; extraer
 textos repartidos por sesenta archivos no lo es.
 
+### 11. Prisma sobre ESM: verificado, con tres condiciones
+
+Resultado del spike de la tarea 3.3, ejecutado el 2026-08-20 contra el contenedor de PostgreSQL 16
+de este mismo change, con Node 22.18.0 y Prisma 7.9.1.
+
+**Conclusión: Prisma funciona con `"type": "module"` y `moduleResolution: NodeNext`.** No hay que
+revertir ESM. Se verificó el ciclo completo: `prisma generate`, `prisma migrate dev`, y consultas,
+`$transaction` y `$disconnect` reales contra la base de datos, tanto con `tsx` en desarrollo como
+con el JavaScript ya compilado corriendo sobre `node` a secas, que es como corre en producción.
+
+Ahora bien, Prisma 7 no se configura como Prisma 5 o 6, y tres detalles condicionan `add-data-model`:
+
+**1. La URL de conexión ya no vive en el schema.** `datasource { url = env(...) }` es un error de
+validación en Prisma 7. La URL se declara en un `prisma.config.ts` en la raíz, y el cliente recibe
+un *driver adapter* explícito:
+
+```
+   prisma.config.ts ──► CLI (generate, migrate)
+        │
+        └── DATABASE_URL
+                 │
+                 ▼
+   new PrismaPg({ connectionString }) ──► new PrismaClient({ adapter })
+```
+
+Esto añade `@prisma/adapter-pg` y `pg` como dependencias. También significa que `prisma.config.ts`
+lee el entorno fuera del módulo de configuración: es un archivo de tiempo de CLI, no de tiempo de
+petición, y necesitará su propia excepción declarada en el `eslint.config.js` de la API, igual que
+`src/config/**`. Es la segunda y última excepción prevista.
+
+**2. El generador es `prisma-client`, no `prisma-client-js`**, y exige un `output` explícito. El
+cliente se genera como código fuente TypeScript dentro del repositorio, no dentro de `node_modules`.
+Ese directorio generado tiene que entrar en el `include` del `tsconfig` para que se compile a `dist`.
+
+**3. Hay que fijar `moduleFormat = "esm"` e `importFileExtension = "js"`.** Es el detalle que más
+caro sale si se descubre tarde: por defecto el cliente generado importa sus propios archivos como
+`./enums.ts`, con extensión `.ts` literal. `tsx` lo tolera y `tsc` compila sin quejarse, así que en
+desarrollo y en el build todo parece correcto — y el proceso revienta con `ERR_MODULE_NOT_FOUND` al
+arrancar en producción, que es el único sitio donde corre `node` sobre el JavaScript compilado. Se
+reprodujo el fallo y se confirmó que estas dos opciones lo eliminan.
+
+```prisma
+generator client {
+  provider            = "prisma-client"
+  output              = "../generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+```
+
+**Alternativa descartada**: volver a CommonJS en la API para evitar el asunto. Habría dado una
+monorepo con dos sistemas de módulos, `packages/contracts` tendría que publicar ambos formatos, y se
+habría pagado esa complejidad de forma permanente para esquivar un problema que resultó tener una
+solución de cuatro líneas.
+
 ## Risks / Trade-offs
 
-**El proyecto vive dentro de OneDrive** → OneDrive sincroniza `node_modules` y la caché de Turbo, lo
-que provoca lentitud, bloqueos de archivos y builds corruptos en Windows. Mitigación: excluir
-`node_modules`, `.turbo` y `dist` de la sincronización, o mover el repositorio fuera de la carpeta
-sincronizada. Conviene decidirlo **antes** de la primera instalación de dependencias, no después.
+**El proyecto vivía dentro de OneDrive** → ~~riesgo abierto~~. **Resuelto (tarea 1.2)**: se optó por
+mover el repositorio fuera de la carpeta sincronizada, a `C:\\Users\\super\\dev\\monedin`, en lugar
+de configurar exclusiones. Se eligió mover porque las exclusiones de OneDrive se configuran por
+máquina y no viajan con el repositorio: quien clone el proyecto en otro equipo volvería a tener el
+problema sin enterarse. La decisión se tomó **antes** de la primera instalación de dependencias.
+
+**El antivirus puede bloquear los binarios de las herramientas** → apareció durante la ejecución de
+este change: 360 Total Security impide crear `turbo.exe` (50 MB, sin firmar) al instalar, y ni pnpm
+ni npm ni `tar` consiguen escribirlo. El síntoma engaña, porque la instalación parece terminar bien
+y el fallo aparece luego como `spawn EPERM` al ejecutar `turbo`. Mitigación: excluir la carpeta del
+proyecto y el store de pnpm (`%LOCALAPPDATA%\\pnpm\\store`) en el antivirus. Queda anotado en el
+README, porque le va a pasar a cualquiera que clone el proyecto en una máquina con un antivirus
+agresivo.
 
 **El repositorio no está bajo git** → todo el trabajo hecho hasta ahora es irrecuperable ante un
 error. Mitigación: `git init` y primer commit como primera tarea del change, antes de instalar nada.
 
-**Fricción histórica entre Prisma y ESM** → si se fija `"type": "module"` en toda la monorepo y
-Prisma da problemas en `add-data-model`, el coste de revertir crece con cada módulo escrito.
-Mitigación: verificar la combinación exacta de versiones en una tarea corta de este change y dejar
-la decisión registrada por escrito antes de escribir el segundo módulo.
+**Fricción histórica entre Prisma y ESM** → ~~riesgo abierto~~. **Cerrado**: ver la decisión 11,
+que registra el resultado del spike. Se mantiene `"type": "module"` en toda la monorepo.
 
 **La caché de Turborepo puede enmascarar fallos** → una tarea marcada como exitosa desde caché
 oculta que el código actual ya no compila. Mitigación: declarar bien entradas y salidas de cada

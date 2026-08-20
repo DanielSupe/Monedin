@@ -1,0 +1,8 @@
+{
+  "extends": "@monedin/config/tsconfig.react.json",
+  "compilerOptions": {
+    "types": ["vite/client"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts", "vite.config.ts"],
+  "exclude": ["dist", "node_modules"]
+}

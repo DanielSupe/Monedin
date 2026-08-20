@@ -1,0 +1,58 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "stream",
+  "globalDependencies": [
+    "pnpm-lock.yaml",
+    "packages/config/tsconfig.base.json",
+    "packages/config/eslint.config.js",
+    "packages/config/prettier.config.js"
+  ],
+  "globalEnv": ["NODE_ENV"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "tsconfig.json",
+        "tsconfig.*.json",
+        "package.json",
+        "vite.config.ts",
+        "index.html",
+        "public/**"
+      ],
+      "outputs": ["dist/**"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "tests/**", "eslint.config.js", "package.json"],
+      "outputs": []
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "tests/**",
+        "tsconfig.json",
+        "tsconfig.*.json",
+        "package.json"
+      ],
+      "outputs": []
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "tests/**",
+        "vitest.config.ts",
+        "package.json",
+        ".env.example"
+      ],
+      "outputs": ["coverage/**"]
+    }
+  }
+}

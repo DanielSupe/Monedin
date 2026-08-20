@@ -1,0 +1,19 @@
+import { API_PREFIX } from "@monedin/contracts";
+import { createApp } from "./app.js";
+import { initConfig } from "./config/index.js";
+import { configureLogger, logger } from "./shared/logger/index.js";
+
+/**
+ * Punto de entrada.
+ *
+ * La configuración se valida ANTES de crear la app y de abrir el puerto: si algo
+ * falta o está mal, el proceso muere aquí y no llega a aceptar ni una petición.
+ */
+const config = initConfig();
+configureLogger(config.LOG_LEVEL);
+
+const app = createApp();
+
+app.listen(config.API_PORT, () => {
+  logger.info(`API escuchando en http://localhost:${config.API_PORT}${API_PREFIX}`);
+});
