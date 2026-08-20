@@ -52,7 +52,7 @@
         "package.json",
         ".env.example"
       ],
-      "outputs": ["coverage/**"]
+      "outputs": []
     }
   }
 }
