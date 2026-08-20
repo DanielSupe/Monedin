@@ -1,0 +1,71 @@
+schema: spec-driven
+
+context: |
+  PRODUCTO
+  Monedín: plataforma de educación financiera gamificada para niños de 6 a 11 años.
+  Los padres asignan tareas con valor en monedas y publican premios con precio en monedas.
+  El niño gana monedas completando tareas (con aprobación del padre) y las gasta canjeando
+  premios (también con aprobación). La moneda es virtual y cerrada a la familia: no hay dinero
+  real, no hay pagos, no hay interoperabilidad entre familias.
+  Primer mercado: Latinoamérica hispanohablante.
+
+  STACK
+  Monorepo con pnpm workspaces + Turborepo. Node 22 LTS, TypeScript strict.
+  - apps/api: Express + Prisma (ORM) + PostgreSQL.
+  - apps/web: Vite + React + TanStack Query + TanStack Router.
+  - packages/contracts: schemas Zod, tipos y constantes de dominio compartidos front/back.
+  - packages/config: tsconfig, eslint y prettier compartidos.
+  Infra local: docker-compose con PostgreSQL 16 + Adminer.
+  Archivos subidos (imágenes, documentos): S3 detrás de una interfaz StorageProvider.
+  Tests: Vitest + Supertest.
+
+  ARQUITECTURA
+  Arquitectura por módulos. Cada módulo de la API tiene la misma anatomía:
+    modules/<name>/<name>.routes.ts       monta rutas, cero lógica
+    modules/<name>/<name>.controller.ts   parsea y serializa, cero autorización
+    modules/<name>/<name>.service.ts      reglas de negocio Y autorización
+    modules/<name>/<name>.repository.ts   único lugar que toca Prisma
+    modules/<name>/<name>.errors.ts       errores de dominio del módulo
+  La autorización se valida en la capa de negocio, nunca en el controlador. El controlador
+  construye un actor { userId, familyRole, childProfileId? } desde la sesión y lo pasa como
+  primer argumento a los servicios: service.method(actor, dto).
+
+  CONVENCIONES
+  - Todas las rutas de la API van bajo el prefijo /api/v1.
+  - Código, identificadores, tablas, endpoints y commits en inglés.
+  - Textos visibles al usuario en español, centralizados en un módulo de mensajes.
+  - Proposals, specs, designs y tasks de OpenSpec redactados en español.
+  - Nada hardcodeado: ningún process.env fuera del módulo config, que valida el entorno con Zod
+    al arrancar y falla ruidosamente si falta una variable.
+  - Las constantes de dominio viven una sola vez en packages/contracts, nunca duplicadas.
+  - Toda mutación de saldo es atómica (increment/decrement, nunca read-modify-write) y escribe
+    su fila de historial en la misma transacción.
+  - Toda transición de estado es condicional y verifica que afectó exactamente una fila, para que
+    un doble tap no acredite dos veces.
+
+  DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
+  - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
+  - El saldo vive en ChildProfile.coins como fuente de verdad; una tabla de historial append-only
+    registra cada movimiento de monedas.
+  - El niño accede con perfil familiar + PIN, no con contraseña.
+  - Task.coins tiene rango 1-9999. El estado TaskStatus.REJECTED no existe: rechazar una tarea la
+    devuelve a PENDING.
+  - Los avatares y las imágenes se suben a S3 (bucket privado, URLs firmadas de corta vida).
+
+rules:
+  proposal:
+    - Redactar en español.
+    - Incluir siempre una sección de "No incluye" que delimite el alcance.
+    - No repetir el contexto del proyecto; asumirlo conocido.
+  design:
+    - Redactar en español, con diagramas ASCII cuando aclaren más que el texto.
+    - Documentar las alternativas descartadas y por qué.
+    - Señalar explícitamente las decisiones que se difieren a un change posterior.
+  specs:
+    - Redactar en español.
+    - Cada requisito debe ser verificable y llevar al menos un escenario concreto.
+    - Cubrir los caminos de error y de autorización, no solo el camino feliz.
+  tasks:
+    - Redactar en español.
+    - Tareas de como máximo 2 horas, en orden ejecutable.
+    - Incluir las tareas de test junto a la funcionalidad que cubren, no al final.
