@@ -71,7 +71,7 @@
 - [x] 10.1 Redactar el `CLAUDE.md` sobre lo que quedó realmente construido: rol asignado, prohibición de hardcodear, centralización de configuración y constantes, anatomía obligatoria de módulo, patrón de actor, reglas de atomicidad e idempotencia para el saldo y las transiciones de estado, prefijo de rutas, idiomas, paginación por defecto y exigencia de tests por change
 - [x] 10.2 Escribir el `README` con el arranque en dos comandos y los requisitos previos (Docker, Node, pnpm)
 - [ ] 10.3 Verificación de extremo a extremo sobre un clon limpio: `docker compose up`, `pnpm install`, `pnpm dev`, `GET /api/v1/health` responde, el front muestra el resultado, quitar una variable del `.env` impide arrancar con mensaje claro, y `pnpm test` pasa entero — **parcial**: verificado todo sobre el repositorio actual (contenedores arriba, `pnpm install`, API y front levantados, `health` respondiendo por el proxy de Vite, el front pintando el resultado, quitar `WEB_ORIGIN` impide arrancar con salida 1 y mensaje claro, y los 55 tests en verde). Queda pendiente hacerlo con `pnpm dev` sobre un **clon limpio**, porque `pnpm dev` pasa por Turborepo (ver nota)
-- [ ] 10.4 Commit final del change
+- [x] 10.4 Commit final del change
 
 ---
 

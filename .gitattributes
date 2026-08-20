@@ -1,0 +1,19 @@
+# Fin de linea LF en todo el repositorio, tambien en el working copy de Windows.
+# La API y sus imagenes corren en Linux, y los scripts de shell y los archivos
+# que entran a un contenedor se rompen con CRLF.
+* text=auto eol=lf
+
+# Binarios: que git no los toque.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# Generados: no ensucian las revisiones ni cuentan como codigo escrito a mano.
+pnpm-lock.yaml linguist-generated=true
+apps/web/src/routeTree.gen.ts linguist-generated=true
