@@ -271,4 +271,4 @@ jsonc
 Debe cumplirse *A o B* (validación cruzada). Devuelve el *array* de tareas creadas.
 Valida que todos los childId existan (404) y sean hijos del padre autenticado (403), *antes* de crear nada.
 
-dueDate se acepta como string ISO 8601 (fecha o fecha-hora) y se convierte a datetime.
+dueDate se acepta como string ISO 8601 (fecha o fecha-hora) y se convierte a datetime. 
