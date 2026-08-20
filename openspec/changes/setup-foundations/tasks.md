@@ -1,7 +1,7 @@
 ## 1. Preparación del repositorio
 
-- [ ] 1.1 Ejecutar `git init` y crear el `.gitignore` raíz (`node_modules`, `.turbo`, `dist`, `.env`, artefactos de build). Commit inicial con lo que ya existe, antes de instalar nada
-- [ ] 1.2 Resolver la interferencia de OneDrive: excluir `node_modules`, `.turbo` y `dist` de la sincronización, o mover el repositorio fuera de la carpeta sincronizada. Dejar constancia de la decisión tomada
+- [x] 1.1 Ejecutar `git init` y crear el `.gitignore` raíz (`node_modules`, `.turbo`, `dist`, `.env`, artefactos de build). Commit inicial con lo que ya existe, antes de instalar nada
+- [x] 1.2 Resolver la interferencia de OneDrive: excluir `node_modules`, `.turbo` y `dist` de la sincronización, o mover el repositorio fuera de la carpeta sincronizada. Dejar constancia de la decisión tomada
 - [ ] 1.3 Fijar las versiones de herramientas: Node 22 LTS en `engines` más archivo de versión, y pnpm en el campo `packageManager` del `package.json` raíz
 
 ## 2. Raíz del monorepo
