@@ -33,3 +33,7 @@ Desktop.ini
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Cliente de Prisma: se genera, no se versiona. Son cientos de archivos que
+# ensuciarian cada revision. La tarea `db:generate` lo reconstruye.
+apps/api/src/generated/

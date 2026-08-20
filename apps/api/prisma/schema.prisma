@@ -1,0 +1,241 @@
+// Esquema de datos de Monedin.
+//
+// Prisma 7 NO admite `url` dentro de datasource: la conexion se declara en
+// prisma.config.ts. Y el generador necesita moduleFormat/importFileExtension
+// para que el cliente generado no importe sus propios archivos con extension
+// ".ts" literal, cosa que tsx tolera y `node` sobre el JS compilado no.
+// Ver la decision 6 del design de add-data-model.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+/// Ciclo de vida de una tarea.
+///
+/// NO existe un estado de rechazo: rechazar devuelve la tarea a PENDING para que
+/// el nino la reintente. Un valor de enum que ningun flujo produce es una
+/// invitacion a que alguien lo use mal.
+enum TaskStatus {
+  PENDING
+  COMPLETED
+  APPROVED
+}
+
+/// Ciclo de vida de un canje. Aqui el rechazo SI es terminal: el nino no pierde
+/// monedas al rechazarse, porque el descuento solo ocurre al aprobar.
+enum RedemptionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/// De donde viene un movimiento de monedas.
+enum CoinReason {
+  TASK_APPROVED
+  REDEMPTION_APPROVED
+  MANUAL_ADJUSTMENT
+}
+
+// ---------------------------------------------------------------------------
+// Identidad
+// ---------------------------------------------------------------------------
+
+/// Un padre. SOLO un padre.
+///
+/// El nino no tiene fila aqui: vive entero en ChildProfile con su PIN. Por eso
+/// no hay columna de rol — valdria siempre PARENT. Ver la decision 1 del design.
+model User {
+  id           String   @id @default(cuid(2))
+  name         String
+  email        String   @unique
+  /// Hash opaco. El algoritmo lo decide `add-authentication`.
+  passwordHash String
+  image        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  children ChildProfile[]
+  tasks    Task[]
+  rewards  Reward[]
+
+  @@map("users")
+}
+
+/// Un nino, entero.
+///
+/// Nombre, credencial, saldo y datos de perfil en una sola tabla: actualizar un
+/// nino ya no toca dos tablas en transaccion.
+model ChildProfile {
+  id      String  @id @default(cuid(2))
+  name    String
+  /// Hash opaco del PIN. El algoritmo y la longitud los decide
+  /// `add-authentication`; la columna guarda un hash de longitud fija.
+  pinHash String
+  /// Saldo actual. Fuente de verdad, con CHECK (coins >= 0) en la migracion.
+  /// Se modifica SIEMPRE con increment/decrement, nunca leyendo y escribiendo.
+  coins   Int     @default(0)
+  age     Int?
+  avatar  String?
+
+  /// Baja logica: oculta de los listados sin destruir historial.
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  parentId String
+  parent   User   @relation(fields: [parentId], references: [id], onDelete: Cascade)
+
+  tasks            Task[]
+  assignments      RewardAssignment[]
+  redemptions      RewardRedemption[]
+  coinTransactions CoinTransaction[]
+
+  @@index([parentId, deletedAt])
+  @@map("child_profiles")
+}
+
+// ---------------------------------------------------------------------------
+// Tareas
+// ---------------------------------------------------------------------------
+
+/// Una tarea asignada a UN nino. Asignarla a varios crea varias filas.
+model Task {
+  id          String     @id @default(cuid(2))
+  title       String
+  description String?
+  /// Lo que gana el nino al aprobarse. CHECK de rango en la migracion.
+  coins       Int
+  status      TaskStatus @default(PENDING)
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  childId String
+  child   ChildProfile @relation(fields: [childId], references: [id], onDelete: Restrict)
+
+  parentId String
+  parent   User   @relation(fields: [parentId], references: [id], onDelete: Cascade)
+
+  coinTransactions CoinTransaction[]
+
+  @@index([childId, status])
+  @@index([parentId, createdAt])
+  @@map("tasks")
+}
+
+// ---------------------------------------------------------------------------
+// Premios y canjes
+// ---------------------------------------------------------------------------
+
+/// Un premio del catalogo del padre. Existe una vez y se asigna a varios ninos.
+model Reward {
+  id          String  @id @default(cuid(2))
+  title       String
+  description String?
+  image       String?
+  /// Retirada logica: deja de poder canjearse, los canjes previos siguen ahi.
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  parentId String
+  parent   User   @relation(fields: [parentId], references: [id], onDelete: Cascade)
+
+  assignments RewardAssignment[]
+  redemptions RewardRedemption[]
+
+  @@index([parentId, isActive])
+  @@map("rewards")
+}
+
+/// Puente premio-nino CON PRECIO PROPIO. El mismo premio puede costarle 50 al
+/// hijo mayor y 30 al menor: es intencional.
+///
+/// La clave compuesta impide dos asignaciones del mismo premio al mismo nino.
+model RewardAssignment {
+  rewardId String
+  reward   Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+
+  childId String
+  child   ChildProfile @relation(fields: [childId], references: [id], onDelete: Cascade)
+
+  /// Precio para ESE nino. CHECK de rango en la migracion.
+  coins Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([rewardId, childId])
+  @@index([childId])
+  @@map("reward_assignments")
+}
+
+/// Solicitud de canje iniciada por el nino.
+model RewardRedemption {
+  id String @id @default(cuid(2))
+  /// SNAPSHOT del precio al solicitar. Si el padre lo cambia despues, el canje
+  /// pendiente respeta el precio original. CHECK de rango en la migracion.
+  coins  Int
+  status RedemptionStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rewardId String
+  reward   Reward @relation(fields: [rewardId], references: [id], onDelete: Restrict)
+
+  childId String
+  child   ChildProfile @relation(fields: [childId], references: [id], onDelete: Restrict)
+
+  coinTransactions CoinTransaction[]
+
+  @@index([childId, status])
+  @@index([rewardId])
+  @@map("reward_redemptions")
+}
+
+// ---------------------------------------------------------------------------
+// Libro de monedas
+// ---------------------------------------------------------------------------
+
+/// Historial append-only de movimientos de monedas.
+///
+/// NO lleva updatedAt a proposito: una fila escrita no se toca. La migracion
+/// instala un disparador que rechaza UPDATE y DELETE sobre esta tabla, y las
+/// relaciones son Restrict para que no se pueda borrar un nino con historial.
+model CoinTransaction {
+  id String @id @default(cuid(2))
+  /// Positivo acredita, negativo descuenta. Nunca cero.
+  amount Int
+  /// Saldo resultante tras aplicar el movimiento. Redundante a proposito:
+  /// convierte auditar el saldo en una comparacion, no en una agregacion.
+  /// Ver la decision 5 del design.
+  balanceAfter Int
+  reason       CoinReason
+  createdAt    DateTime   @default(now())
+
+  childId String
+  child   ChildProfile @relation(fields: [childId], references: [id], onDelete: Restrict)
+
+  /// De donde vino el movimiento, cuando vino de algo.
+  taskId String?
+  task   Task?   @relation(fields: [taskId], references: [id], onDelete: Restrict)
+
+  redemptionId String?
+  redemption   RewardRedemption? @relation(fields: [redemptionId], references: [id], onDelete: Restrict)
+
+  @@index([childId, createdAt])
+  @@map("coin_transactions")
+}

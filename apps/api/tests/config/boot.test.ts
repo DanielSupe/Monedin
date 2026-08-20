@@ -92,6 +92,7 @@ describe("arranque de la API con configuración inválida", () => {
       NODE_ENV: "test",
       API_PORT: "3997",
       DATABASE_URL: secret,
+      TEST_DATABASE_URL: "postgresql://monedin:monedin@localhost:5432/monedin_test",
       WEB_ORIGIN: "http://localhost:5173",
     });
 
@@ -134,6 +135,7 @@ describe("arranque de la API con configuración válida", () => {
       NODE_ENV: "test",
       API_PORT: "39871",
       DATABASE_URL: "postgresql://monedin:monedin@localhost:5432/monedin",
+      TEST_DATABASE_URL: "postgresql://monedin:monedin@localhost:5432/monedin_test",
       WEB_ORIGIN: "http://localhost:5173",
     });
 

@@ -7,10 +7,15 @@
     "packages/config/eslint.config.js",
     "packages/config/prettier.config.js"
   ],
-  "globalEnv": ["NODE_ENV"],
+  "globalEnv": [
+    "NODE_ENV"
+  ],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build",
+        "db:generate"
+      ],
       "inputs": [
         "src/**",
         "tsconfig.json",
@@ -18,41 +23,72 @@
         "package.json",
         "vite.config.ts",
         "index.html",
-        "public/**"
+        "public/**",
+        "prisma/schema.prisma"
       ],
-      "outputs": ["dist/**"]
+      "outputs": [
+        "dist/**"
+      ]
     },
     "dev": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build",
+        "db:generate"
+      ],
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"],
-      "inputs": ["src/**", "tests/**", "eslint.config.js", "package.json"],
+      "dependsOn": [
+        "^build",
+        "db:generate"
+      ],
+      "inputs": [
+        "src/**",
+        "tests/**",
+        "eslint.config.js",
+        "package.json"
+      ],
       "outputs": []
     },
     "typecheck": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build",
+        "db:generate"
+      ],
       "inputs": [
         "src/**",
         "tests/**",
         "tsconfig.json",
         "tsconfig.*.json",
-        "package.json"
+        "package.json",
+        "prisma/schema.prisma"
       ],
       "outputs": []
     },
     "test": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build",
+        "db:generate"
+      ],
       "inputs": [
         "src/**",
         "tests/**",
         "vitest.config.ts",
         "package.json",
-        ".env.example"
+        ".env.example",
+        "prisma/schema.prisma"
       ],
       "outputs": []
+    },
+    "db:generate": {
+      "inputs": [
+        "prisma/schema.prisma",
+        "prisma.config.ts"
+      ],
+      "outputs": [
+        "src/generated/**"
+      ]
     }
   }
 }

@@ -7,4 +7,8 @@ packages:
 # Cualquier entrada nueva aqui es codigo de terceros ejecutandose al instalar:
 # se anade a conciencia, no por quitarse un aviso de encima.
 allowBuilds:
+  # Prisma descarga sus motores nativos en el postinstall; sin esto no hay
+  # `prisma generate` ni migraciones.
+  '@prisma/engines': true
   esbuild: true
+  prisma: true

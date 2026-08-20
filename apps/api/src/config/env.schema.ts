@@ -17,7 +17,7 @@ import { LOG_LEVELS } from "../shared/logger/index.js";
  * en una respuesta HTTP. Al reportar un problema con una de ellas se nombra la
  * variable y se enmascara el valor.
  */
-export const SECRET_ENV_KEYS = ["DATABASE_URL"] as const;
+export const SECRET_ENV_KEYS = ["DATABASE_URL", "TEST_DATABASE_URL"] as const;
 
 export type SecretEnvKey = (typeof SECRET_ENV_KEYS)[number];
 
@@ -63,6 +63,20 @@ export const envSchema = z.object({
 
   /** Nivel de log. Único campo con valor por defecto razonable. */
   LOG_LEVEL: z.enum(LOG_LEVELS).default("info"),
+
+  /**
+   * Cadena de conexión de la base de datos de tests. Secreta.
+   *
+   * Separada de `DATABASE_URL` a propósito: la batería de tests borra y recrea
+   * su esquema, y apuntarla por accidente a la base de desarrollo destruiría
+   * los datos con los que se está trabajando.
+   */
+  TEST_DATABASE_URL: z
+    .string({ required_error: "obligatoria" })
+    .min(1, "obligatoria")
+    .refine((value) => value.startsWith("postgresql://") || value.startsWith("postgres://"), {
+      message: "se esperaba una cadena de conexión que empiece por postgresql://",
+    }),
 });
 
 /** Configuración validada de la API. */

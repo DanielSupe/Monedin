@@ -11,7 +11,14 @@
 /** Prefijo bajo el que se sirve toda la API. Front y back lo comparten. */
 export const API_PREFIX = "/api/v1";
 
-/** Rol familiar del usuario. Discrimina que puede ver y hacer. */
+/**
+ * Rol familiar. Discrimina que puede ver y hacer quien llama.
+ *
+ * NO es una columna de la base de datos: solo los padres son `User` y el nino
+ * vive como `ChildProfile`, asi que una columna de rol valdria siempre PARENT.
+ * Es un tipo de dominio, y lo que discrimina es el actor. Ver la decision 2 del
+ * design de `add-data-model`.
+ */
 export const FAMILY_ROLES = ["PARENT", "CHILD"] as const;
 export type FamilyRole = (typeof FAMILY_ROLES)[number];
 
@@ -19,9 +26,16 @@ export type FamilyRole = (typeof FAMILY_ROLES)[number];
 export const CHILD_AGE_MIN = 6;
 export const CHILD_AGE_MAX = 11;
 
-/** Nombre de usuario del nino. El nino no tiene email. */
-export const USERNAME_MIN_LENGTH = 3;
-export const USERNAME_MAX_LENGTH = 20;
+/**
+ * PIN de acceso del nino.
+ *
+ * El nino no tiene correo ni nombre de usuario: entra eligiendo su perfil dentro
+ * de la cuenta del padre y tecleando este PIN. Se declara como rango y no como
+ * longitud exacta porque el numero definitivo se cierra en `add-authentication`,
+ * y dentro de este rango cabe sin romper nada.
+ */
+export const PIN_MIN_LENGTH = 4;
+export const PIN_MAX_LENGTH = 6;
 
 /** Nombre visible de una persona. */
 export const NAME_MIN_LENGTH = 2;

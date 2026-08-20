@@ -10,18 +10,28 @@
     "start": "node dist/server.js",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.test.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@monedin/contracts": "workspace:*",
+    "@prisma/adapter-pg": "^7.9.1",
+    "@prisma/client": "^7.9.1",
     "dotenv": "^16.4.7",
     "express": "^5.0.1",
+    "pg": "^8.23.0",
+    "prisma": "^7.9.1",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@monedin/config": "workspace:*",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
+    "@types/pg": "^8.23.1",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.17.0",
     "supertest": "^7.0.0",

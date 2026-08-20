@@ -99,7 +99,10 @@ Reglas que no se negocian:
 - **El controlador nunca decide permisos.** Construye el actor desde la sesión y se lo pasa al
   servicio. Si en un controlador aparece un `if` sobre el rol o sobre la propiedad de un recurso,
   está en la capa equivocada.
-- **Solo el repositorio importa el cliente de base de datos.** Ninguna otra capa.
+- **Solo el repositorio importa el cliente de base de datos.** Ninguna otra capa. Lo garantiza una
+  regla de ESLint (`no-restricted-imports`): importar el cliente desde una ruta, un controlador o un
+  servicio no compila el lint. Los repositorios envuelven sus consultas en `withTranslatedErrors()`
+  para que un choque de unicidad salga como 409 y no como 500.
 - **El módulo no define su propio mapeo a HTTP.** Lanza errores de dominio y ya está.
 
 ### Patrón de actor
@@ -109,19 +112,25 @@ Todo método de servicio recibe el actor como **primer argumento**:
 ```ts
 service.method(actor, dto);
 
-interface Actor {
-  userId: string;
-  familyRole: FamilyRole;
-  childProfileId?: string; // presente solo cuando familyRole es CHILD
-}
+type Actor =
+  | { familyRole: "PARENT"; userId: string }
+  | { familyRole: "CHILD"; childProfileId: string; parentId: string };
 ```
 
-El tipo está en `apps/api/src/shared/actor.ts`.
+El tipo está en `apps/api/src/shared/actor.ts`, junto a `isParent()`, `isChild()` y
+`owningParentId()`.
+
+Es una **unión discriminada, no un objeto con campos opcionales**, porque el niño no tiene fila en
+`User` y por tanto no tiene identificador de usuario. Con campos opcionales se podía construir un
+actor de niño sin su perfil y compilaba.
 
 Esto es lo que hace *cumplible* que la autorización viva en la capa de negocio: si el actor es un
 parámetro obligatorio, no se puede escribir un servicio que ignore quién llama sin que se note al
 leer la firma. Y un servicio invocado desde otro servicio o desde un job sigue comprobando permisos,
 cosa que un middleware por ruta no haría.
+
+`owningParentId(actor)` da el identificador del padre dueño de los datos: para un padre es él mismo,
+para un niño el suyo. Es el valor con el que se filtra para no cruzar familias.
 
 `health` es la **única** excepción del sistema: es público por definición y no recibe actor.
 
@@ -130,6 +139,10 @@ Las reglas de acceso del producto, que el servicio debe verificar:
 - Un `PARENT` solo opera sobre entidades cuyo `parentId` es el suyo.
 - Un `CHILD` solo opera sobre entidades cuyo `childId` es su propio perfil.
 - Los niños nunca ven datos de sus hermanos.
+
+**El niño no es un `User`.** `User` es exclusivamente el padre; el niño vive entero en
+`ChildProfile`, con su nombre y su PIN. Por eso no hay columna de rol en la base de datos: valdría
+siempre `PARENT`. `FamilyRole` existe como tipo de dominio y es lo que discrimina el actor.
 
 ---
 
@@ -176,14 +189,30 @@ Estas dos reglas existen porque un niño con un teléfono lento **va a tocar dos
 
 ### Toda mutación de saldo es atómica
 
+**No escribas tu propia versión de esto.** Existe una operación de referencia y todo módulo que
+mueva monedas pasa por ella:
+
+```ts
+import { applyCoinMovement } from "../../shared/database/index.js";
+
+await prisma.$transaction(async (tx) => {
+  await applyCoinMovement(tx, { childId, amount: task.coins, reason: "TASK_APPROVED", taskId });
+  // ...el resto de la unidad de trabajo, en la MISMA transacción
+});
+```
+
+Recibe la transacción como primer argumento precisamente para que no se pueda llamar fuera de una.
+
 `ChildProfile.coins` es la fuente de verdad del saldo. Se modifica **siempre** con `increment` o
 `decrement`, **nunca** leyendo, sumando en memoria y escribiendo: dos peticiones simultáneas con
 lectura-modificación-escritura pierden una de las dos.
 
 En la **misma transacción** se escribe la fila del historial. El historial es append-only: nunca se
-edita ni se borra una fila, porque es lo que permite reconstruir cómo se llegó a un saldo.
+edita ni se borra una fila. Lo garantiza un **disparador de PostgreSQL**, no la buena voluntad del
+código: intentar un `UPDATE` o un `DELETE` sobre `coin_transactions` falla. Corregir un movimiento
+equivocado se hace registrando otro que lo compense.
 
-El saldo nunca es negativo.
+El saldo nunca es negativo, y también eso lo garantiza el motor con un `CHECK`.
 
 ### Toda transición de estado es condicional
 
@@ -214,7 +243,38 @@ Máquinas de estado, tal como las define el producto:
 
 ---
 
-## 5. Convenciones
+## 5. Base de datos
+
+**Los invariantes viven en el motor**, no solo en el código. La migración inicial instala
+restricciones `CHECK` (saldo no negativo, rangos de monedas y de edad) y un disparador que hace
+inmutable el historial. La validación de entrada protege la puerta principal; esto protege todo lo
+demás: una consulta a mano, una importación, un módulo futuro que use `update` en vez de `increment`.
+
+**AVISO para cualquier migración que recree una tabla**: Prisma no conoce esas restricciones y una
+migración generada automáticamente puede llevárselas por delante. El test de coherencia
+(`tests/database/limits-sync.test.ts`) lo detecta, pero revísalo tú antes de dar la migración por
+buena.
+
+**Los límites se repiten en SQL.** Una migración es un artefacto congelado y no puede importar
+constantes, así que los números de `@monedin/contracts` aparecen también en el SQL. Cambiar un
+límite son tres pasos: editar la constante, escribir una migración que altere la restricción, y ver
+pasar el test que compara ambos.
+
+**El cliente generado no se versiona.** `pnpm db:generate` lo reconstruye en `apps/api/src/generated`
+y las tareas de Turborepo lo encadenan a `build`, `typecheck` y `test`.
+
+**Prisma 7 no se configura como Prisma 5 o 6.** La URL va en `prisma.config.ts`, el cliente necesita
+un adaptador explícito, y el generador exige `moduleFormat = "esm"` e `importFileExtension = "js"`.
+Sin esas dos opciones el proyecto compila, los tests pasan, y el proceso revienta al arrancar en
+producción. Ver la decisión 6 del design de `add-data-model` antes de tocar nada de esto.
+
+**Los tests de datos corren contra PostgreSQL de verdad**, en una base separada de la de desarrollo,
+con cada test dentro de una transacción que se deshace. Un doble en memoria no tiene restricciones,
+que es justo lo que hay que probar.
+
+---
+
+## 6. Convenciones
 
 ### Rutas
 
@@ -248,7 +308,7 @@ ver la decisión 11 del design de `setup-foundations` antes de tocar la configur
 
 ---
 
-## 6. Tests
+## 7. Tests
 
 **Ningún change se da por terminado sin tests.** No es una fase final: las tareas de test van junto a
 la funcionalidad que cubren.
@@ -266,7 +326,7 @@ Herramientas: Vitest en todo el proyecto, Supertest para la API.
 
 ---
 
-## 7. Cómo se trabaja
+## 8. Cómo se trabaja
 
 El proceso lo lleva OpenSpec. Nada de código sin un change aprobado que lo cubra.
 
@@ -296,11 +356,13 @@ openspec/changes/<nombre>/
 `Markdown.md` es el documento de producto original y `openspec/config.yaml` recoge decisiones
 posteriores. Donde discrepan, **manda `config.yaml`**, salvo que se decida lo contrario por escrito:
 
-| Asunto                | `Markdown.md`       | `config.yaml` (vigente)        |
-| --------------------- | ------------------- | ------------------------------ |
-| Login del niño        | username + password | perfil familiar + PIN          |
-| Rango de `coins`      | 0–9999              | 1–9999                         |
-| `TaskStatus.REJECTED` | existe pero sin usar | no existe                     |
-| Prefijo de rutas      | sin prefijo         | `/api/v1` (design, decisión 6) |
+| Asunto                | `Markdown.md`         | Vigente                     | Estado                    |
+| --------------------- | --------------------- | --------------------------- | ------------------------- |
+| Login del niño        | username + contraseña | perfil + PIN                | **cerrado** en el esquema |
+| Rango de `coins`      | 0–9999                | 1–9999                      | **cerrado**, con `CHECK`  |
+| `TaskStatus.REJECTED` | existe pero sin usar  | no existe                   | **cerrado**, no está      |
+| Prefijo de rutas      | sin prefijo           | `/api/v1`                   | **cerrado**               |
+| `User.familyRole`     | columna en `User`     | tipo de dominio, no columna | **cerrado** en el esquema |
 
-Estas cuatro hay que cerrarlas en `add-data-model` y `add-authentication`.
+`add-data-model` las cerró todas. Lo que queda para `add-authentication` es cuántos dígitos tiene el
+PIN y con qué algoritmo se hashean las credenciales: son decisiones de autenticación, no de esquema.

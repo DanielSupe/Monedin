@@ -83,6 +83,40 @@ export function allowEnvAccess(files) {
   };
 }
 
+/**
+ * Mensaje de la regla que confina el acceso a la base de datos.
+ */
+const DATABASE_RULE_MESSAGE =
+  "El cliente de base de datos solo se importa desde un archivo *.repository.ts. " +
+  "Rutas, controladores y servicios acceden a los datos a traves del repositorio " +
+  "de su modulo. Ver CLAUDE.md y la spec `data-access`.";
+
+/**
+ * Prohibe importar el cliente de base de datos.
+ *
+ * Se aplica a todo el paquete y se levanta despues para los repositorios y para
+ * el propio modulo que construye el cliente.
+ */
+export const forbidDatabaseImports = {
+  rules: {
+    "no-restricted-imports": [
+      "error",
+      {
+        patterns: [
+          { group: ["**/generated/prisma", "**/generated/prisma/*"], message: DATABASE_RULE_MESSAGE },
+          { group: ["@prisma/client", "@prisma/adapter-pg"], message: DATABASE_RULE_MESSAGE },
+          { group: ["**/shared/database", "**/shared/database/*"], message: DATABASE_RULE_MESSAGE },
+        ],
+      },
+    ],
+  },
+};
+
+/** Levanta la prohibicion anterior para las rutas indicadas. */
+export function allowDatabaseImports(files) {
+  return { files, rules: { "no-restricted-imports": "off" } };
+}
+
 /** Configuracion para paquetes y apps que corren en Node. */
 export const node = [
   ...base,
@@ -118,4 +152,12 @@ export const react = [
   },
 ];
 
-export default { ignores, base, node, react, allowEnvAccess };
+export default {
+  ignores,
+  base,
+  node,
+  react,
+  allowEnvAccess,
+  forbidDatabaseImports,
+  allowDatabaseImports,
+};

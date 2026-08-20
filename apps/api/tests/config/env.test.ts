@@ -7,6 +7,7 @@ function validEnv(): Record<string, string | undefined> {
     NODE_ENV: "test",
     API_PORT: "3000",
     DATABASE_URL: "postgresql://monedin:monedin@localhost:5432/monedin",
+    TEST_DATABASE_URL: "postgresql://monedin:monedin@localhost:5432/monedin_test",
     WEB_ORIGIN: "http://localhost:5173",
     LOG_LEVEL: "info",
   };

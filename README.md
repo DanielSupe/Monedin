@@ -7,9 +7,10 @@ niño gana monedas completando tareas (con aprobación del padre) y las gasta ca
 (también con aprobación). La moneda es virtual y cerrada a la familia: no hay dinero real, no hay
 pagos y no hay interoperabilidad entre familias.
 
-> **Estado del proyecto**: el andamio (`setup-foundations`). Hay monorepo, configuración validada,
-> contrato de errores, `GET /api/v1/health` y un front que lo consume. Todavía **no** hay modelo de
-> datos, ni autenticación, ni módulos de dominio.
+> **Estado del proyecto**: andamio y modelo de datos (`setup-foundations`, `add-data-model`). Hay
+> monorepo, configuración validada, contrato de errores, `GET /api/v1/health`, un front que lo
+> consume, y el esquema completo del dominio con sus invariantes garantizados por PostgreSQL.
+> Todavía **no** hay autenticación ni módulos de dominio.
 
 ---
 
@@ -75,6 +76,27 @@ por buena una tarea que ya no compila, y `--force` la desactiva.
 
 Para un solo paquete: `pnpm --filter @monedin/api test`.
 
+### Base de datos
+
+```bash
+pnpm --filter @monedin/api db:generate   # regenera el cliente de Prisma
+pnpm --filter @monedin/api db:migrate    # crea y aplica una migración en desarrollo
+pnpm --filter @monedin/api db:deploy     # aplica las migraciones pendientes (producción)
+pnpm --filter @monedin/api db:seed       # datos de ejemplo, SOLO en desarrollo
+pnpm --filter @monedin/api db:studio     # explorador de datos de Prisma
+```
+
+El cliente de Prisma **se genera, no se versiona**. Las tareas de Turborepo lo encadenan a `build`,
+`typecheck` y `test`, así que en el flujo normal no hay que pensar en ello.
+
+Los tests de la capa de datos corren contra una base **separada** de la de desarrollo
+(`TEST_DATABASE_URL`), que se recrea al arrancar la batería. Cada test va dentro de una transacción
+que se deshace, así que no dejan rastro y el orden no importa.
+
+Cuando toques una migración que recree una tabla, comprueba que siguen ahí las restricciones `CHECK`
+y el disparador del historial: Prisma no los conoce y puede llevárselos por delante. Hay un test que
+lo detecta (`tests/database/limits-sync.test.ts`).
+
 ---
 
 ## Estructura
@@ -82,11 +104,14 @@ Para un solo paquete: `pnpm --filter @monedin/api test`.
 ```
 monedin/
 ├── apps/
-│   ├── api/                  Express + TypeScript
+│   ├── api/                  Express + Prisma + TypeScript
+│   │   ├── prisma/           esquema, migraciones y siembra de desarrollo
+│   │   ├── prisma.config.ts  configuración del CLI de Prisma
 │   │   └── src/
-│   │       ├── config/       ÚNICO lugar que lee el entorno
+│   │       ├── config/       ÚNICO lugar que lee el entorno en tiempo de petición
+│   │       ├── generated/    cliente de Prisma (generado, no versionado)
 │   │       ├── modules/      un directorio por módulo (health es la plantilla)
-│   │       ├── shared/       errores, mensajes, logger, actor, validación
+│   │       ├── shared/       errores, mensajes, logger, actor, base de datos
 │   │       ├── app.ts        composición de la app
 │   │       └── server.ts     arranque
 │   └── web/                  Vite + React + TanStack Router y Query
@@ -144,6 +169,11 @@ Windows sin Modo desarrollador restringe la creación de symlinks. Suele bastar 
 `pnpm install`; si es persistente, activa Modo desarrollador en Ajustes → Privacidad y seguridad →
 Para desarrolladores.
 
+**El editor marca errores de tipos justo después de clonar.**
+El cliente de Prisma se genera y no está en el repositorio. Ejecuta
+`pnpm --filter @monedin/api db:generate` (o cualquier `pnpm build` / `pnpm test`, que ya lo
+encadenan) y reinicia el servidor de TypeScript del editor.
+
 **El puerto 5432 ya está en uso.**
 Tienes otro PostgreSQL corriendo. Cambia `POSTGRES_PORT` en el `.env` y ajusta `DATABASE_URL` para
 que coincida.
@@ -157,9 +187,13 @@ El proyecto es portable a mano, sin pipeline (eso es trabajo de un change poster
 ```bash
 pnpm install --frozen-lockfile
 pnpm build
+pnpm --filter @monedin/api db:deploy  # aplica las migraciones pendientes
 node apps/api/dist/server.js          # API, con su .env
 # apps/web/dist se sirve como estáticos desde Nginx
 ```
+
+La API cierra de forma ordenada al recibir la señal de apagado: deja de aceptar peticiones y después
+cierra la conexión a la base de datos.
 
 Nginx sirve la SPA en `/` y reenvía `/api/v1/*` a la API — la misma topología que el proxy de Vite en
 desarrollo, para que los problemas de cookies y orígenes aparezcan mientras programas y no en el
