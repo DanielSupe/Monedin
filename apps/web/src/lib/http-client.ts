@@ -72,6 +72,11 @@ async function readErrorBody(response: Response): Promise<ApiRequestError> {
   });
 }
 
+function hasBody(response: Response): boolean {
+  if (response.status === 204 || response.status === 205) return false;
+  return (response.headers.get("content-length") ?? "") !== "0";
+}
+
 /**
  * Llama a la API y devuelve la respuesta ya validada contra el esquema
  * compartido.
@@ -106,7 +111,10 @@ export async function apiFetch<T>(
     throw await readErrorBody(response);
   }
 
-  const payload: unknown = await response.json();
+  // Una respuesta sin cuerpo (204, o cualquier 2xx vacía) no se puede parsear
+  // como JSON. Es una respuesta correcta, no un fallo.
+  const payload: unknown = hasBody(response) ? await response.json() : undefined;
+
   const parsed = schema.safeParse(payload);
 
   if (!parsed.success) {

@@ -243,7 +243,46 @@ Máquinas de estado, tal como las define el producto:
 
 ---
 
-## 5. Base de datos
+## 5. Sesión y protección de rutas
+
+**Las rutas nacen protegidas.** Se definen con `moduleRouter()`, que mete el guardián dentro de la
+cadena de cada ruta. Definir una y olvidarse de protegerla no es posible:
+
+```ts
+const tasks = moduleRouter();
+
+tasks.get("/tasks", requireParent, handleList);   // protegida, sin decir nada
+tasks.publicGet("/health", handleHealth);         // pública, a conciencia
+```
+
+Solo hay dos rutas públicas en todo el sistema —la sonda de salud y el acceso— y cada una lo declara
+en su propio router.
+
+**El actor se obtiene del middleware, nunca se reconstruye.** El controlador lo lee y se lo pasa al
+servicio:
+
+```ts
+export const handleList: RequestHandler = async (req, res) => {
+  const tareas = await service.listTasks(actorOf(req), filtros);
+  res.json(tareas);
+};
+```
+
+`requireParent` y `requireChild` son filtros GRUESOS y **no autorizan nada**: que alguien tenga el
+rol correcto no dice si el recurso es suyo. Eso lo sigue comprobando el servicio.
+
+**Ningún módulo lee la tabla de sesiones.** Es del módulo `auth`, y la única pieza que la consulta
+desde fuera es el middleware, a través del repositorio de `auth`.
+
+**Las credenciales se hashean con `scrypt`** de `node:crypto`, en un formato que lleva dentro sus
+propios parámetros para poder subirlos sin invalidar a nadie. El identificador de sesión se guarda
+hasheado: leer la tabla entera no permite suplantar a nadie.
+
+**Los bloqueos son por identidad, no por IP.** En una casa todos comparten IP.
+
+---
+
+## 6. Base de datos
 
 **Los invariantes viven en el motor**, no solo en el código. La migración inicial instala
 restricciones `CHECK` (saldo no negativo, rangos de monedas y de edad) y un disparador que hace
@@ -274,7 +313,7 @@ que es justo lo que hay que probar.
 
 ---
 
-## 6. Convenciones
+## 7. Convenciones
 
 ### Rutas
 
@@ -308,7 +347,7 @@ ver la decisión 11 del design de `setup-foundations` antes de tocar la configur
 
 ---
 
-## 7. Tests
+## 8. Tests
 
 **Ningún change se da por terminado sin tests.** No es una fase final: las tareas de test van junto a
 la funcionalidad que cubren.
@@ -326,7 +365,7 @@ Herramientas: Vitest en todo el proyecto, Supertest para la API.
 
 ---
 
-## 8. Cómo se trabaja
+## 9. Cómo se trabaja
 
 El proceso lo lleva OpenSpec. Nada de código sin un change aprobado que lo cubra.
 

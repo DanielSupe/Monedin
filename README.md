@@ -7,10 +7,9 @@ niño gana monedas completando tareas (con aprobación del padre) y las gasta ca
 (también con aprobación). La moneda es virtual y cerrada a la familia: no hay dinero real, no hay
 pagos y no hay interoperabilidad entre familias.
 
-> **Estado del proyecto**: andamio y modelo de datos (`setup-foundations`, `add-data-model`). Hay
-> monorepo, configuración validada, contrato de errores, `GET /api/v1/health`, un front que lo
-> consume, y el esquema completo del dominio con sus invariantes garantizados por PostgreSQL.
-> Todavía **no** hay autenticación ni módulos de dominio.
+> **Estado del proyecto**: andamio, modelo de datos y autenticación. Un padre puede registrarse,
+> entrar, pasar al perfil de un hijo con su PIN y volver. Todavía **no** hay módulos de dominio:
+> tareas, premios y canjes existen como tablas, no como funcionalidad.
 
 ---
 
@@ -86,6 +85,17 @@ pnpm --filter @monedin/api db:seed       # datos de ejemplo, SOLO en desarrollo
 pnpm --filter @monedin/api db:studio     # explorador de datos de Prisma
 ```
 
+Tras sembrar, se puede entrar con:
+
+| Quién | Credencial |
+| ----- | ---------- |
+| Lucía (madre) | `familia.ejemplo@monedin.dev` / `monedin-desarrollo` |
+| Mateo | PIN `1234` |
+| Emma | PIN `5678` |
+
+Están a la vista de cualquiera que lea el repositorio: por eso la siembra **se niega a ejecutarse
+fuera de desarrollo**.
+
 El cliente de Prisma **se genera, no se versiona**. Las tareas de Turborepo lo encadenan a `build`,
 `typecheck` y `test`, así que en el flujo normal no hay que pensar en ello.
 
@@ -128,6 +138,32 @@ monedin/
 la anatomía de módulo, el patrón de autorización y las reglas de atomicidad del saldo.
 
 ---
+
+## Cómo se entra
+
+El dispositivo es familiar, así que el flujo lo es también:
+
+```
+   El padre entra una vez con su correo y contraseña.
+   Su sesión persiste en el dispositivo (30 días, y el uso la renueva).
+        │
+        ├── "Entrar como…"  →  elige perfil  →  PIN de 4 dígitos
+        │                                            │
+        │                                            ▼
+        │                                    sesión del niño
+        │                                            │
+        └────────── "Salir de mi perfil" ◄───────────┘
+                    (no vuelve a pedir la contraseña)
+```
+
+La sesión del padre queda **suspendida, no cerrada**: son dos cookies, y salir del perfil del niño
+borra una. Cerrar la sesión del padre se lleva por delante el acceso a todos los perfiles.
+
+Cinco PIN fallidos bloquean el perfil de ese niño durante 5 minutos, y su padre puede desbloquearlo
+al momento. Diez contraseñas fallidas bloquean la cuenta del padre 15 minutos.
+
+**No hay recuperación de contraseña.** Necesita envío de correo, que llegará en su propio change; un
+padre que la olvide hoy se queda fuera. El PIN de un niño sí se recupera: lo restablece su padre.
 
 ## Configuración
 

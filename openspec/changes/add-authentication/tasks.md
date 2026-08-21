@@ -75,19 +75,19 @@
 
 - [x] 8.1 Implementar `GET /auth/session`, que responde 200 con o sin sesión y nunca expone credenciales ni el identificador
 - [x] 8.2 Tests del estado: con padre, con niño (incluye saldo y que hay padre detrás) y sin nadie
-- [ ] 8.3 Cablear en el front el cliente de sesión y el estado de autenticación, consultándolo al arrancar
-- [ ] 8.4 Crear la guarda de rutas del front: sin sesión lleva al acceso, y las rutas de cada rol respetan quién está dentro
-- [ ] 8.5 Crear las pantallas de registro y acceso del padre, mostrando el error por código y no por texto
-- [ ] 8.6 Crear el selector de perfil y el teclado numérico del PIN, con el mensaje de bloqueo diferenciado del de PIN incorrecto
-- [ ] 8.7 Crear la salida del perfil de niño y el cierre de sesión del padre
-- [ ] 8.8 Tests del front: la guarda redirige sin sesión, y el cliente distingue credencial incorrecta de bloqueo por el código
+- [x] 8.3 Cablear en el front el cliente de sesión y el estado de autenticación, consultándolo al arrancar
+- [x] 8.4 Crear la guarda de rutas del front: sin sesión lleva al acceso, y las rutas de cada rol respetan quién está dentro
+- [x] 8.5 Crear las pantallas de registro y acceso del padre, mostrando el error por código y no por texto
+- [x] 8.6 Crear el selector de perfil y el teclado numérico del PIN, con el mensaje de bloqueo diferenciado del de PIN incorrecto
+- [x] 8.7 Crear la salida del perfil de niño y el cierre de sesión del padre
+- [x] 8.8 Tests del front: la guarda redirige sin sesión, y el cliente distingue credencial incorrecta de bloqueo por el código
 
 ## 9. Cierre
 
-- [ ] 9.1 Actualizar la siembra para que genere credenciales verificables, y dejar documentadas las de ejemplo
-- [ ] 9.2 Actualizar `.env.example` y el esquema de entorno con la duración de sesión y la política de cookies
-- [ ] 9.3 Actualizar `CLAUDE.md`: cómo se protege una ruta, cómo se obtiene el actor, y que ningún módulo lee la tabla de sesiones
-- [ ] 9.4 Actualizar el `README` con el flujo de acceso y las credenciales de la siembra
-- [ ] 9.5 Verificación de extremo a extremo en el navegador: registrarse, entrar, pasar a un hijo con su PIN, volver sin reescribir la contraseña, y cerrar sesión
-- [ ] 9.6 Verificación completa sin caché sobre un clon limpio, y `openspec validate --all` en verde
-- [ ] 9.7 Commit final del change
+- [x] 9.1 Actualizar la siembra para que genere credenciales verificables, y dejar documentadas las de ejemplo
+- [x] 9.2 Actualizar `.env.example` y el esquema de entorno con la duración de sesión y la política de cookies
+- [x] 9.3 Actualizar `CLAUDE.md`: cómo se protege una ruta, cómo se obtiene el actor, y que ningún módulo lee la tabla de sesiones
+- [x] 9.4 Actualizar el `README` con el flujo de acceso y las credenciales de la siembra
+- [x] 9.5 Verificación de extremo a extremo en el navegador: registrarse, entrar, pasar a un hijo con su PIN, volver sin reescribir la contraseña, y cerrar sesión
+- [x] 9.6 Verificación completa sin caché sobre un clon limpio, y `openspec validate --all` en verde
+- [x] 9.7 Commit final del change

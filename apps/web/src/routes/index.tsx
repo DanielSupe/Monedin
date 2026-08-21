@@ -1,60 +1,88 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { fetchHealth, healthQueryKey } from "../api/health.js";
-import { ApiRequestError } from "../lib/http-client.js";
+import { useState } from "react";
+import { AuthGate, ChildOnly, ParentOnly } from "../features/auth/AuthGate.js";
+import { ChildProfilePicker } from "../features/auth/ChildProfilePicker.js";
+import { useLeaveChildProfile, useLogout, useSession } from "../features/auth/use-session.js";
 import { messages } from "../lib/messages.js";
 
 export const Route = createFileRoute("/")({
-  component: HealthView,
+  component: Home,
 });
 
+function Home(): React.ReactElement {
+  return (
+    <AuthGate>
+      <SignedIn />
+    </AuthGate>
+  );
+}
+
 /**
- * Prueba de extremo a extremo del contrato compartido.
+ * Lo que se ve con sesión iniciada.
  *
- * Esta vista existe para demostrar que la cadena completa funciona: la API sirve
- * `health`, Vite lo reenvía por el proxy, el cliente HTTP lo valida contra el
- * esquema de `@monedin/contracts` y el tipo que se pinta aquí es el mismo que la
- * API declara. No es una pantalla de producto.
+ * Andamio: enseña quién está dentro y deja pasar a un perfil de niño y volver.
+ * Las pantallas de producto llegan con sus módulos.
  */
-function HealthView() {
-  const { data, error, isPending } = useQuery({
-    queryKey: healthQueryKey,
-    queryFn: fetchHealth,
-  });
+function SignedIn(): React.ReactElement {
+  const { session } = useSession();
+  const [picking, setPicking] = useState(false);
+  const logout = useLogout();
+  const leave = useLeaveChildProfile();
 
-  if (isPending) {
-    return <p>{messages.health.loading}</p>;
-  }
+  const actor = session?.actor;
+  if (actor == null) return <p>{messages.health.loading}</p>;
 
-  if (error) {
-    // El front decide qué mostrar por el CÓDIGO, nunca por el texto del mensaje.
-    const code = error instanceof ApiRequestError ? error.code : "DESCONOCIDO";
-
+  if (picking) {
     return (
-      <section>
-        <h2>{messages.health.heading}</h2>
-        <p>{messages.health.failed}</p>
-        <p>
-          <code>{code}</code>
-        </p>
-      </section>
+      <ChildProfilePicker
+        onCancel={() => {
+          setPicking(false);
+        }}
+        onEntered={() => {
+          setPicking(false);
+        }}
+      />
     );
   }
 
   return (
     <section>
-      <h2>{messages.health.heading}</h2>
-      <p>{messages.health.ok}</p>
-      <dl>
-        <dt>{messages.health.service}</dt>
-        <dd>
-          <code>{data.service}</code>
-        </dd>
-        <dt>{messages.health.version}</dt>
-        <dd>
-          <code>{data.version}</code>
-        </dd>
-      </dl>
+      <h2>Hola, {actor.name}</h2>
+
+      <ChildOnly>
+        <p>
+          Tienes <strong>{actor.familyRole === "CHILD" ? actor.coins : 0}</strong> monedas.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            leave.mutate();
+          }}
+        >
+          {messages.auth.leaveChild}
+        </button>
+      </ChildOnly>
+
+      <ParentOnly>
+        <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem" }}>
+          <button
+            type="button"
+            onClick={() => {
+              setPicking(true);
+            }}
+          >
+            {messages.auth.enterAsChild}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              logout.mutate();
+            }}
+          >
+            {messages.auth.signOut}
+          </button>
+        </div>
+      </ParentOnly>
     </section>
   );
 }

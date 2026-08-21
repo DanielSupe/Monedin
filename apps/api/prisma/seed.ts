@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { getConfig } from "../src/config/index.js";
+import { hashCredential } from "../src/shared/crypto/credentials.js";
 
 /**
  * Datos de ejemplo para desarrollar.
@@ -11,9 +12,19 @@ import { getConfig } from "../src/config/index.js";
  *
  * Es idempotente: se puede ejecutar las veces que haga falta.
  *
- * Las credenciales son literales de relleno. `add-authentication` decidirá el
- * algoritmo de hash y esta siembra se actualizará entonces; hoy nada las lee.
+ * Las credenciales son REALES y verificables: se puede entrar con ellas. Están
+ * escritas aquí a la vista de cualquiera, que es exactamente el motivo por el
+ * que esta siembra se niega a ejecutarse fuera de desarrollo.
  */
+
+/** Credenciales de ejemplo. Documentadas en el README. */
+export const CREDENCIALES_DE_EJEMPLO = {
+  padre: { correo: "familia.ejemplo@monedin.dev", password: "monedin-desarrollo" },
+  ninos: [
+    { nombre: "Mateo", pin: "1234" },
+    { nombre: "Emma", pin: "5678" },
+  ],
+} as const;
 
 const config = getConfig();
 
@@ -36,7 +47,11 @@ async function seed(): Promise<void> {
   const padre = await prisma.user.upsert({
     where: { email: PADRE },
     update: {},
-    create: { name: "Lucía Ramírez", email: PADRE, passwordHash: "relleno-de-desarrollo" },
+    create: {
+      name: "Lucía Ramírez",
+      email: PADRE,
+      passwordHash: await hashCredential(CREDENCIALES_DE_EJEMPLO.padre.password),
+    },
   });
 
   // Limpiar lo sembrado antes para que la siembra sea idempotente sin acumular.
@@ -47,7 +62,19 @@ async function seed(): Promise<void> {
     select: { id: true },
   });
 
+  // La contraseña se refresca en cada siembra, para que siga siendo la
+  // documentada aunque se hubiera cambiado probando.
+  await prisma.user.update({
+    where: { id: padre.id },
+    data: {
+      passwordHash: await hashCredential(CREDENCIALES_DE_EJEMPLO.padre.password),
+      failedLoginAttempts: 0,
+      lockedUntil: null,
+    },
+  });
+
   if (previos.length > 0) {
+    await prisma.session.deleteMany({ where: { userId: padre.id } });
     const ids = previos.map((c) => c.id);
     await prisma.$executeRawUnsafe(
       `ALTER TABLE coin_transactions DISABLE TRIGGER coin_transactions_immutable`,
@@ -66,10 +93,22 @@ async function seed(): Promise<void> {
   }
 
   const mayor = await prisma.childProfile.create({
-    data: { name: "Mateo", pinHash: "relleno-de-desarrollo", age: 10, coins: 0, parentId: padre.id },
+    data: {
+      name: CREDENCIALES_DE_EJEMPLO.ninos[0].nombre,
+      pinHash: await hashCredential(CREDENCIALES_DE_EJEMPLO.ninos[0].pin),
+      age: 10,
+      coins: 0,
+      parentId: padre.id,
+    },
   });
   const menor = await prisma.childProfile.create({
-    data: { name: "Emma", pinHash: "relleno-de-desarrollo", age: 7, coins: 0, parentId: padre.id },
+    data: {
+      name: CREDENCIALES_DE_EJEMPLO.ninos[1].nombre,
+      pinHash: await hashCredential(CREDENCIALES_DE_EJEMPLO.ninos[1].pin),
+      age: 7,
+      coins: 0,
+      parentId: padre.id,
+    },
   });
 
   await prisma.task.createMany({
@@ -126,10 +165,13 @@ async function seed(): Promise<void> {
     });
   }
 
-  console.log(
-    `Sembrado: 1 padre (${PADRE}), 2 hijos, 4 tareas, 2 premios con 4 asignaciones ` +
-      "y su saldo inicial con historial.",
-  );
+  const resumen = [
+    `Sembrado: 1 padre, 2 hijos, 4 tareas, 2 premios con 4 asignaciones y su saldo inicial.`,
+    `  Padre: ${CREDENCIALES_DE_EJEMPLO.padre.correo} / ${CREDENCIALES_DE_EJEMPLO.padre.password}`,
+    ...CREDENCIALES_DE_EJEMPLO.ninos.map((n) => `  ${n.nombre}: PIN ${n.pin}`),
+  ];
+
+  console.log(resumen.join(String.fromCharCode(10)));
 }
 
 try {
