@@ -1,6 +1,11 @@
 schema: spec-driven
 
 context: |
+  Las reglas de desarrollo vinculantes viven en CLAUDE.md, en la raíz del repositorio:
+  anatomía de módulo, patrón de actor, contrato de errores, atomicidad del saldo y
+  exigencia de tests. Este contexto no las repite; da el marco de producto y las
+  decisiones ya cerradas.
+
   PRODUCTO
   Monedín: plataforma de educación financiera gamificada para niños de 6 a 11 años.
   Los padres asignan tareas con valor en monedas y publican premios con precio en monedas.
@@ -9,15 +14,21 @@ context: |
   real, no hay pagos, no hay interoperabilidad entre familias.
   Primer mercado: Latinoamérica hispanohablante.
 
+  Lo que enseña, y que ninguna decisión debe diluir: el ciclo esfuerzo → ingreso → decisión
+  de gasto. No es una app bancaria para niños ni un gestor de tareas: la clave es que las
+  tareas valen monedas y los premios cuestan monedas.
+  Para el padre es una herramienta de gestión del hogar con impacto educativo; para el niño,
+  una experiencia de autonomía donde ve su saldo y elige sus metas.
+
   STACK
   Monorepo con pnpm workspaces + Turborepo. Node 22 LTS, TypeScript strict.
-  - apps/api: Express + Prisma (ORM) + PostgreSQL.
+  - apps/api: Express + Prisma 7 + PostgreSQL 16.
   - apps/web: Vite + React + TanStack Query + TanStack Router.
   - packages/contracts: schemas Zod, tipos y constantes de dominio compartidos front/back.
   - packages/config: tsconfig, eslint y prettier compartidos.
   Infra local: docker-compose con PostgreSQL 16 + Adminer.
   Archivos subidos (imágenes, documentos): S3 detrás de una interfaz StorageProvider.
-  Tests: Vitest + Supertest.
+  Tests: Vitest + Supertest, contra PostgreSQL real en una base separada.
 
   ARQUITECTURA
   Arquitectura por módulos. Cada módulo de la API tiene la misma anatomía:
@@ -26,31 +37,66 @@ context: |
     modules/<name>/<name>.service.ts      reglas de negocio Y autorización
     modules/<name>/<name>.repository.ts   único lugar que toca Prisma
     modules/<name>/<name>.errors.ts       errores de dominio del módulo
-  La autorización se valida en la capa de negocio, nunca en el controlador. El controlador
-  construye un actor { userId, familyRole, childProfileId? } desde la sesión y lo pasa como
-  primer argumento a los servicios: service.method(actor, dto).
+  El módulo health es la plantilla ejecutable de esa anatomía.
 
-  CONVENCIONES
-  - Todas las rutas de la API van bajo el prefijo /api/v1.
-  - Código, identificadores, tablas, endpoints y commits en inglés.
-  - Textos visibles al usuario en español, centralizados en un módulo de mensajes.
-  - Proposals, specs, designs y tasks de OpenSpec redactados en español.
-  - Nada hardcodeado: ningún process.env fuera del módulo config, que valida el entorno con Zod
-    al arrancar y falla ruidosamente si falta una variable.
-  - Las constantes de dominio viven una sola vez en packages/contracts, nunca duplicadas.
-  - Toda mutación de saldo es atómica (increment/decrement, nunca read-modify-write) y escribe
-    su fila de historial en la misma transacción.
-  - Toda transición de estado es condicional y verifica que afectó exactamente una fila, para que
-    un doble tap no acredite dos veces.
+  La autorización se valida en la capa de negocio, nunca en el controlador. El controlador
+  construye el actor desde la sesión y lo pasa como primer argumento: service.method(actor, dto).
+  El actor es una unión discriminada, porque el niño no es un User y no tiene userId:
+    { familyRole: "PARENT", userId }
+    { familyRole: "CHILD", childProfileId, parentId }
+
+  MODELO DE DATOS (ya implementado, ver apps/api/prisma/schema.prisma)
+  User (solo el padre) · ChildProfile (el niño entero: nombre, PIN, saldo, edad, avatar,
+  baja lógica) · Task · Reward · RewardAssignment (precio por niño, clave compuesta) ·
+  RewardRedemption (precio congelado al solicitar) · CoinTransaction (historial append-only).
+
+  El motor garantiza los invariantes, no solo el código: CHECK para saldo no negativo, rangos
+  de monedas y de edad, y un disparador que hace inmutable el historial.
+
+  MÁQUINAS DE ESTADO
+  Tarea:  PENDING --(el niño la marca)--> COMPLETED --(el padre aprueba)--> APPROVED [+monedas]
+          COMPLETED --(el padre rechaza)--> PENDING. Solo se edita en PENDING.
+          Completar solo el niño dueño; aprobar y rechazar solo el padre dueño.
+  Canje:  PENDING --(aprueba)--> APPROVED [-monedas]  |  PENDING --(rechaza)--> REJECTED (terminal).
+          El niño solo puede pedir un premio que exista, esté activo, esté asignado a él y cuyo
+          precio no supere su saldo. El saldo se valida DOS veces: al solicitar y al aprobar.
+
+  SUPERFICIE DE LA API PREVISTA (todo bajo /api/v1)
+  Lo ya construido:
+    GET /health  público, sonda de vida, no consulta la base de datos.
+  Lo que falta, con las reglas que ya están decididas:
+    /children   POST y GET (padre), GET /children/me (niño, incluye su saldo),
+                PATCH /children/:id (padre, solo hijos propios).
+                No hay borrado: existe baja lógica en el esquema.
+    /tasks      POST (padre) acepta DOS formas y debe cumplirse una u otra:
+                  A) { childIds: [...], coins }  mismo precio para todos
+                  B) { assignments: [{ childId, coins }] }  precio distinto por hijo
+                Se crea UNA FILA POR HIJO y se devuelve el array. Valida que todos los hijos
+                existan (404) y sean del padre (403) ANTES de crear nada.
+                GET y GET /:id (ambos roles, filtrando por pertenencia).
+                PATCH /:id (padre, solo en PENDING). DELETE /:id (padre).
+                PATCH /:id/complete (niño) · /approve y /reject (padre).
+    /rewards    catálogo del padre, con asignación y precio por hijo. Sin diseñar todavía.
+    /redemptions  solicitud del niño y resolución del padre. Sin diseñar todavía.
 
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
-  - El saldo vive en ChildProfile.coins como fuente de verdad; una tabla de historial append-only
-    registra cada movimiento de monedas.
-  - El niño accede con perfil familiar + PIN, no con contraseña.
-  - Task.coins tiene rango 1-9999. El estado TaskStatus.REJECTED no existe: rechazar una tarea la
-    devuelve a PENDING.
+  - El niño NO es un User: vive entero como ChildProfile dentro de la cuenta de su padre, y
+    accede con perfil + PIN. No tiene correo ni nombre de usuario.
+  - No hay columna de rol en la base de datos: solo los padres son User, así que valdría
+    siempre PARENT. FamilyRole existe como tipo de dominio y discrimina el actor.
+  - El saldo vive en ChildProfile.coins como fuente de verdad; una tabla de historial
+    append-only registra cada movimiento, con el saldo resultante de cada uno.
+  - Task.coins tiene rango 1-9999. El estado TaskStatus.REJECTED no existe: rechazar una tarea
+    la devuelve a PENDING.
+  - Dar de baja un hijo o retirar un premio es lógico, nunca destruye historial.
   - Los avatares y las imágenes se suben a S3 (bucket privado, URLs firmadas de corta vida).
+
+  ABIERTO
+  - Cuántos dígitos tiene el PIN y con qué algoritmo se hashean las credenciales: se cierra en
+    add-authentication.
+  - DELETE /tasks era borrado físico en el boceto original, pero una tarea con historial de
+    monedas no se puede borrar (clave ajena restrictiva). Resolverlo en el change de tareas.
 
 rules:
   proposal:

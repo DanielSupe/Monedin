@@ -351,18 +351,19 @@ openspec/changes/<nombre>/
   interfaz `StorageProvider`.
 - `health` es sonda de **vida**, no de dependencias: no consulta la base de datos, ni la consultará.
 
-### Contradicciones conocidas entre documentos
+### Fuente de verdad
 
-`Markdown.md` es el documento de producto original y `openspec/config.yaml` recoge decisiones
-posteriores. Donde discrepan, **manda `config.yaml`**, salvo que se decida lo contrario por escrito:
+`openspec/config.yaml` es el **único** documento de producto. Recoge el marco, la superficie de la
+API prevista y las decisiones cerradas, y se inyecta como contexto en toda la planificación de
+OpenSpec.
 
-| Asunto                | `Markdown.md`         | Vigente                     | Estado                    |
-| --------------------- | --------------------- | --------------------------- | ------------------------- |
-| Login del niño        | username + contraseña | perfil + PIN                | **cerrado** en el esquema |
-| Rango de `coins`      | 0–9999                | 1–9999                      | **cerrado**, con `CHECK`  |
-| `TaskStatus.REJECTED` | existe pero sin usar  | no existe                   | **cerrado**, no está      |
-| Prefijo de rutas      | sin prefijo           | `/api/v1`                   | **cerrado**               |
-| `User.familyRole`     | columna en `User`     | tipo de dominio, no columna | **cerrado** en el esquema |
+Hubo un boceto inicial, `Markdown.md`, que se retiró al cerrar `add-data-model`: su modelo de datos
+ya contradecía al esquema real en cinco puntos (el niño como `User`, `coins` desde 0,
+`TaskStatus.REJECTED`, rutas sin prefijo y una columna `familyRole`). Un documento de producto que
+describe algo distinto de lo que hay construido no es documentación de más: es una trampa para quien
+lo lea de buena fe.
 
-`add-data-model` las cerró todas. Lo que queda para `add-authentication` es cuántos dígitos tiene el
-PIN y con qué algoritmo se hashean las credenciales: son decisiones de autenticación, no de esquema.
+Lo que aquel boceto tenía y seguía siendo válido —la superficie de endpoints y el encuadre de
+producto— vive ahora en `config.yaml`. Si aparece una discrepancia entre `config.yaml`, este
+documento y el código, gana el código, y hay que corregir el documento en el mismo change que la
+detectó.

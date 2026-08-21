@@ -6,7 +6,7 @@ la forma que tiene.
 El punto de partida son tres restricciones que no se eligen aquí:
 
 - **El niño no es un `User`.** Decisión tomada antes de escribir este change, y de la que se derivan
-  casi todas las diferencias respecto al modelo de datos de `Markdown.md`.
+  casi todas las diferencias respecto al modelo de datos del boceto de producto original.
 - **Prisma 7 no se configura como Prisma 5 o 6.** El spike de `setup-foundations` (decisión 11 de su
   design) dejó verificado que funciona sobre ESM y dejó anotadas tres condiciones que hay que
   aplicar. Este change las aplica; no las vuelve a investigar.
@@ -39,12 +39,12 @@ El punto de partida son tres restricciones que no se eligen aquí:
 
 ### 1. El niño vive entero en `ChildProfile`, sin fila en `User`
 
-`Markdown.md` daba al niño una fila en `User` con `username` y contraseña, y una `ChildProfile` que
-la extendía. Se elige la lectura literal de `config.yaml`: el niño accede con perfil y PIN, así que
-no es un usuario del sistema sino un perfil dentro de la cuenta de su padre.
+El boceto de producto original daba al niño una fila en `User` con `username` y contraseña, y una
+`ChildProfile` que la extendía. Se elige la lectura literal de la decisión ya cerrada: el niño accede
+con perfil y PIN, así que no es un usuario del sistema sino un perfil dentro de la cuenta de su padre.
 
 ```
-   ANTES (Markdown.md)                 AHORA
+   ANTES (boceto original)             AHORA
    ───────────────────                 ─────
    User                                User            solo el padre
      familyRole PARENT|CHILD             email @unique
@@ -62,7 +62,7 @@ no es un usuario del sistema sino un perfil dentro de la cuenta de su padre.
    a un rol.
 ```
 
-Lo que se gana no es solo una tabla menos. `Markdown.md` advertía de que actualizar un hijo tocaba
+Lo que se gana no es solo una tabla menos. El boceto advertía de que actualizar un hijo tocaba
 dos tablas en transacción porque el nombre vivía en `User` y la edad en `ChildProfile`; ese problema
 desaparece. Y deja de ser representable el estado que la implementación anterior producía cuando
 fallaba a medias: un `User` huérfano sin perfil.
@@ -98,12 +98,14 @@ qué familia es, y llevarlo en el actor evita una consulta previa en cada servic
 
 **`User.familyRole` no se crea.** Si solo los padres son `User`, la columna vale siempre `PARENT`, y
 una columna con un único valor posible es ruido que además invita a comprobaciones inútiles.
-`FamilyRole` sobrevive como tipo de dominio, que es lo que discrimina el actor. Esto contradice
-`config.yaml`; queda escrito en el proposal en lugar de aplicarse en silencio.
+`FamilyRole` sobrevive como tipo de dominio, que es lo que discrimina el actor. Contradecía lo que
+`config.yaml` decía entonces, así que quedó escrito en el proposal en lugar de aplicarse en silencio;
+`config.yaml` ya recoge la decisión.
 
 **Las constantes de `username` se sustituyen.** El niño no tiene username, así que
-`USERNAME_MIN_LENGTH` y `USERNAME_MAX_LENGTH` se quedan sin consumidor. Entran `PIN_LENGTH` y las
-constantes que la migración necesita replicar.
+`USERNAME_MIN_LENGTH` y `USERNAME_MAX_LENGTH` se quedan sin consumidor. Entran `PIN_MIN_LENGTH` y
+`PIN_MAX_LENGTH` —un rango, no una longitud exacta, porque el número definitivo se cierra en
+`add-authentication` y dentro del rango cabe sin romper nada.
 
 ### 3. Los invariantes del saldo viven en el motor
 
