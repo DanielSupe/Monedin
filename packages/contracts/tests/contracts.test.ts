@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   API_PREFIX,
+  AVATAR_KEYS,
+  DEFAULT_AVATAR_KEY,
   CHILD_AGE_MAX,
   CHILD_AGE_MIN,
   COINS_MAX,
@@ -8,6 +10,8 @@ import {
   ERROR_CODES,
   apiErrorSchema,
   healthResponseSchema,
+  isAvatarKey,
+  resolveAvatarKey,
 } from "../src/index.js";
 
 describe("constantes de dominio", () => {
@@ -74,5 +78,45 @@ describe("esquema de health", () => {
     });
 
     expect(result).not.toHaveProperty("timestamp");
+  });
+});
+
+describe("catálogo de avatares", () => {
+  it("no repite ninguna clave", () => {
+    expect(new Set(AVATAR_KEYS).size).toBe(AVATAR_KEYS.length);
+  });
+
+  it("reconoce una clave del catálogo", () => {
+    for (const key of AVATAR_KEYS) {
+      expect(isAvatarKey(key)).toBe(true);
+    }
+  });
+
+  it("rechaza una clave que no está", () => {
+    expect(isAvatarKey("dragon")).toBe(false);
+    expect(isAvatarKey("")).toBe(false);
+    expect(isAvatarKey(null)).toBe(false);
+    expect(isAvatarKey(42)).toBe(false);
+  });
+
+  it("el avatar por defecto está en el catálogo", () => {
+    expect(isAvatarKey(DEFAULT_AVATAR_KEY)).toBe(true);
+  });
+
+  it("un perfil sin avatar resuelve al de por defecto", () => {
+    expect(resolveAvatarKey(null)).toBe(DEFAULT_AVATAR_KEY);
+    expect(resolveAvatarKey(undefined)).toBe(DEFAULT_AVATAR_KEY);
+    // Una clave que ya no está en el catálogo tampoco deja el perfil sin cara.
+    expect(resolveAvatarKey("clave-retirada")).toBe(DEFAULT_AVATAR_KEY);
+  });
+
+  it("un perfil con avatar del catálogo conserva el suyo", () => {
+    expect(resolveAvatarKey("zorro")).toBe("zorro");
+  });
+
+  it("las claves son legibles y estables, no números", () => {
+    for (const key of AVATAR_KEYS) {
+      expect(key).toMatch(/^[a-z]+$/);
+    }
   });
 });

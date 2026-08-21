@@ -108,7 +108,8 @@ describe("los límites del motor y los del contrato compartido coinciden", () =>
       "coin_transactions_balance_after_non_negative",
       "users_failed_login_attempts_non_negative",
       "child_profiles_failed_pin_attempts_non_negative",
-      "sessions_child_requires_parent_session",
+      "sessions_account_has_no_child",
+      "users_failed_pin_attempts_non_negative",
       "sessions_not_self_parented",
       "sessions_token_hash_is_sha256",
     ];
@@ -134,10 +135,10 @@ describe("los límites del motor y los del contrato compartido coinciden", () =>
 });
 
 describe("reglas estructurales de la sesión", () => {
-  it("una sesión de niño no puede existir sin sesión de padre detrás", async () => {
-    const definicion = (await liveCheckConstraints()).get("sessions_child_requires_parent_session");
+  it("una sesión de cuenta no puede apuntar a un perfil de niño", async () => {
+    const definicion = (await liveCheckConstraints()).get("sessions_account_has_no_child");
 
-    expect(definicion, "falta sessions_child_requires_parent_session").toBeDefined();
+    expect(definicion, "falta sessions_account_has_no_child").toBeDefined();
     expect(definicion).toContain("childProfileId");
     expect(definicion).toContain("parentSessionId");
   });

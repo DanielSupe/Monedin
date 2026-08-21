@@ -25,6 +25,10 @@ export interface ParentCredentials {
   passwordHash: string;
   failedLoginAttempts: number;
   lockedUntil: Date | null;
+  /** PIN de adulto. Su bloqueo se cuenta aparte del de la contraseña. */
+  pinHash: string;
+  failedPinAttempts: number;
+  pinLockedUntil: Date | null;
 }
 
 export function findParentByEmail(email: string): Promise<ParentCredentials | null> {
@@ -38,6 +42,9 @@ export function findParentByEmail(email: string): Promise<ParentCredentials | nu
         passwordHash: true,
         failedLoginAttempts: true,
         lockedUntil: true,
+        pinHash: true,
+        failedPinAttempts: true,
+        pinLockedUntil: true,
       },
     }),
   );
@@ -54,16 +61,21 @@ export function findParentCredentialsById(id: string): Promise<ParentCredentials
         passwordHash: true,
         failedLoginAttempts: true,
         lockedUntil: true,
+        pinHash: true,
+        failedPinAttempts: true,
+        pinLockedUntil: true,
       },
     }),
   );
 }
 
-export function findParentById(id: string): Promise<{ id: string; name: string; email: string } | null> {
+export function findParentById(
+  id: string,
+): Promise<{ id: string; name: string; email: string; image: string | null } | null> {
   return withTranslatedErrors(() =>
     getPrisma().user.findUnique({
       where: { id },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, image: true },
     }),
   );
 }
@@ -72,6 +84,7 @@ export function createParent(data: {
   name: string;
   email: string;
   passwordHash: string;
+  pinHash: string;
 }): Promise<{ id: string; name: string; email: string }> {
   return withTranslatedErrors(() =>
     getPrisma().user.create({
@@ -111,6 +124,47 @@ export function clearParentLockout(id: string): Promise<void> {
     await getPrisma().user.update({
       where: { id },
       data: { failedLoginAttempts: 0, lockedUntil: null },
+    });
+  });
+}
+
+/**
+ * Cambia el PIN de adulto y desbloquea.
+ *
+ * Poner un PIN nuevo desbloquea el perfil: es la vía por la que un padre se
+ * rescata a sí mismo cuando lo ha olvidado y se ha quedado fuera.
+ */
+export function updateParentPinHash(id: string, pinHash: string): Promise<void> {
+  return withTranslatedErrors(async () => {
+    await getPrisma().user.update({
+      where: { id },
+      data: { pinHash, failedPinAttempts: 0, pinLockedUntil: null },
+    });
+  });
+}
+
+export function registerFailedParentPin(id: string): Promise<number> {
+  return withTranslatedErrors(async () => {
+    const updated = await getPrisma().user.update({
+      where: { id },
+      data: { failedPinAttempts: { increment: 1 } },
+      select: { failedPinAttempts: true },
+    });
+    return updated.failedPinAttempts;
+  });
+}
+
+export function lockParentPinUntil(id: string, until: Date): Promise<void> {
+  return withTranslatedErrors(async () => {
+    await getPrisma().user.update({ where: { id }, data: { pinLockedUntil: until } });
+  });
+}
+
+export function clearParentPinLockout(id: string): Promise<void> {
+  return withTranslatedErrors(async () => {
+    await getPrisma().user.update({
+      where: { id },
+      data: { failedPinAttempts: 0, pinLockedUntil: null },
     });
   });
 }
@@ -293,13 +347,35 @@ export function revokeSession(id: string): Promise<void> {
   });
 }
 
-/** Revoca todas las sesiones de una cuenta, opcionalmente salvando una. */
-export function revokeAllSessionsOfUser(userId: string, exceptSessionId?: string): Promise<number> {
+/**
+ * Revoca todas las sesiones de una cuenta, salvando opcionalmente un dispositivo.
+ *
+ * «Salvar un dispositivo» es salvar su sesión de cuenta **y el perfil que tenga
+ * activo**. Salvar solo la cuenta echaría a quien acaba de cambiar su
+ * contraseña de vuelta a la rejilla, que no es conservar su sesión: es
+ * expulsarlo con más pasos.
+ */
+export function revokeAllSessionsOfUser(
+  userId: string,
+  keepAccountSessionId?: string,
+): Promise<number> {
   return withTranslatedErrors(async () => {
     const result = await getPrisma().session.deleteMany({
       where: {
         userId,
-        ...(exceptSessionId === undefined ? {} : { id: { not: exceptSessionId } }),
+        ...(keepAccountSessionId === undefined
+          ? {}
+          : {
+              AND: [
+                { id: { not: keepAccountSessionId } },
+                {
+                  OR: [
+                    { parentSessionId: null },
+                    { parentSessionId: { not: keepAccountSessionId } },
+                  ],
+                },
+              ],
+            }),
       },
     });
     return result.count;
@@ -314,10 +390,16 @@ export function revokeSessionsOfChildProfile(childProfileId: string): Promise<nu
   });
 }
 
-/** Revoca las sesiones de niño que cuelgan de una sesión de padre. */
-export function revokeChildSessionsOf(parentSessionId: string): Promise<number> {
+/**
+ * Revoca los perfiles activos que cuelgan de una sesión de cuenta.
+ *
+ * Se usa al entrar a un perfil, para que nunca haya dos activos a la vez.
+ */
+export function revokeProfileSessionsOf(accountSessionId: string): Promise<number> {
   return withTranslatedErrors(async () => {
-    const result = await getPrisma().session.deleteMany({ where: { parentSessionId } });
+    const result = await getPrisma().session.deleteMany({
+      where: { parentSessionId: accountSessionId },
+    });
     return result.count;
   });
 }

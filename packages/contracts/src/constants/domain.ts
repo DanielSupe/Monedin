@@ -98,6 +98,14 @@ export const CHILD_MAX_FAILED_ATTEMPTS = 5;
 export const CHILD_LOCKOUT_MINUTES = 5;
 
 /**
+ * Bloqueo del PIN de adulto, con los mismos numeros que su contrasena: es un
+ * adulto tecleando, no un nino de seis anos. Se cuenta APARTE del de la
+ * contrasena, para que bloquear uno no bloquee el otro.
+ */
+export const PARENT_PIN_MAX_FAILED_ATTEMPTS = 10;
+export const PARENT_PIN_LOCKOUT_MINUTES = 15;
+
+/**
  * Duracion de las sesiones.
  *
  * La del padre es larga porque el dispositivo es familiar y volver a teclear la
@@ -107,9 +115,18 @@ export const CHILD_LOCKOUT_MINUTES = 5;
 export const PARENT_SESSION_DAYS = 30;
 export const CHILD_SESSION_HOURS = 12;
 
-/** Nombres de las cookies. Ver la decision 1 del design de add-authentication. */
-export const PARENT_SESSION_COOKIE = "monedin_session";
-export const CHILD_SESSION_COOKIE = "monedin_child";
+/**
+ * Nombres de las cookies.
+ *
+ * `ACCOUNT_SESSION_COOKIE` acredita que el dispositivo pertenece a una cuenta.
+ * NO concede poderes por si sola.
+ * `PROFILE_SESSION_COOKIE` dice que perfil esta activo: el del padre o el de un
+ * hijo. Es la que da el actor.
+ *
+ * Ver la decision 1 del design de add-profile-selection.
+ */
+export const ACCOUNT_SESSION_COOKIE = "monedin_session";
+export const PROFILE_SESSION_COOKIE = "monedin_profile";
 
 /** Paginacion por defecto de los listados de la API. */
 export const DEFAULT_PAGE_SIZE = 20;

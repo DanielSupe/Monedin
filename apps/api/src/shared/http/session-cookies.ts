@@ -1,14 +1,17 @@
-import { CHILD_SESSION_COOKIE, PARENT_SESSION_COOKIE } from "@monedin/contracts";
+import { ACCOUNT_SESSION_COOKIE, PROFILE_SESSION_COOKIE } from "@monedin/contracts";
 import type { Request, Response } from "express";
 import { getConfig } from "../../config/index.js";
 
 /**
- * Las dos cookies de sesión.
+ * Las dos cookies.
  *
- * La del padre está siempre mientras no cierre; la del niño se pone encima
- * mientras está dentro. Salir del perfil del niño es borrar una cookie: la
- * sesión del padre nunca se tocó, así que no hay nada que restaurar. Ver la
- * decisión 1 del design de `add-authentication`.
+ * La de CUENTA acredita que el dispositivo pertenece a esta familia y no
+ * concede poderes por sí sola. La de PERFIL dice quién está usando el
+ * dispositivo ahora mismo, y es la que da el actor.
+ *
+ * Salir de un perfil es borrar la segunda: la de cuenta nunca se toca, así que
+ * elegir otro no exige la contraseña. Ver la decisión 1 del design de
+ * `add-profile-selection`.
  */
 
 interface CookieOptions {
@@ -34,30 +37,30 @@ function baseOptions(): CookieOptions {
   };
 }
 
-export function setParentSessionCookie(res: Response, token: string, expiresAt: Date): void {
-  res.cookie(PARENT_SESSION_COOKIE, token, { ...baseOptions(), expires: expiresAt });
+export function setAccountSessionCookie(res: Response, token: string, expiresAt: Date): void {
+  res.cookie(ACCOUNT_SESSION_COOKIE, token, { ...baseOptions(), expires: expiresAt });
 }
 
-export function setChildSessionCookie(res: Response, token: string, expiresAt: Date): void {
-  res.cookie(CHILD_SESSION_COOKIE, token, { ...baseOptions(), expires: expiresAt });
+export function setProfileSessionCookie(res: Response, token: string, expiresAt: Date): void {
+  res.cookie(PROFILE_SESSION_COOKIE, token, { ...baseOptions(), expires: expiresAt });
 }
 
-export function clearParentSessionCookie(res: Response): void {
+export function clearAccountSessionCookie(res: Response): void {
   // Las opciones tienen que coincidir con las de emisión o el navegador no la
   // borra: se quedaría una cookie que no vale y confunde al front.
-  res.clearCookie(PARENT_SESSION_COOKIE, baseOptions());
+  res.clearCookie(ACCOUNT_SESSION_COOKIE, baseOptions());
 }
 
-export function clearChildSessionCookie(res: Response): void {
-  res.clearCookie(CHILD_SESSION_COOKIE, baseOptions());
+export function clearProfileSessionCookie(res: Response): void {
+  res.clearCookie(PROFILE_SESSION_COOKIE, baseOptions());
 }
 
-export function readParentSessionCookie(req: Request): string | undefined {
-  return readCookie(req, PARENT_SESSION_COOKIE);
+export function readAccountSessionCookie(req: Request): string | undefined {
+  return readCookie(req, ACCOUNT_SESSION_COOKIE);
 }
 
-export function readChildSessionCookie(req: Request): string | undefined {
-  return readCookie(req, CHILD_SESSION_COOKIE);
+export function readProfileSessionCookie(req: Request): string | undefined {
+  return readCookie(req, PROFILE_SESSION_COOKIE);
 }
 
 function readCookie(req: Request, name: string): string | undefined {

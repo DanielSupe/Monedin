@@ -167,7 +167,7 @@ describe("atomicidad", () => {
       data: {
         name: "Padre atomicidad",
         email: `atomicidad-${Date.now()}@monedin.test`,
-        passwordHash: "h",
+        passwordHash: "h", pinHash: "hash-de-prueba",
       },
     });
     const hijo = await prisma.childProfile.create({
@@ -211,7 +211,7 @@ describe("concurrencia", () => {
       data: {
         name: "Padre concurrencia",
         email: `concurrencia-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@monedin.test`,
-        passwordHash: "h",
+        passwordHash: "h", pinHash: "hash-de-prueba",
       },
     });
     const hijo = await prisma.childProfile.create({

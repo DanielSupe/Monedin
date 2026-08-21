@@ -3,28 +3,40 @@ import type { NextFunction, Request, RequestHandler, Response } from "express";
 import * as authRepository from "../../modules/auth/auth.repository.js";
 import type { Actor } from "../actor.js";
 import { ForbiddenError, UnauthorizedError } from "../errors/domain-errors.js";
-import { clearChildSessionCookie, clearParentSessionCookie, readChildSessionCookie, readParentSessionCookie } from "./session-cookies.js";
+import {
+  clearAccountSessionCookie,
+  clearProfileSessionCookie,
+  readAccountSessionCookie,
+  readProfileSessionCookie,
+} from "./session-cookies.js";
 
 /**
  * Resolución de la sesión y protección de rutas.
  *
- * Vive aquí y no en el módulo `auth` porque lo consume toda la API. Es la única
- * pieza fuera de `auth` que sabe de sesiones, y lo hace a través del repositorio
- * de `auth`, nunca con Prisma directamente.
+ * Hay DOS niveles, y esa es la diferencia con `add-authentication`:
  *
- * Cada petición se resuelve a un actor o a ninguno ANTES de que se ejecute nada
- * de negocio. Los servicios reciben ese actor y no lo reconstruyen.
+ *   sesión de CUENTA   acredita que el dispositivo pertenece a esta familia.
+ *                      NO da actor.
+ *   perfil ACTIVO      dice quién está usando el dispositivo. SÍ da actor.
+ *
+ * Que la cookie de cuenta no conceda poderes es lo que hace que la rejilla sea
+ * una frontera y no una pantalla que se rodea llamando al endpoint: sin esto,
+ * un niño podría aprobarse sus propias tareas. Ver la decisión 2 del design de
+ * `add-profile-selection`.
+ *
+ * Vive aquí y no en el módulo `auth` porque lo consume toda la API, y lee las
+ * sesiones a través del repositorio de `auth`, nunca con Prisma directamente.
  */
 
-/** La sesión ya resuelta de una petición. */
+/** Lo que se ha podido resolver de una petición. */
 export interface ResolvedSession {
-  actor: Actor;
-  /** Identificador de la fila de sesión activa: la del niño si la hay. */
-  sessionId: string;
-  /** Identificador de la sesión de padre, esté activa o suspendida detrás. */
-  parentSessionId: string;
-  /** Si hay una sesión de padre esperando detrás de una de niño. */
-  parentSessionAvailable: boolean;
+  /** La cuenta acreditada. Presente siempre que haya cookie de cuenta válida. */
+  accountUserId: string;
+  accountSessionId: string;
+  /** Quién está operando. Ausente mientras no se haya elegido perfil. */
+  actor?: Actor;
+  /** Identificador de la fila del perfil activo, si lo hay. */
+  profileSessionId?: string;
 }
 
 declare global {
@@ -33,6 +45,7 @@ declare global {
     interface Request {
       session?: ResolvedSession;
       isPublicRoute?: boolean;
+      isAccountOnlyRoute?: boolean;
     }
   }
 }
@@ -45,10 +58,7 @@ function isExpired(expiresAt: Date): boolean {
 }
 
 /**
- * Resuelve la sesión de la petición si la hay.
- *
- * Se monta antes de todo y NUNCA rechaza: solo deja el actor disponible. Quien
- * exige sesión es el guardián.
+ * Resuelve lo que haya. NUNCA rechaza: quien exige es el guardián.
  */
 export const resolveSession: RequestHandler = (req, res, next) => {
   void resolve(req, res)
@@ -57,72 +67,67 @@ export const resolveSession: RequestHandler = (req, res, next) => {
 };
 
 async function resolve(req: Request, res: Response): Promise<void> {
-  const parentToken = readParentSessionCookie(req);
-  if (parentToken === undefined) {
-    // Sin sesión de padre no puede haber sesión de niño: si quedó una cookie
-    // suelta, se retira.
-    if (readChildSessionCookie(req) !== undefined) {
-      clearChildSessionCookie(res);
+  const accountToken = readAccountSessionCookie(req);
+
+  if (accountToken === undefined) {
+    // Sin cuenta no puede haber perfil: si quedó una cookie suelta, se retira.
+    if (readProfileSessionCookie(req) !== undefined) {
+      clearProfileSessionCookie(res);
     }
     return;
   }
 
-  const parentSession = await authRepository.findSessionByToken(parentToken);
+  const account = await authRepository.findSessionByToken(accountToken);
 
-  if (parentSession === null || parentSession.childProfileId !== null || isExpired(parentSession.expiresAt)) {
-    // Caducada, inexistente, o alguien presentó una cookie de niño en el hueco
-    // de la de padre. En los tres casos: no hay sesión.
-    clearParentSessionCookie(res);
-    clearChildSessionCookie(res);
+  // Una fila con `parentSessionId` no es una cuenta, es un perfil: alguien la
+  // presentó en el hueco equivocado.
+  if (account === null || account.parentSessionId !== null || isExpired(account.expiresAt)) {
+    clearAccountSessionCookie(res);
+    clearProfileSessionCookie(res);
     return;
   }
 
-  await renewIfNeeded(parentSession.id, parentSession.expiresAt);
+  await renewIfNeeded(account.id, account.expiresAt);
 
-  const childToken = readChildSessionCookie(req);
-  if (childToken !== undefined) {
-    const childSession = await authRepository.findSessionByToken(childToken);
+  // Cuenta acreditada. Todavía no hay actor.
+  req.session = { accountUserId: account.userId, accountSessionId: account.id };
 
-    const valid =
-      childSession !== null &&
-      childSession.childProfileId !== null &&
-      !isExpired(childSession.expiresAt) &&
-      // La sesión de niño solo vale si nació de ESTA sesión de padre.
-      childSession.parentSessionId === parentSession.id;
+  const profileToken = readProfileSessionCookie(req);
+  if (profileToken === undefined) return;
 
-    if (valid && childSession.childProfileId !== null) {
-      await renewIfNeeded(childSession.id, childSession.expiresAt);
+  const profile = await authRepository.findSessionByToken(profileToken);
 
-      req.session = {
-        actor: {
+  const valid =
+    profile !== null &&
+    // Un perfil siempre cuelga de una cuenta, y tiene que ser ESTA.
+    profile.parentSessionId === account.id &&
+    !isExpired(profile.expiresAt);
+
+  if (!valid) {
+    // Perfil huérfano, caducado o de otra cuenta: se retira y se sigue con la
+    // cuenta acreditada pero sin actor, que manda a la rejilla.
+    clearProfileSessionCookie(res);
+    return;
+  }
+
+  await renewIfNeeded(profile.id, profile.expiresAt);
+
+  req.session.profileSessionId = profile.id;
+  req.session.actor =
+    profile.childProfileId === null
+      ? { familyRole: "PARENT", userId: profile.userId }
+      : {
           familyRole: "CHILD",
-          childProfileId: childSession.childProfileId,
-          parentId: childSession.userId,
-        },
-        sessionId: childSession.id,
-        parentSessionId: parentSession.id,
-        parentSessionAvailable: true,
-      };
-      return;
-    }
-
-    // Cookie de niño huérfana o caducada: se retira y se sigue como el padre.
-    clearChildSessionCookie(res);
-  }
-
-  req.session = {
-    actor: { familyRole: "PARENT", userId: parentSession.userId },
-    sessionId: parentSession.id,
-    parentSessionId: parentSession.id,
-    parentSessionAvailable: false,
-  };
+          childProfileId: profile.childProfileId,
+          parentId: profile.userId,
+        };
 }
 
 /**
- * Prolonga la caducidad si ya ha consumido buena parte de su vida.
+ * Prolonga la caducidad si ya consumió buena parte de su vida.
  *
- * No se renueva en cada petición para no escribir en la base de datos
- * constantemente; con este umbral, un uso continuado nunca expulsa a nadie.
+ * No se renueva en cada petición para no escribir en la base constantemente;
+ * con este umbral, un uso continuado nunca expulsa a nadie.
  */
 async function renewIfNeeded(sessionId: string, expiresAt: Date): Promise<void> {
   const totalMs = PARENT_SESSION_DAYS * 86_400_000;
@@ -134,13 +139,28 @@ async function renewIfNeeded(sessionId: string, expiresAt: Date): Promise<void> 
 }
 
 /**
- * Exige sesión.
+ * Exige ACTOR, no solo cuenta.
  *
- * Se monta sobre todo el router de la API, y las rutas públicas se declaran una
- * a una con `publicRoute`. Olvidarse deja la ruta protegida, que es el fallo
- * benigno. Ver la decisión 5 del design.
+ * Es el guardián por defecto de todas las rutas. Una cookie de cuenta sin
+ * perfil elegido responde 401 igual que si no hubiera nada: es exactamente lo
+ * que impide rodear la rejilla.
  */
 export const requireSession: RequestHandler = (req, _res, next) => {
+  if (req.session?.actor === undefined) {
+    next(new UnauthorizedError());
+    return;
+  }
+  next();
+};
+
+/**
+ * Exige únicamente CUENTA acreditada, sin perfil elegido.
+ *
+ * Solo para las rutas de la rejilla: listar los perfiles y entrar a uno son
+ * justo los pasos previos a ser alguien. Cualquier otra ruta usa el guardián
+ * por defecto.
+ */
+export const requireAccount: RequestHandler = (req, _res, next) => {
   if (req.session === undefined) {
     next(new UnauthorizedError());
     return;
@@ -151,15 +171,33 @@ export const requireSession: RequestHandler = (req, _res, next) => {
 /**
  * Marca la petición como dirigida a una ruta pública.
  *
- * Va justo delante del guardián en la cadena de esa ruta. No se usa
- * directamente: lo pone `moduleRouter()` en sus métodos `public*`.
+ * No se usa directamente: lo pone `moduleRouter()` en sus métodos `public*`.
  */
 export const markPublic: RequestHandler = (req, _res, next) => {
   req.isPublicRoute = true;
   next();
 };
 
-/** Guardián que respeta las rutas declaradas públicas. */
+/**
+ * Marca la petición como dirigida a una ruta de SOLO CUENTA.
+ *
+ * Lo pone `moduleRouter()` en sus métodos `account*`. Tiene que ser una marca y
+ * no un middleware suelto: el guardián por defecto se ejecuta ANTES que los
+ * manejadores propios de la ruta, así que un `requireAccount` puesto detrás no
+ * llegaría nunca a correr.
+ */
+export const markAccountOnly: RequestHandler = (req, _res, next) => {
+  req.isAccountOnlyRoute = true;
+  next();
+};
+
+/**
+ * Guardián por defecto. Exige ACTOR, salvo en rutas declaradas.
+ *
+ * Público  -> pasa sin nada.
+ * Solo cuenta -> basta con la cuenta acreditada.
+ * Lo demás -> hace falta perfil elegido.
+ */
 export const requireSessionUnlessPublic: RequestHandler = (
   req: Request,
   res: Response,
@@ -167,6 +205,10 @@ export const requireSessionUnlessPublic: RequestHandler = (
 ) => {
   if (req.isPublicRoute === true) {
     next();
+    return;
+  }
+  if (req.isAccountOnlyRoute === true) {
+    requireAccount(req, res, next);
     return;
   }
   requireSession(req, res, next);
@@ -180,11 +222,12 @@ export const requireSessionUnlessPublic: RequestHandler = (
  * servicio, con el actor.
  */
 export const requireParent: RequestHandler = (req, _res, next) => {
-  if (req.session === undefined) {
+  const actor = req.session?.actor;
+  if (actor === undefined) {
     next(new UnauthorizedError());
     return;
   }
-  if (req.session.actor.familyRole !== "PARENT") {
+  if (actor.familyRole !== "PARENT") {
     next(new ForbiddenError());
     return;
   }
@@ -193,30 +236,31 @@ export const requireParent: RequestHandler = (req, _res, next) => {
 
 /** Exige que quien llama sea un niño. */
 export const requireChild: RequestHandler = (req, _res, next) => {
-  if (req.session === undefined) {
+  const actor = req.session?.actor;
+  if (actor === undefined) {
     next(new UnauthorizedError());
     return;
   }
-  if (req.session.actor.familyRole !== "CHILD") {
+  if (actor.familyRole !== "CHILD") {
     next(new ForbiddenError());
     return;
   }
   next();
 };
 
-/**
- * Lee la sesión resuelta.
- *
- * Se usa después de `requireSession`, que garantiza que existe.
- */
-export function sessionOf(req: Request): ResolvedSession {
+/** Lee la cuenta acreditada. Se usa tras `requireAccount`. */
+export function accountOf(req: Request): ResolvedSession {
   if (req.session === undefined) {
     throw new UnauthorizedError();
   }
   return req.session;
 }
 
-/** Lee el actor. Es lo que el controlador pasa al servicio. */
+/** Lee el actor. Se usa tras `requireSession`, que garantiza que existe. */
 export function actorOf(req: Request): Actor {
-  return sessionOf(req).actor;
+  const actor = req.session?.actor;
+  if (actor === undefined) {
+    throw new UnauthorizedError();
+  }
+  return actor;
 }

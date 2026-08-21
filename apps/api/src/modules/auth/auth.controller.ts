@@ -1,22 +1,23 @@
 import {
   type SessionState,
+  changeAdultPinSchema,
   changePasswordSchema,
-  enterChildProfileSchema,
+  enterProfileSchema,
   loginParentSchema,
   registerParentSchema,
+  resetAdultPinSchema,
   setChildPinSchema,
 } from "@monedin/contracts";
 import type { Request, RequestHandler } from "express";
 import {
-  clearChildSessionCookie,
-  clearParentSessionCookie,
-  setChildSessionCookie,
-  setParentSessionCookie,
+  clearAccountSessionCookie,
+  clearProfileSessionCookie,
+  setAccountSessionCookie,
+  setProfileSessionCookie,
 } from "../../shared/http/session-cookies.js";
-import { actorOf, sessionOf } from "../../shared/http/session.js";
+import { accountOf, actorOf } from "../../shared/http/session.js";
 import { validatedPart } from "../../shared/http/validate.js";
 import * as service from "./auth.service.js";
-import { ParentSessionRequiredError } from "./auth.errors.js";
 
 /**
  * Parseo y serialización. Cero autorización.
@@ -26,92 +27,140 @@ import { ParentSessionRequiredError } from "./auth.errors.js";
  */
 
 // ---------------------------------------------------------------------------
-// Padre
+// Cuenta
 // ---------------------------------------------------------------------------
 
 export const handleRegister: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", registerParentSchema);
-  const { parent, session } = await service.registerParent(input);
+  const { session } = await service.registerParent(input);
 
-  setParentSessionCookie(res, session.token, session.expiresAt);
+  // Registrarse acredita la cuenta y NO activa ningún perfil: se llega a la
+  // rejilla, igual que en cualquier apertura posterior.
+  setAccountSessionCookie(res, session.token, session.expiresAt);
 
-  res.status(201).json(parentState(parent));
+  res.status(201).json(accountWithoutProfile());
 };
 
 export const handleLogin: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", loginParentSchema);
-  const { parent, session } = await service.loginParent(input);
+  const { session } = await service.loginParent(input);
 
-  // Entrar como padre descarta cualquier perfil de niño que hubiera activo.
-  clearChildSessionCookie(res);
-  setParentSessionCookie(res, session.token, session.expiresAt);
+  // Entrar descarta cualquier perfil que hubiera activo.
+  clearProfileSessionCookie(res);
+  setAccountSessionCookie(res, session.token, session.expiresAt);
 
-  res.status(200).json(parentState(parent));
+  res.status(200).json(accountWithoutProfile());
 };
 
 export const handleLogout: RequestHandler = async (req, res) => {
   const current = req.session;
 
   if (current !== undefined) {
-    // Cerrar la del padre se lleva por cascada las de sus niños.
-    await service.logout(current.parentSessionId);
+    // Cerrar la cuenta se lleva por cascada el perfil activo.
+    await service.logout(current.accountSessionId);
   }
 
-  clearChildSessionCookie(res);
-  clearParentSessionCookie(res);
+  clearProfileSessionCookie(res);
+  clearAccountSessionCookie(res);
 
   res.status(204).send();
 };
 
 export const handleChangePassword: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", changePasswordSchema);
-  const current = sessionOf(req);
+  const current = accountOf(req);
 
-  await service.changePassword(current.actor, current.sessionId, input);
+  await service.changePassword(actorOf(req), current.accountSessionId, input);
 
   res.status(204).send();
 };
 
 // ---------------------------------------------------------------------------
-// Niño
+// PIN de adulto
 // ---------------------------------------------------------------------------
 
-export const handleListChildProfiles: RequestHandler = async (req, res) => {
-  const children = await service.listSelectableChildren(actorOf(req));
+export const handleChangeAdultPin: RequestHandler = async (req, res) => {
+  const input = validatedPart(req, "body", changeAdultPinSchema);
 
-  res.status(200).json({ children });
+  await service.changeAdultPin(actorOf(req), input);
+
+  res.status(204).send();
 };
 
-export const handleEnterChildProfile: RequestHandler = async (req, res) => {
-  const input = validatedPart(req, "body", enterChildProfileSchema);
-  const current = sessionOf(req);
+/**
+ * Restablecer el PIN con la contraseña.
+ *
+ * Solo exige cuenta, no perfil activo: es la vía por la que un padre bloqueado
+ * fuera de su propio perfil se rescata.
+ */
+export const handleResetAdultPin: RequestHandler = async (req, res) => {
+  const input = validatedPart(req, "body", resetAdultPinSchema);
+  const account = accountOf(req);
 
-  const { child, session } = await service.enterChildProfile(
-    current.actor,
-    current.parentSessionId,
+  await service.resetAdultPin(account.accountUserId, input);
+
+  res.status(204).send();
+};
+
+// ---------------------------------------------------------------------------
+// Rejilla de perfiles
+// ---------------------------------------------------------------------------
+
+export const handleListProfiles: RequestHandler = async (req, res) => {
+  const account = accountOf(req);
+  const profiles = await service.listProfiles(account.accountUserId);
+
+  res.status(200).json({ profiles });
+};
+
+export const handleEnterProfile: RequestHandler = async (req, res) => {
+  const input = validatedPart(req, "body", enterProfileSchema);
+  const account = accountOf(req);
+
+  const { profile, session } = await service.enterProfile(
+    account.accountUserId,
+    account.accountSessionId,
     input,
   );
 
-  setChildSessionCookie(res, session.token, session.expiresAt);
+  setProfileSessionCookie(res, session.token, session.expiresAt);
 
   res.status(200).json({
-    actor: { familyRole: "CHILD" as const, ...child },
-    parentSessionAvailable: true,
+    actor:
+      profile.familyRole === "CHILD"
+        ? {
+            familyRole: "CHILD" as const,
+            id: profile.id,
+            name: profile.name,
+            avatar: profile.avatar,
+            coins: profile.coins ?? 0,
+          }
+        : {
+            familyRole: "PARENT" as const,
+            id: profile.id,
+            name: profile.name,
+            email: profile.email ?? "",
+          },
+    hasAccount: true,
   } satisfies SessionState);
 };
 
-export const handleLeaveChildProfile: RequestHandler = async (req, res) => {
-  const current = sessionOf(req);
+export const handleLeaveProfile: RequestHandler = async (req, res) => {
+  const current = accountOf(req);
 
-  if (current.actor.familyRole !== "CHILD") {
-    throw new ParentSessionRequiredError();
+  if (current.profileSessionId !== undefined) {
+    await service.leaveProfile(current.profileSessionId);
   }
 
-  await service.leaveChildProfile(current.sessionId);
-  clearChildSessionCookie(res);
+  // Borrar la cookie es idempotente: salir sin estar dentro no es un error.
+  clearProfileSessionCookie(res);
 
   res.status(204).send();
 };
+
+// ---------------------------------------------------------------------------
+// PIN de los hijos
+// ---------------------------------------------------------------------------
 
 export const handleSetChildPin: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", setChildPinSchema);
@@ -122,8 +171,6 @@ export const handleSetChildPin: RequestHandler = async (req, res) => {
 };
 
 export const handleUnlockChildProfile: RequestHandler = async (req, res) => {
-  // Express tipa los parámetros como `string | string[]`; una ruta con un solo
-  // segmento nombrado siempre da una cadena.
   const raw = req.params.childProfileId;
   const childProfileId = typeof raw === "string" ? raw : "";
 
@@ -137,10 +184,11 @@ export const handleUnlockChildProfile: RequestHandler = async (req, res) => {
 // ---------------------------------------------------------------------------
 
 /**
- * Responde 200 con o sin sesión.
+ * Responde 200 en las TRES situaciones.
  *
- * No es un endpoint de error: la aplicación web lo llama al cargarse, y que
- * todavía no haya entrado nadie es el caso normal.
+ * No es un endpoint de error: la aplicación web lo llama al cargarse, y tanto
+ * «no ha entrado nadie» como «hay cuenta y falta elegir perfil» son casos
+ * normales que deciden qué pantalla pintar.
  */
 export const handleSessionState: RequestHandler = async (req, res) => {
   res.status(200).json(await buildSessionState(req));
@@ -150,29 +198,42 @@ async function buildSessionState(req: Request): Promise<SessionState> {
   const current = req.session;
 
   if (current === undefined) {
-    return { actor: null, parentSessionAvailable: false };
+    return { actor: null, hasAccount: false };
   }
 
-  if (current.actor.familyRole === "CHILD") {
-    const child = await service.describeChild(current.actor.childProfileId);
-
-    return {
-      actor: child === null ? null : { familyRole: "CHILD", ...child },
-      parentSessionAvailable: current.parentSessionAvailable,
-    };
+  const actor = current.actor;
+  if (actor === undefined) {
+    return accountWithoutProfile();
   }
 
-  const parent = await service.describeParent(current.actor.userId);
+  if (actor.familyRole === "CHILD") {
+    const child = await service.describeChild(actor.childProfileId);
 
-  return {
-    actor: parent === null ? null : { familyRole: "PARENT", ...parent },
-    parentSessionAvailable: false,
-  };
+    return child === null
+      ? accountWithoutProfile()
+      : {
+          actor: {
+            familyRole: "CHILD",
+            id: child.id,
+            name: child.name,
+            avatar: child.avatar,
+            coins: child.coins,
+          },
+          hasAccount: true,
+        };
+  }
+
+  const parent = await service.describeParent(actor.userId);
+
+  return parent === null
+    ? accountWithoutProfile()
+    : {
+        actor: { familyRole: "PARENT", id: parent.id, name: parent.name, email: parent.email },
+        hasAccount: true,
+      };
 }
 
-function parentState(parent: service.ParentSummary): SessionState {
-  return {
-    actor: { familyRole: "PARENT", ...parent },
-    parentSessionAvailable: false,
-  };
+/** Hay cuenta acreditada y todavía no se ha elegido perfil: toca la rejilla. */
+function accountWithoutProfile(): SessionState {
+  return { actor: null, hasAccount: true };
 }

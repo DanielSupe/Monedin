@@ -5,10 +5,13 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { apiRouters, createApp } from "../../src/app.js";
 import { generateSessionToken, hashSessionToken } from "../../src/shared/crypto/session-token.js";
 import { moduleRouter } from "../../src/shared/http/module-router.js";
-import { requireChild, requireParent, sessionOf } from "../../src/shared/http/session.js";
+import { actorOf, requireChild, requireParent } from "../../src/shared/http/session.js";
 import { testPrisma } from "../support/database.js";
 import {
+  ACCOUNT_COOKIE,
   CREDENCIALES,
+  PROFILE_COOKIE,
+  asParent,
   clearsCookie,
   cookieValue,
   createChildProfile,
@@ -27,7 +30,12 @@ function probeRouter(): Router {
 
   // Definida SIN decir nada: tiene que nacer protegida.
   probe.get("/probe/default", (req, res) => {
-    res.status(200).json({ actor: sessionOf(req).actor });
+    res.status(200).json({ actor: actorOf(req) });
+  });
+
+  // Se conforma con la cuenta acreditada: es lo que hace la rejilla.
+  probe.accountGet("/probe/account-only", (_req, res) => {
+    res.status(200).json({ ok: true });
   });
 
   probe.publicGet("/probe/public", (_req, res) => {
@@ -64,8 +72,9 @@ describe("almacenamiento del identificador de sesión", () => {
       name: CREDENCIALES.nombre,
       email: CREDENCIALES.correo,
       password: CREDENCIALES.password,
+      pin: CREDENCIALES.pin,
     });
-    const token = cookieValue(response, "monedin_session") ?? "";
+    const token = cookieValue(response, ACCOUNT_COOKIE) ?? "";
 
     const sesiones = await testPrisma().session.findMany({ select: { tokenHash: true } });
 
@@ -92,8 +101,9 @@ describe("almacenamiento del identificador de sesión", () => {
       name: CREDENCIALES.nombre,
       email: CREDENCIALES.correo,
       password: CREDENCIALES.password,
+      pin: CREDENCIALES.pin,
     });
-    const token = cookieValue(response, "monedin_session") ?? "";
+    const token = cookieValue(response, ACCOUNT_COOKIE) ?? "";
 
     expect(JSON.stringify(response.body)).not.toContain(token);
   }, 60_000);
@@ -105,6 +115,7 @@ describe("banderas de la cookie", () => {
       name: CREDENCIALES.nombre,
       email: CREDENCIALES.correo,
       password: CREDENCIALES.password,
+      pin: CREDENCIALES.pin,
     });
 
     const cookie = (response.headers["set-cookie"] as unknown as string[]).find((c) =>
@@ -124,8 +135,8 @@ describe("caducidad", () => {
 
     const estado = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
 
-    expect(estado.body.actor).toBeNull();
-    expect(clearsCookie(estado, "monedin_session")).toBe(true);
+    expect(estado.body).toEqual({ actor: null, hasAccount: false });
+    expect(clearsCookie(estado, ACCOUNT_COOKIE)).toBe(true);
   }, 60_000);
 
   it("el uso prolonga la caducidad cuando ya ha consumido buena parte de su vida", async () => {
@@ -141,26 +152,26 @@ describe("caducidad", () => {
     expect(sesion.expiresAt.getTime()).toBeGreaterThan(casiCaducada.getTime());
   }, 60_000);
 
-  it("una sesión de niño no sobrevive a la de su padre", async () => {
+  it("un perfil no sobrevive a la caducidad de su cuenta", async () => {
     const { cookies } = await registerParent(app);
     const parentId = await parentIdByEmail(CREDENCIALES.correo);
     const hijo = await createChildProfile(parentId, { pin: "1234" });
 
     const entrada = await request(app)
-      .post(`${API_PREFIX}/auth/child-profiles/enter`)
+      .post(`${API_PREFIX}/auth/profiles/enter`)
       .set("Cookie", cookies)
-      .send({ childProfileId: hijo.id, pin: "1234" });
-    const childCookie = cookieValue(entrada, "monedin_child") ?? "";
+      .send({ profileId: hijo.id, pin: "1234" });
+    const childCookie = cookieValue(entrada, PROFILE_COOKIE) ?? "";
 
-    // Caduca la del padre.
+    // Caduca la sesión de CUENTA.
     await testPrisma().session.updateMany({
-      where: { childProfileId: null },
+      where: { parentSessionId: null },
       data: { expiresAt: new Date(Date.now() - 1000) },
     });
 
     const estado = await request(app)
       .get(`${API_PREFIX}/auth/session`)
-      .set("Cookie", [...cookies, `monedin_child=${childCookie}`]);
+      .set("Cookie", [...cookies, `${PROFILE_COOKIE}=${childCookie}`]);
 
     expect(estado.body.actor).toBeNull();
   }, 120_000);
@@ -172,14 +183,14 @@ describe("revocación", () => {
 
     const cierre = await request(app).post(`${API_PREFIX}/auth/logout`).set("Cookie", cookies);
     expect(cierre.status).toBe(204);
-    expect(clearsCookie(cierre, "monedin_session")).toBe(true);
+    expect(clearsCookie(cierre, ACCOUNT_COOKIE)).toBe(true);
 
     // La fila ya no está...
     expect(await testPrisma().session.count()).toBe(0);
 
     // ...así que presentar de nuevo la misma cookie no vale.
     const estado = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
-    expect(estado.body.actor).toBeNull();
+    expect(estado.body).toEqual({ actor: null, hasAccount: false });
   }, 60_000);
 
   it("una cookie conservada deja de valer en cuanto se revoca", async () => {
@@ -190,18 +201,18 @@ describe("revocación", () => {
 
     const estado = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
 
-    expect(estado.body.actor).toBeNull();
+    expect(estado.body).toEqual({ actor: null, hasAccount: false });
   }, 60_000);
 
-  it("cerrar la del padre se lleva por cascada las de sus niños", async () => {
+  it("cerrar la cuenta se lleva por cascada el perfil activo", async () => {
     const { cookies } = await registerParent(app);
     const parentId = await parentIdByEmail(CREDENCIALES.correo);
     const hijo = await createChildProfile(parentId, { pin: "1234" });
 
     await request(app)
-      .post(`${API_PREFIX}/auth/child-profiles/enter`)
+      .post(`${API_PREFIX}/auth/profiles/enter`)
       .set("Cookie", cookies)
-      .send({ childProfileId: hijo.id, pin: "1234" });
+      .send({ profileId: hijo.id, pin: "1234" });
 
     expect(await testPrisma().session.count()).toBe(2);
 
@@ -218,8 +229,8 @@ describe("revocación", () => {
 });
 
 describe("resolución del actor", () => {
-  it("una sesión de padre da un actor de padre", async () => {
-    const { cookies } = await registerParent(app);
+  it("el perfil del padre activo da un actor de padre", async () => {
+    const { cookies } = await asParent(app);
 
     const response = await request(app).get(`${API_PREFIX}/probe/default`).set("Cookie", cookies);
 
@@ -236,14 +247,14 @@ describe("resolución del actor", () => {
     const hijo = await createChildProfile(parentId, { pin: "1234" });
 
     const entrada = await request(app)
-      .post(`${API_PREFIX}/auth/child-profiles/enter`)
+      .post(`${API_PREFIX}/auth/profiles/enter`)
       .set("Cookie", cookies)
-      .send({ childProfileId: hijo.id, pin: "1234" });
-    const childCookie = cookieValue(entrada, "monedin_child") ?? "";
+      .send({ profileId: hijo.id, pin: "1234" });
+    const childCookie = cookieValue(entrada, PROFILE_COOKIE) ?? "";
 
     const response = await request(app)
       .get(`${API_PREFIX}/probe/default`)
-      .set("Cookie", [...cookies, `monedin_child=${childCookie}`]);
+      .set("Cookie", [...cookies, `${PROFILE_COOKIE}=${childCookie}`]);
 
     expect(response.body.actor).toEqual({
       familyRole: "CHILD",
@@ -269,6 +280,32 @@ describe("las rutas nacen protegidas", () => {
     expect(response.body).not.toHaveProperty("actor");
   });
 
+  it("responde 401 TAMBIÉN con cuenta acreditada y sin perfil elegido", async () => {
+    const { cookies } = await registerParent(app);
+
+    const response = await request(app).get(`${API_PREFIX}/probe/default`).set("Cookie", cookies);
+
+    // Es la frontera del change: la cookie acredita el dispositivo, no concede
+    // poderes. Sin esto, la rejilla se rodearía llamando al endpoint.
+    expect(response.status).toBe(401);
+  }, 60_000);
+
+  it("una ruta de solo cuenta SÍ responde con la cuenta acreditada", async () => {
+    const { cookies } = await registerParent(app);
+
+    const response = await request(app)
+      .get(`${API_PREFIX}/probe/account-only`)
+      .set("Cookie", cookies);
+
+    expect(response.status).toBe(200);
+  }, 60_000);
+
+  it("pero una ruta de solo cuenta sigue exigiendo cuenta", async () => {
+    const response = await request(app).get(`${API_PREFIX}/probe/account-only`);
+
+    expect(response.status).toBe(401);
+  });
+
   it("una ruta declarada pública responde sin sesión", async () => {
     const response = await request(app).get(`${API_PREFIX}/probe/public`);
 
@@ -286,7 +323,7 @@ describe("las rutas nacen protegidas", () => {
     const response = await request(app).get(`${API_PREFIX}/auth/session`);
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ actor: null, parentSessionAvailable: false });
+    expect(response.body).toEqual({ actor: null, hasAccount: false });
   });
 });
 
@@ -297,20 +334,20 @@ describe("guardianes de rol", () => {
     const hijo = await createChildProfile(parentId, { pin: "1234" });
 
     const entrada = await request(app)
-      .post(`${API_PREFIX}/auth/child-profiles/enter`)
+      .post(`${API_PREFIX}/auth/profiles/enter`)
       .set("Cookie", cookies)
-      .send({ childProfileId: hijo.id, pin: "1234" });
-    const childCookie = cookieValue(entrada, "monedin_child") ?? "";
+      .send({ profileId: hijo.id, pin: "1234" });
+    const childCookie = cookieValue(entrada, PROFILE_COOKIE) ?? "";
 
     const response = await request(app)
       .get(`${API_PREFIX}/probe/only-parent`)
-      .set("Cookie", [...cookies, `monedin_child=${childCookie}`]);
+      .set("Cookie", [...cookies, `${PROFILE_COOKIE}=${childCookie}`]);
 
     expect(response.status).toBe(403);
   }, 120_000);
 
   it("un padre en una ruta de niño recibe 403", async () => {
-    const { cookies } = await registerParent(app);
+    const { cookies } = await asParent(app);
 
     const response = await request(app)
       .get(`${API_PREFIX}/probe/only-child`)
@@ -329,8 +366,8 @@ describe("guardianes de rol", () => {
     // Un padre con el rol correcto llamando a una ruta de padre, pero sobre un
     // perfil de otra familia: la comprobación de rol le deja pasar y la del
     // servicio lo rechaza igualmente.
-    const nuestra = await registerParent(app);
-    const otraFamilia = await registerParent(app, { email: "otra@monedin.test" });
+    const nuestra = await asParent(app);
+    const otraFamilia = await asParent(app, { email: "otra@monedin.test" });
     const otroParentId = await parentIdByEmail("otra@monedin.test");
     const suHijo = await createChildProfile(otroParentId, { pin: "1234" });
     expect(otraFamilia.cookies.length).toBeGreaterThan(0);
@@ -349,11 +386,20 @@ describe("estado de la sesión", () => {
     const response = await request(app).get(`${API_PREFIX}/auth/session`);
 
     expect(response.status).toBe(200);
-    expect(response.body.actor).toBeNull();
+    expect(response.body).toEqual({ actor: null, hasAccount: false });
   });
 
-  it("nunca expone credenciales ni el identificador de sesión", async () => {
+  it("con cuenta y sin perfil lo dice, y no es un error", async () => {
     const { cookies } = await registerParent(app);
+
+    const response = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ actor: null, hasAccount: true });
+  }, 60_000);
+
+  it("nunca expone credenciales ni el identificador de sesión", async () => {
+    const { cookies } = await asParent(app);
     const token = cookies.join(";");
 
     const response = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
@@ -373,34 +419,34 @@ describe("estado de la sesión", () => {
     const hijo = await createChildProfile(parentId, { pin: "1234", coins: 77 });
 
     const entrada = await request(app)
-      .post(`${API_PREFIX}/auth/child-profiles/enter`)
+      .post(`${API_PREFIX}/auth/profiles/enter`)
       .set("Cookie", cookies)
-      .send({ childProfileId: hijo.id, pin: "1234" });
-    const childCookie = cookieValue(entrada, "monedin_child") ?? "";
+      .send({ profileId: hijo.id, pin: "1234" });
+    const childCookie = cookieValue(entrada, PROFILE_COOKIE) ?? "";
 
     const estado = await request(app)
       .get(`${API_PREFIX}/auth/session`)
-      .set("Cookie", [...cookies, `monedin_child=${childCookie}`]);
+      .set("Cookie", [...cookies, `${PROFILE_COOKIE}=${childCookie}`]);
 
     expect(estado.body.actor).toMatchObject({ familyRole: "CHILD", coins: 77 });
-    expect(estado.body.parentSessionAvailable).toBe(true);
+    expect(estado.body.hasAccount).toBe(true);
   }, 120_000);
 
-  it("acceder de nuevo como padre descarta el perfil de niño activo", async () => {
+  it("acceder de nuevo descarta el perfil activo", async () => {
     const { cookies } = await registerParent(app);
     const parentId = await parentIdByEmail(CREDENCIALES.correo);
     const hijo = await createChildProfile(parentId, { pin: "1234" });
 
     await request(app)
-      .post(`${API_PREFIX}/auth/child-profiles/enter`)
+      .post(`${API_PREFIX}/auth/profiles/enter`)
       .set("Cookie", cookies)
-      .send({ childProfileId: hijo.id, pin: "1234" });
+      .send({ profileId: hijo.id, pin: "1234" });
 
     const acceso = await login(app, {
       email: CREDENCIALES.correo,
       password: CREDENCIALES.password,
     });
 
-    expect(clearsCookie(acceso, "monedin_child")).toBe(true);
+    expect(clearsCookie(acceso, PROFILE_COOKIE)).toBe(true);
   }, 120_000);
 });

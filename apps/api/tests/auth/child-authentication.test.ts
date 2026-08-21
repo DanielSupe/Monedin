@@ -1,13 +1,23 @@
-import { API_PREFIX, CHILD_MAX_FAILED_ATTEMPTS, ERROR_CODES } from "@monedin/contracts";
+import {
+  API_PREFIX,
+  CHILD_MAX_FAILED_ATTEMPTS,
+  ERROR_CODES,
+  PARENT_PROFILE_ID,
+} from "@monedin/contracts";
 import request from "supertest";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
 import { testPrisma } from "../support/database.js";
 import {
   CREDENCIALES,
+  PROFILE_COOKIE,
+  asParent,
   clearsCookie,
   cookieValue,
   createChildProfile,
+  enterProfile,
+  liveCookies,
+  login,
   parentIdByEmail,
   registerParent,
   resetAuthData,
@@ -17,38 +27,39 @@ const app = createApp();
 
 interface Familia {
   parentId: string;
+  /** Cuenta acreditada + perfil del padre activo. Con esto se opera. */
   cookies: string[];
+  /** Solo la cuenta: el estado de la rejilla. */
+  accountCookies: string[];
   mayor: { id: string; name: string; pin: string };
   menor: { id: string; name: string; pin: string };
 }
 
 /** Un padre con dos hijos, con PIN distinto cada uno. */
 async function crearFamilia(email: string = CREDENCIALES.correo): Promise<Familia> {
-  const { cookies } = await registerParent(app, { email });
-  const parentId = await parentIdByEmail(email);
+  // `asParent` deja la cuenta acreditada Y el perfil del padre activo, que es
+  // lo que hace falta para operar desde `add-profile-selection`.
+  const { cookies, accountCookies, parentId } = await asParent(app, { email });
 
   return {
     parentId,
     cookies,
+    accountCookies,
     mayor: await createChildProfile(parentId, { name: "Mateo", pin: "1234", coins: 120 }),
     menor: await createChildProfile(parentId, { name: "Emma", pin: "5678", coins: 80 }),
   };
 }
 
-/** Cookies de padre + niño, tal como las llevaría el navegador. */
+/** Cookies de cuenta + perfil de niño, tal como las llevaría el navegador. */
 function conNino(familia: Familia, childCookie: string): string[] {
-  return [...familia.cookies, `monedin_child=${childCookie}`];
+  return [...familia.accountCookies, `${PROFILE_COOKIE}=${childCookie}`];
 }
 
-function entrar(
-  cookies: string[],
-  childProfileId: string,
-  pin: string,
-): request.Test {
+function entrar(cookies: string[], profileId: string, pin: string): request.Test {
   return request(app)
-    .post(`${API_PREFIX}/auth/child-profiles/enter`)
+    .post(`${API_PREFIX}/auth/profiles/enter`)
     .set("Cookie", cookies)
-    .send({ childProfileId, pin });
+    .send({ profileId, pin });
 }
 
 beforeEach(async () => {
@@ -67,22 +78,33 @@ describe("listado de perfiles", () => {
     const familia = await crearFamilia();
 
     const response = await request(app)
-      .get(`${API_PREFIX}/auth/child-profiles`)
+      .get(`${API_PREFIX}/auth/profiles`)
       .set("Cookie", familia.cookies);
 
     expect(response.status).toBe(200);
-    expect(response.body.children.map((c: { name: string }) => c.name)).toEqual(["Mateo", "Emma"]);
+    // La rejilla lleva al padre por delante: es un perfil mas.
+    expect(response.body.profiles.map((c: { name: string }) => c.name)).toEqual([
+      CREDENCIALES.nombre,
+      "Mateo",
+      "Emma",
+    ]);
   }, 60_000);
 
   it("solo expone nombre y avatar, nada más", async () => {
     const familia = await crearFamilia();
 
     const response = await request(app)
-      .get(`${API_PREFIX}/auth/child-profiles`)
+      .get(`${API_PREFIX}/auth/profiles`)
       .set("Cookie", familia.cookies);
 
-    for (const child of response.body.children) {
-      expect(Object.keys(child).sort()).toEqual(["avatar", "id", "locked", "name"]);
+    for (const child of response.body.profiles) {
+      expect(Object.keys(child).sort()).toEqual([
+        "avatar",
+        "familyRole",
+        "id",
+        "locked",
+        "name",
+      ]);
     }
     // Ni el saldo ni el PIN asoman antes de entrar.
     expect(JSON.stringify(response.body)).not.toContain("coins");
@@ -92,7 +114,7 @@ describe("listado de perfiles", () => {
   it("sin sesión de padre no hay listado", async () => {
     await crearFamilia();
 
-    const response = await request(app).get(`${API_PREFIX}/auth/child-profiles`);
+    const response = await request(app).get(`${API_PREFIX}/auth/profiles`);
 
     expect(response.status).toBe(401);
   }, 60_000);
@@ -105,10 +127,13 @@ describe("listado de perfiles", () => {
     });
 
     const response = await request(app)
-      .get(`${API_PREFIX}/auth/child-profiles`)
+      .get(`${API_PREFIX}/auth/profiles`)
       .set("Cookie", familia.cookies);
 
-    expect(response.body.children.map((c: { name: string }) => c.name)).toEqual(["Mateo"]);
+    expect(response.body.profiles.map((c: { name: string }) => c.name)).toEqual([
+      CREDENCIALES.nombre,
+      "Mateo",
+    ]);
   }, 60_000);
 
   it("y tampoco se puede entrar a él indicando su identificador", async () => {
@@ -136,7 +161,7 @@ describe("entrada con PIN", () => {
       name: "Mateo",
       coins: 120,
     });
-    expect(cookieValue(response, "monedin_child")).toBeTruthy();
+    expect(cookieValue(response, PROFILE_COOKIE)).toBeTruthy();
   }, 60_000);
 
   it("con el PIN equivocado se rechaza y la sesión del padre queda intacta", async () => {
@@ -145,7 +170,7 @@ describe("entrada con PIN", () => {
     const response = await entrar(familia.cookies, familia.mayor.id, "9999");
 
     expect(response.status).toBe(401);
-    expect(cookieValue(response, "monedin_child")).toBeUndefined();
+    expect(cookieValue(response, PROFILE_COOKIE)).toBeUndefined();
 
     // El padre sigue dentro.
     const estado = await request(app)
@@ -270,11 +295,11 @@ describe("bloqueo del perfil", () => {
     await fallarPin(familia, familia.mayor.id, CHILD_MAX_FAILED_ATTEMPTS);
 
     const listado = await request(app)
-      .get(`${API_PREFIX}/auth/child-profiles`)
+      .get(`${API_PREFIX}/auth/profiles`)
       .set("Cookie", familia.cookies);
 
-    const mayor = listado.body.children.find((c: { id: string }) => c.id === familia.mayor.id);
-    const menor = listado.body.children.find((c: { id: string }) => c.id === familia.menor.id);
+    const mayor = listado.body.profiles.find((c: { id: string }) => c.id === familia.mayor.id);
+    const menor = listado.body.profiles.find((c: { id: string }) => c.id === familia.menor.id);
 
     expect(mayor.locked).toBe(true);
     expect(menor.locked).toBe(false);
@@ -282,23 +307,24 @@ describe("bloqueo del perfil", () => {
 });
 
 describe("suspensión de la sesión del padre", () => {
-  it("volver al padre no pide la contraseña", async () => {
+  it("salir del perfil de un nino devuelve a la rejilla, sin pedir la contrasena", async () => {
     const familia = await crearFamilia();
     const entrada = await entrar(familia.cookies, familia.mayor.id, familia.mayor.pin);
-    const childCookie = cookieValue(entrada, "monedin_child") ?? "";
+    const childCookie = cookieValue(entrada, PROFILE_COOKIE) ?? "";
 
     const salida = await request(app)
-      .post(`${API_PREFIX}/auth/child-profiles/leave`)
+      .post(`${API_PREFIX}/auth/profiles/leave`)
       .set("Cookie", conNino(familia, childCookie));
 
     expect(salida.status).toBe(204);
-    expect(clearsCookie(salida, "monedin_child")).toBe(true);
+    expect(clearsCookie(salida, PROFILE_COOKIE)).toBe(true);
 
-    // Y el padre está de vuelta, sin reescribir nada.
+    // Se vuelve a la REJILLA, no al padre: encontrarse siendo el padre sin
+    // haber tecleado nada es justo el agujero que este change cierra.
     const estado = await request(app)
       .get(`${API_PREFIX}/auth/session`)
-      .set("Cookie", familia.cookies);
-    expect(estado.body.actor.familyRole).toBe("PARENT");
+      .set("Cookie", familia.accountCookies);
+    expect(estado.body).toEqual({ actor: null, hasAccount: true });
   }, 60_000);
 
   it("cambiar de un hijo a otro pide el PIN del segundo", async () => {
@@ -315,7 +341,7 @@ describe("suspensión de la sesión del padre", () => {
   it("cerrar la sesión del padre se lleva el acceso al perfil del niño", async () => {
     const familia = await crearFamilia();
     const entrada = await entrar(familia.cookies, familia.mayor.id, familia.mayor.pin);
-    const childCookie = cookieValue(entrada, "monedin_child") ?? "";
+    const childCookie = cookieValue(entrada, PROFILE_COOKIE) ?? "";
 
     await request(app).post(`${API_PREFIX}/auth/logout`).set("Cookie", familia.cookies);
 
@@ -329,21 +355,21 @@ describe("suspensión de la sesión del padre", () => {
   it("una cookie de niño sin la de su padre no vale nada", async () => {
     const familia = await crearFamilia();
     const entrada = await entrar(familia.cookies, familia.mayor.id, familia.mayor.pin);
-    const childCookie = cookieValue(entrada, "monedin_child") ?? "";
+    const childCookie = cookieValue(entrada, PROFILE_COOKIE) ?? "";
 
     const estado = await request(app)
       .get(`${API_PREFIX}/auth/session`)
-      .set("Cookie", [`monedin_child=${childCookie}`]);
+      .set("Cookie", [`${PROFILE_COOKIE}=${childCookie}`]);
 
     expect(estado.body.actor).toBeNull();
     // Y se retira, para no dejar una cookie que confunde al front.
-    expect(clearsCookie(estado, "monedin_child")).toBe(true);
+    expect(clearsCookie(estado, PROFILE_COOKIE)).toBe(true);
   }, 60_000);
 
   it("una cookie de niño de OTRA sesión de padre no vale", async () => {
     const familia = await crearFamilia();
     const entrada = await entrar(familia.cookies, familia.mayor.id, familia.mayor.pin);
-    const childCookie = cookieValue(entrada, "monedin_child") ?? "";
+    const childCookie = cookieValue(entrada, PROFILE_COOKIE) ?? "";
 
     // El padre entra de nuevo: sesión distinta, la de niño ya no cuelga de ella.
     const otroAcceso = await request(app)
@@ -353,28 +379,39 @@ describe("suspensión de la sesión del padre", () => {
 
     const estado = await request(app)
       .get(`${API_PREFIX}/auth/session`)
-      .set("Cookie", [...nuevasCookies, `monedin_child=${childCookie}`]);
+      .set("Cookie", [...nuevasCookies, `${PROFILE_COOKIE}=${childCookie}`]);
 
-    expect(estado.body.actor.familyRole).toBe("PARENT");
+    // La cuenta nueva vale; el perfil que colgaba de la anterior, no.
+    expect(estado.body).toEqual({ actor: null, hasAccount: true });
   }, 120_000);
 });
 
 describe("frontera entre el niño y su padre", () => {
   async function sesionDeNino(familia: Familia): Promise<string[]> {
     const entrada = await entrar(familia.cookies, familia.mayor.id, familia.mayor.pin);
-    return conNino(familia, cookieValue(entrada, "monedin_child") ?? "");
+    return conNino(familia, cookieValue(entrada, PROFILE_COOKIE) ?? "");
   }
 
   it("una sesión de niño no puede ejecutar operaciones de padre", async () => {
     const familia = await crearFamilia();
     const nino = await sesionDeNino(familia);
 
-    const listado = await request(app)
-      .get(`${API_PREFIX}/auth/child-profiles`)
-      .set("Cookie", nino);
+    const cambio = await request(app)
+      .post(`${API_PREFIX}/auth/pin`)
+      .set("Cookie", nino)
+      .send({ currentPin: CREDENCIALES.pin, newPin: "1111" });
 
-    expect(listado.status).toBe(403);
-    expect(listado.body.code).toBe(ERROR_CODES.FORBIDDEN);
+    expect(cambio.status).toBe(403);
+    expect(cambio.body.code).toBe(ERROR_CODES.FORBIDDEN);
+  }, 60_000);
+
+  it("pero SI puede ver la rejilla: la necesita para volver", async () => {
+    const familia = await crearFamilia();
+    const nino = await sesionDeNino(familia);
+
+    const listado = await request(app).get(`${API_PREFIX}/auth/profiles`).set("Cookie", nino);
+
+    expect(listado.status).toBe(200);
   }, 60_000);
 
   it("una sesión de niño no puede cambiar ningún PIN, ni el suyo", async () => {
@@ -415,23 +452,29 @@ describe("frontera entre el niño y su padre", () => {
     expect(JSON.stringify(estado.body)).not.toContain(familia.menor.id);
   }, 60_000);
 
-  it("y dice que hay una sesión de padre esperando detrás", async () => {
+  it("y dice que la cuenta sigue acreditada detras", async () => {
     const familia = await crearFamilia();
     const nino = await sesionDeNino(familia);
 
     const estado = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", nino);
 
-    expect(estado.body.parentSessionAvailable).toBe(true);
+    // Es lo que permite volver a la rejilla sin reescribir la contrasena.
+    expect(estado.body.hasAccount).toBe(true);
   }, 60_000);
 
-  it("un padre no puede llamar a la salida de perfil de niño", async () => {
+  it("salir de un perfil es simetrico: el padre tambien sale del suyo", async () => {
     const familia = await crearFamilia();
 
     const response = await request(app)
-      .post(`${API_PREFIX}/auth/child-profiles/leave`)
+      .post(`${API_PREFIX}/auth/profiles/leave`)
       .set("Cookie", familia.cookies);
 
-    expect(response.status).toBe(403);
+    expect(response.status).toBe(204);
+
+    const estado = await request(app)
+      .get(`${API_PREFIX}/auth/session`)
+      .set("Cookie", familia.accountCookies);
+    expect(estado.body).toEqual({ actor: null, hasAccount: true });
   }, 60_000);
 });
 
@@ -470,19 +513,33 @@ describe("gestión del PIN por el padre", () => {
 
   it("cambiar el PIN echa fuera a quien estuviera dentro", async () => {
     const familia = await crearFamilia();
-    const entrada = await entrar(familia.cookies, familia.mayor.id, familia.mayor.pin);
-    const childCookie = cookieValue(entrada, "monedin_child") ?? "";
 
-    await request(app)
+    // El nino entra en la tablet de casa.
+    const entrada = await entrar(familia.accountCookies, familia.mayor.id, familia.mayor.pin);
+    const childCookie = cookieValue(entrada, PROFILE_COOKIE) ?? "";
+
+    // La madre cambia el PIN desde OTRO dispositivo. Tiene que ser otro: en el
+    // mismo, entrar al perfil del nino ya habria retirado el suyo, porque nunca
+    // hay dos perfiles activos sobre la misma sesion de cuenta.
+    const otroDispositivo = await login(app, {
+      email: CREDENCIALES.correo,
+      password: CREDENCIALES.password,
+    });
+    const suCuenta = liveCookies(otroDispositivo);
+    const suPerfil = await enterProfile(app, suCuenta, PARENT_PROFILE_ID, CREDENCIALES.pin);
+
+    const cambio = await request(app)
       .post(`${API_PREFIX}/auth/child-profiles/pin`)
-      .set("Cookie", familia.cookies)
+      .set("Cookie", suPerfil)
       .send({ childProfileId: familia.mayor.id, pin: "4321" });
+    expect(cambio.status).toBe(204);
 
+    // Y al nino lo echa: su perfil deja de valer.
     const estado = await request(app)
       .get(`${API_PREFIX}/auth/session`)
       .set("Cookie", conNino(familia, childCookie));
 
-    expect(estado.body.actor.familyRole).toBe("PARENT");
+    expect(estado.body).toEqual({ actor: null, hasAccount: true });
   }, 120_000);
 
   it("un padre no puede tocar el PIN de un hijo ajeno", async () => {

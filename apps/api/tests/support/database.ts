@@ -84,7 +84,7 @@ export async function createParent(
     data: {
       name: overrides.name ?? "Padre de prueba",
       email: overrides.email ?? `padre-${unique}@monedin.test`,
-      passwordHash: "hash-de-prueba",
+      passwordHash: "hash-de-prueba", pinHash: "hash-de-prueba",
     },
   });
 

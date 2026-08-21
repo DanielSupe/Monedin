@@ -40,6 +40,14 @@ export const registerParentSchema = z.object({
     .max(NAME_MAX_LENGTH, "El nombre es demasiado largo."),
   email: emailSchema,
   password: passwordSchema,
+  /**
+   * PIN de adulto, pedido ya en el registro.
+   *
+   * Se pide aquí y no después para no tener que contemplar en todo el sistema
+   * el estado «cuenta sin PIN»: un campo más una sola vez sale más barato. Ver
+   * la decisión 4 del design de `add-profile-selection`.
+   */
+  pin: pinSchema,
 });
 
 export type RegisterParentInput = z.infer<typeof registerParentSchema>;
@@ -61,12 +69,49 @@ export const changePasswordSchema = z.object({
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
+/** Cambio del PIN de adulto indicando el actual. */
+export const changeAdultPinSchema = z.object({
+  currentPin: pinSchema,
+  newPin: pinSchema,
+});
+
+export type ChangeAdultPinInput = z.infer<typeof changeAdultPinSchema>;
+
+/**
+ * Restablecimiento del PIN de adulto con la contraseña.
+ *
+ * Es la vía de recuperación, y existe porque el PIN se usa a diario y la
+ * contraseña casi nunca: olvidar el primero es mucho más probable.
+ */
+export const resetAdultPinSchema = z.object({
+  password: z.string().min(1, "La contraseña es obligatoria."),
+  newPin: pinSchema,
+});
+
+export type ResetAdultPinInput = z.infer<typeof resetAdultPinSchema>;
+
 export const enterChildProfileSchema = z.object({
   childProfileId: z.string().min(1),
   pin: pinSchema,
 });
 
 export type EnterChildProfileInput = z.infer<typeof enterChildProfileSchema>;
+
+/**
+ * Entrada a un perfil de la rejilla.
+ *
+ * `profileId` es el del hijo, o `PARENT_PROFILE_ID` para el perfil del padre.
+ * Un único endpoint para los dos: desde la rejilla son perfiles iguales, y
+ * tener dos caminos invitaría a proteger uno y olvidar el otro.
+ */
+export const PARENT_PROFILE_ID = "parent" as const;
+
+export const enterProfileSchema = z.object({
+  profileId: z.string().min(1),
+  pin: pinSchema,
+});
+
+export type EnterProfileInput = z.infer<typeof enterProfileSchema>;
 
 export const setChildPinSchema = z.object({
   childProfileId: z.string().min(1),
@@ -94,6 +139,23 @@ export const childActorSchema = z.object({
   coins: z.number().int(),
 });
 
+/** Un perfil tal como se ofrece en la rejilla, antes de entrar. */
+export const selectableProfileSchema = z.object({
+  /** El del hijo, o `PARENT_PROFILE_ID` para el del padre. */
+  id: z.string(),
+  familyRole: z.enum(["PARENT", "CHILD"]),
+  name: z.string(),
+  avatar: z.string(),
+  locked: z.boolean(),
+});
+
+export const selectableProfilesSchema = z.object({
+  profiles: z.array(selectableProfileSchema),
+});
+
+export type SelectableProfile = z.infer<typeof selectableProfileSchema>;
+export type SelectableProfiles = z.infer<typeof selectableProfilesSchema>;
+
 export const sessionActorSchema = z.discriminatedUnion("familyRole", [
   parentActorSchema,
   childActorSchema,
@@ -102,16 +164,21 @@ export const sessionActorSchema = z.discriminatedUnion("familyRole", [
 export type SessionActor = z.infer<typeof sessionActorSchema>;
 
 /**
- * Respuesta del estado de sesión.
+ * Respuesta del estado de sesión. Responde 200 SIEMPRE.
  *
- * Responde 200 SIEMPRE, con o sin sesión: la aplicación web la llama al
- * arrancar para saber qué pintar, y que nadie haya entrado todavía es el caso
- * normal, no un error.
+ * Distingue TRES situaciones, no dos, y la aplicación web las necesita para
+ * saber qué pintar:
+ *
+ *   hasAccount false, actor null   ->  pantalla de acceso
+ *   hasAccount true,  actor null   ->  rejilla de perfiles
+ *   hasAccount true,  actor        ->  la aplicación, como ese perfil
+ *
+ * Ver la decisión 2 del design de `add-profile-selection`.
  */
 export const sessionStateSchema = z.object({
   actor: sessionActorSchema.nullable(),
-  /** Si hay una sesión de padre esperando detrás de una de niño. */
-  parentSessionAvailable: z.boolean(),
+  /** Si el dispositivo está acreditado para una cuenta. */
+  hasAccount: z.boolean(),
 });
 
 export type SessionState = z.infer<typeof sessionStateSchema>;

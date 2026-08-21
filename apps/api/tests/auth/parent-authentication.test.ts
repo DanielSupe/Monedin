@@ -4,7 +4,9 @@ import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "../../src/app.js";
 import { testPrisma } from "../support/database.js";
 import {
+  ACCOUNT_COOKIE,
   CREDENCIALES,
+  asParent,
   cookieValue,
   login,
   parentIdByEmail,
@@ -31,16 +33,37 @@ describe("registro de un padre", () => {
       name: CREDENCIALES.nombre,
       email: CREDENCIALES.correo,
       password: CREDENCIALES.password,
+      pin: CREDENCIALES.pin,
     });
 
     expect(response.status).toBe(201);
-    expect(response.body.actor).toMatchObject({
-      familyRole: "PARENT",
+    // La cuenta queda acreditada: no hay que acceder acto seguido.
+    expect(cookieValue(response, ACCOUNT_COOKIE)).toBeTruthy();
+    // Pero NO deja perfil activo: se llega a la rejilla, como en cualquier
+    // apertura posterior.
+    expect(response.body).toEqual({ actor: null, hasAccount: true });
+  });
+
+  it("exige el PIN de adulto al registrarse", async () => {
+    const response = await request(app).post(`${API_PREFIX}/auth/register`).send({
       name: CREDENCIALES.nombre,
       email: CREDENCIALES.correo,
+      password: CREDENCIALES.password,
     });
-    // Con la sesión ya puesta: no hay que acceder acto seguido.
-    expect(cookieValue(response, "monedin_session")).toBeTruthy();
+
+    expect(response.status).toBe(422);
+    expect(response.body.details.map((d: { field: string }) => d.field)).toContain("pin");
+  });
+
+  it("rechaza un PIN que no son cuatro dígitos", async () => {
+    const response = await request(app).post(`${API_PREFIX}/auth/register`).send({
+      name: CREDENCIALES.nombre,
+      email: CREDENCIALES.correo,
+      password: CREDENCIALES.password,
+      pin: "12",
+    });
+
+    expect(response.status).toBe(422);
   });
 
   it("rechaza un correo ya registrado", async () => {
@@ -50,6 +73,7 @@ describe("registro de un padre", () => {
       name: "Otro",
       email: CREDENCIALES.correo,
       password: "otra-contraseña-decente",
+      pin: CREDENCIALES.pin,
     });
 
     expect(response.status).toBe(409);
@@ -63,6 +87,7 @@ describe("registro de un padre", () => {
       name: "Otra",
       email: "lucia@monedin.test",
       password: "otra-contraseña-decente",
+      pin: CREDENCIALES.pin,
     });
 
     expect(response.status).toBe(409);
@@ -73,6 +98,7 @@ describe("registro de un padre", () => {
       name: CREDENCIALES.nombre,
       email: CREDENCIALES.correo,
       password: "corta",
+      pin: CREDENCIALES.pin,
     });
 
     expect(response.status).toBe(422);
@@ -84,8 +110,8 @@ describe("registro de un padre", () => {
   it("no existe ninguna vía pública de registro de niños", async () => {
     // Se recorren los métodos públicos del router de auth: ninguno crea perfiles.
     const intentos = await Promise.all([
-      request(app).post(`${API_PREFIX}/auth/child-profiles`).send({ name: "Colado", pin: "1234" }),
-      request(app).post(`${API_PREFIX}/auth/child-profiles/enter`).send({ childProfileId: "x", pin: "1234" }),
+      request(app).post(`${API_PREFIX}/auth/profiles`).send({ name: "Colado", pin: "1234" }),
+      request(app).post(`${API_PREFIX}/auth/profiles/enter`).send({ profileId: "x", pin: "1234" }),
     ]);
 
     for (const intento of intentos) {
@@ -107,8 +133,9 @@ describe("acceso con correo y contraseña", () => {
     });
 
     expect(response.status).toBe(200);
-    expect(response.body.actor.familyRole).toBe("PARENT");
-    expect(cookieValue(response, "monedin_session")).toBeTruthy();
+    // Acredita la cuenta y manda a la rejilla; todavía no es nadie.
+    expect(response.body).toEqual({ actor: null, hasAccount: true });
+    expect(cookieValue(response, ACCOUNT_COOKIE)).toBeTruthy();
   });
 
   it("con la contraseña equivocada rechaza sin decir cuál de los dos falla", async () => {
@@ -294,8 +321,19 @@ describe("bloqueo por intentos fallidos", () => {
 describe("cambio de contraseña", () => {
   const NUEVA = "otra-contraseña-bien-larga";
 
+  it("no se puede cambiar solo con la cuenta, sin perfil elegido", async () => {
+    const { accountCookies } = await asParent(app);
+
+    const cambio = await request(app)
+      .post(`${API_PREFIX}/auth/password`)
+      .set("Cookie", accountCookies)
+      .send({ currentPassword: CREDENCIALES.password, newPassword: NUEVA });
+
+    expect(cambio.status).toBe(401);
+  }, 60_000);
+
   it("con la actual correcta funciona y conserva la sesión que lo pidió", async () => {
-    const { cookies } = await registerParent(app);
+    const { cookies } = await asParent(app);
 
     const cambio = await request(app)
       .post(`${API_PREFIX}/auth/password`)
@@ -307,6 +345,7 @@ describe("cambio de contraseña", () => {
     // La sesión que hizo el cambio sigue valiendo.
     const estado = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
     expect(estado.body.actor?.familyRole).toBe("PARENT");
+    expect(estado.body.hasAccount).toBe(true);
 
     // Y la contraseña nueva es la que sirve.
     await expect(
@@ -315,7 +354,7 @@ describe("cambio de contraseña", () => {
   }, 60_000);
 
   it("las demás sesiones dejan de valer", async () => {
-    const { cookies: primera } = await registerParent(app);
+    const { cookies: primera } = await asParent(app);
     const otra = await login(app, {
       email: CREDENCIALES.correo,
       password: CREDENCIALES.password,
@@ -328,11 +367,11 @@ describe("cambio de contraseña", () => {
       .send({ currentPassword: CREDENCIALES.password, newPassword: NUEVA });
 
     const estadoOtra = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", segunda);
-    expect(estadoOtra.body.actor).toBeNull();
+    expect(estadoOtra.body).toEqual({ actor: null, hasAccount: false });
   }, 60_000);
 
   it("con la actual incorrecta se rechaza y la anterior sigue valiendo", async () => {
-    const { cookies } = await registerParent(app);
+    const { cookies } = await asParent(app);
 
     const cambio = await request(app)
       .post(`${API_PREFIX}/auth/password`)

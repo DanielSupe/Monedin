@@ -1,22 +1,31 @@
-import type { Router as ExpressRouter } from "express";
-import { moduleRouter } from "../../shared/http/module-router.js";
-import { requireChild, requireParent } from "../../shared/http/session.js";
-import { validate } from "../../shared/http/validate.js";
 import {
+  changeAdultPinSchema,
   changePasswordSchema,
-  enterChildProfileSchema,
+  enterProfileSchema,
   loginParentSchema,
   registerParentSchema,
+  resetAdultPinSchema,
   setChildPinSchema,
 } from "@monedin/contracts";
+import type { Router as ExpressRouter } from "express";
+import { moduleRouter } from "../../shared/http/module-router.js";
+import { requireParent } from "../../shared/http/session.js";
+import { validate } from "../../shared/http/validate.js";
 import * as controller from "./auth.controller.js";
 
 /**
  * Monta las rutas del módulo. Cero lógica.
  *
- * Las tres primeras son PÚBLICAS y se declaran como tales una a una: registro y
- * acceso no pueden exigir sesión, y el estado de sesión es lo que la aplicación
- * web llama antes de tener ninguna. Todo lo demás hereda la protección.
+ * Hay TRES niveles de protección aquí, y la diferencia importa:
+ *
+ *   públicas          registro, acceso, cierre y estado. No hay ni cuenta.
+ *   `requireAccount`  la rejilla: listar perfiles y entrar a uno. Son los pasos
+ *                     previos a ser alguien, así que no pueden exigir actor.
+ *   por defecto       todo lo demás exige ACTOR, es decir, perfil ya elegido.
+ *
+ * Que `requireAccount` esté en tres rutas contadas y no sea el criterio general
+ * es lo que impide rodear la rejilla. Ver la decisión 2 del design de
+ * `add-profile-selection`.
  */
 const auth = moduleRouter();
 
@@ -38,7 +47,27 @@ auth.publicGet("/auth/session", controller.handleSessionState);
 // seguir borrando las cookies en lugar de responder 401.
 auth.publicPost("/auth/logout", controller.handleLogout);
 
-// --- Requieren sesión de padre ----------------------------------------------
+// --- Solo cuenta acreditada: la rejilla -------------------------------------
+
+auth.accountGet("/auth/profiles", controller.handleListProfiles);
+
+auth.accountPost(
+  "/auth/profiles/enter",
+  validate({ body: enterProfileSchema }),
+  controller.handleEnterProfile,
+);
+
+auth.accountPost("/auth/profiles/leave", controller.handleLeaveProfile);
+
+// Restablecer el PIN con la contraseña rescata a un padre bloqueado fuera de su
+// propio perfil: exigirle perfil activo lo dejaría encerrado.
+auth.accountPost(
+  "/auth/pin/reset",
+  validate({ body: resetAdultPinSchema }),
+  controller.handleResetAdultPin,
+);
+
+// --- Exigen perfil de padre activo ------------------------------------------
 
 auth.post(
   "/auth/password",
@@ -47,13 +76,11 @@ auth.post(
   controller.handleChangePassword,
 );
 
-auth.get("/auth/child-profiles", requireParent, controller.handleListChildProfiles);
-
 auth.post(
-  "/auth/child-profiles/enter",
+  "/auth/pin",
   requireParent,
-  validate({ body: enterChildProfileSchema }),
-  controller.handleEnterChildProfile,
+  validate({ body: changeAdultPinSchema }),
+  controller.handleChangeAdultPin,
 );
 
 auth.post(
@@ -68,7 +95,3 @@ auth.post(
   requireParent,
   controller.handleUnlockChildProfile,
 );
-
-// --- Requiere sesión de niño ------------------------------------------------
-
-auth.post("/auth/child-profiles/leave", requireChild, controller.handleLeaveChildProfile);

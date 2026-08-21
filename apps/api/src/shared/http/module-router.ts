@@ -1,5 +1,5 @@
 import { Router, type RequestHandler, type Router as ExpressRouter } from "express";
-import { markPublic, requireSessionUnlessPublic } from "./session.js";
+import { markAccountOnly, markPublic, requireSessionUnlessPublic } from "./session.js";
 
 /**
  * Router de módulo con la protección puesta.
@@ -31,6 +31,17 @@ export interface ModuleRouter {
   /** Rutas accesibles sin sesión. Se declaran una a una, a conciencia. */
   publicGet(path: string, ...handlers: RequestHandler[]): void;
   publicPost(path: string, ...handlers: RequestHandler[]): void;
+
+  /**
+   * Rutas que se conforman con la CUENTA acreditada, sin perfil elegido.
+   *
+   * Son las de la rejilla: listar perfiles y entrar a uno son justo los pasos
+   * previos a ser alguien, así que no pueden exigir actor. Se declaran una a
+   * una porque cada una es un hueco por el que se opera sin haber elegido
+   * perfil.
+   */
+  accountGet(path: string, ...handlers: RequestHandler[]): void;
+  accountPost(path: string, ...handlers: RequestHandler[]): void;
 }
 
 export function moduleRouter(): ModuleRouter {
@@ -47,6 +58,12 @@ export function moduleRouter(): ModuleRouter {
     ...handlers,
   ];
 
+  const accountChain = (handlers: RequestHandler[]): RequestHandler[] => [
+    markAccountOnly,
+    requireSessionUnlessPublic,
+    ...handlers,
+  ];
+
   return {
     router,
 
@@ -57,5 +74,8 @@ export function moduleRouter(): ModuleRouter {
 
     publicGet: (path, ...handlers) => router.get(path, ...publicChain(handlers)),
     publicPost: (path, ...handlers) => router.post(path, ...publicChain(handlers)),
+
+    accountGet: (path, ...handlers) => router.get(path, ...accountChain(handlers)),
+    accountPost: (path, ...handlers) => router.post(path, ...accountChain(handlers)),
   };
 }

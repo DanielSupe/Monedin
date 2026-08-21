@@ -63,11 +63,21 @@ model User {
   passwordHash String
   image        String?
 
+  /// PIN de adulto. La contrasena vincula un dispositivo; el PIN activa el
+  /// perfil en el dia a dia. Ver la decision 3 del design de
+  /// add-profile-selection.
+  pinHash String
+
   /// Bloqueo por intentos fallidos. Ver la decision 4 del design de
   /// add-authentication: se bloquea por identidad, no por direccion IP, porque
   /// en una casa todos comparten IP.
   failedLoginAttempts Int       @default(0)
   lockedUntil         DateTime?
+
+  /// Bloqueo del PIN, SEPARADO del de la contrasena. Un nino aporreando el PIN
+  /// de su madre no puede dejarla sin poder entrar con su contrasena.
+  failedPinAttempts Int       @default(0)
+  pinLockedUntil    DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -258,14 +268,20 @@ model CoinTransaction {
 // Sesiones
 // ---------------------------------------------------------------------------
 
-/// Una sesion activa.
+/// Una sesion activa. Hay DOS niveles, y la fila dice cual es por su forma:
 ///
-/// Guarda el HASH del identificador, nunca el identificador. Quien lea esta
-/// tabla entera no puede suplantar a nadie con lo que encuentre. Ver la
-/// decision 3 del design de add-authentication.
+///   parentSessionId NULL      -> SESION DE CUENTA. Acredita que el dispositivo
+///                                pertenece a esta cuenta. NO da actor.
+///   parentSessionId NOT NULL  -> PERFIL ACTIVO, colgando de esa cuenta.
+///     childProfileId NULL       ... el perfil del PADRE
+///     childProfileId NOT NULL   ... el perfil de ese hijo
 ///
-/// Una sesion de nino nace de una sesion de padre y guarda cual: si la del
-/// padre cae, la del nino deja de valer sin tener que ir a buscarla.
+/// Que la cookie de cuenta no de poderes es lo que hace que la rejilla sea una
+/// frontera y no una pantalla que se rodea llamando al endpoint. Ver la
+/// decision 1 del design de add-profile-selection.
+///
+/// Guarda el HASH del identificador, nunca el identificador: quien lea esta
+/// tabla entera no puede suplantar a nadie con lo que encuentre.
 model Session {
   id String @id @default(cuid(2))
 
@@ -277,11 +293,12 @@ model Session {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  /// Presente solo en sesiones de nino. Nulo = sesion de padre.
+  /// En un perfil activo: nulo es el perfil del padre. En una sesion de
+  /// cuenta: siempre nulo.
   childProfileId String?
   childProfile   ChildProfile? @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
 
-  /// De que sesion de padre nacio esta sesion de nino. Nulo en las de padre.
+  /// De que sesion de cuenta cuelga este perfil. Nulo en las de cuenta.
   parentSessionId String?
   parentSession   Session?  @relation("ChildSessions", fields: [parentSessionId], references: [id], onDelete: Cascade)
   childSessions   Session[] @relation("ChildSessions")

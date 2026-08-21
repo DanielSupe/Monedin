@@ -4,7 +4,12 @@ import {
   CHILD_SESSION_HOURS,
   PARENT_LOCKOUT_MINUTES,
   PARENT_MAX_FAILED_ATTEMPTS,
+  PARENT_PIN_LOCKOUT_MINUTES,
+  PARENT_PIN_MAX_FAILED_ATTEMPTS,
+  PARENT_PROFILE_ID,
   PARENT_SESSION_DAYS,
+  resolveAvatarKey,
+  type AvatarKey,
 } from "@monedin/contracts";
 import type { Actor } from "../../shared/actor.js";
 import { hashCredential, verifyCredential } from "../../shared/crypto/credentials.js";
@@ -21,9 +26,12 @@ import {
 /**
  * Reglas de negocio y autorización del módulo `auth`.
  *
- * Los métodos que operan sobre datos de una familia reciben el actor como
- * primer argumento, como todos. Los de acceso (registro, login) no lo reciben
- * porque su cometido es precisamente crear uno: son públicos por definición.
+ * Aquí conviven dos niveles: acreditar la CUENTA con la contraseña, y activar
+ * un PERFIL con su PIN. La rejilla de perfiles vive en este módulo y no en uno
+ * aparte porque listar, entrar y salir de un perfil es comportamiento de
+ * sesión: un módulo separado necesitaría exactamente este repositorio.
+ *
+ * Ver la decisión 1 del design de `add-profile-selection`.
  */
 
 // ---------------------------------------------------------------------------
@@ -49,11 +57,10 @@ function activeLockout(lockedUntil: Date | null): Date | undefined {
 }
 
 /**
- * Iguala el coste de un intento contra una cuenta inexistente.
+ * Iguala el coste de un intento contra algo que no existe.
  *
- * Sin esto, un correo no registrado respondería mucho antes que uno registrado
- * —no habría hash que calcular— y eso permite enumerar cuentas cronometrando.
- * Se hashea contra un valor de descarte para pagar el mismo precio.
+ * Sin esto, un correo o un perfil inexistentes responderían mucho antes —no
+ * habría hash que calcular— y eso permite enumerarlos cronometrando.
  */
 const DUMMY_HASH_PROMISE = hashCredential("credencial-inexistente-para-igualar-tiempos");
 
@@ -62,7 +69,7 @@ async function burnEquivalentTime(candidate: string): Promise<void> {
 }
 
 // ---------------------------------------------------------------------------
-// Padre
+// Cuenta: registro, acceso y contraseña
 // ---------------------------------------------------------------------------
 
 export interface ParentSummary {
@@ -76,17 +83,21 @@ export interface IssuedSession {
   expiresAt: Date;
 }
 
-/** Registro público de un padre. Deja la sesión iniciada. */
+/**
+ * Registro público de un padre. Acredita la CUENTA.
+ *
+ * NO deja ningún perfil activo: al terminar se llega a la rejilla, igual que en
+ * cualquier apertura posterior. El PIN se pide aquí para no arrastrar por todo
+ * el sistema el estado «cuenta sin PIN». Ver la decisión 4 del design.
+ */
 export async function registerParent(input: {
   name: string;
   email: string;
   password: string;
+  pin: string;
 }): Promise<{ parent: ParentSummary; session: IssuedSession }> {
   const email = normalizeEmail(input.email);
 
-  // La unicidad la garantiza el almacén; comprobar antes solo mejora el
-  // mensaje. Dos registros simultáneos siguen sin poder crear dos cuentas
-  // porque el repositorio traduce el choque a conflicto.
   if ((await repository.findParentByEmail(email)) !== null) {
     throw new EmailAlreadyRegisteredError();
   }
@@ -95,12 +106,13 @@ export async function registerParent(input: {
     name: input.name,
     email,
     passwordHash: await hashCredential(input.password),
+    pinHash: await hashCredential(input.pin),
   });
 
-  return { parent, session: await issueParentSession(parent.id) };
+  return { parent, session: await issueAccountSession(parent.id) };
 }
 
-/** Acceso con correo y contraseña. */
+/** Acceso con correo y contraseña. Acredita la cuenta; no activa ningún perfil. */
 export async function loginParent(input: {
   email: string;
   password: string;
@@ -109,7 +121,6 @@ export async function loginParent(input: {
   const found = await repository.findParentByEmail(email);
 
   if (found === null) {
-    // Se paga el mismo coste que si existiera, y se responde lo mismo.
     await burnEquivalentTime(input.password);
     throw new InvalidCredentialsError();
   }
@@ -129,26 +140,24 @@ export async function loginParent(input: {
     throw new InvalidCredentialsError();
   }
 
-  // Un acceso correcto limpia el contador.
   if (found.failedLoginAttempts > 0 || found.lockedUntil !== null) {
     await repository.clearParentLockout(found.id);
   }
 
-  // Único momento en que se tiene la credencial en claro para re-derivarla.
   if (needsRehash) {
     await repository.updateParentPasswordHash(found.id, await hashCredential(input.password));
   }
 
   return {
     parent: { id: found.id, name: found.name, email: found.email },
-    session: await issueParentSession(found.id),
+    session: await issueAccountSession(found.id),
   };
 }
 
 /** Cambio de contraseña. Revoca las demás sesiones y conserva la actual. */
 export async function changePassword(
   actor: Actor,
-  sessionId: string,
+  accountSessionId: string,
   input: { currentPassword: string; newPassword: string },
 ): Promise<void> {
   if (actor.familyRole !== "PARENT") {
@@ -166,14 +175,14 @@ export async function changePassword(
   }
 
   await repository.updateParentPasswordHash(found.id, await hashCredential(input.newPassword));
-  await repository.revokeAllSessionsOfUser(found.id, sessionId);
+  await repository.revokeAllSessionsOfUser(found.id, accountSessionId);
 }
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-async function issueParentSession(userId: string): Promise<IssuedSession> {
+async function issueAccountSession(userId: string): Promise<IssuedSession> {
   const token = generateSessionToken();
   const expiresAt = daysFromNow(PARENT_SESSION_DAYS);
 
@@ -183,57 +192,194 @@ async function issueParentSession(userId: string): Promise<IssuedSession> {
 }
 
 // ---------------------------------------------------------------------------
-// Niño
+// PIN de adulto
 // ---------------------------------------------------------------------------
 
-export interface SelectableChild {
+/** Cambio del PIN indicando el actual. Exige tener el perfil de padre activo. */
+export async function changeAdultPin(
+  actor: Actor,
+  input: { currentPin: string; newPin: string },
+): Promise<void> {
+  if (actor.familyRole !== "PARENT") {
+    throw new ParentSessionRequiredError();
+  }
+
+  const found = await repository.findParentCredentialsById(actor.userId);
+  if (found === null) {
+    throw new NotFoundError();
+  }
+
+  const { valid } = await verifyCredential(input.currentPin, found.pinHash);
+  if (!valid) {
+    throw new InvalidPinError();
+  }
+
+  await repository.updateParentPinHash(found.id, await hashCredential(input.newPin));
+}
+
+/**
+ * Restablecimiento del PIN con la contraseña.
+ *
+ * NO exige perfil activo, a propósito: es la vía por la que un padre bloqueado
+ * fuera de su propio perfil se rescata. Exigirlo lo dejaría encerrado.
+ */
+export async function resetAdultPin(
+  accountUserId: string,
+  input: { password: string; newPin: string },
+): Promise<void> {
+  const found = await repository.findParentCredentialsById(accountUserId);
+  if (found === null) {
+    throw new NotFoundError();
+  }
+
+  const { valid } = await verifyCredential(input.password, found.passwordHash);
+  if (!valid) {
+    throw new InvalidCredentialsError();
+  }
+
+  // Poner un PIN nuevo desbloquea: es justo para lo que se viene aquí.
+  await repository.updateParentPinHash(found.id, await hashCredential(input.newPin));
+}
+
+// ---------------------------------------------------------------------------
+// Rejilla de perfiles
+// ---------------------------------------------------------------------------
+
+export interface SelectableProfile {
+  /** El del hijo, o `PARENT_PROFILE_ID` para el del padre. */
   id: string;
+  familyRole: "PARENT" | "CHILD";
   name: string;
-  avatar: string | null;
+  avatar: AvatarKey;
   locked: boolean;
 }
 
-/** Perfiles que puede elegir quien tiene esta sesión de padre. */
-export async function listSelectableChildren(actor: Actor): Promise<SelectableChild[]> {
-  if (actor.familyRole !== "PARENT") {
-    throw new ParentSessionRequiredError();
+/**
+ * Los perfiles de la familia: el del padre y el de cada hijo activo.
+ *
+ * Recibe el identificador de la CUENTA y no un actor, porque se llama justo
+ * antes de ser nadie: de eso va la rejilla.
+ *
+ * Solo nombre y avatar. El saldo o la edad de un niño no tienen por qué verse
+ * antes de entrar.
+ */
+export async function listProfiles(accountUserId: string): Promise<SelectableProfile[]> {
+  const parent = await repository.findParentCredentialsById(accountUserId);
+  if (parent === null) {
+    throw new NotFoundError();
   }
 
-  const children = await repository.findSelectableChildren(actor.userId);
+  const profile = await repository.findParentById(accountUserId);
+  const children = await repository.findSelectableChildren(accountUserId);
 
-  // Solo nombre y avatar: el selector no necesita más, y el saldo o la edad de
-  // un niño no tienen por qué verse antes de entrar.
-  return children.map((child) => ({
-    id: child.id,
-    name: child.name,
-    avatar: child.avatar,
-    locked: activeLockout(child.lockedUntil) !== undefined,
-  }));
+  return [
+    {
+      id: PARENT_PROFILE_ID,
+      familyRole: "PARENT",
+      name: parent.name,
+      avatar: resolveAvatarKey(profile?.image),
+      locked: activeLockout(parent.pinLockedUntil) !== undefined,
+    },
+    ...children.map((child) => ({
+      id: child.id,
+      familyRole: "CHILD" as const,
+      name: child.name,
+      avatar: resolveAvatarKey(child.avatar),
+      locked: activeLockout(child.lockedUntil) !== undefined,
+    })),
+  ];
 }
 
-export interface ChildSummary {
+export interface ActiveProfile {
+  familyRole: "PARENT" | "CHILD";
   id: string;
   name: string;
-  avatar: string | null;
-  coins: number;
+  avatar: AvatarKey;
+  /** Solo en un perfil de niño. */
+  coins?: number;
+  /** Solo en el perfil del padre. */
+  email?: string;
 }
 
-/** Entrada a un perfil de niño desde la sesión de su padre. */
-export async function enterChildProfile(
-  actor: Actor,
-  parentSessionId: string,
-  input: { childProfileId: string; pin: string },
-): Promise<{ child: ChildSummary; session: IssuedSession }> {
-  if (actor.familyRole !== "PARENT") {
-    throw new ParentSessionRequiredError();
+/**
+ * Activa un perfil de la rejilla, sea el del padre o el de un hijo.
+ *
+ * Un único camino para los dos: desde la rejilla son perfiles iguales, y tener
+ * dos endpoints invitaría a proteger uno y olvidarse del otro.
+ */
+export async function enterProfile(
+  accountUserId: string,
+  accountSessionId: string,
+  input: { profileId: string; pin: string },
+): Promise<{ profile: ActiveProfile; session: IssuedSession }> {
+  return input.profileId === PARENT_PROFILE_ID
+    ? enterParentProfile(accountUserId, accountSessionId, input.pin)
+    : enterChildProfile(accountUserId, accountSessionId, input.profileId, input.pin);
+}
+
+async function enterParentProfile(
+  accountUserId: string,
+  accountSessionId: string,
+  pin: string,
+): Promise<{ profile: ActiveProfile; session: IssuedSession }> {
+  const found = await repository.findParentCredentialsById(accountUserId);
+  if (found === null) {
+    await burnEquivalentTime(pin);
+    throw new InvalidPinError();
   }
 
-  const found = await repository.findChildCredentials(input.childProfileId);
+  const lockedUntil = activeLockout(found.pinLockedUntil);
+  if (lockedUntil !== undefined) {
+    throw new TooManyAttemptsError(lockedUntil);
+  }
 
-  // Perfil inexistente, de otra familia o dado de baja: la MISMA respuesta en
-  // los tres casos. Distinguirlos permitiría descubrir qué perfiles existen.
-  if (found === null || found.parentId !== actor.userId || found.deletedAt !== null) {
-    await burnEquivalentTime(input.pin);
+  const { valid, needsRehash } = await verifyCredential(pin, found.pinHash);
+
+  if (!valid) {
+    const attempts = await repository.registerFailedParentPin(found.id);
+    if (attempts >= PARENT_PIN_MAX_FAILED_ATTEMPTS) {
+      await repository.lockParentPinUntil(found.id, minutesFromNow(PARENT_PIN_LOCKOUT_MINUTES));
+    }
+    throw new InvalidPinError();
+  }
+
+  if (found.failedPinAttempts > 0 || found.pinLockedUntil !== null) {
+    await repository.clearParentPinLockout(found.id);
+  }
+  if (needsRehash) {
+    await repository.updateParentPinHash(found.id, await hashCredential(pin));
+  }
+
+  const profile = await repository.findParentById(accountUserId);
+
+  // Cambiar de perfil no deja dos activos: se retira el anterior.
+  await repository.revokeProfileSessionsOf(accountSessionId);
+  const session = await issueProfileSession(accountUserId, accountSessionId, undefined);
+
+  return {
+    profile: {
+      familyRole: "PARENT",
+      id: PARENT_PROFILE_ID,
+      name: found.name,
+      email: found.email,
+      avatar: resolveAvatarKey(profile?.image),
+    },
+    session,
+  };
+}
+
+async function enterChildProfile(
+  accountUserId: string,
+  accountSessionId: string,
+  childProfileId: string,
+  pin: string,
+): Promise<{ profile: ActiveProfile; session: IssuedSession }> {
+  const found = await repository.findChildCredentials(childProfileId);
+
+  // Inexistente, de otra familia o dado de baja: la MISMA respuesta en los tres
+  // casos, para que no se pueda descubrir qué perfiles existen.
+  if (found === null || found.parentId !== accountUserId || found.deletedAt !== null) {
+    await burnEquivalentTime(pin);
     throw new InvalidPinError();
   }
 
@@ -242,7 +388,7 @@ export async function enterChildProfile(
     throw new TooManyAttemptsError(lockedUntil);
   }
 
-  const { valid, needsRehash } = await verifyCredential(input.pin, found.pinHash);
+  const { valid, needsRehash } = await verifyCredential(pin, found.pinHash);
 
   if (!valid) {
     const attempts = await repository.registerFailedPin(found.id);
@@ -255,9 +401,8 @@ export async function enterChildProfile(
   if (found.failedPinAttempts > 0 || found.lockedUntil !== null) {
     await repository.clearChildLockout(found.id);
   }
-
   if (needsRehash) {
-    await repository.updateChildPinHash(found.id, await hashCredential(input.pin));
+    await repository.updateChildPinHash(found.id, await hashCredential(pin));
   }
 
   const child = await repository.findChildForSession(found.id);
@@ -265,35 +410,54 @@ export async function enterChildProfile(
     throw new NotFoundError();
   }
 
+  await repository.revokeProfileSessionsOf(accountSessionId);
+  const session = await issueProfileSession(accountUserId, accountSessionId, child.id);
+
+  return {
+    profile: {
+      familyRole: "CHILD",
+      id: child.id,
+      name: child.name,
+      avatar: resolveAvatarKey(child.avatar),
+      coins: child.coins,
+    },
+    session,
+  };
+}
+
+async function issueProfileSession(
+  accountUserId: string,
+  accountSessionId: string,
+  childProfileId: string | undefined,
+): Promise<IssuedSession> {
   const token = generateSessionToken();
-  // La sesión de niño nunca dura más que la de su padre.
   const expiresAt = hoursFromNow(CHILD_SESSION_HOURS);
 
   await repository.createSession({
     token,
-    userId: actor.userId,
-    childProfileId: child.id,
-    parentSessionId,
+    userId: accountUserId,
+    ...(childProfileId === undefined ? {} : { childProfileId }),
+    parentSessionId: accountSessionId,
     expiresAt,
   });
 
-  return {
-    child: { id: child.id, name: child.name, avatar: child.avatar, coins: child.coins },
-    session: { token, expiresAt },
-  };
+  return { token, expiresAt };
 }
 
 /**
- * Salida del perfil de niño.
+ * Sale del perfil activo y vuelve a la rejilla.
  *
- * Solo revoca la sesión del niño. La del padre nunca se tocó, así que volver a
- * ella no requiere hacer nada más.
+ * Solo revoca el perfil. La sesión de cuenta no se toca, así que elegir otro no
+ * exige la contraseña.
  */
-export async function leaveChildProfile(childSessionId: string): Promise<void> {
-  await repository.revokeSession(childSessionId);
+export async function leaveProfile(profileSessionId: string): Promise<void> {
+  await repository.revokeSession(profileSessionId);
 }
 
-/** El padre establece o restablece el PIN de un hijo suyo. */
+// ---------------------------------------------------------------------------
+// Gestión del PIN de los hijos
+// ---------------------------------------------------------------------------
+
 export async function setChildPin(
   actor: Actor,
   input: { childProfileId: string; pin: string },
@@ -303,24 +467,16 @@ export async function setChildPin(
   }
 
   const found = await repository.findChildCredentials(input.childProfileId);
-  if (found === null || found.deletedAt !== null) {
-    throw new NotFoundError();
-  }
-  if (found.parentId !== actor.userId) {
-    // Existe pero no es suyo: 404 y no 403, para no confirmar que existe.
+  // Existe pero no es suyo: 404 y no 403, para no confirmar que existe.
+  if (found === null || found.deletedAt !== null || found.parentId !== actor.userId) {
     throw new NotFoundError();
   }
 
   await repository.updateChildPinHash(found.id, await hashCredential(input.pin));
-  // Cambiar el PIN echa fuera a quien estuviera dentro con el anterior.
   await repository.revokeSessionsOfChildProfile(found.id);
 }
 
-/** El padre desbloquea el perfil de un hijo suyo. */
-export async function unlockChildProfile(
-  actor: Actor,
-  childProfileId: string,
-): Promise<void> {
+export async function unlockChildProfile(actor: Actor, childProfileId: string): Promise<void> {
   if (actor.familyRole !== "PARENT") {
     throw new ParentSessionRequiredError();
   }
@@ -337,12 +493,17 @@ export async function unlockChildProfile(
 // Descripción de quien está dentro
 // ---------------------------------------------------------------------------
 
-/** Datos básicos del padre para la respuesta de estado. Nunca su credencial. */
 export function describeParent(userId: string): Promise<ParentSummary | null> {
   return repository.findParentById(userId);
 }
 
-/** Datos básicos del niño, con su saldo, para la respuesta de estado. */
+export interface ChildSummary {
+  id: string;
+  name: string;
+  avatar: string | null;
+  coins: number;
+}
+
 export async function describeChild(childProfileId: string): Promise<ChildSummary | null> {
   const child = await repository.findChildForSession(childProfileId);
   if (child === null) return null;
@@ -354,7 +515,7 @@ export async function describeChild(childProfileId: string): Promise<ChildSummar
 // Cierre de sesión
 // ---------------------------------------------------------------------------
 
-/** Cierra la sesión del padre. La cascada se lleva las de sus niños. */
-export async function logout(sessionId: string): Promise<void> {
-  await repository.revokeSession(sessionId);
+/** Cierra la sesión de cuenta. La cascada se lleva el perfil activo. */
+export async function logout(accountSessionId: string): Promise<void> {
+  await repository.revokeSession(accountSessionId);
 }
