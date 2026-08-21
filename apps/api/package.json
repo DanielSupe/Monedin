@@ -21,6 +21,7 @@
     "@monedin/contracts": "workspace:*",
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
     "express": "^5.0.1",
     "pg": "^8.23.0",
@@ -29,6 +30,7 @@
   },
   "devDependencies": {
     "@monedin/config": "workspace:*",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
     "@types/pg": "^8.23.1",

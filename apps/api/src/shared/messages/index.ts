@@ -24,10 +24,34 @@ export const messages = {
     conflict: "Esta operación no se puede completar en el estado actual.",
     /** 422 — la entrada no cumple su esquema. */
     validation: "Algunos datos no son válidos. Revisa los campos señalados.",
+    /** 429 — demasiados intentos, hay un bloqueo activo. */
+    tooManyAttempts:
+      "Demasiados intentos fallidos. Espera unos minutos antes de volver a intentarlo.",
     /** 500 — fallo no previsto. Genérico a propósito. */
     internal:
       "Ocurrió un error inesperado. Vuelve a intentarlo en unos minutos. " +
       "Si el problema continúa, comparte el identificador del incidente.",
+  },
+
+  auth: {
+    /**
+     * Credenciales incorrectas.
+     *
+     * DELIBERADAMENTE ambiguo: es el mismo mensaje tanto si el correo no existe
+     * como si la contraseña no coincide. Decir cuál de los dos falla le regala a
+     * quien prueba la mitad del trabajo. Ver la spec `parent-authentication`.
+     */
+    invalidCredentials: "El correo o la contraseña no son correctos.",
+    /** PIN incorrecto al entrar a un perfil de niño. */
+    invalidPin: "Ese PIN no es correcto.",
+    /** El perfil del niño está bloqueado por intentos fallidos. */
+    childLocked:
+      "Este perfil está bloqueado por varios intentos fallidos. " +
+      "Puede desbloquearlo tu papá o tu mamá, o esperar unos minutos.",
+    /** Correo ya registrado. */
+    emailTaken: "Ese correo ya está registrado.",
+    /** Se requiere sesión de padre para esta operación. */
+    parentSessionRequired: "Necesitas la sesión de un adulto para hacer esto.",
   },
 
   health: {

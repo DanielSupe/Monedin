@@ -62,12 +62,20 @@ model User {
   /// Hash opaco. El algoritmo lo decide `add-authentication`.
   passwordHash String
   image        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+
+  /// Bloqueo por intentos fallidos. Ver la decision 4 del design de
+  /// add-authentication: se bloquea por identidad, no por direccion IP, porque
+  /// en una casa todos comparten IP.
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   children ChildProfile[]
   tasks    Task[]
   rewards  Reward[]
+  sessions Session[]
 
   @@map("users")
 }
@@ -88,6 +96,11 @@ model ChildProfile {
   age     Int?
   avatar  String?
 
+  /// Bloqueo del perfil por PIN fallido. Es por perfil, no por dispositivo: que
+  /// un hermano se bloquee no debe dejar fuera a los demas.
+  failedPinAttempts Int       @default(0)
+  lockedUntil       DateTime?
+
   /// Baja logica: oculta de los listados sin destruir historial.
   deletedAt DateTime?
   createdAt DateTime  @default(now())
@@ -100,6 +113,7 @@ model ChildProfile {
   assignments      RewardAssignment[]
   redemptions      RewardRedemption[]
   coinTransactions CoinTransaction[]
+  sessions         Session[]
 
   @@index([parentId, deletedAt])
   @@map("child_profiles")
@@ -238,4 +252,46 @@ model CoinTransaction {
 
   @@index([childId, createdAt])
   @@map("coin_transactions")
+}
+
+// ---------------------------------------------------------------------------
+// Sesiones
+// ---------------------------------------------------------------------------
+
+/// Una sesion activa.
+///
+/// Guarda el HASH del identificador, nunca el identificador. Quien lea esta
+/// tabla entera no puede suplantar a nadie con lo que encuentre. Ver la
+/// decision 3 del design de add-authentication.
+///
+/// Una sesion de nino nace de una sesion de padre y guarda cual: si la del
+/// padre cae, la del nino deja de valer sin tener que ir a buscarla.
+model Session {
+  id String @id @default(cuid(2))
+
+  /// SHA-256 del identificador que viaja en la cookie.
+  tokenHash String @unique
+
+  /// El padre dueno de la sesion. Presente SIEMPRE, tambien en las de nino:
+  /// una sesion de nino siempre cuelga de la de su padre.
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Presente solo en sesiones de nino. Nulo = sesion de padre.
+  childProfileId String?
+  childProfile   ChildProfile? @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
+
+  /// De que sesion de padre nacio esta sesion de nino. Nulo en las de padre.
+  parentSessionId String?
+  parentSession   Session?  @relation("ChildSessions", fields: [parentSessionId], references: [id], onDelete: Cascade)
+  childSessions   Session[] @relation("ChildSessions")
+
+  expiresAt  DateTime
+  lastUsedAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([childProfileId])
+  @@index([expiresAt])
+  @@map("sessions")
 }

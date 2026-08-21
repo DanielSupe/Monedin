@@ -20,6 +20,14 @@ export const ERROR_CODES = {
   CONFLICT: "CONFLICT",
   /** La entrada no cumple su esquema. 422, con detalle por campo. */
   VALIDATION_ERROR: "VALIDATION_ERROR",
+  /**
+   * Se agotaron los intentos permitidos y hay un bloqueo activo. 429.
+   *
+   * Tiene código propio y no se confunde con `UNAUTHORIZED` a propósito: el
+   * cliente necesita distinguir "vuelve a intentarlo" de "espera", y responder
+   * 401 le diría a quien está probando combinaciones que siga probando.
+   */
+  TOO_MANY_ATTEMPTS: "TOO_MANY_ATTEMPTS",
   /** Fallo no previsto. 500, con identificador de incidente. */
   INTERNAL_ERROR: "INTERNAL_ERROR",
 } as const;

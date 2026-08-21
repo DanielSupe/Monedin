@@ -1,0 +1,61 @@
+import { Router, type RequestHandler, type Router as ExpressRouter } from "express";
+import { markPublic, requireSessionUnlessPublic } from "./session.js";
+
+/**
+ * Router de módulo con la protección puesta.
+ *
+ * Toda ruta definida a través de este envoltorio lleva el guardián de sesión
+ * intercalado ANTES de sus manejadores. Las públicas se declaran con los
+ * métodos `public*`, que además del guardián insertan la marca que lo hace
+ * pasar de largo.
+ *
+ * Es lo que hace literal que «las rutas nacen protegidas»: no se puede definir
+ * una ruta por aquí y olvidarse de protegerla, porque el guardián no es algo
+ * que se añada sino algo que ya está. Ver la decisión 5 del design de
+ * `add-authentication`.
+ *
+ * El guardián va dentro de la cadena de cada ruta y no montado por delante del
+ * router porque Express evalúa los middlewares de un router en orden: uno
+ * montado después de las rutas nunca llegaría a ejecutarse, y uno montado antes
+ * no sabría todavía si la ruta que va a resolverse es pública.
+ */
+export interface ModuleRouter {
+  /** El router de Express, listo para montar. */
+  readonly router: ExpressRouter;
+
+  get(path: string, ...handlers: RequestHandler[]): void;
+  post(path: string, ...handlers: RequestHandler[]): void;
+  patch(path: string, ...handlers: RequestHandler[]): void;
+  delete(path: string, ...handlers: RequestHandler[]): void;
+
+  /** Rutas accesibles sin sesión. Se declaran una a una, a conciencia. */
+  publicGet(path: string, ...handlers: RequestHandler[]): void;
+  publicPost(path: string, ...handlers: RequestHandler[]): void;
+}
+
+export function moduleRouter(): ModuleRouter {
+  const router = Router();
+
+  const protectedChain = (handlers: RequestHandler[]): RequestHandler[] => [
+    requireSessionUnlessPublic,
+    ...handlers,
+  ];
+
+  const publicChain = (handlers: RequestHandler[]): RequestHandler[] => [
+    markPublic,
+    requireSessionUnlessPublic,
+    ...handlers,
+  ];
+
+  return {
+    router,
+
+    get: (path, ...handlers) => router.get(path, ...protectedChain(handlers)),
+    post: (path, ...handlers) => router.post(path, ...protectedChain(handlers)),
+    patch: (path, ...handlers) => router.patch(path, ...protectedChain(handlers)),
+    delete: (path, ...handlers) => router.delete(path, ...protectedChain(handlers)),
+
+    publicGet: (path, ...handlers) => router.get(path, ...publicChain(handlers)),
+    publicPost: (path, ...handlers) => router.post(path, ...publicChain(handlers)),
+  };
+}

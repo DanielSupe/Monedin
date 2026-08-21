@@ -106,6 +106,11 @@ describe("los límites del motor y los del contrato compartido coinciden", () =>
       "reward_redemptions_coins_range",
       "coin_transactions_amount_non_zero",
       "coin_transactions_balance_after_non_negative",
+      "users_failed_login_attempts_non_negative",
+      "child_profiles_failed_pin_attempts_non_negative",
+      "sessions_child_requires_parent_session",
+      "sessions_not_self_parented",
+      "sessions_token_hash_is_sha256",
     ];
 
     const faltan = esperadas.filter((name) => !constraints.has(name));
@@ -125,5 +130,24 @@ describe("los límites del motor y los del contrato compartido coinciden", () =>
     );
 
     expect(rows.map((r) => r.tgname)).toContain("coin_transactions_immutable");
+  });
+});
+
+describe("reglas estructurales de la sesión", () => {
+  it("una sesión de niño no puede existir sin sesión de padre detrás", async () => {
+    const definicion = (await liveCheckConstraints()).get("sessions_child_requires_parent_session");
+
+    expect(definicion, "falta sessions_child_requires_parent_session").toBeDefined();
+    expect(definicion).toContain("childProfileId");
+    expect(definicion).toContain("parentSessionId");
+  });
+
+  it("el hash de sesión almacenado tiene la longitud de un SHA-256", async () => {
+    const definicion = (await liveCheckConstraints()).get("sessions_token_hash_is_sha256");
+
+    expect(definicion, "falta sessions_token_hash_is_sha256").toBeDefined();
+    // 64 caracteres hexadecimales. Si esto cambiara, sería señal de que se está
+    // guardando otra cosa en esa columna.
+    expect(numbersIn(definicion ?? "")).toContain(64);
   });
 });

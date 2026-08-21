@@ -60,6 +60,57 @@ export const COINS_MAX = 9999;
 /** El saldo de un nino nunca es negativo. */
 export const COINS_BALANCE_MIN = 0;
 
+// ---------------------------------------------------------------------------
+// Autenticacion
+// ---------------------------------------------------------------------------
+
+/**
+ * Longitud del PIN del nino. Exacta, no un rango: cuatro digitos es lo que un
+ * nino de 6 anos recuerda y teclea sin frustrarse.
+ *
+ * Lo que convierte cuatro digitos en una frontera NO es su longitud, son los
+ * limites de intentos de mas abajo. Si alguien los relaja, el PIN deja de
+ * proteger nada.
+ */
+export const PIN_LENGTH = 4;
+
+/**
+ * Minimo de la contrasena del padre.
+ *
+ * Se fija una longitud y no reglas de composicion (mayusculas, simbolos):
+ * las reglas de composicion producen contrasenas peores y mas dificiles de
+ * recordar, y la longitud es lo que de verdad aporta entropia.
+ */
+export const PASSWORD_MIN_LENGTH = 10;
+export const PASSWORD_MAX_LENGTH = 128;
+
+/**
+ * Bloqueo por intentos fallidos.
+ *
+ * Los numeros difieren por quien se equivoca. Un adulto teclea mal su
+ * contrasena unas pocas veces; un nino de seis anos falla su PIN sin querer con
+ * facilidad, asi que su bloqueo es mas corto para no convertir un despiste en
+ * un berrinche. Y su padre puede desbloquearlo al momento.
+ */
+export const PARENT_MAX_FAILED_ATTEMPTS = 10;
+export const PARENT_LOCKOUT_MINUTES = 15;
+export const CHILD_MAX_FAILED_ATTEMPTS = 5;
+export const CHILD_LOCKOUT_MINUTES = 5;
+
+/**
+ * Duracion de las sesiones.
+ *
+ * La del padre es larga porque el dispositivo es familiar y volver a teclear la
+ * contrasena cada dia es justo lo que hace que la gente la apunte en un papel.
+ * La del nino es corta y ademas nunca sobrevive a la de su padre.
+ */
+export const PARENT_SESSION_DAYS = 30;
+export const CHILD_SESSION_HOURS = 12;
+
+/** Nombres de las cookies. Ver la decision 1 del design de add-authentication. */
+export const PARENT_SESSION_COOKIE = "monedin_session";
+export const CHILD_SESSION_COOKIE = "monedin_child";
+
 /** Paginacion por defecto de los listados de la API. */
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 100;

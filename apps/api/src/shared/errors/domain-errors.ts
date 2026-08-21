@@ -65,6 +65,24 @@ export class ValidationError extends DomainError {
   }
 }
 
+/**
+ * Se agotaron los intentos permitidos y hay un bloqueo activo.
+ *
+ * Es distinto de `UnauthorizedError` a propósito. Ver la spec
+ * `api-error-contract`.
+ */
+export class TooManyAttemptsError extends DomainError {
+  readonly code = ERROR_CODES.TOO_MANY_ATTEMPTS;
+
+  constructor(
+    /** Cuándo se podrá volver a intentar. */
+    readonly retryAt: Date,
+    message: string = messages.errors.tooManyAttempts,
+  ) {
+    super(message);
+  }
+}
+
 /** La ruta pedida no está registrada en la API. */
 export class RouteNotFoundError extends DomainError {
   readonly code = ERROR_CODES.ROUTE_NOT_FOUND;
