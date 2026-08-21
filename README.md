@@ -210,6 +210,11 @@ El cliente de Prisma se genera y no está en el repositorio. Ejecuta
 `pnpm --filter @monedin/api db:generate` (o cualquier `pnpm build` / `pnpm test`, que ya lo
 encadenan) y reinicia el servidor de TypeScript del editor.
 
+**Cambio un contrato de `packages/contracts` y la API no lo recoge.**
+Es deliberado: el vigilante de la API mira solo `apps/api/src`. `tsc --watch` reescribe `dist`
+archivo por archivo, y un vigilante que mire ahí encadena un reinicio por escritura y acaba matando
+el proceso a medio arrancar. Tras tocar un contrato, reinicia `pnpm dev`.
+
 **El puerto 5432 ya está en uso.**
 Tienes otro PostgreSQL corriendo. Cambia `POSTGRES_PORT` en el `.env` y ajusta `DATABASE_URL` para
 que coincida.

@@ -307,6 +307,11 @@ un adaptador explícito, y el generador exige `moduleFormat = "esm"` e `importFi
 Sin esas dos opciones el proyecto compila, los tests pasan, y el proceso revienta al arrancar en
 producción. Ver la decisión 6 del design de `add-data-model` antes de tocar nada de esto.
 
+**El vigilante de la API mira solo `apps/api/src`**, con `node --watch` y no con el de `tsx`. Un
+vigilante que mire `packages/contracts/dist` encadena un reinicio por cada archivo que reescribe
+`tsc --watch` y acaba matando el proceso antes de que termine de arrancar. Si tocas un contrato,
+reinicia `pnpm dev`.
+
 **Los tests de datos corren contra PostgreSQL de verdad**, en una base separada de la de desarrollo,
 con cada test dentro de una transacción que se deshace. Un doble en memoria no tiene restricciones,
 que es justo lo que hay que probar.
