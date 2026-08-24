@@ -52,19 +52,19 @@
 
 ## 6. Front
 
-- [ ] 6.1 Ampliar la guarda de rutas a tres estados: sin cuenta lleva al acceso, cuenta sin perfil lleva a la rejilla, perfil activo deja pasar
-- [ ] 6.2 Crear la rejilla con los avatares del catálogo, el nombre de cada perfil y el botón de crear
-- [ ] 6.3 Reutilizar el teclado de PIN para el perfil del padre, con su mensaje propio de bloqueo
-- [ ] 6.4 Añadir el campo de PIN al registro y las pantallas de cambio y restablecimiento
-- [ ] 6.5 Cablear el botón de crear perfil a su pantalla, que en este change solo anuncia que llega en el siguiente
-- [ ] 6.6 Añadir la salida a la rejilla desde cualquier perfil
-- [ ] 6.7 Tests del front: la guarda manda a la rejilla con cuenta y sin perfil; el error de PIN de adulto se distingue del de bloqueo por el código; el catálogo pinta todas sus claves
+- [x] 6.1 Ampliar la guarda de rutas a tres estados: sin cuenta lleva al acceso, cuenta sin perfil lleva a la rejilla, perfil activo deja pasar
+- [x] 6.2 Crear la rejilla con los avatares del catálogo, el nombre de cada perfil y el botón de crear
+- [x] 6.3 Reutilizar el teclado de PIN para el perfil del padre, con su mensaje propio de bloqueo
+- [x] 6.4 Añadir el campo de PIN al registro y las pantallas de cambio y restablecimiento
+- [x] 6.5 Cablear el botón de crear perfil a su pantalla, que en este change solo anuncia que llega en el siguiente
+- [x] 6.6 Añadir la salida a la rejilla desde cualquier perfil
+- [x] 6.7 Tests del front: la guarda manda a la rejilla con cuenta y sin perfil; el error de PIN de adulto se distingue del de bloqueo por el código; el catálogo pinta todas sus claves
 
 ## 7. Cierre
 
-- [ ] 7.1 Actualizar la siembra con el PIN de adulto y avatares del catálogo, y documentar las credenciales
-- [ ] 7.2 Actualizar `CLAUDE.md`: la cookie no da actor, el actor sale del perfil activo, y cómo se declara una ruta de «solo cuenta»
-- [ ] 7.3 Actualizar el `README` con el flujo nuevo y el PIN de adulto de la siembra
-- [ ] 7.4 Verificación de extremo a extremo en el navegador: abrir y ver la rejilla, entrar como padre con PIN, salir, entrar como hijo, salir, y comprobar que sin perfil no se puede operar
-- [ ] 7.5 Verificación completa sin caché sobre un clon limpio, y `openspec validate --all` en verde
-- [ ] 7.6 Commit final del change
+- [x] 7.1 Actualizar la siembra con el PIN de adulto y avatares del catálogo, y documentar las credenciales
+- [x] 7.2 Actualizar `CLAUDE.md`: la cookie no da actor, el actor sale del perfil activo, y cómo se declara una ruta de «solo cuenta»
+- [x] 7.3 Actualizar el `README` con el flujo nuevo y el PIN de adulto de la siembra
+- [x] 7.4 Verificación de extremo a extremo en el navegador: abrir y ver la rejilla, entrar como padre con PIN, salir, entrar como hijo, salir, y comprobar que sin perfil no se puede operar
+- [x] 7.5 Verificación completa sin caché sobre un clon limpio, y `openspec validate --all` en verde
+- [x] 7.6 Commit final del change

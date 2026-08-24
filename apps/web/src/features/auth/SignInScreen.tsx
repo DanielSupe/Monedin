@@ -15,6 +15,7 @@ export function SignInScreen(): React.ReactElement {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [pin, setPin] = useState("");
   const [fieldError, setFieldError] = useState<string | undefined>();
 
   const login = useLogin();
@@ -35,7 +36,7 @@ export function SignInScreen(): React.ReactElement {
       return;
     }
 
-    const parsed = registerParentSchema.safeParse({ name, email, password });
+    const parsed = registerParentSchema.safeParse({ name, email, password, pin });
     if (!parsed.success) {
       setFieldError(parsed.error.issues[0]?.message);
       return;
@@ -84,6 +85,22 @@ export function SignInScreen(): React.ReactElement {
             style={{ display: "block", width: "100%" }}
           />
         </label>
+
+        {mode === "signUp" && (
+          <label>
+            {messages.auth.pin}
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={4}
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+              autoComplete="off"
+              style={{ display: "block", width: "100%" }}
+            />
+            <small>{messages.auth.pinHelp}</small>
+          </label>
+        )}
 
         <button type="submit" disabled={active.isPending}>
           {active.isPending

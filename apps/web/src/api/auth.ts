@@ -1,11 +1,13 @@
 import {
+  type ChangeAdultPinInput,
   type ChangePasswordInput,
-  type EnterChildProfileInput,
+  type EnterProfileInput,
   type LoginParentInput,
   type RegisterParentInput,
-  type SelectableChildren,
+  type ResetAdultPinInput,
+  type SelectableProfiles,
   type SessionState,
-  selectableChildrenSchema,
+  selectableProfilesSchema,
   sessionStateSchema,
 } from "@monedin/contracts";
 import { z } from "zod";
@@ -43,19 +45,27 @@ export async function logout(): Promise<void> {
   await apiFetch("/auth/logout", emptySchema, { method: "POST" });
 }
 
-export function fetchChildProfiles(): Promise<SelectableChildren> {
-  return apiFetch("/auth/child-profiles", selectableChildrenSchema);
+export function fetchProfiles(): Promise<SelectableProfiles> {
+  return apiFetch("/auth/profiles", selectableProfilesSchema);
 }
 
-export function enterChildProfile(input: EnterChildProfileInput): Promise<SessionState> {
-  return apiFetch("/auth/child-profiles/enter", sessionStateSchema, {
+export function enterProfile(input: EnterProfileInput): Promise<SessionState> {
+  return apiFetch("/auth/profiles/enter", sessionStateSchema, {
     method: "POST",
     body: JSON.stringify(input),
   });
 }
 
-export async function leaveChildProfile(): Promise<void> {
-  await apiFetch("/auth/child-profiles/leave", emptySchema, { method: "POST" });
+export async function leaveProfile(): Promise<void> {
+  await apiFetch("/auth/profiles/leave", emptySchema, { method: "POST" });
+}
+
+export async function changeAdultPin(input: ChangeAdultPinInput): Promise<void> {
+  await apiFetch("/auth/pin", emptySchema, { method: "POST", body: JSON.stringify(input) });
+}
+
+export async function resetAdultPin(input: ResetAdultPinInput): Promise<void> {
+  await apiFetch("/auth/pin/reset", emptySchema, { method: "POST", body: JSON.stringify(input) });
 }
 
 export async function changePassword(input: ChangePasswordInput): Promise<void> {
@@ -66,4 +76,4 @@ export async function changePassword(input: ChangePasswordInput): Promise<void> 
 }
 
 export const sessionQueryKey = ["auth", "session"] as const;
-export const childProfilesQueryKey = ["auth", "child-profiles"] as const;
+export const profilesQueryKey = ["auth", "profiles"] as const;

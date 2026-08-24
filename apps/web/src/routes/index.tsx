@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthGate, ChildOnly, ParentOnly } from "../features/auth/AuthGate.js";
-import { ChildProfilePicker } from "../features/auth/ChildProfilePicker.js";
-import { useLeaveChildProfile, useLogout, useSession } from "../features/auth/use-session.js";
+import { ChangePinScreen } from "../features/auth/ChangePinScreen.js";
+import { useLeaveProfile, useLogout, useSession } from "../features/auth/use-session.js";
 import { messages } from "../lib/messages.js";
 
 export const Route = createFileRoute("/")({
@@ -18,31 +18,22 @@ function Home(): React.ReactElement {
 }
 
 /**
- * Lo que se ve con sesión iniciada.
+ * Lo que se ve con un perfil activo, padre o hijo.
  *
- * Andamio: enseña quién está dentro y deja pasar a un perfil de niño y volver.
- * Las pantallas de producto llegan con sus módulos.
+ * Andamio: enseña quién está dentro y deja volver a la rejilla. Las pantallas
+ * de producto llegan con sus módulos.
  */
 function SignedIn(): React.ReactElement {
   const { session } = useSession();
-  const [picking, setPicking] = useState(false);
+  const [changingPin, setChangingPin] = useState(false);
   const logout = useLogout();
-  const leave = useLeaveChildProfile();
+  const leave = useLeaveProfile();
 
   const actor = session?.actor;
   if (actor == null) return <p>{messages.health.loading}</p>;
 
-  if (picking) {
-    return (
-      <ChildProfilePicker
-        onCancel={() => {
-          setPicking(false);
-        }}
-        onEntered={() => {
-          setPicking(false);
-        }}
-      />
-    );
+  if (changingPin) {
+    return <ChangePinScreen onDone={() => setChangingPin(false)} />;
   }
 
   return (
@@ -53,36 +44,22 @@ function SignedIn(): React.ReactElement {
         <p>
           Tienes <strong>{actor.familyRole === "CHILD" ? actor.coins : 0}</strong> monedas.
         </p>
-        <button
-          type="button"
-          onClick={() => {
-            leave.mutate();
-          }}
-        >
-          {messages.auth.leaveChild}
-        </button>
       </ChildOnly>
 
-      <ParentOnly>
-        <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem" }}>
-          <button
-            type="button"
-            onClick={() => {
-              setPicking(true);
-            }}
-          >
-            {messages.auth.enterAsChild}
+      <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem" }}>
+        <button type="button" onClick={() => leave.mutate()}>
+          {messages.auth.changeProfile}
+        </button>
+
+        <ParentOnly>
+          <button type="button" onClick={() => setChangingPin(true)}>
+            {messages.auth.changePinTitle}
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              logout.mutate();
-            }}
-          >
+          <button type="button" onClick={() => logout.mutate()}>
             {messages.auth.signOut}
           </button>
-        </div>
-      </ParentOnly>
+        </ParentOnly>
+      </div>
     </section>
   );
 }

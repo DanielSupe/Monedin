@@ -8,8 +8,9 @@ niño gana monedas completando tareas (con aprobación del padre) y las gasta ca
 pagos y no hay interoperabilidad entre familias.
 
 > **Estado del proyecto**: andamio, modelo de datos y autenticación. Un padre puede registrarse,
-> entrar, pasar al perfil de un hijo con su PIN y volver. Todavía **no** hay módulos de dominio:
-> tareas, premios y canjes existen como tablas, no como funcionalidad.
+> entrar, y elegir desde una rejilla su propio perfil o el de un hijo, cada uno con su PIN. Todavía
+> **no** hay módulos de dominio: tareas, premios y canjes existen como tablas, no como
+> funcionalidad.
 
 ---
 
@@ -89,7 +90,7 @@ Tras sembrar, se puede entrar con:
 
 | Quién | Credencial |
 | ----- | ---------- |
-| Lucía (madre) | `familia.ejemplo@monedin.dev` / `monedin-desarrollo` |
+| Lucía (madre) | `familia.ejemplo@monedin.dev` / `monedin-desarrollo`, perfil con PIN `1357` |
 | Mateo | PIN `1234` |
 | Emma | PIN `5678` |
 
@@ -141,29 +142,34 @@ la anatomía de módulo, el patrón de autorización y las reglas de atomicidad 
 
 ## Cómo se entra
 
-El dispositivo es familiar, así que el flujo lo es también:
+El dispositivo es familiar, así que el flujo lo es también. Hay dos niveles de sesión: la cuenta
+acredita el dispositivo, y el **perfil activo** —el del padre o el de un hijo, elegido en la
+rejilla— es lo que da actor. La cuenta por sí sola no permite operar nada.
 
 ```
-   El padre entra una vez con su correo y contraseña.
-   Su sesión persiste en el dispositivo (30 días, y el uso la renueva).
+   El padre entra una vez con su correo y contraseña, o se registra (con su PIN incluido).
+   La sesión de CUENTA persiste en el dispositivo (30 días, y el uso la renueva).
         │
-        ├── "Entrar como…"  →  elige perfil  →  PIN de 4 dígitos
-        │                                            │
-        │                                            ▼
-        │                                    sesión del niño
-        │                                            │
-        └────────── "Salir de mi perfil" ◄───────────┘
-                    (no vuelve a pedir la contraseña)
+        ▼
+   rejilla de perfiles  ──►  elige un perfil (el suyo o el de un hijo)  ──►  PIN de 4 dígitos
+        ▲                                                                        │
+        │                                                                        ▼
+        └───────────────────── "Cambiar de perfil" ◄───────── perfil activo, padre o hijo
 ```
 
-La sesión del padre queda **suspendida, no cerrada**: son dos cookies, y salir del perfil del niño
-borra una. Cerrar la sesión del padre se lleva por delante el acceso a todos los perfiles.
+Salir de un perfil vuelve a la rejilla sin pedir contraseña: solo borra la cookie de perfil, la de
+cuenta queda intacta. Cerrar la sesión (`signOut`) sí se lleva la cuenta y con ella el acceso a
+todos los perfiles.
 
 Cinco PIN fallidos bloquean el perfil de ese niño durante 5 minutos, y su padre puede desbloquearlo
-al momento. Diez contraseñas fallidas bloquean la cuenta del padre 15 minutos.
+al momento. Diez PIN fallidos bloquean el perfil del propio padre 15 minutos —el mismo límite que
+sus contraseñas, porque es un adulto tecleando, no un niño de seis años— y los dos bloqueos son
+independientes entre sí.
 
 **No hay recuperación de contraseña.** Necesita envío de correo, que llegará en su propio change; un
-padre que la olvide hoy se queda fuera. El PIN de un niño sí se recupera: lo restablece su padre.
+padre que la olvide hoy se queda fuera. El PIN sí se recupera en los dos casos: el de un niño lo
+restablece su padre, y el del padre se restablece con su propia contraseña, desde la rejilla —es la
+vía de rescate para quien se queda bloqueado fuera de su propio perfil.
 
 ## Configuración
 

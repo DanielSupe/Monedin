@@ -258,6 +258,25 @@ tasks.publicGet("/health", handleHealth);         // pública, a conciencia
 Solo hay dos rutas públicas en todo el sistema —la sonda de salud y el acceso— y cada una lo declara
 en su propio router.
 
+**Hay tres niveles de protección, no dos.** Además de público y protegido, una ruta puede
+conformarse con la CUENTA acreditada sin exigir actor. La cookie de cuenta certifica que el
+dispositivo pertenece a una familia; **no da actor por sí sola**. El actor —quién está operando,
+padre o hijo— sale únicamente del perfil activo, una sesión aparte que cuelga de la de cuenta. Sin
+perfil elegido, una ruta que exige actor responde 401 igual que si no hubiera sesión: es justo lo que
+impide rodear la rejilla de selección de perfil llamando al endpoint directamente.
+
+Una ruta de solo cuenta se declara con `accountGet`/`accountPost`, uno a uno como las públicas — no
+es el criterio general:
+
+```ts
+auth.accountGet("/auth/profiles", handleListProfiles); // rejilla: cuenta acreditada, aún sin actor
+auth.get("/tasks", requireParent, handleList);          // exige actor, como cualquier ruta normal
+```
+
+Hoy solo tres rutas usan `accountGet`/`accountPost`: listar los perfiles, entrar a uno, y
+restablecer el PIN de adulto con la contraseña. Son justo los pasos previos a ser alguien —entrar a
+un perfil es lo que crea el actor, así que la ruta que lo hace no puede exigirlo de antemano.
+
 **El actor se obtiene del middleware, nunca se reconstruye.** El controlador lo lee y se lo pasa al
 servicio:
 

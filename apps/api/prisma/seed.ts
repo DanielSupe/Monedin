@@ -19,10 +19,10 @@ import { hashCredential } from "../src/shared/crypto/credentials.js";
 
 /** Credenciales de ejemplo. Documentadas en el README. */
 export const CREDENCIALES_DE_EJEMPLO = {
-  padre: { correo: "familia.ejemplo@monedin.dev", password: "monedin-desarrollo" },
+  padre: { correo: "familia.ejemplo@monedin.dev", password: "monedin-desarrollo", pin: "1357" },
   ninos: [
-    { nombre: "Mateo", pin: "1234" },
-    { nombre: "Emma", pin: "5678" },
+    { nombre: "Mateo", pin: "1234", avatar: "zorro" },
+    { nombre: "Emma", pin: "5678", avatar: "koala" },
   ],
 } as const;
 
@@ -51,6 +51,8 @@ async function seed(): Promise<void> {
       name: "Lucía Ramírez",
       email: PADRE,
       passwordHash: await hashCredential(CREDENCIALES_DE_EJEMPLO.padre.password),
+      pinHash: await hashCredential(CREDENCIALES_DE_EJEMPLO.padre.pin),
+      image: "pulpo",
     },
   });
 
@@ -62,14 +64,19 @@ async function seed(): Promise<void> {
     select: { id: true },
   });
 
-  // La contraseña se refresca en cada siembra, para que siga siendo la
-  // documentada aunque se hubiera cambiado probando.
+  // La contraseña y el PIN se refrescan en cada siembra, para que sigan siendo
+  // los documentados aunque se hubieran cambiado probando, y se desbloquean los
+  // dos por si una siembra anterior los dejó bloqueados.
   await prisma.user.update({
     where: { id: padre.id },
     data: {
       passwordHash: await hashCredential(CREDENCIALES_DE_EJEMPLO.padre.password),
       failedLoginAttempts: 0,
       lockedUntil: null,
+      pinHash: await hashCredential(CREDENCIALES_DE_EJEMPLO.padre.pin),
+      failedPinAttempts: 0,
+      pinLockedUntil: null,
+      image: "pulpo",
     },
   });
 
@@ -96,6 +103,7 @@ async function seed(): Promise<void> {
     data: {
       name: CREDENCIALES_DE_EJEMPLO.ninos[0].nombre,
       pinHash: await hashCredential(CREDENCIALES_DE_EJEMPLO.ninos[0].pin),
+      avatar: CREDENCIALES_DE_EJEMPLO.ninos[0].avatar,
       age: 10,
       coins: 0,
       parentId: padre.id,
@@ -105,6 +113,7 @@ async function seed(): Promise<void> {
     data: {
       name: CREDENCIALES_DE_EJEMPLO.ninos[1].nombre,
       pinHash: await hashCredential(CREDENCIALES_DE_EJEMPLO.ninos[1].pin),
+      avatar: CREDENCIALES_DE_EJEMPLO.ninos[1].avatar,
       age: 7,
       coins: 0,
       parentId: padre.id,
@@ -167,7 +176,7 @@ async function seed(): Promise<void> {
 
   const resumen = [
     `Sembrado: 1 padre, 2 hijos, 4 tareas, 2 premios con 4 asignaciones y su saldo inicial.`,
-    `  Padre: ${CREDENCIALES_DE_EJEMPLO.padre.correo} / ${CREDENCIALES_DE_EJEMPLO.padre.password}`,
+    `  Padre: ${CREDENCIALES_DE_EJEMPLO.padre.correo} / ${CREDENCIALES_DE_EJEMPLO.padre.password} / PIN ${CREDENCIALES_DE_EJEMPLO.padre.pin}`,
     ...CREDENCIALES_DE_EJEMPLO.ninos.map((n) => `  ${n.nombre}: PIN ${n.pin}`),
   ];
 

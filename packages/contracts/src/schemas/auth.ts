@@ -90,13 +90,6 @@ export const resetAdultPinSchema = z.object({
 
 export type ResetAdultPinInput = z.infer<typeof resetAdultPinSchema>;
 
-export const enterChildProfileSchema = z.object({
-  childProfileId: z.string().min(1),
-  pin: pinSchema,
-});
-
-export type EnterChildProfileInput = z.infer<typeof enterChildProfileSchema>;
-
 /**
  * Entrada a un perfil de la rejilla.
  *
@@ -182,17 +175,3 @@ export const sessionStateSchema = z.object({
 });
 
 export type SessionState = z.infer<typeof sessionStateSchema>;
-
-export const selectableChildSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  avatar: z.string().nullable(),
-  locked: z.boolean(),
-});
-
-export const selectableChildrenSchema = z.object({
-  children: z.array(selectableChildSchema),
-});
-
-export type SelectableChild = z.infer<typeof selectableChildSchema>;
-export type SelectableChildren = z.infer<typeof selectableChildrenSchema>;

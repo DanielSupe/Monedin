@@ -1,6 +1,5 @@
-import { ERROR_CODES } from "@monedin/contracts";
+import { ERROR_CODES, type SessionState } from "@monedin/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { SessionState } from "@monedin/contracts";
 import * as api from "../../api/auth.js";
 import { ApiRequestError } from "../../lib/http-client.js";
 import { messages } from "../../lib/messages.js";
@@ -31,7 +30,7 @@ function useRefreshSession(): () => Promise<void> {
 
   return async () => {
     await queryClient.invalidateQueries({ queryKey: api.sessionQueryKey });
-    await queryClient.invalidateQueries({ queryKey: api.childProfilesQueryKey });
+    await queryClient.invalidateQueries({ queryKey: api.profilesQueryKey });
   };
 }
 
@@ -62,29 +61,49 @@ export function useLogout() {
   });
 }
 
-export function useChildProfiles(enabled: boolean) {
+export function useProfiles(enabled: boolean) {
   return useQuery({
-    queryKey: api.childProfilesQueryKey,
-    queryFn: api.fetchChildProfiles,
+    queryKey: api.profilesQueryKey,
+    queryFn: api.fetchProfiles,
     enabled,
   });
 }
 
-export function useEnterChildProfile() {
+export function useEnterProfile() {
   const refresh = useRefreshSession();
 
   return useMutation({
-    mutationFn: api.enterChildProfile,
+    mutationFn: api.enterProfile,
     onSuccess: refresh,
   });
 }
 
-export function useLeaveChildProfile() {
+export function useLeaveProfile() {
   const refresh = useRefreshSession();
 
   return useMutation({
-    mutationFn: api.leaveChildProfile,
+    mutationFn: api.leaveProfile,
     onSuccess: refresh,
+  });
+}
+
+/** Cambia el PIN de adulto indicando el actual. Exige perfil de padre activo. */
+export function useChangeAdultPin() {
+  return useMutation({ mutationFn: api.changeAdultPin });
+}
+
+/**
+ * Restablece el PIN de adulto con la contraseña. No exige perfil activo: es
+ * la vía de rescate para un padre bloqueado fuera de su propio perfil.
+ */
+export function useResetAdultPin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.resetAdultPin,
+    // El bloqueo se limpia al restablecer: la rejilla necesita saberlo para
+    // dejar de mostrar el perfil como bloqueado.
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: api.profilesQueryKey }),
   });
 }
 
@@ -112,6 +131,19 @@ export function describeAuthError(error: unknown): string {
     default:
       return messages.errors.network;
   }
+}
+
+/**
+ * Qué pantalla toca, según el estado de sesión.
+ *
+ * Son TRES, no dos: sin cuenta se pide acceso, con cuenta y sin perfil se
+ * elige quién eres, y con perfil se usa la aplicación.
+ */
+export type Screen = "signIn" | "profiles" | "app";
+
+export function screenFor(session: SessionState | undefined): Screen {
+  if (session === undefined || !session.hasAccount) return "signIn";
+  return session.actor === null ? "profiles" : "app";
 }
 
 /** Si el error es un bloqueo, para que la interfaz no invite a reintentar ya. */

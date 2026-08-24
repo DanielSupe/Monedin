@@ -43,16 +43,36 @@ export const messages = {
     /** Bloqueo. Distinto de una credencial incorrecta, y por eso otro mensaje. */
     tooManyAttempts: "Demasiados intentos. Espera unos minutos antes de volver a probar.",
 
-    /** Selector de perfil de niño. */
+    pin: "PIN de 4 dígitos",
+    pinHelp: "Lo usarás cada vez que entres a tu perfil. La contraseña solo al vincular un dispositivo.",
+
+    /** Rejilla de perfiles. */
     whoIsPlaying: "¿Quién eres?",
-    enterAsChild: "Entrar como…",
+    createProfile: "Crear perfil",
+    createProfileSoon: "Crear perfiles llega en el siguiente paso.",
+    changeProfile: "Cambiar de perfil",
     profileLocked: "Bloqueado",
     pinPrompt: "Escribe tu PIN",
     pinWrong: "Ese PIN no es correcto. Prueba otra vez.",
+    adultPinWrong: "Ese PIN no es correcto.",
+    adultPinLocked: "Demasiados intentos. Espera unos minutos o restablece el PIN con tu contraseña.",
     pinLocked: "Este perfil está bloqueado. Pídele a un adulto que lo desbloquee.",
     back: "Volver",
-    leaveChild: "Salir de mi perfil",
-    noChildren: "Todavía no has añadido a nadie.",
+
+    /** Cambiar el PIN sabiendo el actual. Requiere perfil de padre activo. */
+    changePinTitle: "Cambiar PIN",
+    currentPin: "PIN actual",
+    newPin: "PIN nuevo",
+    changePinSubmit: "Guardar PIN",
+    pinChanged: "PIN actualizado.",
+
+    /** Restablecer el PIN con la contraseña. Es la vía de rescate sin perfil activo. */
+    forgotPin: "¿Olvidaste tu PIN?",
+    resetPinTitle: "Restablecer PIN",
+    resetPinSubmit: "Restablecer",
+    pinReset: "PIN restablecido. Ya puedes entrar con el nuevo.",
+
+    cancel: "Cancelar",
   },
 
   errors: {
