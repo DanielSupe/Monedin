@@ -4,6 +4,7 @@ import express, { type Express, Router, type Router as ExpressRouter } from "exp
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { childrenRouter } from "./modules/children/children.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
+import { rewardsRouter } from "./modules/rewards/rewards.routes.js";
 import { tasksRouter } from "./modules/tasks/tasks.routes.js";
 import { errorHandler } from "./shared/errors/error-handler.js";
 import { notFoundHandler } from "./shared/errors/not-found-handler.js";
@@ -30,7 +31,13 @@ import { resolveSession } from "./shared/http/session.js";
  * design de `add-authentication`.
  */
 
-export const apiRouters: ExpressRouter[] = [healthRouter, authRouter, childrenRouter, tasksRouter];
+export const apiRouters: ExpressRouter[] = [
+  healthRouter,
+  authRouter,
+  childrenRouter,
+  tasksRouter,
+  rewardsRouter,
+];
 
 export function createApp(routers: ExpressRouter[] = apiRouters): Express {
   const app = express();

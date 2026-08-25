@@ -122,6 +122,21 @@ export const messages = {
     childRoleRequired: rolRequerido.nino,
   },
 
+  rewards: {
+    /**
+     * Premio inexistente, de otra familia, no ofrecido a este niño, o ya
+     * retirado.
+     *
+     * Es el MISMO mensaje para todos los casos, por la misma razón que en
+     * `children` y en `tasks`: distinguirlos confirmaría que ese premio existe.
+     */
+    notFound: "No encontramos ese premio.",
+    /** Publicar, editar, reemplazar ofertas y retirar son cosa del adulto. */
+    parentRoleRequired: rolRequerido.adulto,
+    /** El escaparate propio lo ve un niño sobre su propio perfil. */
+    childRoleRequired: rolRequerido.nino,
+  },
+
   health: {
     /** Etiqueta del servicio en la respuesta de salud. */
     serviceName: "monedin-api",

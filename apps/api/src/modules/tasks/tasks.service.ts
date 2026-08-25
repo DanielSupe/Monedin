@@ -8,10 +8,10 @@ import {
   type Task,
   type TaskBatch,
   type UpdateTaskInput,
+  normalizeCoinsPerChild,
   resolveAvatarKey,
 } from "@monedin/contracts";
 import type { Actor } from "../../shared/actor.js";
-import { ValidationError } from "../../shared/errors/domain-errors.js";
 import { toPage, toSkipTake } from "../../shared/pagination.js";
 // El hijo ajeno, el inexistente y el dado de baja son el mismo error que ya
 // tiene `children`, con el mismo texto. Definir aquí un segundo error para
@@ -57,7 +57,7 @@ export async function createBatch(actor: Actor, input: CreateTaskInput): Promise
     throw new ParentRoleRequiredError();
   }
 
-  const assignments = normalizeAssignments(input);
+  const assignments = normalizeCoinsPerChild(input);
   const childIds = assignments.map((assignment) => assignment.childId);
 
   // Una sola consulta para los hijos del reparto entero. Si falta uno, no se
@@ -81,25 +81,6 @@ export async function createBatch(actor: Actor, input: CreateTaskInput): Promise
   return rows.map(toTask);
 }
 
-/**
- * Deja las dos formas del alta en una sola lista de `{ childId, coins }`.
- *
- * A partir de aquí el servicio tiene UN camino, no dos.
- */
-function normalizeAssignments(input: CreateTaskInput): Array<{ childId: string; coins: number }> {
-  if (input.assignments !== undefined) {
-    return input.assignments;
-  }
-
-  const { childIds, coins } = input;
-  if (childIds === undefined || coins === undefined) {
-    // Inalcanzable: el esquema compartido exige exactamente una de las dos
-    // formas. La rama existe para que el tipo diga lo mismo que el `.refine()`.
-    throw new ValidationError([]);
-  }
-
-  return childIds.map((childId) => ({ childId, coins }));
-}
 
 // ---------------------------------------------------------------------------
 // Lecturas del padre

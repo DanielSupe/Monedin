@@ -178,6 +178,22 @@ async function seed(): Promise<void> {
   const helado = await prisma.reward.create({
     data: { title: "Helado", parentId: padre.id },
   });
+  // Retirado: sigue en el catálogo del padre bajo el filtro de retirados, y ya
+  // no aparece en ningún escaparate. Sin este caso, un desarrollador que
+  // arranca por primera vez no vería nunca ese filtro con algo dentro.
+  await prisma.reward.create({
+    data: {
+      title: "Videojuego (retirado)",
+      description: "Se dejó de ofrecer.",
+      isActive: false,
+      parentId: padre.id,
+    },
+  });
+  // Sin ninguna oferta: estado válido, no un premio a medio publicar. Es como
+  // se retira la oferta a todos sin retirar el premio.
+  await prisma.reward.create({
+    data: { title: "Sin ofertas todavía", parentId: padre.id },
+  });
 
   // El mismo premio cuesta distinto a cada hijo: es intencional.
   await prisma.rewardAssignment.createMany({
@@ -211,7 +227,8 @@ async function seed(): Promise<void> {
 
   const resumen = [
     `Sembrado: 1 padre, 2 hijos, ${creadas.length} tareas en los tres estados,`,
-    `  2 premios con 4 asignaciones, y el saldo que sale de las tareas aprobadas.`,
+    `  4 premios (uno retirado, uno sin ofertas) con 4 asignaciones, y el saldo`,
+    `  que sale de las tareas aprobadas.`,
     `  Padre: ${CREDENCIALES_DE_EJEMPLO.padre.correo} / ${CREDENCIALES_DE_EJEMPLO.padre.password} / PIN ${CREDENCIALES_DE_EJEMPLO.padre.pin}`,
     ...CREDENCIALES_DE_EJEMPLO.ninos.map((n) => `  ${n.nombre}: PIN ${n.pin}`),
   ];

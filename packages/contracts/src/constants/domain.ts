@@ -76,6 +76,16 @@ export const TASK_STATUSES = ["PENDING", "COMPLETED", "APPROVED"] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
 /**
+ * Filtro del catálogo de premios. NO es una columna: el motor guarda
+ * `Reward.isActive` como booleano, y este par es solo cómo se pide el filtro
+ * en la query. Un estado y no un booleano porque puede crecer —un premio
+ * agotado, uno programado— sin tener que renombrarse. Ver la decisión 6 del
+ * design de `add-rewards`.
+ */
+export const REWARD_STATUSES = ["ACTIVE", "RETIRED"] as const;
+export type RewardStatus = (typeof REWARD_STATUSES)[number];
+
+/**
  * Hijos activos que caben en una familia.
  *
  * Es un limite de POLITICA, no un invariante de integridad: excederlo no

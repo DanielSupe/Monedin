@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChildrenRouteImport } from './routes/children'
+import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as TasksRouteImport } from './routes/tasks'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const ChildrenRoute = ChildrenRouteImport.update({
   path: '/children',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RewardsRoute = RewardsRouteImport.update({
+  id: '/rewards',
+  path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TasksRoute = TasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
@@ -32,30 +38,34 @@ const TasksRoute = TasksRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/children': typeof ChildrenRoute
+  '/rewards': typeof RewardsRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/children': typeof ChildrenRoute
+  '/rewards': typeof RewardsRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/children': typeof ChildrenRoute
+  '/rewards': typeof RewardsRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/children' | '/tasks'
+  fullPaths: '/' | '/children' | '/rewards' | '/tasks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/children' | '/tasks'
-  id: '__root__' | '/' | '/children' | '/tasks'
+  to: '/' | '/children' | '/rewards' | '/tasks'
+  id: '__root__' | '/' | '/children' | '/rewards' | '/tasks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChildrenRoute: typeof ChildrenRoute
+  RewardsRoute: typeof RewardsRoute
   TasksRoute: typeof TasksRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChildrenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rewards': {
+      id: '/rewards'
+      path: '/rewards'
+      fullPath: '/rewards'
+      preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tasks': {
       id: '/tasks'
       path: '/tasks'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChildrenRoute: ChildrenRoute,
+  RewardsRoute: RewardsRoute,
   TasksRoute: TasksRoute,
 }
 export const routeTree = rootRouteImport

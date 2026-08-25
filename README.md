@@ -7,10 +7,12 @@ niño gana monedas completando tareas (con aprobación del padre) y las gasta ca
 (también con aprobación). La moneda es virtual y cerrada a la familia: no hay dinero real, no hay
 pagos y no hay interoperabilidad entre familias.
 
-> **Estado del proyecto**: andamio, modelo de datos y autenticación. Un padre puede registrarse,
-> entrar, y elegir desde una rejilla su propio perfil o el de un hijo, cada uno con su PIN. Todavía
-> **no** hay módulos de dominio: tareas, premios y canjes existen como tablas, no como
-> funcionalidad.
+> **Estado del proyecto**: modelo de datos, autenticación y los dos primeros módulos de dominio. Un
+> padre puede registrarse, entrar, y elegir desde una rejilla su propio perfil o el de un hijo, cada
+> uno con su PIN. `tasks` cubre el ciclo completo de una tarea —repartirla, marcarla, aprobarla o
+> rechazarla, con la acreditación de monedas— y `rewards` el catálogo de premios —publicarlos,
+> ponerles precio por hijo, editarlos y retirarlos—. Lo que **no** hay todavía es canjear: pedir un
+> premio y que el padre lo resuelva descontando monedas es `add-redemptions`, sin construir.
 
 ---
 

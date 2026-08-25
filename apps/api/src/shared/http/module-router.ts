@@ -26,6 +26,7 @@ export interface ModuleRouter {
   get(path: string, ...handlers: RequestHandler[]): void;
   post(path: string, ...handlers: RequestHandler[]): void;
   patch(path: string, ...handlers: RequestHandler[]): void;
+  put(path: string, ...handlers: RequestHandler[]): void;
   delete(path: string, ...handlers: RequestHandler[]): void;
 
   /** Rutas accesibles sin sesión. Se declaran una a una, a conciencia. */
@@ -48,7 +49,7 @@ export interface ModuleRouter {
 export type RouteLevel = "public" | "account";
 
 export interface DeclaredRoute {
-  method: "GET" | "POST" | "PATCH" | "DELETE";
+  method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
   path: string;
   level: RouteLevel;
 }
@@ -103,6 +104,7 @@ export function moduleRouter(): ModuleRouter {
     get: (path, ...handlers) => router.get(path, ...protectedChain(handlers)),
     post: (path, ...handlers) => router.post(path, ...protectedChain(handlers)),
     patch: (path, ...handlers) => router.patch(path, ...protectedChain(handlers)),
+    put: (path, ...handlers) => router.put(path, ...protectedChain(handlers)),
     delete: (path, ...handlers) => router.delete(path, ...protectedChain(handlers)),
 
     publicGet: (path, ...handlers) => {

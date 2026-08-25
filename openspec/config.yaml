@@ -95,8 +95,27 @@ context: |
                 aprobar tiene efecto secundario sobre el saldo y no es idempotente.
                 Aprobar ACREDITA en la misma transaccion que el cambio de estado, condicionado
                 al estado de origen: dos toques dan una acreditacion y un 409.
+    /rewards    Un premio es UNA fila; lo que se multiplica es la ASIGNACION (precio propio por
+                hijo), no el premio, a diferencia de las tareas. POST (padre) acepta las mismas
+                DOS formas que /tasks para el precio -childIds+coins o assignments-, con la
+                MISMA regla compartida de `coins-per-child`. TODO O NADA: se comprueban todos los
+                hijos antes de crear nada, 404 y no 403 para el ajeno o inexistente.
+                GET (padre) el catalogo paginado, con TODAS las ofertas de cada premio y un
+                filtro `status=ACTIVE|RETIRED` (ACTIVE por defecto).
+                GET /rewards/mine (niño) su escaparate: solo activos ofrecidos a el, con SU
+                precio y si `affordable` -pista de interfaz, no una reserva-, tomado de la
+                sesion y nunca de la peticion.
+                GET /:id (ambos roles, cada uno con su vista: `Reward` con todas las ofertas o
+                `OwnReward` con una sola, nunca la misma forma con un parametro).
+                PATCH /:id (padre): titulo y descripcion. NUNCA el precio -es 422-, porque el
+                precio no vive en el premio sino en la oferta a cada hijo.
+                PUT /:id/assignments (padre): REEMPLAZA el conjunto COMPLETO de ofertas de una
+                vez -borra y recrea en una transaccion-, no altas/bajas por hijo. Un conjunto
+                vacio es valido: retira la oferta a todos sin retirar el premio.
+                DELETE /:id (padre): retiro LOGICO, no destruye ofertas ni canjes previos. Cero
+                filas afectadas es 404 y no 409: retirar no mueve monedas.
+                Sin migracion: `Reward` y `RewardAssignment` ya estaban desde `add-data-model`.
   Lo que falta, con las reglas que ya están decididas:
-    /rewards    catálogo del padre, con asignación y precio por hijo. Sin diseñar todavía.
     /redemptions  solicitud del niño y resolución del padre. Sin diseñar todavía.
 
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)

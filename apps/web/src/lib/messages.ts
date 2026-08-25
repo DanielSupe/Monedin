@@ -179,6 +179,66 @@ export const messages = {
     nextPage: "Siguiente",
   },
 
+  rewards: {
+    /** Gestión del padre. */
+    title: "Premios",
+    empty: "Todavía no has publicado ningún premio.",
+    newReward: "Publicar un premio",
+    newRewardTitle: "Nuevo premio",
+    rewardTitle: "¿Qué premio es?",
+    description: "Detalles (opcional)",
+    forWhom: "¿Para quién?",
+    noChildren: "Primero crea un perfil de hijo.",
+    sameCoins: "El mismo precio para todos",
+    coinsPerChild: "Un precio para cada uno",
+    coins: "Monedas",
+    create: "Publicar",
+    working: "Guardando…",
+    cancel: "Cancelar",
+    back: "Volver",
+
+    /** Edición del premio: solo título y descripción. */
+    edit: "Editar",
+    editRewardTitle: "Editar premio",
+    save: "Guardar",
+
+    /** Reemplazo del conjunto de ofertas. */
+    editOffers: "Cambiar quién puede pedirlo",
+    offeredTo: "Ofrecido a",
+    noOffers: "Sin ofertas todavía.",
+    saveOffers: "Guardar ofertas",
+
+    /** La baja es lógica: la interfaz tiene que decirlo antes, no después. */
+    retire: "Retirar",
+    retireConfirm:
+      "Este premio dejará de poder pedirse y desaparecerá del escaparate de tus hijos. " +
+      "Sigue en tu catálogo. ¿Seguro?",
+    retireSubmit: "Sí, retirar",
+
+    /** Filtro del catálogo. */
+    filterActive: "Activos",
+    filterRetired: "Retirados",
+
+    /** Lo que ve el niño. */
+    myRewardsTitle: "Mis premios",
+    myRewardsEmpty: "Todavía no hay premios para ti.",
+    myRewards: "Ver mis premios",
+    affordable: "¡Ya te alcanza!",
+    missingPrefix: "Te faltan",
+
+    /**
+     * Errores. Un 404 aquí NO es «esa tarea ya no está pendiente»: es que ese
+     * premio ya no está, retirado o nunca existió.
+     */
+    notFound: "No encontramos ese premio.",
+    forbidden: "No puedes hacer esto desde este perfil.",
+    invalidData: "Revisa los datos: algo no es válido.",
+
+    /** Paginación del listado. */
+    previousPage: "Anterior",
+    nextPage: "Siguiente",
+  },
+
   errors: {
     /** La respuesta no se pudo interpretar como el cuerpo de error estándar. */
     unreadableResponse: "La respuesta del servidor no se pudo interpretar.",

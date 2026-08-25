@@ -12,13 +12,19 @@ import {
   ERROR_CODES,
   MAX_CHILDREN_PER_FAMILY,
   MAX_PAGE_SIZE,
+  REWARD_STATUSES,
   apiErrorSchema,
   avatarKeySchema,
   createChildSchema,
+  createRewardSchema,
   healthResponseSchema,
   isAvatarKey,
+  listOwnRewardsQuerySchema,
+  listRewardsQuerySchema,
   pageOf,
   paginationQuerySchema,
+  replaceAssignmentsSchema,
+  rewardSchema,
   TASK_STATUSES,
   createTaskSchema,
   listOwnTasksQuerySchema,
@@ -27,6 +33,7 @@ import {
   taskBatchesPageSchema,
   updateChildSchema,
   updateOwnChildSchema,
+  updateRewardSchema,
   updateTaskSchema,
 } from "../src/index.js";
 
@@ -482,6 +489,169 @@ describe("contrato de las tareas", () => {
       pageSize: DEFAULT_PAGE_SIZE,
       total: 1,
       totalPages: 1,
+    });
+
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("contrato de los premios", () => {
+  const base = { title: "Ir al cine" } as const;
+
+  it("acepta el alta con el mismo precio para todos", () => {
+    const result = createRewardSchema.safeParse({
+      ...base,
+      childIds: ["hijo-1", "hijo-2"],
+      coins: 200,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("acepta el alta con un precio distinto por hijo", () => {
+    const result = createRewardSchema.safeParse({
+      ...base,
+      assignments: [
+        { childId: "hijo-1", coins: 200 },
+        { childId: "hijo-2", coins: 150 },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rechaza las dos formas de precio a la vez", () => {
+    const result = createRewardSchema.safeParse({
+      ...base,
+      childIds: ["hijo-1"],
+      coins: 200,
+      assignments: [{ childId: "hijo-2", coins: 150 }],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rechaza que no venga ninguna de las dos formas", () => {
+    expect(createRewardSchema.safeParse(base).success).toBe(false);
+  });
+
+  it("rechaza repetir al mismo hijo en el alta", () => {
+    expect(
+      createRewardSchema.safeParse({ ...base, childIds: ["hijo-1", "hijo-1"], coins: 200 })
+        .success,
+    ).toBe(false);
+  });
+
+  it("rechaza un precio fuera del rango del producto", () => {
+    const conPrecio = (coins: number) =>
+      createRewardSchema.safeParse({ ...base, childIds: ["hijo-1"], coins }).success;
+
+    expect(conPrecio(COINS_MIN - 1)).toBe(false);
+    expect(conPrecio(0)).toBe(false);
+    expect(conPrecio(COINS_MAX + 1)).toBe(false);
+    expect(conPrecio(COINS_MIN)).toBe(true);
+    expect(conPrecio(COINS_MAX)).toBe(true);
+  });
+
+  it("el alta no acepta el padre dueño ni el estado inicial", () => {
+    const conExtra = (extra: Record<string, unknown>) =>
+      createRewardSchema.safeParse({ ...base, childIds: ["hijo-1"], coins: 200, ...extra })
+        .success;
+
+    expect(conExtra({ parentId: "otro" })).toBe(false);
+    expect(conExtra({ isActive: false })).toBe(false);
+  });
+
+  it("la edición NO acepta precio: cambiarlo es cambiar la oferta a un hijo", () => {
+    expect(updateRewardSchema.safeParse({ title: "Otro título" }).success).toBe(true);
+    expect(updateRewardSchema.safeParse({ coins: 200 }).success).toBe(false);
+    expect(updateRewardSchema.safeParse({ title: "Otro", coins: 200 }).success).toBe(false);
+  });
+
+  it("una edición sin ningún campo no es una edición", () => {
+    expect(updateRewardSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("la edición admite borrar la descripción", () => {
+    expect(updateRewardSchema.safeParse({ description: null }).success).toBe(true);
+  });
+
+  it("el reemplazo de ofertas acepta un conjunto vacío", () => {
+    // Es cómo se retira la oferta a todos sin retirar el premio.
+    expect(replaceAssignmentsSchema.safeParse({ assignments: [] }).success).toBe(true);
+  });
+
+  it("el reemplazo de ofertas rechaza un hijo repetido en el conjunto", () => {
+    const result = replaceAssignmentsSchema.safeParse({
+      assignments: [
+        { childId: "hijo-1", coins: 100 },
+        { childId: "hijo-1", coins: 150 },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("el reemplazo de ofertas rechaza un precio fuera de rango", () => {
+    const result = replaceAssignmentsSchema.safeParse({
+      assignments: [{ childId: "hijo-1", coins: COINS_MAX + 1 }],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("la query del niño NO admite pedir el escaparate de otro", () => {
+    // Es la garantía de que un niño no puede pedir el precio de su hermano:
+    // no hay ningún parámetro que pudiera apuntar a otro perfil.
+    expect(listOwnRewardsQuerySchema.safeParse({ childId: "hermano" }).success).toBe(false);
+    expect(listOwnRewardsQuerySchema.safeParse({}).success).toBe(true);
+  });
+
+  it("el filtro del catálogo rechaza un estado inventado", () => {
+    expect(listRewardsQuerySchema.safeParse({ status: "ACTIVE" }).success).toBe(true);
+    expect(listRewardsQuerySchema.safeParse({ status: "RETIRED" }).success).toBe(true);
+    expect(listRewardsQuerySchema.safeParse({ status: "DELETED" }).success).toBe(false);
+  });
+
+  it("el filtro del catálogo es ACTIVE por defecto", () => {
+    const result = listRewardsQuerySchema.safeParse({});
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.status).toBe("ACTIVE");
+    }
+  });
+
+  it("los estados del filtro son exactamente activo y retirado", () => {
+    expect([...REWARD_STATUSES]).toEqual(["ACTIVE", "RETIRED"]);
+  });
+
+  it("un premio se ve con todas sus ofertas, cada una con el hijo y su precio", () => {
+    const result = rewardSchema.safeParse({
+      id: "premio-1",
+      title: "Ir al cine",
+      description: null,
+      status: "ACTIVE",
+      offers: [
+        { child: { id: "hijo-1", name: "Ana", avatar: DEFAULT_AVATAR_KEY }, coins: 200 },
+        { child: { id: "hijo-2", name: "Bruno", avatar: DEFAULT_AVATAR_KEY }, coins: 150 },
+      ],
+      createdAt: "2026-08-24T10:00:00.000Z",
+      updatedAt: "2026-08-24T10:00:00.000Z",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("un premio sin ninguna oferta es válido", () => {
+    const result = rewardSchema.safeParse({
+      id: "premio-1",
+      title: "Ir al cine",
+      description: null,
+      status: "ACTIVE",
+      offers: [],
+      createdAt: "2026-08-24T10:00:00.000Z",
+      updatedAt: "2026-08-24T10:00:00.000Z",
     });
 
     expect(result.success).toBe(true);

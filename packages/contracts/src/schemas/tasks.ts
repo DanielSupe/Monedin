@@ -1,13 +1,18 @@
 import { z } from "zod";
 import {
-  COINS_MAX,
-  COINS_MIN,
   DESCRIPTION_MAX_LENGTH,
   TASK_STATUSES,
   TITLE_MAX_LENGTH,
   TITLE_MIN_LENGTH,
 } from "../constants/domain.js";
 import { avatarKeySchema } from "./avatar.js";
+import {
+  childIdSchema,
+  coinsAmountSchema,
+  coinsPerChildAssignmentSchema,
+  coinsPerChildFields,
+  withCoinsPerChildRules,
+} from "./coins-per-child.js";
 import { pageOf, paginationQuerySchema } from "./pagination.js";
 
 /**
@@ -41,12 +46,11 @@ export const taskDescriptionSchema = z
  *
  * El rango lo garantiza además un CHECK en el motor (`tasks_coins_range`), así
  * que un valor fuera de rango se rechaza aquí y volvería a rechazarse allí.
+ *
+ * Es el mismo esquema que usa la regla compartida de `coins-per-child`: una
+ * tarea y un premio validan el mismo rango con el mismo mensaje.
  */
-export const taskCoinsSchema = z
-  .number({ invalid_type_error: "Las monedas tienen que ser un número." })
-  .int("Las monedas tienen que ser un número entero.")
-  .min(COINS_MIN, `Una tarea vale como mínimo ${COINS_MIN} moneda.`)
-  .max(COINS_MAX, `Una tarea vale como máximo ${COINS_MAX} monedas.`);
+export const taskCoinsSchema = coinsAmountSchema;
 
 /**
  * Fecha límite, en ISO 8601.
@@ -59,81 +63,42 @@ export const taskDueDateSchema = z
   .string()
   .datetime({ offset: true, message: "La fecha límite no es una fecha válida." });
 
-/** Identificador de un hijo dentro de una petición de reparto. */
-const childIdSchema = z.string().min(1, "Falta el identificador del hijo.");
-
 // ---------------------------------------------------------------------------
 // Entrada
 // ---------------------------------------------------------------------------
 
 /** Un hijo con el valor que le toca a él. La forma B del alta. */
-export const taskAssignmentSchema = z
-  .object({
-    childId: childIdSchema,
-    coins: taskCoinsSchema,
-  })
-  .strict();
+export const taskAssignmentSchema = coinsPerChildAssignmentSchema;
 
 export type TaskAssignmentInput = z.infer<typeof taskAssignmentSchema>;
 
 /**
  * Alta de un reparto. Se crea UNA TAREA POR HIJO.
  *
- * El valor se indica de dos formas y hay que cumplir EXACTAMENTE UNA:
+ * El valor se indica de dos formas y hay que cumplir EXACTAMENTE UNA, con la
+ * regla de `coins-per-child`:
  *
  *   A) { childIds: [...], coins }             el mismo valor para todos
  *   B) { assignments: [{ childId, coins }] }  un valor distinto por hijo
  *
  * La regla vive en el esquema compartido y no en el servicio para que el front
  * rechace el formulario sin viaje al servidor y con el mismo criterio que
- * aplicará la API. Ver la decisión 8 del design de `add-tasks`.
+ * aplicará la API. Ver la decisión 8 del design de `add-tasks` y la 2 del
+ * design de `add-rewards`, que la extrajo de aquí.
  *
  * NO acepta `parentId` ni `status`: el padre dueño sale de la sesión y una
  * tarea nace siempre pendiente. Al ser `.strict()`, mandarlos es 422.
  */
-export const createTaskSchema = z
-  .object({
-    title: taskTitleSchema,
-    description: taskDescriptionSchema.optional(),
-    dueDate: taskDueDateSchema.optional(),
-
-    // Forma A. Las dos juntas o ninguna: `childIds` sin `coins` no es media
-    // forma válida, es una petición sin valor.
-    childIds: z.array(childIdSchema).min(1, "Elige al menos un hijo.").optional(),
-    coins: taskCoinsSchema.optional(),
-
-    // Forma B.
-    assignments: z
-      .array(taskAssignmentSchema)
-      .min(1, "Elige al menos un hijo.")
-      .optional(),
-  })
-  .strict()
-  .refine(
-    (value) => {
-      const compartido = value.childIds !== undefined && value.coins !== undefined;
-      const porHijo = value.assignments !== undefined;
-
-      // Ni las dos formas, ni ninguna, ni media: si `compartido` y `porHijo`
-      // valen lo mismo es que faltan campos o sobran.
-      if (compartido === porHijo) return false;
-      if (compartido) return value.assignments === undefined;
-      return value.childIds === undefined && value.coins === undefined;
-    },
-    {
-      message:
-        "Indica el mismo valor para todos los hijos o uno por hijo, pero no las dos cosas.",
-    },
-  )
-  .refine(
-    (value) => {
-      // Un hijo repetido crearía dos tareas idénticas en el mismo reparto, que
-      // no es lo que nadie quiere decir al repetirlo.
-      const ids = value.childIds ?? value.assignments?.map((one) => one.childId) ?? [];
-      return new Set(ids).size === ids.length;
-    },
-    { message: "Hay un hijo repetido en el reparto." },
-  );
+export const createTaskSchema = withCoinsPerChildRules(
+  z
+    .object({
+      title: taskTitleSchema,
+      description: taskDescriptionSchema.optional(),
+      dueDate: taskDueDateSchema.optional(),
+      ...coinsPerChildFields,
+    })
+    .strict(),
+);
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 

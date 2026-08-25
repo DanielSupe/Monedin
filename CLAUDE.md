@@ -278,6 +278,36 @@ Máquinas de estado, tal como las define el producto:
 - **Canje**: `PENDING → APPROVED` (**descuenta**) o `→ REJECTED` (terminal, no devuelve nada, porque
   el descuento solo ocurre al aprobar).
 
+### Reemplazo atómico de un conjunto de filas puente
+
+Cuando una relación de muchos a muchos lleva un dato propio en la tabla puente —el precio de un
+premio para cada hijo, en `RewardAssignment`— y el cliente decide de una vez **el conjunto entero**
+que debe quedar vigente, la operación se escribe como `deleteMany` de las filas actuales seguido de
+`createMany` de las nuevas, **en una única transacción**:
+
+```ts
+return getPrisma().$transaction(async (tx) => {
+  await tx.rewardAssignment.deleteMany({ where: { rewardId } });
+  if (assignments.length > 0) {
+    await tx.rewardAssignment.createMany({ data: assignments.map(/* ... */) });
+  }
+  return tx.reward.findUniqueOrThrow({ where: { id: rewardId }, select: REWARD_FIELDS });
+});
+```
+
+Y no un `upsert` por fila calculando la diferencia contra lo que había. Poner o quitar un hijo del
+conjunto es **una sola decisión** de quien la toma, no una secuencia de altas y bajas que la interfaz
+tiene que reconstruir comparando dos listas; y encadenar varias llamadas dejaría un estado a medias
+visible si la segunda de tres fallara. La transacción es lo que hace que un conjunto rechazado —un
+hijo ajeno entre los indicados— deje las filas **exactamente como estaban**, en vez de a medio borrar.
+
+**Cuándo NO aplica**: en cuanto la fila puente tenga algo que conservar —un `createdAt` que alguien
+lea, un historial propio, una fila que otra tabla referencie por clave ajena—, borrar y recrear deja
+de ser inocuo y hay que volver al diff (leer lo que hay, calcular altas/bajas/cambios, escribir solo
+eso). `RewardAssignment` puede permitírselo porque no lleva historial y ningún canje la referencia:
+`RewardRedemption` congela su propio precio apuntando al premio y al hijo, no a la asignación. Ver la
+decisión 3 del design de `add-rewards`.
+
 ---
 
 ## 5. Sesión y protección de rutas
