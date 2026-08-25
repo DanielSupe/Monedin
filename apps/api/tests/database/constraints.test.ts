@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createChild, createParent, withRollback } from "../support/database.js";
+import { createChild, createParent, createTask, withRollback } from "../support/database.js";
 
 /**
  * Las restricciones viven en el motor, no solo en el código.
@@ -66,9 +66,7 @@ describe("restricciones de rango del motor", () => {
       const hijo = await createChild(db, padre.id);
 
       await expect(
-        db.task.create({
-          data: { title: "Ordenar el cuarto", coins: 0, childId: hijo.id, parentId: padre.id },
-        }),
+        createTask(db, { parentId: padre.id, childId: hijo.id }, { coins: 0 }),
       ).rejects.toThrow();
     }));
 
@@ -78,9 +76,7 @@ describe("restricciones de rango del motor", () => {
       const hijo = await createChild(db, padre.id);
 
       await expect(
-        db.task.create({
-          data: { title: "Ordenar el cuarto", coins: 10_000, childId: hijo.id, parentId: padre.id },
-        }),
+        createTask(db, { parentId: padre.id, childId: hijo.id }, { coins: 10_000 }),
       ).rejects.toThrow();
     }));
 
@@ -185,9 +181,7 @@ describe("estados de tarea", () => {
     withRollback(async (db) => {
       const padre = await createParent(db);
       const hijo = await createChild(db, padre.id);
-      const tarea = await db.task.create({
-        data: { title: "Ordenar el cuarto", coins: 50, childId: hijo.id, parentId: padre.id },
-      });
+      const tarea = await createTask(db, { parentId: padre.id, childId: hijo.id });
 
       expect(tarea.status).toBe("PENDING");
 

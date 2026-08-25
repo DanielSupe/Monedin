@@ -49,7 +49,6 @@ export const messages = {
     /** Rejilla de perfiles. */
     whoIsPlaying: "¿Quién eres?",
     createProfile: "Crear perfil",
-    createProfileSoon: "Crear perfiles llega en el siguiente paso.",
     changeProfile: "Cambiar de perfil",
     profileLocked: "Bloqueado",
     pinPrompt: "Escribe tu PIN",
@@ -73,6 +72,111 @@ export const messages = {
     pinReset: "PIN restablecido. Ya puedes entrar con el nuevo.",
 
     cancel: "Cancelar",
+  },
+
+  children: {
+    /** Gestión de los perfiles desde el lado del padre. */
+    title: "Perfiles de la familia",
+    empty: "Todavía no has creado ningún perfil.",
+    addChild: "Añadir un perfil",
+    newChildTitle: "Nuevo perfil",
+    editChildTitle: "Editar perfil",
+    name: "Nombre",
+    age: "Edad",
+    ageOptional: "Edad (opcional)",
+    avatar: "Animal",
+    pin: "PIN de 4 dígitos",
+    pinHelp: "Es el que usará para entrar a su perfil.",
+    coins: "Monedas",
+    save: "Guardar",
+    create: "Crear perfil",
+    cancel: "Cancelar",
+    working: "Guardando…",
+    back: "Volver",
+    edit: "Editar",
+    locked: "Bloqueado",
+    unlock: "Desbloquear",
+    resetPin: "Cambiar su PIN",
+
+    /** La baja es definitiva: la interfaz tiene que decirlo antes, no después. */
+    deactivate: "Dar de baja",
+    deactivateConfirm:
+      "Este perfil dejará de aparecer y no se puede recuperar. Su historial de monedas se conserva. ¿Seguro?",
+    deactivateSubmit: "Sí, dar de baja",
+
+    /** Lo que el niño ve y puede cambiar de lo suyo. */
+    myProfileTitle: "Mi perfil",
+    myCoins: "Mis monedas",
+    chooseAvatar: "Elige tu animal",
+    avatarSaved: "¡Listo!",
+    changeMyPin: "Cambiar mi PIN",
+
+    /** Errores. Un 409 aquí NO es «correo ya registrado». */
+    maxReached: "Esta familia ya tiene el máximo de perfiles. Da de baja alguno para crear otro.",
+    notFound: "No encontramos ese perfil.",
+    forbidden: "No puedes hacer esto desde este perfil.",
+    invalidData: "Revisa los datos: algo no es válido.",
+
+    /** Paginación del listado. */
+    previousPage: "Anterior",
+    nextPage: "Siguiente",
+  },
+
+  tasks: {
+    /** Gestión del padre. */
+    title: "Tareas",
+    empty: "Todavía no has repartido ninguna tarea.",
+    newTask: "Repartir una tarea",
+    newTaskTitle: "Nueva tarea",
+    taskTitle: "¿Qué hay que hacer?",
+    description: "Detalles (opcional)",
+    dueDate: "Fecha límite (opcional)",
+    dueDateHelp: "Solo se muestra: no caduca ni avisa.",
+    dueLabel: "Para el",
+    forWhom: "¿Para quién?",
+    noChildren: "Primero crea un perfil de hijo.",
+    sameCoins: "El mismo valor para todos",
+    coinsPerChild: "Un valor para cada uno",
+    coins: "Monedas",
+    create: "Repartir",
+    working: "Guardando…",
+    cancel: "Cancelar",
+    back: "Volver",
+    remove: "Borrar",
+    approve: "Aprobar",
+    reject: "Rechazar",
+
+    /** Filtro del listado. Filtrar por completadas es la bandeja de aprobación. */
+    filterAll: "Todas",
+    filterPending: "Pendientes",
+    filterCompleted: "Por aprobar",
+    filterApproved: "Aprobadas",
+
+    /** Estados, tal como los lee una persona. */
+    statusPending: "Pendiente",
+    statusCompleted: "Hecha, esperando revisión",
+    statusApproved: "Aprobada",
+
+    /** Lo que ve el niño. */
+    myTasksTitle: "Mis tareas",
+    myTasksEmpty: "No tienes tareas ahora mismo. ¡Disfruta!",
+    markDone: "¡Ya la hice!",
+    waitingReview: "Se lo dijimos a tu papá o a tu mamá.",
+    earned: "¡Ganaste estas monedas!",
+    myTasks: "Ver mis tareas",
+
+    /**
+     * Errores. Un 409 aquí NO es el tope de perfiles: es que alguien se te
+     * adelantó, o que la pantalla lleva un rato abierta.
+     */
+    conflict: "Esa tarea ya no está pendiente. Vuelve a cargar la lista para verla como está ahora.",
+    notFound: "No encontramos esa tarea.",
+    forbidden: "No puedes hacer esto desde este perfil.",
+    invalidData: "Revisa los datos: algo no es válido.",
+
+    /** Paginación del listado. */
+    previousPage: "Anterior",
+    nextPage: "Siguiente",
   },
 
   errors: {

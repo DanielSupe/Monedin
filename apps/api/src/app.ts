@@ -2,7 +2,9 @@ import { API_PREFIX } from "@monedin/contracts";
 import cookieParser from "cookie-parser";
 import express, { type Express, Router, type Router as ExpressRouter } from "express";
 import { authRouter } from "./modules/auth/auth.routes.js";
+import { childrenRouter } from "./modules/children/children.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
+import { tasksRouter } from "./modules/tasks/tasks.routes.js";
 import { errorHandler } from "./shared/errors/error-handler.js";
 import { notFoundHandler } from "./shared/errors/not-found-handler.js";
 import { resolveSession } from "./shared/http/session.js";
@@ -28,7 +30,7 @@ import { resolveSession } from "./shared/http/session.js";
  * design de `add-authentication`.
  */
 
-export const apiRouters: ExpressRouter[] = [healthRouter, authRouter];
+export const apiRouters: ExpressRouter[] = [healthRouter, authRouter, childrenRouter, tasksRouter];
 
 export function createApp(routers: ExpressRouter[] = apiRouters): Express {
   const app = express();

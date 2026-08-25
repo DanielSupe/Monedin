@@ -1,11 +1,13 @@
 import {
   type SessionState,
   changeAdultPinSchema,
+  changeOwnChildPinSchema,
   changePasswordSchema,
   enterProfileSchema,
   loginParentSchema,
   registerParentSchema,
   resetAdultPinSchema,
+  resolveAvatarKey,
   setChildPinSchema,
 } from "@monedin/contracts";
 import type { Request, RequestHandler } from "express";
@@ -83,6 +85,15 @@ export const handleChangeAdultPin: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", changeAdultPinSchema);
 
   await service.changeAdultPin(actorOf(req), input);
+
+  res.status(204).send();
+};
+
+/** El niño cambia el PIN de SU perfil, el de la sesión, sabiendo el actual. */
+export const handleChangeOwnChildPin: RequestHandler = async (req, res) => {
+  const input = validatedPart(req, "body", changeOwnChildPinSchema);
+
+  await service.changeOwnChildPin(actorOf(req), input);
 
   res.status(204).send();
 };
@@ -216,7 +227,9 @@ async function buildSessionState(req: Request): Promise<SessionState> {
             familyRole: "CHILD",
             id: child.id,
             name: child.name,
-            avatar: child.avatar,
+            // Resuelto al de por defecto, igual que en la rejilla: eran dos
+            // formas del mismo dato y el front tenía que tratar el hueco.
+            avatar: resolveAvatarKey(child.avatar),
             coins: child.coins,
           },
           hasAccount: true,

@@ -4,6 +4,7 @@ import { ConflictError, NotFoundError } from "../../src/shared/errors/domain-err
 import {
   closeTestPrisma,
   createChild,
+  createTask,
   createParent,
   deleteLedgerRows,
   testPrisma,
@@ -116,9 +117,7 @@ describe("movimiento de monedas", () => {
     withRollback(async (db) => {
       const padre = await createParent(db);
       const hijo = await createChild(db, padre.id);
-      const tarea = await db.task.create({
-        data: { title: "Ordenar el cuarto", coins: 50, childId: hijo.id, parentId: padre.id },
-      });
+      const tarea = await createTask(db, { parentId: padre.id, childId: hijo.id });
 
       await applyCoinMovement(db, {
         childId: hijo.id,

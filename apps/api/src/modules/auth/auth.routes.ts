@@ -1,5 +1,6 @@
 import {
   changeAdultPinSchema,
+  changeOwnChildPinSchema,
   changePasswordSchema,
   enterProfileSchema,
   loginParentSchema,
@@ -9,7 +10,7 @@ import {
 } from "@monedin/contracts";
 import type { Router as ExpressRouter } from "express";
 import { moduleRouter } from "../../shared/http/module-router.js";
-import { requireParent } from "../../shared/http/session.js";
+import { requireChild, requireParent } from "../../shared/http/session.js";
 import { validate } from "../../shared/http/validate.js";
 import * as controller from "./auth.controller.js";
 
@@ -88,6 +89,17 @@ auth.post(
   requireParent,
   validate({ body: setChildPinSchema }),
   controller.handleSetChildPin,
+);
+
+// El niño cambia el SUYO, y para eso tiene que saber el actual. Es una ruta
+// aparte de la de arriba a propósito: aquella es la vía de rescate del padre y
+// no exige el PIN anterior. Con una sola, la puerta de rescate quedaría abierta
+// también para quien ya está dentro del perfil.
+auth.post(
+  "/auth/child-profiles/me/pin",
+  requireChild,
+  validate({ body: changeOwnChildPinSchema }),
+  controller.handleChangeOwnChildPin,
 );
 
 auth.post(

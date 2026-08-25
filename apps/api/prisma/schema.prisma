@@ -142,8 +142,20 @@ model Task {
   coins       Int
   status      TaskStatus @default(PENDING)
   dueDate     DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+
+  /// Identificador del REPARTO: las filas creadas en el mismo POST lo
+  /// comparten. Lo genera la aplicacion antes de insertar, porque hace falta
+  /// conocerlo para que todas las filas lleven el mismo.
+  ///
+  /// No es opcional: una columna nullable obligaria a tratar el caso «sin
+  /// reparto» en cada consulta y en cada pantalla, para siempre. Las filas
+  /// anteriores se rellenaron en la migracion con su propio identificador, de
+  /// modo que cada una es un reparto de una. Ver la decision 4 del design de
+  /// add-tasks.
+  batchId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   childId String
   child   ChildProfile @relation(fields: [childId], references: [id], onDelete: Restrict)
@@ -155,6 +167,7 @@ model Task {
 
   @@index([childId, status])
   @@index([parentId, createdAt])
+  @@index([parentId, batchId])
   @@map("tasks")
 }
 

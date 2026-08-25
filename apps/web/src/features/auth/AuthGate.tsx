@@ -33,16 +33,34 @@ export function AuthGate({ children }: { children: ReactNode }): ReactElement {
   }
 }
 
-/** Envuelve contenido que solo tiene sentido para un padre. */
-export function ParentOnly({ children }: { children: ReactNode }): ReactElement | null {
+/**
+ * Envuelve contenido que solo tiene sentido para un padre.
+ *
+ * `fallback` importa cuando lo envuelto es una PÁGINA entera y no un botón: sin
+ * él, un niño que llegue a `/children` se queda mirando una pantalla en blanco
+ * sin saber por qué.
+ */
+export function ParentOnly({
+  children,
+  fallback = null,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}): ReactElement | null {
   const { session } = useSession();
 
-  return session?.actor?.familyRole === "PARENT" ? <>{children}</> : null;
+  return session?.actor?.familyRole === "PARENT" ? <>{children}</> : <>{fallback}</>;
 }
 
 /** Envuelve contenido que solo tiene sentido para un niño. */
-export function ChildOnly({ children }: { children: ReactNode }): ReactElement | null {
+export function ChildOnly({
+  children,
+  fallback = null,
+}: {
+  children: ReactNode;
+  fallback?: ReactNode;
+}): ReactElement | null {
   const { session } = useSession();
 
-  return session?.actor?.familyRole === "CHILD" ? <>{children}</> : null;
+  return session?.actor?.familyRole === "CHILD" ? <>{children}</> : <>{fallback}</>;
 }

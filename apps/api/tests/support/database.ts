@@ -111,6 +111,39 @@ export async function createChild(
 }
 
 /**
+ * Crea una tarea valida colgando de un padre y un hijo.
+ *
+ * `batchId` es obligatorio desde `add-tasks`, y salvo que se indique otro cada
+ * tarea nace en su propio reparto de una: es lo que hace este ayudante util
+ * tambien para los tests que no van de repartos.
+ */
+export async function createTask(
+  db: TransactionalPrisma,
+  owners: { parentId: string; childId: string },
+  overrides: {
+    title?: string;
+    coins?: number;
+    status?: "PENDING" | "COMPLETED" | "APPROVED";
+    batchId?: string;
+    dueDate?: Date;
+  } = {},
+): Promise<{ id: string; batchId: string; status: string; coins: number }> {
+  const task = await db.task.create({
+    data: {
+      title: overrides.title ?? "Ordenar el cuarto",
+      coins: overrides.coins ?? 50,
+      batchId: overrides.batchId ?? `reparto-${Math.random().toString(36).slice(2, 12)}`,
+      ...(overrides.status === undefined ? {} : { status: overrides.status }),
+      ...(overrides.dueDate === undefined ? {} : { dueDate: overrides.dueDate }),
+      childId: owners.childId,
+      parentId: owners.parentId,
+    },
+  });
+
+  return { id: task.id, batchId: task.batchId, status: task.status, coins: task.coins };
+}
+
+/**
  * Borra el historial de un hijo, desactivando el disparador que lo protege.
  *
  * Es limpieza de tests, no una operación del dominio. Que haga falta desactivar

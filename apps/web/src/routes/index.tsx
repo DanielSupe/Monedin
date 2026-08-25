@@ -1,8 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthGate, ChildOnly, ParentOnly } from "../features/auth/AuthGate.js";
 import { ChangePinScreen } from "../features/auth/ChangePinScreen.js";
 import { useLeaveProfile, useLogout, useSession } from "../features/auth/use-session.js";
+import { ChildSettings } from "../features/children/ChildSettings.js";
+import { MyTasks } from "../features/tasks/MyTasks.js";
 import { messages } from "../lib/messages.js";
 
 export const Route = createFileRoute("/")({
@@ -26,6 +28,8 @@ function Home(): React.ReactElement {
 function SignedIn(): React.ReactElement {
   const { session } = useSession();
   const [changingPin, setChangingPin] = useState(false);
+  const [misAjustes, setMisAjustes] = useState(false);
+  const [misTareas, setMisTareas] = useState(false);
   const logout = useLogout();
   const leave = useLeaveProfile();
 
@@ -36,6 +40,14 @@ function SignedIn(): React.ReactElement {
     return <ChangePinScreen onDone={() => setChangingPin(false)} />;
   }
 
+  if (misAjustes) {
+    return <ChildSettings onDone={() => setMisAjustes(false)} />;
+  }
+
+  if (misTareas) {
+    return <MyTasks onDone={() => setMisTareas(false)} />;
+  }
+
   return (
     <section>
       <h2>Hola, {actor.name}</h2>
@@ -44,14 +56,22 @@ function SignedIn(): React.ReactElement {
         <p>
           Tienes <strong>{actor.familyRole === "CHILD" ? actor.coins : 0}</strong> monedas.
         </p>
+        <button type="button" onClick={() => setMisTareas(true)}>
+          {messages.tasks.myTasks}
+        </button>
+        <button type="button" onClick={() => setMisAjustes(true)}>
+          {messages.children.myProfileTitle}
+        </button>
       </ChildOnly>
 
-      <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem" }}>
+      <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem", flexWrap: "wrap" }}>
         <button type="button" onClick={() => leave.mutate()}>
           {messages.auth.changeProfile}
         </button>
 
         <ParentOnly>
+          <Link to="/tasks">{messages.tasks.title}</Link>
+          <Link to="/children">{messages.children.title}</Link>
           <button type="button" onClick={() => setChangingPin(true)}>
             {messages.auth.changePinTitle}
           </button>

@@ -1,7 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { getConfig } from "../src/config/index.js";
 import { hashCredential } from "../src/shared/crypto/credentials.js";
+import { applyCoinMovement } from "../src/shared/database/coin-ledger.js";
 
 /**
  * Datos de ejemplo para desarrollar.
@@ -120,20 +122,55 @@ async function seed(): Promise<void> {
     },
   });
 
-  await prisma.task.createMany({
-    data: [
-      { title: "Ordenar el cuarto", coins: 50, childId: mayor.id, parentId: padre.id },
-      { title: "Sacar la basura", coins: 20, childId: mayor.id, parentId: padre.id },
-      { title: "Guardar los juguetes", coins: 30, childId: menor.id, parentId: padre.id },
-      {
-        title: "Leer 15 minutos",
-        description: "Un cuento antes de dormir.",
-        coins: 40,
-        childId: menor.id,
-        parentId: padre.id,
-      },
-    ],
-  });
+  // --- Tareas ---------------------------------------------------------------
+  //
+  // Se siembran en los TRES estados para que la aplicacion tenga algo que
+  // ensenar nada mas levantarla: pendientes que el nino puede marcar, marcadas
+  // que esperan al padre en su bandeja de aprobacion, y aprobadas con su
+  // acreditacion de verdad.
+  //
+  // Un REPARTO son las filas creadas en un mismo acto. "Ordenar el cuarto" se
+  // asigno a los dos hijos a la vez, asi que sus dos filas comparten `batchId`;
+  // el resto son repartos de uno. El identificador lo genera quien crea, porque
+  // hace falta conocerlo antes de insertar.
+  const ordenarElCuarto = randomUUID();
+  const deberesDeCasa = randomUUID();
+
+  const tareas = [
+    // Pendientes: lo que cada nino tiene por hacer.
+    { title: "Ordenar el cuarto", coins: 50, childId: mayor.id, batchId: ordenarElCuarto },
+    { title: "Ordenar el cuarto", coins: 30, childId: menor.id, batchId: ordenarElCuarto },
+
+    // Marcadas: esperando a que su padre las resuelva. Es la bandeja.
+    { title: "Sacar la basura", coins: 20, childId: mayor.id, status: "COMPLETED" as const },
+    {
+      title: "Leer 15 minutos",
+      description: "Un cuento antes de dormir.",
+      coins: 40,
+      childId: menor.id,
+      status: "COMPLETED" as const,
+    },
+
+    // Aprobadas: ya pagadas. Su acreditacion se escribe justo debajo.
+    { title: "Poner la mesa", coins: 70, childId: mayor.id, batchId: deberesDeCasa, status: "APPROVED" as const },
+    { title: "Poner la mesa", coins: 50, childId: menor.id, batchId: deberesDeCasa, status: "APPROVED" as const },
+    { title: "Hacer la cama", coins: 50, childId: mayor.id, status: "APPROVED" as const },
+    { title: "Hacer la cama", coins: 30, childId: menor.id, status: "APPROVED" as const },
+  ];
+
+  const creadas = [];
+  for (const tarea of tareas) {
+    creadas.push(
+      await prisma.task.create({
+        data: {
+          ...tarea,
+          batchId: tarea.batchId ?? randomUUID(),
+          parentId: padre.id,
+        },
+        select: { id: true, childId: true, coins: true, status: true },
+      }),
+    );
+  }
 
   const cine = await prisma.reward.create({
     data: { title: "Ir al cine", description: "Una película a elegir.", parentId: padre.id },
@@ -152,30 +189,29 @@ async function seed(): Promise<void> {
     ],
   });
 
-  // Saldo inicial de ejemplo, moviéndolo por el libro y no a mano, para que el
-  // historial cuadre desde el primer día.
-  for (const [hijo, monedas] of [
-    [mayor, 120],
-    [menor, 80],
-  ] as const) {
-    await prisma.$transaction(async (tx) => {
-      await tx.childProfile.update({
-        where: { id: hijo.id },
-        data: { coins: { increment: monedas } },
-      });
-      await tx.coinTransaction.create({
-        data: {
-          childId: hijo.id,
-          amount: monedas,
-          balanceAfter: monedas,
-          reason: "MANUAL_ADJUSTMENT",
-        },
-      });
-    });
+  // El saldo sale de las tareas aprobadas y de nada mas.
+  //
+  // Antes era un ajuste manual, y contradecia una decision cerrada del
+  // producto: el saldo solo se mueve con tareas y canjes. Ahora cada moneda
+  // sembrada tiene su tarea detras, asi que el historial que ve un desarrollador
+  // el primer dia es el mismo que producira la aplicacion.
+  //
+  // Se acredita con `applyCoinMovement`, la misma operacion que usa el modulo
+  // `tasks`: la siembra no escribe su propia version de mover monedas.
+  for (const tarea of creadas.filter((una) => una.status === "APPROVED")) {
+    await prisma.$transaction((tx) =>
+      applyCoinMovement(tx, {
+        childId: tarea.childId,
+        amount: tarea.coins,
+        reason: "TASK_APPROVED",
+        taskId: tarea.id,
+      }),
+    );
   }
 
   const resumen = [
-    `Sembrado: 1 padre, 2 hijos, 4 tareas, 2 premios con 4 asignaciones y su saldo inicial.`,
+    `Sembrado: 1 padre, 2 hijos, ${creadas.length} tareas en los tres estados,`,
+    `  2 premios con 4 asignaciones, y el saldo que sale de las tareas aprobadas.`,
     `  Padre: ${CREDENCIALES_DE_EJEMPLO.padre.correo} / ${CREDENCIALES_DE_EJEMPLO.padre.password} / PIN ${CREDENCIALES_DE_EJEMPLO.padre.pin}`,
     ...CREDENCIALES_DE_EJEMPLO.ninos.map((n) => `  ${n.nombre}: PIN ${n.pin}`),
   ];

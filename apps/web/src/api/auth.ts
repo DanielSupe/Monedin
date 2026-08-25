@@ -1,5 +1,6 @@
 import {
   type ChangeAdultPinInput,
+  type ChangeOwnChildPinInput,
   type ChangePasswordInput,
   type EnterProfileInput,
   type LoginParentInput,
@@ -7,6 +8,7 @@ import {
   type ResetAdultPinInput,
   type SelectableProfiles,
   type SessionState,
+  type SetChildPinInput,
   selectableProfilesSchema,
   sessionStateSchema,
 } from "@monedin/contracts";
@@ -62,6 +64,32 @@ export async function leaveProfile(): Promise<void> {
 
 export async function changeAdultPin(input: ChangeAdultPinInput): Promise<void> {
   await apiFetch("/auth/pin", emptySchema, { method: "POST", body: JSON.stringify(input) });
+}
+
+/**
+ * El niño cambia el PIN de SU perfil, el de la sesión.
+ *
+ * No lleva identificador: el perfil sale de la sesión. Vive en `auth` y no en
+ * `children` porque tocar una credencial es de este módulo.
+ */
+export async function changeOwnChildPin(input: ChangeOwnChildPinInput): Promise<void> {
+  await apiFetch("/auth/child-profiles/me/pin", emptySchema, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+/** El padre repone el PIN de un hijo, sin conocer el anterior. */
+export async function setChildPin(input: SetChildPinInput): Promise<void> {
+  await apiFetch("/auth/child-profiles/pin", emptySchema, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+/** El padre desbloquea el perfil de un hijo bloqueado por intentos. */
+export async function unlockChildProfile(childProfileId: string): Promise<void> {
+  await apiFetch(`/auth/child-profiles/${childProfileId}/unlock`, emptySchema, { method: "POST" });
 }
 
 export async function resetAdultPin(input: ResetAdultPinInput): Promise<void> {

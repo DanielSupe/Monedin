@@ -1,4 +1,4 @@
-import { API_PREFIX, AVATAR_KEYS, ERROR_CODES } from "@monedin/contracts";
+import { API_PREFIX, AVATAR_KEYS, DEFAULT_AVATAR_KEY, ERROR_CODES } from "@monedin/contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as api from "../src/api/auth.js";
 import { AVATAR_OPTIONS, avatarGlyph } from "../src/features/auth/avatars.js";
@@ -50,7 +50,13 @@ describe("cliente de sesión", () => {
       "fetch",
       vi.fn().mockResolvedValue(
         jsonResponse(200, {
-          actor: { familyRole: "CHILD", id: "c1", name: "Mateo", avatar: null, coins: 120 },
+          actor: {
+            familyRole: "CHILD",
+            id: "c1",
+            name: "Mateo",
+            avatar: DEFAULT_AVATAR_KEY,
+            coins: 120,
+          },
           hasAccount: true,
         }),
       ),
@@ -60,6 +66,23 @@ describe("cliente de sesión", () => {
 
     expect(state.actor).toMatchObject({ familyRole: "CHILD", coins: 120 });
     expect(state.hasAccount).toBe(true);
+  });
+
+  it("el avatar del actor llega siempre resuelto, nunca nulo", async () => {
+    // La API lo resuelve al de por defecto antes de responder, igual que en la
+    // rejilla. Eran dos formas del mismo dato y el front tenía que tratar el
+    // hueco en cada pantalla. Ver la tarea 1.6 de `add-children`.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        jsonResponse(200, {
+          actor: { familyRole: "CHILD", id: "c1", name: "Mateo", avatar: null, coins: 0 },
+          hasAccount: true,
+        }),
+      ),
+    );
+
+    await expect(api.fetchSession()).rejects.toBeInstanceOf(ApiRequestError);
   });
 
   it("maneja una respuesta 204 sin cuerpo", async () => {

@@ -2,6 +2,7 @@ import { ERROR_CODES, PIN_LENGTH, type SelectableProfile } from "@monedin/contra
 import { useState } from "react";
 import { ApiRequestError } from "../../lib/http-client.js";
 import { messages } from "../../lib/messages.js";
+import { CreateProfileScreen } from "../children/CreateProfileScreen.js";
 import { avatarGlyph } from "./avatars.js";
 import { ResetPinScreen } from "./ResetPinScreen.js";
 import { describeAuthError, isLockout, useEnterProfile, useProfiles } from "./use-session.js";
@@ -29,14 +30,7 @@ export function ProfileGrid(): React.ReactElement {
   const { data, isPending } = useProfiles(true);
 
   if (view.name === "create") {
-    return (
-      <section>
-        <p>{messages.auth.createProfileSoon}</p>
-        <button type="button" onClick={() => setView({ name: "grid" })}>
-          {messages.auth.back}
-        </button>
-      </section>
-    );
+    return <CreateProfileScreen onDone={() => setView({ name: "grid" })} />;
   }
 
   if (view.name === "reset") {

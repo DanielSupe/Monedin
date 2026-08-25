@@ -203,6 +203,43 @@ await prisma.$transaction(async (tx) => {
 
 Recibe la transacción como primer argumento precisamente para que no se pueda llamar fuera de una.
 
+**`applyCoinMovement` NO es idempotente**, y suponer lo contrario es el error caro de este proyecto.
+Dos llamadas idénticas acreditan dos veces: hace exactamente lo que se le pide, tantas veces como se
+le pida. Lo que impide el duplicado es que el segundo intento **no encuentre el estado de origen que
+esperaba** — la transición condicional de más abajo—, nunca el libro mayor.
+
+**La transacción interactiva vive en el repositorio**, porque el cliente no se puede importar fuera
+de uno. La consecuencia es que la comprobación de «cuántas filas afectó» ocurre ahí, y que ahí se
+lanza el error de dominio: devolver un `null` desde dentro de `$transaction` la confirmaría, y en el
+caso de aprobar eso significa acreditar. El repositorio sigue sin saber de roles ni de pertenencia,
+que es lo que el servicio comprueba **antes** de llamarlo.
+
+`tasks.repository.approve()` es la plantilla, y el orden de sus tres pasos es la plantilla:
+
+```ts
+return withTranslatedErrors(() =>
+  getPrisma().$transaction(async (tx) => {
+    // 1. La transición, con el estado de ORIGEN en la condición.
+    const affected = await tx.task.updateMany({
+      where: { id: taskId, status: "COMPLETED" },
+      data: { status: "APPROVED" },
+    });
+    if (affected.count !== 1) throw new TaskTransitionConflictError(); // deshace la transacción
+
+    // 2. Y SOLO ENTONCES el dinero, en la misma transacción.
+    await applyCoinMovement(tx, { childId, amount: coins, reason: "TASK_APPROVED", taskId });
+
+    // 3. Lo que se devuelve, leído dentro.
+    return tx.task.findUniqueOrThrow({ where: { id: taskId }, select: TASK_FIELDS });
+  }),
+);
+```
+
+Al revés —acreditar y después mirar el estado— el segundo toque de un doble tap paga antes de
+descubrir que perdió la carrera. Read Committed basta: el `UPDATE` condicional toma un bloqueo de
+fila, la segunda transacción espera y reevalúa el predicado sobre la versión ya confirmada. No hace
+falta subir el aislamiento ni mapear `P2034`.
+
 `ChildProfile.coins` es la fuente de verdad del saldo. Se modifica **siempre** con `increment` o
 `decrement`, **nunca** leyendo, sumando en memoria y escribiendo: dos peticiones simultáneas con
 lectura-modificación-escritura pierden una de las dos.
@@ -273,9 +310,22 @@ auth.accountGet("/auth/profiles", handleListProfiles); // rejilla: cuenta acredi
 auth.get("/tasks", requireParent, handleList);          // exige actor, como cualquier ruta normal
 ```
 
-Hoy solo tres rutas usan `accountGet`/`accountPost`: listar los perfiles, entrar a uno, y
-restablecer el PIN de adulto con la contraseña. Son justo los pasos previos a ser alguien —entrar a
-un perfil es lo que crea el actor, así que la ruta que lo hace no puede exigirlo de antemano.
+Hoy hay **cinco** rutas de solo cuenta, y la lista está escrita en un test (`account-only-routes`)
+que falla si aparece una sexta: listar los perfiles, entrar a uno, salir a la rejilla, restablecer el
+PIN de adulto con la contraseña, y **crear un perfil de hijo**. Las cuatro primeras son los pasos
+previos a ser alguien —entrar a un perfil es lo que crea el actor, así que la ruta que lo hace no
+puede exigirlo de antemano—. La quinta ocurre en la misma pantalla y por la misma razón: pedir el PIN
+de adulto para añadir un hijo convierte la rejilla en un trámite, y una familia recién registrada se
+quedaría sin salida.
+
+Esta frase decía «tres» y ya eran cuatro: se olvidaba `/auth/profiles/leave`. Por eso ahora la lista
+vive en un test y no solo aquí. Una convención que solo vive en un documento está muerta al tercer
+mes, incluida esta.
+
+**Solo cuenta NO significa sin autorización.** `POST /children` se conforma con la cookie de cuenta,
+pero su servicio rechaza que la ejecute un perfil de niño activo: que la cookie alcance no quiere
+decir que valga cualquiera que la traiga. Por eso ese servicio recibe, además del identificador de la
+cuenta, quién está operando —si es que ya hay alguien—.
 
 **El actor se obtiene del middleware, nunca se reconstruye.** El controlador lo lee y se lo pasa al
 servicio:
@@ -307,6 +357,13 @@ hasheado: leer la tabla entera no permite suplantar a nadie.
 restricciones `CHECK` (saldo no negativo, rangos de monedas y de edad) y un disparador que hace
 inmutable el historial. La validación de entrada protege la puerta principal; esto protege todo lo
 demás: una consulta a mano, una importación, un módulo futuro que use `update` en vez de `increment`.
+
+**Un invariante de INTEGRIDAD va al motor; un límite de POLÍTICA que cuenta filas, no.** Saldo no
+negativo y rangos son integridad: violarlos corrompe los datos, así que los impone PostgreSQL.
+Cuántos hijos caben en una familia es política: excederlo no descuadra ningún saldo, y expresarlo en
+SQL exigiría un disparador que cuenta en cada inserción. Ese vive en el servicio
+(`MAX_CHILDREN_PER_FAMILY`) y responde 409. La consecuencia se acepta a conciencia: bajo Read
+Committed, dos altas simultáneas en el último hueco pueden dejar la familia en uno más del tope.
 
 **AVISO para cualquier migración que recree una tabla**: Prisma no conoce esas restricciones y una
 migración generada automáticamente puede llevárselas por delante. El test de coherencia
@@ -358,6 +415,32 @@ de sesión se comportan igual que en producción detrás de Nginx.
 
 Los listados paginan por defecto: `DEFAULT_PAGE_SIZE = 20`, `MAX_PAGE_SIZE = 100`, ambos en
 `@monedin/contracts`. Un endpoint de listado sin paginación es un endpoint sin terminar.
+
+El patrón lo estrena `GET /children` y es el que copian los listados siguientes:
+
+- `paginationQuerySchema` valida `page` y `pageSize` con `z.coerce`, porque la query llega como
+  cadena. Un `pageSize` por encima del máximo es **422, no un recorte silencioso**: recortar esconde
+  el error de quien llama, que pide 500, recibe 100 y cree que hay 100.
+- La respuesta es `{ items, page, pageSize, total, totalPages }`, con los metadatos en el cuerpo y no
+  en cabeceras, porque el front valida cada respuesta con Zod y una cabecera quedaría fuera del
+  contrato. `totalPages` nunca es 0.
+- La aritmética vive solo en `shared/pagination.ts`: el servicio habla de página y tamaño, el
+  repositorio de `skip`/`take`, y ningún repositorio hace cuentas con entrada de usuario.
+- El repositorio **cuenta y lee en la misma transacción** —si no, un alta concurrente entre las dos
+  consultas deja `total` e `items` contradiciéndose— y su `orderBy` **incluye el identificador como
+  desempate**. Sin desempate, dos filas creadas en el mismo milisegundo pueden salir en dos páginas o
+  en ninguna: es el bug clásico de la paginación por desplazamiento.
+- Una página posterior a la última devuelve lista vacía, no 404.
+
+`GET /auth/profiles` es la excepción declarada: la rejilla es el conjunto entero de una familia, y
+paginar un «¿quién eres?» no significa nada.
+
+**Cuando la unidad de la lista es un grupo, se pagina por el grupo.** `GET /tasks` devuelve repartos,
+así que el `skip`/`take` se aplica a los identificadores de reparto y no a las filas, en dos
+consultas dentro de la misma transacción: primero qué grupos entran, después todas las filas de esos
+grupos. Paginar filas y agrupar después es una línea menos y produce grupos truncados en cada
+frontera de página. El desempate del orden es el identificador del grupo, por la misma razón de
+siempre.
 
 ### TypeScript
 

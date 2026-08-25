@@ -64,18 +64,38 @@ context: |
   SUPERFICIE DE LA API PREVISTA (todo bajo /api/v1)
   Lo ya construido:
     GET /health  público, sonda de vida, no consulta la base de datos.
+    /children   POST de SOLO CUENTA: se crea desde la rejilla sin PIN de adulto, porque crear un
+                perfil es otro de los pasos previos a ser alguien. Un perfil de NIÑO activo no
+                puede (403). Tope de hijos activos por familia impuesto en el servicio (409).
+                GET paginado y GET /:id (padre, solo hijos propios). Ajeno o dado de baja -> 404,
+                nunca 403, para no confirmar que existe.
+                PATCH /:id (padre): nombre, edad y avatar. NUNCA el saldo.
+                DELETE /:id (padre): baja LOGICA y DEFINITIVA, sin reactivacion. Revoca las
+                sesiones abiertas de ese perfil y conserva su historial.
+                GET y PATCH /children/me (niño): su perfil con su saldo, y su avatar. El perfil
+                sale de la sesion y nunca de la peticion, asi que no ve a sus hermanos.
+                El PIN propio del niño NO vive aqui: POST /auth/child-profiles/me/pin, porque
+                cambiar una credencial toca la tabla de sesiones y esa es exclusiva de auth.
+                Estas rutas estrenaron el patron de paginacion del proyecto.
+    /tasks      POST (padre) acepta DOS formas y debe cumplirse EXACTAMENTE una:
+                  A) { childIds: [...], coins }  mismo valor para todos
+                  B) { assignments: [{ childId, coins }] }  valor distinto por hijo
+                Se crea UNA FILA POR HIJO y se devuelve el array. El reparto es TODO O NADA:
+                se comprueban todos los hijos antes de crear nada, y un hijo ajeno, inexistente
+                o dado de baja da 404 -> nunca 403, para no confirmar que existe. (El boceto
+                decia 403 para el ajeno; se corrigio en add-tasks por coherencia con /children.)
+                Las filas creadas en el mismo POST comparten `batchId`, que es el REPARTO.
+                GET (padre) devuelve los repartos AGRUPADOS y pagina POR REPARTO, con filtros
+                por estado y por hijo. Filtrar por COMPLETED es la bandeja de aprobacion. El
+                filtro por estado ensena el reparto entero; el de hijo acota tambien las filas.
+                GET /tasks/mine (niño) su lista plana, tomada de la sesion y nunca de la query.
+                GET /:id (ambos roles, cada uno con su vista, filtrando por pertenencia).
+                PATCH /:id (padre, solo en PENDING). DELETE /:id (padre, solo en PENDING).
+                POST /:id/complete (niño) · /approve y /reject (padre). POST y no PATCH:
+                aprobar tiene efecto secundario sobre el saldo y no es idempotente.
+                Aprobar ACREDITA en la misma transaccion que el cambio de estado, condicionado
+                al estado de origen: dos toques dan una acreditacion y un 409.
   Lo que falta, con las reglas que ya están decididas:
-    /children   POST y GET (padre), GET /children/me (niño, incluye su saldo),
-                PATCH /children/:id (padre, solo hijos propios).
-                No hay borrado: existe baja lógica en el esquema.
-    /tasks      POST (padre) acepta DOS formas y debe cumplirse una u otra:
-                  A) { childIds: [...], coins }  mismo precio para todos
-                  B) { assignments: [{ childId, coins }] }  precio distinto por hijo
-                Se crea UNA FILA POR HIJO y se devuelve el array. Valida que todos los hijos
-                existan (404) y sean del padre (403) ANTES de crear nada.
-                GET y GET /:id (ambos roles, filtrando por pertenencia).
-                PATCH /:id (padre, solo en PENDING). DELETE /:id (padre).
-                PATCH /:id/complete (niño) · /approve y /reject (padre).
     /rewards    catálogo del padre, con asignación y precio por hijo. Sin diseñar todavía.
     /redemptions  solicitud del niño y resolución del padre. Sin diseñar todavía.
 
@@ -89,14 +109,24 @@ context: |
     append-only registra cada movimiento, con el saldo resultante de cada uno.
   - Task.coins tiene rango 1-9999. El estado TaskStatus.REJECTED no existe: rechazar una tarea
     la devuelve a PENDING.
-  - Dar de baja un hijo o retirar un premio es lógico, nunca destruye historial.
+  - Dar de baja un hijo o retirar un premio es lógico, nunca destruye historial. La baja de un hijo
+    es ademas DEFINITIVA: no hay reactivacion.
+  - El saldo solo se mueve con tareas y canjes. No hay ajuste manual: CoinReason.MANUAL_ADJUSTMENT
+    existe en el enum pero ningun endpoint lo produce, y desde add-tasks tampoco la siembra.
+  - DELETE /tasks es borrado FISICO, y solo en PENDING. Era una pregunta abierta y la cierra
+    add-tasks: la condicion de estado es lo que garantiza que nunca se intente borrar una tarea
+    con historial de monedas detras, cuya clave ajena restrictiva lo impediria de todas formas.
+    En COMPLETED tampoco se borra, y eso no es un limite tecnico sino de producto: el niño hizo
+    el trabajo y merece una respuesta, sea aprobarla o rechazarla.
+  - Corregir una acreditacion equivocada NO se hace editando el historial, que es inmutable, sino
+    registrando un movimiento que la compense. Ese mecanismo todavia no lo expone ningun endpoint.
+  - Cambiar un PIN sabiendo el actual NO revoca sesiones, ni la propia ni la de otro dispositivo.
+    Para echar a alguien de otro dispositivo esta cerrar la sesion de cuenta, que si revoca.
   - Los avatares y las imágenes se suben a S3 (bucket privado, URLs firmadas de corta vida).
 
   ABIERTO
   - Cuántos dígitos tiene el PIN y con qué algoritmo se hashean las credenciales: se cierra en
     add-authentication.
-  - DELETE /tasks era borrado físico en el boceto original, pero una tarea con historial de
-    monedas no se puede borrar (clave ajena restrictiva). Resolverlo en el change de tareas.
 
 rules:
   proposal:

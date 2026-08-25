@@ -106,6 +106,20 @@ export const enterProfileSchema = z.object({
 
 export type EnterProfileInput = z.infer<typeof enterProfileSchema>;
 
+/**
+ * El niño cambia SU PIN sabiendo el actual.
+ *
+ * No lleva identificador de perfil a propósito: el que se cambia es el de la
+ * sesión y nunca uno que venga en la petición. Es lo que hace imposible por
+ * construcción que un niño le cambie el PIN a un hermano.
+ */
+export const changeOwnChildPinSchema = z.object({
+  currentPin: pinSchema,
+  newPin: pinSchema,
+});
+
+export type ChangeOwnChildPinInput = z.infer<typeof changeOwnChildPinSchema>;
+
 export const setChildPinSchema = z.object({
   childProfileId: z.string().min(1),
   pin: pinSchema,
@@ -128,7 +142,10 @@ export const childActorSchema = z.object({
   familyRole: z.literal("CHILD"),
   id: z.string(),
   name: z.string(),
-  avatar: z.string().nullable(),
+  // Resuelto al de por defecto, nunca nulo, igual que en `selectableProfileSchema`:
+  // eran dos formas del mismo dato en el mismo paquete. Estrechar el tipo no
+  // rompe a nadie, porque el front ya trataba el caso vacío.
+  avatar: z.string(),
   coins: z.number().int(),
 });
 

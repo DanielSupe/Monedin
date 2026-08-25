@@ -1,17 +1,33 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import {
   API_PREFIX,
   AVATAR_KEYS,
   DEFAULT_AVATAR_KEY,
+  DEFAULT_PAGE_SIZE,
   CHILD_AGE_MAX,
   CHILD_AGE_MIN,
   COINS_MAX,
   COINS_MIN,
   ERROR_CODES,
+  MAX_CHILDREN_PER_FAMILY,
+  MAX_PAGE_SIZE,
   apiErrorSchema,
+  avatarKeySchema,
+  createChildSchema,
   healthResponseSchema,
   isAvatarKey,
+  pageOf,
+  paginationQuerySchema,
+  TASK_STATUSES,
+  createTaskSchema,
+  listOwnTasksQuerySchema,
+  listTasksQuerySchema,
   resolveAvatarKey,
+  taskBatchesPageSchema,
+  updateChildSchema,
+  updateOwnChildSchema,
+  updateTaskSchema,
 } from "../src/index.js";
 
 describe("constantes de dominio", () => {
@@ -118,5 +134,356 @@ describe("catálogo de avatares", () => {
     for (const key of AVATAR_KEYS) {
       expect(key).toMatch(/^[a-z]+$/);
     }
+  });
+
+  it("el esquema acepta todas las claves del catálogo, sin huecos", () => {
+    for (const key of AVATAR_KEYS) {
+      expect(avatarKeySchema.safeParse(key).success).toBe(true);
+    }
+  });
+
+  it("el esquema rechaza una clave inventada", () => {
+    // Es la ÚNICA defensa: la columna es texto libre a nivel de motor.
+    expect(avatarKeySchema.safeParse("dragon").success).toBe(false);
+    expect(avatarKeySchema.safeParse("").success).toBe(false);
+  });
+});
+
+describe("paginación de los listados", () => {
+  it("aplica los valores por defecto del contrato cuando no se pide nada", () => {
+    expect(paginationQuerySchema.parse({})).toEqual({ page: 1, pageSize: DEFAULT_PAGE_SIZE });
+  });
+
+  it("coacciona las cadenas, porque la query siempre llega como texto", () => {
+    expect(paginationQuerySchema.parse({ page: "3", pageSize: "5" })).toEqual({
+      page: 3,
+      pageSize: 5,
+    });
+  });
+
+  it("rechaza un tamaño de página por encima del máximo, en vez de recortarlo", () => {
+    // Recortar en silencio escondería el error de quien llama: pediría 500,
+    // recibiría 100 y creería que hay 100.
+    const result = paginationQuerySchema.safeParse({ pageSize: MAX_PAGE_SIZE + 1 });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("acepta justo el máximo", () => {
+    expect(paginationQuerySchema.parse({ pageSize: MAX_PAGE_SIZE }).pageSize).toBe(MAX_PAGE_SIZE);
+  });
+
+  it("rechaza páginas y tamaños sin sentido", () => {
+    for (const query of [
+      { page: 0 },
+      { page: -1 },
+      { page: "abc" },
+      { page: 1.5 },
+      { pageSize: 0 },
+      { pageSize: -3 },
+      { pageSize: 2.5 },
+    ]) {
+      expect(paginationQuerySchema.safeParse(query).success, JSON.stringify(query)).toBe(false);
+    }
+  });
+
+  it("la envoltura lleva el total sin paginar, que es lo que pinta el paginador", () => {
+    const schema = pageOf(z.object({ id: z.string() }));
+
+    const result = schema.safeParse({
+      items: [{ id: "a" }],
+      page: 1,
+      pageSize: 20,
+      total: 41,
+      totalPages: 3,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("la envoltura rechaza una respuesta sin items", () => {
+    // Sin esto, una respuesta mal formada pasaría como éxito silencioso.
+    const schema = pageOf(z.object({ id: z.string() }));
+
+    expect(schema.safeParse({ page: 1, pageSize: 20, total: 0, totalPages: 1 }).success).toBe(false);
+  });
+});
+
+describe("contratos de los perfiles de hijo", () => {
+  const alta = { name: "Mateo", pin: "1234" };
+
+  it("acepta un alta con lo mínimo", () => {
+    expect(createChildSchema.safeParse(alta).success).toBe(true);
+  });
+
+  it("acepta un alta con edad y avatar", () => {
+    expect(createChildSchema.safeParse({ ...alta, age: 8, avatar: "zorro" }).success).toBe(true);
+  });
+
+  it("el alta NO acepta monedas: sería una impresora de monedas", () => {
+    // El alta es una ruta de solo cuenta y no pide PIN de adulto. Que un perfil
+    // recién creado no tenga saldo es lo que hace tolerable lo primero.
+    expect(createChildSchema.safeParse({ ...alta, coins: 500 }).success).toBe(false);
+  });
+
+  it("el alta NO acepta el padre dueño: sale de la sesión", () => {
+    expect(createChildSchema.safeParse({ ...alta, parentId: "otro" }).success).toBe(false);
+  });
+
+  it("rechaza los datos fuera de los límites del producto", () => {
+    expect(createChildSchema.safeParse({ ...alta, name: "A" }).success).toBe(false);
+    expect(createChildSchema.safeParse({ ...alta, pin: "123" }).success).toBe(false);
+    expect(createChildSchema.safeParse({ ...alta, pin: "abcd" }).success).toBe(false);
+    expect(createChildSchema.safeParse({ ...alta, age: CHILD_AGE_MIN - 1 }).success).toBe(false);
+    expect(createChildSchema.safeParse({ ...alta, age: CHILD_AGE_MAX + 1 }).success).toBe(false);
+    expect(createChildSchema.safeParse({ ...alta, avatar: "dragon" }).success).toBe(false);
+  });
+
+  it("señala TODOS los campos que fallan, no solo el primero", () => {
+    const result = createChildSchema.safeParse({ name: "A", pin: "x", age: 99 });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const campos = result.error.issues.map((issue) => issue.path.join("."));
+      expect(campos).toContain("name");
+      expect(campos).toContain("pin");
+      expect(campos).toContain("age");
+    }
+  });
+
+  it("una edición sin ningún campo no es una edición", () => {
+    expect(updateChildSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("la edición admite borrar la edad, que es distinto de no tocarla", () => {
+    expect(updateChildSchema.safeParse({ age: null }).success).toBe(true);
+  });
+
+  it("la edición no toca el saldo", () => {
+    expect(updateChildSchema.safeParse({ coins: 10 }).success).toBe(false);
+  });
+
+  it("el niño solo cambia su avatar de su propio perfil", () => {
+    expect(updateOwnChildSchema.safeParse({ avatar: "panda" }).success).toBe(true);
+    expect(updateOwnChildSchema.safeParse({ name: "Otro" }).success).toBe(false);
+    expect(updateOwnChildSchema.safeParse({ age: 9 }).success).toBe(false);
+    expect(updateOwnChildSchema.safeParse({ coins: 99 }).success).toBe(false);
+  });
+
+  it("el tope de hijos por familia es un número sensato", () => {
+    // Guarda contra un 1 por error de tecleo, que dejaría a las familias con un
+    // solo hijo posible.
+    expect(MAX_CHILDREN_PER_FAMILY).toBeGreaterThan(1);
+  });
+});
+
+describe("contrato de las tareas", () => {
+  const base = { title: "Sacar la basura" } as const;
+
+  it("acepta el reparto con el mismo valor para todos", () => {
+    const result = createTaskSchema.safeParse({
+      ...base,
+      childIds: ["hijo-1", "hijo-2"],
+      coins: 25,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("acepta el reparto con un valor distinto por hijo", () => {
+    const result = createTaskSchema.safeParse({
+      ...base,
+      assignments: [
+        { childId: "hijo-1", coins: 25 },
+        { childId: "hijo-2", coins: 40 },
+      ],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rechaza las dos formas a la vez", () => {
+    const result = createTaskSchema.safeParse({
+      ...base,
+      childIds: ["hijo-1"],
+      coins: 25,
+      assignments: [{ childId: "hijo-2", coins: 40 }],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rechaza que no venga ninguna de las dos formas", () => {
+    expect(createTaskSchema.safeParse(base).success).toBe(false);
+  });
+
+  it("rechaza media forma: hijos sin valor, o valor sin hijos", () => {
+    expect(createTaskSchema.safeParse({ ...base, childIds: ["hijo-1"] }).success).toBe(false);
+    expect(createTaskSchema.safeParse({ ...base, coins: 25 }).success).toBe(false);
+  });
+
+  it("rechaza mezclar el valor compartido con las asignaciones por hijo", () => {
+    const result = createTaskSchema.safeParse({
+      ...base,
+      coins: 25,
+      assignments: [{ childId: "hijo-1", coins: 40 }],
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rechaza un reparto sin ningún hijo", () => {
+    expect(createTaskSchema.safeParse({ ...base, childIds: [], coins: 25 }).success).toBe(false);
+    expect(createTaskSchema.safeParse({ ...base, assignments: [] }).success).toBe(false);
+  });
+
+  it("rechaza repetir al mismo hijo dentro del reparto", () => {
+    // Repetirlo crearía dos tareas idénticas, que no es lo que nadie quiere
+    // decir al elegir dos veces al mismo niño.
+    expect(
+      createTaskSchema.safeParse({ ...base, childIds: ["hijo-1", "hijo-1"], coins: 25 }).success,
+    ).toBe(false);
+    expect(
+      createTaskSchema.safeParse({
+        ...base,
+        assignments: [
+          { childId: "hijo-1", coins: 25 },
+          { childId: "hijo-1", coins: 40 },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it("rechaza un valor fuera del rango del producto", () => {
+    const conValor = (coins: number) =>
+      createTaskSchema.safeParse({ ...base, childIds: ["hijo-1"], coins }).success;
+
+    expect(conValor(COINS_MIN - 1)).toBe(false);
+    expect(conValor(COINS_MAX + 1)).toBe(false);
+    expect(conValor(-5)).toBe(false);
+    expect(conValor(12.5)).toBe(false);
+    expect(conValor(COINS_MIN)).toBe(true);
+    expect(conValor(COINS_MAX)).toBe(true);
+
+    expect(
+      createTaskSchema.safeParse({ ...base, assignments: [{ childId: "h", coins: 0 }] }).success,
+    ).toBe(false);
+  });
+
+  it("el alta no acepta el padre dueño ni el estado inicial", () => {
+    const conExtra = (extra: Record<string, unknown>) =>
+      createTaskSchema.safeParse({ ...base, childIds: ["hijo-1"], coins: 25, ...extra }).success;
+
+    expect(conExtra({ parentId: "otro" })).toBe(false);
+    expect(conExtra({ status: "APPROVED" })).toBe(false);
+  });
+
+  it("la fecha límite es opcional y tiene que ser una fecha ISO", () => {
+    const conFecha = (dueDate: unknown) =>
+      createTaskSchema.safeParse({ ...base, childIds: ["h"], coins: 25, dueDate }).success;
+
+    expect(createTaskSchema.safeParse({ ...base, childIds: ["h"], coins: 25 }).success).toBe(true);
+    expect(conFecha("2026-09-01T10:00:00.000Z")).toBe(true);
+    expect(conFecha("2026-09-01T10:00:00-05:00")).toBe(true);
+    expect(conFecha("el martes")).toBe(false);
+    expect(conFecha("2026-09-01")).toBe(false);
+  });
+
+  it("la edición no reasigna la tarea a otro hijo", () => {
+    // Cambiar de hijo es borrar la pendiente y crear otra. Al ser `.strict()`,
+    // esto es 422 y no un campo que se ignora en silencio.
+    expect(updateTaskSchema.safeParse({ childId: "hijo-2" }).success).toBe(false);
+    expect(updateTaskSchema.safeParse({ title: "Otro", childId: "hijo-2" }).success).toBe(false);
+  });
+
+  it("la edición no mueve el estado: para eso están las transiciones", () => {
+    expect(updateTaskSchema.safeParse({ status: "APPROVED" }).success).toBe(false);
+  });
+
+  it("una edición sin ningún campo no es una edición", () => {
+    expect(updateTaskSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("la edición admite borrar la descripción y la fecha límite", () => {
+    expect(updateTaskSchema.safeParse({ description: null }).success).toBe(true);
+    expect(updateTaskSchema.safeParse({ dueDate: null }).success).toBe(true);
+  });
+
+  it("los filtros del listado rechazan un estado inventado", () => {
+    expect(listTasksQuerySchema.safeParse({ status: "COMPLETED" }).success).toBe(true);
+    expect(listTasksQuerySchema.safeParse({ status: "REJECTED" }).success).toBe(false);
+    expect(listTasksQuerySchema.safeParse({ status: "completed" }).success).toBe(false);
+  });
+
+  it("el listado del padre pagina y filtra por hijo", () => {
+    const result = listTasksQuerySchema.safeParse({ page: "2", pageSize: "5", childId: "hijo-1" });
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).toMatchObject({ page: 2, pageSize: 5, childId: "hijo-1" });
+    }
+  });
+
+  it("los dos listados heredan la paginación por defecto y su tope", () => {
+    // `.extend()` no puede perder lo que hereda: un tamaño por encima del
+    // máximo sigue siendo 422 y no un recorte silencioso.
+    expect(listTasksQuerySchema.safeParse({ pageSize: String(MAX_PAGE_SIZE + 1) }).success).toBe(
+      false,
+    );
+    expect(listOwnTasksQuerySchema.safeParse({ pageSize: String(MAX_PAGE_SIZE + 1) }).success).toBe(
+      false,
+    );
+
+    const propio = listOwnTasksQuerySchema.safeParse({});
+    expect(propio.success).toBe(true);
+    if (propio.success) {
+      expect(propio.data).toEqual({ page: 1, pageSize: DEFAULT_PAGE_SIZE });
+    }
+  });
+
+  it("el listado del niño NO admite pedir el de otro", () => {
+    // Aquí está la garantía de que un niño no ve a su hermano: no hay ningún
+    // parámetro que pudiera apuntar a otro perfil.
+    expect(listOwnTasksQuerySchema.safeParse({ childId: "hermano" }).success).toBe(false);
+    expect(listOwnTasksQuerySchema.safeParse({ status: "PENDING" }).success).toBe(true);
+  });
+
+  it("los estados son los tres del ciclo, sin rechazo terminal", () => {
+    expect([...TASK_STATUSES]).toEqual(["PENDING", "COMPLETED", "APPROVED"]);
+    expect(TASK_STATUSES).not.toContain("REJECTED");
+  });
+
+  it("la página de repartos lleva los metadatos en el cuerpo", () => {
+    const result = taskBatchesPageSchema.safeParse({
+      items: [
+        {
+          batchId: "reparto-1",
+          title: "Sacar la basura",
+          description: null,
+          dueDate: null,
+          createdAt: "2026-08-24T10:00:00.000Z",
+          tasks: [
+            {
+              id: "tarea-1",
+              batchId: "reparto-1",
+              title: "Sacar la basura",
+              description: null,
+              coins: 25,
+              status: "PENDING",
+              dueDate: null,
+              child: { id: "hijo-1", name: "Mateo", avatar: DEFAULT_AVATAR_KEY },
+              createdAt: "2026-08-24T10:00:00.000Z",
+              updatedAt: "2026-08-24T10:00:00.000Z",
+            },
+          ],
+        },
+      ],
+      page: 1,
+      pageSize: DEFAULT_PAGE_SIZE,
+      total: 1,
+      totalPages: 1,
+    });
+
+    expect(result.success).toBe(true);
   });
 });

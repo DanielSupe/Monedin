@@ -161,7 +161,7 @@ export function login(
 /** Crea un perfil de hijo directamente en la base, con su PIN ya hasheado. */
 export async function createChildProfile(
   parentId: string,
-  options: { name?: string; pin?: string; coins?: number; avatar?: string } = {},
+  options: { name?: string; pin?: string; coins?: number; avatar?: string; age?: number } = {},
 ): Promise<{ id: string; name: string; pin: string }> {
   const { hashCredential } = await import("../../src/shared/crypto/credentials.js");
   const pin = options.pin ?? "1234";
@@ -172,12 +172,124 @@ export async function createChildProfile(
       pinHash: await hashCredential(pin),
       coins: options.coins ?? 0,
       ...(options.avatar === undefined ? {} : { avatar: options.avatar }),
+      ...(options.age === undefined ? {} : { age: options.age }),
       parentId,
     },
     select: { id: true, name: true },
   });
 
   return { ...child, pin };
+}
+
+/**
+ * Registra un padre, le crea un hijo y ENTRA al perfil de ese hijo.
+ *
+ * Es el equivalente de `asParent` para el otro rol. Devuelve también las
+ * cookies de solo cuenta y las del padre, porque casi todo test de niño acaba
+ * comprobando la frontera contra uno de esos dos estados.
+ */
+export async function asChild(
+  app: Express,
+  options: {
+    childName?: string;
+    childPin?: string;
+    coins?: number;
+    avatar?: string;
+    age?: number;
+    email?: string;
+  } = {},
+): Promise<{
+  cookies: string[];
+  accountCookies: string[];
+  parentId: string;
+  childId: string;
+  childPin: string;
+}> {
+  // NO se devuelven las cookies del padre a propósito: entrar al perfil del
+  // niño revoca el perfil activo de esa misma sesión de cuenta, porque nunca
+  // hay dos a la vez. Devolverlas sería entregar unas cookies muertas. Un test
+  // que necesite al padre Y al niño a la vez tiene que simular DOS dispositivos,
+  // es decir, dos sesiones de cuenta distintas con `login`.
+  const { accountCookies, parentId } = await asParent(app, {
+    ...(options.email === undefined ? {} : { email: options.email }),
+  });
+
+  const child = await createChildProfile(parentId, {
+    name: options.childName ?? "Mateo",
+    pin: options.childPin ?? "1234",
+    ...(options.coins === undefined ? {} : { coins: options.coins }),
+    ...(options.avatar === undefined ? {} : { avatar: options.avatar }),
+    ...(options.age === undefined ? {} : { age: options.age }),
+  });
+
+  return {
+    cookies: await enterProfile(app, accountCookies, child.id, child.pin),
+    accountCookies,
+    parentId,
+    childId: child.id,
+    childPin: child.pin,
+  };
+}
+
+/**
+ * Un segundo dispositivo para la misma cuenta, con el perfil del padre activo.
+ *
+ * Accede otra vez con correo y contraseña, lo que abre una sesión de CUENTA
+ * nueva e independiente. Es lo que hace falta para probar escenarios donde un
+ * perfil sigue abierto en un sitio mientras se opera desde otro: dentro de una
+ * misma sesión de cuenta eso es imposible por diseño.
+ */
+export async function parentOnSecondDevice(
+  app: Express,
+  credentials: { email?: string; password?: string; pin?: string } = {},
+): Promise<string[]> {
+  const response = await login(app, {
+    email: credentials.email ?? CREDENCIALES.correo,
+    password: credentials.password ?? CREDENCIALES.password,
+  });
+
+  if (response.status !== 200) {
+    throw new Error(`El acceso falló: ${response.status} ${JSON.stringify(response.body)}`);
+  }
+
+  return enterProfile(
+    app,
+    liveCookies(response),
+    PARENT_PROFILE_ID,
+    credentials.pin ?? CREDENCIALES.pin,
+  );
+}
+
+/**
+ * Una familia con varios hijos ya creados, para los tests de listado,
+ * paginación y aislamiento entre hermanos.
+ *
+ * Los hijos se crean EN SERIE y no con `Promise.all`, para que su `createdAt`
+ * respete el orden de los nombres. Los tests de orden estable que necesitan lo
+ * contrario —varias filas en el mismo instante— fuerzan la fecha a mano.
+ */
+export async function familiaConHijos(
+  app: Express,
+  nombres: string[],
+  overrides: { email?: string } = {},
+): Promise<{
+  cookies: string[];
+  accountCookies: string[];
+  parentId: string;
+  hijos: Array<{ id: string; name: string; pin: string }>;
+}> {
+  const { cookies, accountCookies, parentId } = await asParent(app, {
+    ...(overrides.email === undefined ? {} : { email: overrides.email }),
+  });
+
+  const hijos: Array<{ id: string; name: string; pin: string }> = [];
+  for (const [indice, name] of nombres.entries()) {
+    hijos.push(
+      await createChildProfile(parentId, { name, pin: String(1000 + indice).padStart(4, "0") }),
+    );
+  }
+
+  return { cookies, accountCookies, parentId, hijos };
 }
 
 export async function parentIdByEmail(email: string): Promise<string> {

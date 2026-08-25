@@ -17,6 +17,7 @@ import { generateSessionToken } from "../../shared/crypto/session-token.js";
 import { NotFoundError, TooManyAttemptsError } from "../../shared/errors/domain-errors.js";
 import * as repository from "./auth.repository.js";
 import {
+  ChildSessionRequiredError,
   EmailAlreadyRegisteredError,
   InvalidCredentialsError,
   InvalidPinError,
@@ -474,6 +475,55 @@ export async function setChildPin(
 
   await repository.updateChildPinHash(found.id, await hashCredential(input.pin));
   await repository.revokeSessionsOfChildProfile(found.id);
+}
+
+/**
+ * El niño cambia SU PIN, demostrando el actual.
+ *
+ * Distinta de `setChildPin` en las dos cosas que importan: el perfil sale del
+ * ACTOR y no de la petición, y hay que conocer el PIN anterior. La otra es la
+ * vía de rescate del padre y por eso no lo exige.
+ *
+ * Fallar el actual cuenta para el MISMO bloqueo que fallar al entrar. Sin eso,
+ * quien recibe la tablet con el perfil de otro abierto podría probar
+ * combinaciones sin coste hasta cambiarle el PIN y dejarlo fuera.
+ *
+ * NO revoca ninguna sesión, ni la propia ni la de otro dispositivo: un perfil
+ * ya abierto sigue siendo el mismo perfil de la misma persona. Ver la decisión
+ * 10 del design de `add-children`, que corrige la spec en ese punto.
+ */
+export async function changeOwnChildPin(
+  actor: Actor,
+  input: { currentPin: string; newPin: string },
+): Promise<void> {
+  if (actor.familyRole !== "CHILD") {
+    throw new ChildSessionRequiredError();
+  }
+
+  const found = await repository.findChildCredentials(actor.childProfileId);
+  if (found === null || found.deletedAt !== null) {
+    throw new NotFoundError();
+  }
+
+  const lockedUntil = activeLockout(found.lockedUntil);
+  if (lockedUntil !== undefined) {
+    throw new TooManyAttemptsError(lockedUntil);
+  }
+
+  const { valid } = await verifyCredential(input.currentPin, found.pinHash);
+  if (!valid) {
+    const attempts = await repository.registerFailedPin(found.id);
+    if (attempts >= CHILD_MAX_FAILED_ATTEMPTS) {
+      await repository.lockChildUntil(found.id, minutesFromNow(CHILD_LOCKOUT_MINUTES));
+    }
+    throw new InvalidPinError();
+  }
+
+  if (found.failedPinAttempts > 0 || found.lockedUntil !== null) {
+    await repository.clearChildLockout(found.id);
+  }
+
+  await repository.updateChildPinHash(found.id, await hashCredential(input.newPin));
 }
 
 export async function unlockChildProfile(actor: Actor, childProfileId: string): Promise<void> {

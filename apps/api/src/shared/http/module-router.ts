@@ -44,6 +44,39 @@ export interface ModuleRouter {
   accountPost(path: string, ...handlers: RequestHandler[]): void;
 }
 
+/** Nivel de protección con el que se declaró una ruta. */
+export type RouteLevel = "public" | "account";
+
+export interface DeclaredRoute {
+  method: "GET" | "POST" | "PATCH" | "DELETE";
+  path: string;
+  level: RouteLevel;
+}
+
+/**
+ * Registro de las rutas que NO exigen actor.
+ *
+ * Existe para que «solo hay unas pocas rutas de solo cuenta» sea comprobable en
+ * un test en vez de una frase en un documento, que es lo que se quedó
+ * desactualizado en `CLAUDE.md` §5 sin que nadie se enterara.
+ *
+ * Se llena al importar cada archivo de rutas, una sola vez: los módulos de ESM
+ * se evalúan una vez por proceso, así que llamar varias veces a `createApp()`
+ * no duplica entradas.
+ */
+const declaredRoutes: DeclaredRoute[] = [];
+
+/** Las rutas declaradas con un nivel concreto, en orden de declaración. */
+export function declaredRoutesOf(level: RouteLevel): DeclaredRoute[] {
+  return declaredRoutes.filter((route) => route.level === level);
+}
+
+function record(method: DeclaredRoute["method"], path: string, level: RouteLevel): void {
+  if (!declaredRoutes.some((route) => route.method === method && route.path === path)) {
+    declaredRoutes.push({ method, path, level });
+  }
+}
+
 export function moduleRouter(): ModuleRouter {
   const router = Router();
 
@@ -72,10 +105,22 @@ export function moduleRouter(): ModuleRouter {
     patch: (path, ...handlers) => router.patch(path, ...protectedChain(handlers)),
     delete: (path, ...handlers) => router.delete(path, ...protectedChain(handlers)),
 
-    publicGet: (path, ...handlers) => router.get(path, ...publicChain(handlers)),
-    publicPost: (path, ...handlers) => router.post(path, ...publicChain(handlers)),
+    publicGet: (path, ...handlers) => {
+      record("GET", path, "public");
+      router.get(path, ...publicChain(handlers));
+    },
+    publicPost: (path, ...handlers) => {
+      record("POST", path, "public");
+      router.post(path, ...publicChain(handlers));
+    },
 
-    accountGet: (path, ...handlers) => router.get(path, ...accountChain(handlers)),
-    accountPost: (path, ...handlers) => router.post(path, ...accountChain(handlers)),
+    accountGet: (path, ...handlers) => {
+      record("GET", path, "account");
+      router.get(path, ...accountChain(handlers));
+    },
+    accountPost: (path, ...handlers) => {
+      record("POST", path, "account");
+      router.post(path, ...accountChain(handlers));
+    },
   };
 }

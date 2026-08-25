@@ -1,3 +1,5 @@
+import { MAX_CHILDREN_PER_FAMILY } from "@monedin/contracts";
+
 /**
  * Catálogo de textos visibles al usuario.
  *
@@ -10,6 +12,19 @@
  * migrar un catálogo centralizado es mecánico, extraer textos repartidos por
  * sesenta archivos no lo es. Ver decisión 10 del design.
  */
+/**
+ * Textos de rol, compartidos por los modulos que distinguen adulto de nino.
+ *
+ * Se declaran una vez y los reutilizan las secciones que los necesitan:
+ * `children` y `tasks` dicen exactamente lo mismo cuando el perfil activo no es
+ * el que la operacion pide, y dos copias del mismo texto se despegan a la
+ * primera reescritura.
+ */
+const rolRequerido = {
+  adulto: "Necesitas el perfil de un adulto para hacer esto.",
+  nino: "Esto solo lo puede hacer un perfil de niño.",
+} as const;
+
 export const messages = {
   errors: {
     /** 401 — no hay sesión. */
@@ -52,6 +67,59 @@ export const messages = {
     emailTaken: "Ese correo ya está registrado.",
     /** Se requiere sesión de padre para esta operación. */
     parentSessionRequired: "Necesitas la sesión de un adulto para hacer esto.",
+    /** La operación es la de un niño sobre su propio perfil. */
+    childSessionRequired: "Esto solo lo puede hacer un perfil de niño sobre el suyo.",
+  },
+
+  children: {
+    /**
+     * Hijo inexistente, de otra familia, o dado de baja.
+     *
+     * Es el MISMO mensaje para los tres casos a propósito: distinguirlos
+     * confirmaría a un padre que el perfil de otra familia existe. Ver la
+     * decisión 4 del design de `add-children`.
+     */
+    notFound: "No encontramos ese perfil.",
+    /** Tope de hijos activos alcanzado. */
+    maxReached:
+      `Esta cuenta ya tiene el máximo de ${MAX_CHILDREN_PER_FAMILY} perfiles. ` +
+      "Da de baja alguno para crear otro.",
+    /** La operación es de gestión y necesita el perfil del adulto. */
+    parentRoleRequired: rolRequerido.adulto,
+    /** La operación es la vista propia de un niño. */
+    childRoleRequired: rolRequerido.nino,
+  },
+
+  tasks: {
+    /**
+     * Tarea inexistente, de otra familia, o de un hermano.
+     *
+     * Es el MISMO mensaje para los tres casos, por la misma razón que en
+     * `children`: distinguirlos confirmaría que esa tarea existe.
+     */
+    notFound: "No encontramos esa tarea.",
+    /**
+     * Se intentó editar o borrar una tarea que ya no está pendiente.
+     *
+     * Una tarea que el niño marcó merece una respuesta —aprobarla o
+     * rechazarla—, y una aprobada ya movió monedas: el historial no se
+     * reescribe.
+     */
+    notEditable:
+      "Esa tarea ya no está pendiente, así que no se puede cambiar ni borrar. " +
+      "Si ya la hicieron, apruébala o recházala.",
+    /**
+     * La transición no encontró el estado del que decía partir.
+     *
+     * Casi siempre es que alguien se adelantó desde otro dispositivo, o que la
+     * pantalla lleva un rato abierta.
+     */
+    transitionConflict:
+      "Esa tarea ya no está en el estado que esperabas. Vuelve a cargar la lista para verla como está ahora.",
+    /** Repartir, aprobar y rechazar son cosa del adulto. */
+    parentRoleRequired: rolRequerido.adulto,
+    /** Marcar una tarea como hecha la hace el niño al que le tocó. */
+    childRoleRequired: rolRequerido.nino,
   },
 
   health: {

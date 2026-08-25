@@ -60,6 +60,37 @@ export const COINS_MAX = 9999;
 /** El saldo de un nino nunca es negativo. */
 export const COINS_BALANCE_MIN = 0;
 
+/**
+ * Ciclo de vida de una tarea.
+ *
+ * NO existe un estado de rechazo: rechazar devuelve la tarea a PENDING para que
+ * el nino la reintente. Un valor de enum que ningun flujo produce es una
+ * invitacion a que alguien lo use mal.
+ *
+ * Duplica los valores del enum `TaskStatus` del esquema de Prisma, y no hay
+ * forma de evitarlo: el cliente generado vive dentro de `apps/api` y el front
+ * no puede importarlo. Lo que si se evita es que cada capa escriba su propia
+ * lista. Es el mismo caso que FAMILY_ROLES.
+ */
+export const TASK_STATUSES = ["PENDING", "COMPLETED", "APPROVED"] as const;
+export type TaskStatus = (typeof TASK_STATUSES)[number];
+
+/**
+ * Hijos activos que caben en una familia.
+ *
+ * Es un limite de POLITICA, no un invariante de integridad: excederlo no
+ * corrompe nada, asi que lo impone el servicio y no el motor. Un tope de filas
+ * por padre no se expresa con un CHECK (es un recuento entre filas) y exigiria
+ * un disparador. Ver la decision 7 del design de `add-children`.
+ *
+ * Diez es deliberadamente generoso: el numero existe para acotar el desorden
+ * que puede crear quien tenga el dispositivo, porque el alta no pide PIN de
+ * adulto. No opina sobre cuantos hijos puede tener una familia.
+ *
+ * Los hijos dados de baja NO cuentan.
+ */
+export const MAX_CHILDREN_PER_FAMILY = 10;
+
 // ---------------------------------------------------------------------------
 // Autenticacion
 // ---------------------------------------------------------------------------

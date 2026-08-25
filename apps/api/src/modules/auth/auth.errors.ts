@@ -45,3 +45,17 @@ export class ParentSessionRequiredError extends ForbiddenError {
     super(messages.auth.parentSessionRequired);
   }
 }
+
+/**
+ * La operación es la de un niño sobre su propio perfil.
+ *
+ * Existe para que cambiar el PIN propio y reponer el de un hijo sean rutas
+ * distintas: la primera exige conocer el actual, la segunda no. Si un padre
+ * pudiera entrar por la del niño, la vía de rescate tendría dos puertas y solo
+ * una comprobaría el PIN anterior.
+ */
+export class ChildSessionRequiredError extends ForbiddenError {
+  constructor() {
+    super(messages.auth.childSessionRequired);
+  }
+}

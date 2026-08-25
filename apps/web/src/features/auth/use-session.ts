@@ -93,6 +93,36 @@ export function useChangeAdultPin() {
 }
 
 /**
+ * El niño cambia el PIN de su propio perfil, sabiendo el actual.
+ *
+ * No invalida nada: cambiar un PIN no desactiva ningún perfil ni altera la
+ * sesión. Ver la decisión 10 del design de `add-children`.
+ */
+export function useChangeOwnChildPin() {
+  return useMutation({ mutationFn: api.changeOwnChildPin });
+}
+
+/** El padre repone el PIN de un hijo. Desbloquea el perfil de paso. */
+export function useSetChildPin() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.setChildPin,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: api.profilesQueryKey }),
+  });
+}
+
+/** El padre desbloquea el perfil de un hijo bloqueado por intentos. */
+export function useUnlockChildProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.unlockChildProfile,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: api.profilesQueryKey }),
+  });
+}
+
+/**
  * Restablece el PIN de adulto con la contraseña. No exige perfil activo: es
  * la vía de rescate para un padre bloqueado fuera de su propio perfil.
  */
