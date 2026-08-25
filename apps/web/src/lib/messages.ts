@@ -239,6 +239,49 @@ export const messages = {
     nextPage: "Siguiente",
   },
 
+  redemptions: {
+    /** Bandeja del padre. */
+    title: "Canjes",
+    empty: "No hay ninguna solicitud de canje todavía.",
+    approve: "Aprobar",
+    reject: "Rechazar",
+    back: "Volver",
+    coins: "Monedas",
+
+    /** Filtro de la bandeja. */
+    filterAll: "Todos",
+    filterPending: "Pendientes",
+    filterApproved: "Aprobados",
+    filterRejected: "Rechazados",
+
+    /** Estados, tal como los lee una persona. */
+    statusPending: "Pendiente",
+    statusApproved: "Aprobado",
+    statusRejected: "Rechazado",
+
+    /** Lo que ve el niño: sus propias solicitudes y el botón de pedir. */
+    myRedemptionsTitle: "Mis canjes",
+    myRedemptionsEmpty: "No has pedido ningún premio todavía.",
+    myRedemptions: "Ver mis canjes",
+    request: "Pedirlo",
+    requesting: "Pidiendo…",
+    alreadyRequested: "Ya lo pediste, espera a que te respondan.",
+
+    /**
+     * Errores. Un 409 aquí cubre tres casos —una transición perdida, el saldo
+     * que ya no alcanza al aprobar, o un duplicado al solicitar— con el mismo
+     * texto, porque el código HTTP es el contrato y no el mensaje.
+     */
+    notFound: "No encontramos ese canje.",
+    forbidden: "No puedes hacer esto desde este perfil.",
+    invalidData: "Revisa los datos: algo no es válido.",
+    conflict: "Ese canje ya no se puede resolver así. Vuelve a cargar la lista para verlo actualizado.",
+
+    /** Paginación de la bandeja. */
+    previousPage: "Anterior",
+    nextPage: "Siguiente",
+  },
+
   errors: {
     /** La respuesta no se pudo interpretar como el cuerpo de error estándar. */
     unreadableResponse: "La respuesta del servidor no se pudo interpretar.",

@@ -4,6 +4,7 @@ import { AuthGate, ChildOnly, ParentOnly } from "../features/auth/AuthGate.js";
 import { ChangePinScreen } from "../features/auth/ChangePinScreen.js";
 import { useLeaveProfile, useLogout, useSession } from "../features/auth/use-session.js";
 import { ChildSettings } from "../features/children/ChildSettings.js";
+import { MyRedemptions } from "../features/redemptions/MyRedemptions.js";
 import { MyRewards } from "../features/rewards/MyRewards.js";
 import { MyTasks } from "../features/tasks/MyTasks.js";
 import { messages } from "../lib/messages.js";
@@ -32,6 +33,7 @@ function SignedIn(): React.ReactElement {
   const [misAjustes, setMisAjustes] = useState(false);
   const [misTareas, setMisTareas] = useState(false);
   const [misPremios, setMisPremios] = useState(false);
+  const [misCanjes, setMisCanjes] = useState(false);
   const logout = useLogout();
   const leave = useLeaveProfile();
 
@@ -54,6 +56,10 @@ function SignedIn(): React.ReactElement {
     return <MyRewards onDone={() => setMisPremios(false)} />;
   }
 
+  if (misCanjes) {
+    return <MyRedemptions onDone={() => setMisCanjes(false)} />;
+  }
+
   return (
     <section>
       <h2>Hola, {actor.name}</h2>
@@ -68,6 +74,9 @@ function SignedIn(): React.ReactElement {
         <button type="button" onClick={() => setMisPremios(true)}>
           {messages.rewards.myRewards}
         </button>
+        <button type="button" onClick={() => setMisCanjes(true)}>
+          {messages.redemptions.myRedemptions}
+        </button>
         <button type="button" onClick={() => setMisAjustes(true)}>
           {messages.children.myProfileTitle}
         </button>
@@ -81,6 +90,7 @@ function SignedIn(): React.ReactElement {
         <ParentOnly>
           <Link to="/tasks">{messages.tasks.title}</Link>
           <Link to="/rewards">{messages.rewards.title}</Link>
+          <Link to="/redemptions">{messages.redemptions.title}</Link>
           <Link to="/children">{messages.children.title}</Link>
           <button type="button" onClick={() => setChangingPin(true)}>
             {messages.auth.changePinTitle}

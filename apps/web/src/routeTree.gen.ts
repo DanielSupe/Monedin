@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChildrenRouteImport } from './routes/children'
+import { Route as RedemptionsRouteImport } from './routes/redemptions'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as TasksRouteImport } from './routes/tasks'
 
@@ -22,6 +23,11 @@ const IndexRoute = IndexRouteImport.update({
 const ChildrenRoute = ChildrenRouteImport.update({
   id: '/children',
   path: '/children',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedemptionsRoute = RedemptionsRouteImport.update({
+  id: '/redemptions',
+  path: '/redemptions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RewardsRoute = RewardsRouteImport.update({
@@ -38,12 +44,14 @@ const TasksRoute = TasksRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/children': typeof ChildrenRoute
+  '/redemptions': typeof RedemptionsRoute
   '/rewards': typeof RewardsRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/children': typeof ChildrenRoute
+  '/redemptions': typeof RedemptionsRoute
   '/rewards': typeof RewardsRoute
   '/tasks': typeof TasksRoute
 }
@@ -51,20 +59,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/children': typeof ChildrenRoute
+  '/redemptions': typeof RedemptionsRoute
   '/rewards': typeof RewardsRoute
   '/tasks': typeof TasksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/children' | '/rewards' | '/tasks'
+  fullPaths: '/' | '/children' | '/redemptions' | '/rewards' | '/tasks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/children' | '/rewards' | '/tasks'
-  id: '__root__' | '/' | '/children' | '/rewards' | '/tasks'
+  to: '/' | '/children' | '/redemptions' | '/rewards' | '/tasks'
+  id: '__root__' | '/' | '/children' | '/redemptions' | '/rewards' | '/tasks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChildrenRoute: typeof ChildrenRoute
+  RedemptionsRoute: typeof RedemptionsRoute
   RewardsRoute: typeof RewardsRoute
   TasksRoute: typeof TasksRoute
 }
@@ -83,6 +93,13 @@ declare module '@tanstack/react-router' {
       path: '/children'
       fullPath: '/children'
       preLoaderRoute: typeof ChildrenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redemptions': {
+      id: '/redemptions'
+      path: '/redemptions'
+      fullPath: '/redemptions'
+      preLoaderRoute: typeof RedemptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rewards': {
@@ -105,6 +122,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChildrenRoute: ChildrenRoute,
+  RedemptionsRoute: RedemptionsRoute,
   RewardsRoute: RewardsRoute,
   TasksRoute: TasksRoute,
 }

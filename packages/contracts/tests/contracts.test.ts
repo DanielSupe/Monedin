@@ -12,17 +12,22 @@ import {
   ERROR_CODES,
   MAX_CHILDREN_PER_FAMILY,
   MAX_PAGE_SIZE,
+  REDEMPTION_STATUSES,
   REWARD_STATUSES,
   apiErrorSchema,
   avatarKeySchema,
   createChildSchema,
+  createRedemptionSchema,
   createRewardSchema,
   healthResponseSchema,
   isAvatarKey,
+  listOwnRedemptionsQuerySchema,
   listOwnRewardsQuerySchema,
+  listRedemptionsQuerySchema,
   listRewardsQuerySchema,
   pageOf,
   paginationQuerySchema,
+  redemptionSchema,
   replaceAssignmentsSchema,
   rewardSchema,
   TASK_STATUSES,
@@ -650,6 +655,51 @@ describe("contrato de los premios", () => {
       description: null,
       status: "ACTIVE",
       offers: [],
+      createdAt: "2026-08-24T10:00:00.000Z",
+      updatedAt: "2026-08-24T10:00:00.000Z",
+    });
+
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("contrato de los canjes", () => {
+  it("acepta la solicitud con solo el identificador del premio", () => {
+    expect(createRedemptionSchema.safeParse({ rewardId: "premio-1" }).success).toBe(true);
+  });
+
+  it("la solicitud NO acepta el hijo ni el precio: los decide el servidor", () => {
+    expect(
+      createRedemptionSchema.safeParse({ rewardId: "premio-1", childId: "hijo-1" }).success,
+    ).toBe(false);
+    expect(createRedemptionSchema.safeParse({ rewardId: "premio-1", coins: 100 }).success).toBe(
+      false,
+    );
+  });
+
+  it("la query del niño NO admite pedir los canjes de otro", () => {
+    expect(listOwnRedemptionsQuerySchema.safeParse({ childId: "hermano" }).success).toBe(false);
+    expect(listOwnRedemptionsQuerySchema.safeParse({}).success).toBe(true);
+  });
+
+  it("el filtro de la bandeja del padre rechaza un estado inventado", () => {
+    expect(listRedemptionsQuerySchema.safeParse({ status: "PENDING" }).success).toBe(true);
+    expect(listRedemptionsQuerySchema.safeParse({ status: "APPROVED" }).success).toBe(true);
+    expect(listRedemptionsQuerySchema.safeParse({ status: "REJECTED" }).success).toBe(true);
+    expect(listRedemptionsQuerySchema.safeParse({ status: "CANCELLED" }).success).toBe(false);
+  });
+
+  it("los estados del canje son exactamente pendiente, aprobado y rechazado", () => {
+    expect([...REDEMPTION_STATUSES]).toEqual(["PENDING", "APPROVED", "REJECTED"]);
+  });
+
+  it("un canje se ve con el premio y el hijo que lo solicitó", () => {
+    const result = redemptionSchema.safeParse({
+      id: "canje-1",
+      coins: 60,
+      status: "PENDING",
+      reward: { id: "premio-1", title: "Helado" },
+      child: { id: "hijo-1", name: "Ana", avatar: DEFAULT_AVATAR_KEY },
       createdAt: "2026-08-24T10:00:00.000Z",
       updatedAt: "2026-08-24T10:00:00.000Z",
     });

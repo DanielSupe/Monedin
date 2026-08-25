@@ -4,6 +4,7 @@ import express, { type Express, Router, type Router as ExpressRouter } from "exp
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { childrenRouter } from "./modules/children/children.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
+import { redemptionsRouter } from "./modules/redemptions/redemptions.routes.js";
 import { rewardsRouter } from "./modules/rewards/rewards.routes.js";
 import { tasksRouter } from "./modules/tasks/tasks.routes.js";
 import { errorHandler } from "./shared/errors/error-handler.js";
@@ -37,6 +38,7 @@ export const apiRouters: ExpressRouter[] = [
   childrenRouter,
   tasksRouter,
   rewardsRouter,
+  redemptionsRouter,
 ];
 
 export function createApp(routers: ExpressRouter[] = apiRouters): Express {

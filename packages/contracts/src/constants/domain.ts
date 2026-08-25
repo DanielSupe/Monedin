@@ -86,6 +86,19 @@ export const REWARD_STATUSES = ["ACTIVE", "RETIRED"] as const;
 export type RewardStatus = (typeof REWARD_STATUSES)[number];
 
 /**
+ * Ciclo de vida de un canje.
+ *
+ * Solo dos transiciones desde `PENDING`, y las dos las decide el padre: el niño
+ * no tiene una tercera opción para cancelar la suya en este alcance. `REJECTED`
+ * es terminal, igual que `APPROVED`: rechazar un canje no lo devuelve a
+ * `PENDING` como sí ocurre con una tarea, porque aquí no hay nada que
+ * reintentar sin volver a pedirlo. Ver la decisión 3 del design de
+ * `add-redemptions`.
+ */
+export const REDEMPTION_STATUSES = ["PENDING", "APPROVED", "REJECTED"] as const;
+export type RedemptionStatus = (typeof REDEMPTION_STATUSES)[number];
+
+/**
  * Hijos activos que caben en una familia.
  *
  * Es un limite de POLITICA, no un invariante de integridad: excederlo no

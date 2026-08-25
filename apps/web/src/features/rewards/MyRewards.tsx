@@ -1,6 +1,7 @@
 import type { OwnReward } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
 import { useSession } from "../auth/use-session.js";
+import { describeRedemptionsError, useCreateRedemption, useOwnRedemptions } from "../redemptions/use-redemptions.js";
 import { describeRewardsError, useOwnRewards } from "./use-rewards.js";
 
 /**
@@ -8,9 +9,14 @@ import { describeRewardsError, useOwnRewards } from "./use-rewards.js";
  *
  * Sin selector de hijo: el perfil sale de la sesión, así que esta pantalla no
  * tiene ningún identificador que pudiera apuntar a otro niño.
+ *
+ * El botón de pedir cruza en el CLIENTE el escaparate con los canjes propios
+ * en `PENDING`: es cómo se sabe "ya lo pediste" sin tocar el contrato de
+ * `rewards`. Ver la decisión 8 del design de `add-redemptions`.
  */
 export function MyRewards({ onDone }: { onDone: () => void }): React.ReactElement {
   const { data, isPending, error } = useOwnRewards();
+  const pendientes = useOwnRedemptions({ status: "PENDING" });
   const { session } = useSession();
   const saldo = session?.actor?.familyRole === "CHILD" ? session.actor.coins : 0;
 
@@ -27,6 +33,7 @@ export function MyRewards({ onDone }: { onDone: () => void }): React.ReactElemen
   }
 
   const premios = data?.items ?? [];
+  const premiosYaPedidos = new Set((pendientes.data?.items ?? []).map((canje) => canje.reward.id));
 
   return (
     <section>
@@ -37,7 +44,12 @@ export function MyRewards({ onDone }: { onDone: () => void }): React.ReactElemen
       ) : (
         <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "0.75rem" }}>
           {premios.map((premio) => (
-            <MyRewardRow key={premio.id} reward={premio} balance={saldo} />
+            <MyRewardRow
+              key={premio.id}
+              reward={premio}
+              balance={saldo}
+              yaPedido={premiosYaPedidos.has(premio.id)}
+            />
           ))}
         </ul>
       )}
@@ -52,15 +64,18 @@ export function MyRewards({ onDone }: { onDone: () => void }): React.ReactElemen
 function MyRewardRow({
   reward,
   balance,
+  yaPedido,
 }: {
   reward: OwnReward;
   balance: number;
+  yaPedido: boolean;
 }): React.ReactElement {
   // `affordable` decide el mensaje; la diferencia es solo para mostrar cuánto
   // falta, y se calcula contra el saldo de la SESIÓN, no contra uno propio del
   // ítem: el contrato no lo lleva a propósito, para no duplicar el saldo en
-  // cada fila. Ver la decisión 5 del design.
+  // cada fila. Ver la decisión 5 del design de `add-rewards`.
   const faltan = Math.max(0, reward.coins - balance);
+  const solicitar = useCreateRedemption();
 
   return (
     <li style={{ border: "1px solid #ccc", padding: "0.75rem" }}>
@@ -72,7 +87,25 @@ function MyRewardRow({
       </p>
 
       {reward.affordable ? (
-        <p>{messages.rewards.affordable}</p>
+        <>
+          <p>{messages.rewards.affordable}</p>
+          {yaPedido || solicitar.isSuccess ? (
+            <p>{messages.redemptions.alreadyRequested}</p>
+          ) : (
+            <button
+              type="button"
+              disabled={solicitar.isPending}
+              onClick={() => solicitar.mutate({ rewardId: reward.id })}
+            >
+              {solicitar.isPending ? messages.redemptions.requesting : messages.redemptions.request}
+            </button>
+          )}
+          {solicitar.error !== null && (
+            <p role="alert" style={{ color: "#b00020" }}>
+              {describeRedemptionsError(solicitar.error)}
+            </p>
+          )}
+        </>
       ) : (
         <p>
           {messages.rewards.missingPrefix} {faltan} {messages.rewards.coins.toLowerCase()}

@@ -115,8 +115,29 @@ context: |
                 DELETE /:id (padre): retiro LOGICO, no destruye ofertas ni canjes previos. Cero
                 filas afectadas es 404 y no 409: retirar no mueve monedas.
                 Sin migracion: `Reward` y `RewardAssignment` ya estaban desde `add-data-model`.
-  Lo que falta, con las reglas que ya están decididas:
-    /redemptions  solicitud del niño y resolución del padre. Sin diseñar todavía.
+    /redemptions  El niño solicita el canje de un premio ofrecido a él (POST), congelando en la
+                solicitud el precio de la oferta EN ESE MOMENTO. El saldo se valida DOS veces:
+                al solicitar (404 si el premio no existe/no esta activo/no le fue ofertado -nunca
+                403-, 409 si ya tiene un PENDING del mismo premio, 409 si el saldo no alcanza) y
+                otra vez al aprobar, donde `applyCoinMovement` ya hace esa comprobacion de forma
+                atomica y su ConflictError generico sube sin envolver -tambien lo produce un hijo
+                dado de baja entre solicitar y aprobar, y distinguir los dos casos mentiria en el
+                segundo-.
+                GET (padre) la bandeja paginada de sus hijos, con filtro por `status` y por
+                `childId`. GET /redemptions/mine (niño) sus propias solicitudes, tomado de la
+                sesion y nunca de la peticion. GET /:id (ambos roles: `Redemption` con el hijo o
+                `OwnRedemption` sin el, nunca la misma forma con un parametro).
+                POST /:id/approve (padre) deja el canje en APPROVED y DESCUENTA el precio
+                CONGELADO -nunca el vigente de la oferta si cambio despues-, en la misma
+                transaccion que la transicion condicionada al estado de origen: dos toques dan
+                un descuento y un 409, y el perdedor sigue PENDING.
+                POST /:id/reject (padre) deja el canje en REJECTED, terminal, sin mover monedas.
+                Retirar el premio o quitarle la oferta al hijo NO afecta un canje ya PENDING: el
+                precio ya esta congelado, y aprobar solo revalida el saldo.
+                SEIS rutas: un canje no se edita ni se retira, solo se resuelve -sin PATCH, PUT
+                ni DELETE-. Sin cancelacion del niño en este alcance: solo el padre resuelve.
+                Sin migracion: `RewardRedemption`, `RedemptionStatus` y
+                `CoinReason.REDEMPTION_APPROVED` ya estaban desde `add-data-model`.
 
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.

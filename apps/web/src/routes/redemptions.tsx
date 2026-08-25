@@ -1,0 +1,36 @@
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { AuthGate, ParentOnly } from "../features/auth/AuthGate.js";
+import { RedemptionInbox } from "../features/redemptions/RedemptionInbox.js";
+import { messages } from "../lib/messages.js";
+
+export const Route = createFileRoute("/redemptions")({
+  component: RedemptionsPage,
+});
+
+/**
+ * Bandeja de canjes del padre.
+ *
+ * `AuthGate` decide antes si toca la pantalla de acceso o la rejilla;
+ * `ParentOnly` cubre el caso de un niño que llegue aquí con la URL. La guarda
+ * de verdad sigue estando en el servidor, que responde 403 a un niño que llame
+ * a `GET /redemptions`: esto solo evita enseñar una interfaz que no va a
+ * funcionar.
+ */
+function RedemptionsPage(): React.ReactElement {
+  return (
+    <AuthGate>
+      <ParentOnly fallback={<NoEsParaTi />}>
+        <RedemptionInbox />
+      </ParentOnly>
+    </AuthGate>
+  );
+}
+
+function NoEsParaTi(): React.ReactElement {
+  return (
+    <section>
+      <p>{messages.redemptions.forbidden}</p>
+      <Link to="/">{messages.redemptions.back}</Link>
+    </section>
+  );
+}

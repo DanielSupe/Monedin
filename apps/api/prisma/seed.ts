@@ -225,10 +225,47 @@ async function seed(): Promise<void> {
     );
   }
 
+  // --- Canjes -----------------------------------------------------------------
+  //
+  // Se siembran en los TRES estados sobre "Helado" (60/40): es el único premio
+  // que el saldo de las tareas aprobadas alcanza a pagar (Mateo 120, Emma 80;
+  // "Ir al cine" cuesta 200/150 y ninguno llega todavía). Mateo tiene una
+  // solicitud PENDING que el padre verá en su bandeja, Emma ya tiene una
+  // APROBADA -su saldo ya refleja el descuento-, y una segunda solicitud de
+  // Mateo quedó RECHAZADA. Así el catálogo del padre enseña los tres estados
+  // desde el primer arranque, igual que las tareas.
+  await prisma.rewardRedemption.create({
+    data: { rewardId: helado.id, childId: mayor.id, coins: 60, status: "PENDING" },
+  });
+
+  const paraAprobar = await prisma.rewardRedemption.create({
+    data: { rewardId: helado.id, childId: menor.id, coins: 40, status: "PENDING" },
+  });
+  // Mismo orden que `redemptions.repository.approve()`: la transición primero,
+  // y solo entonces el descuento, con `applyCoinMovement` y no una versión
+  // propia.
+  await prisma.rewardRedemption.update({
+    where: { id: paraAprobar.id },
+    data: { status: "APPROVED" },
+  });
+  await prisma.$transaction((tx) =>
+    applyCoinMovement(tx, {
+      childId: menor.id,
+      amount: -40,
+      reason: "REDEMPTION_APPROVED",
+      redemptionId: paraAprobar.id,
+    }),
+  );
+
+  await prisma.rewardRedemption.create({
+    data: { rewardId: helado.id, childId: mayor.id, coins: 60, status: "REJECTED" },
+  });
+
   const resumen = [
     `Sembrado: 1 padre, 2 hijos, ${creadas.length} tareas en los tres estados,`,
-    `  4 premios (uno retirado, uno sin ofertas) con 4 asignaciones, y el saldo`,
-    `  que sale de las tareas aprobadas.`,
+    `  4 premios (uno retirado, uno sin ofertas) con 4 asignaciones, 3 canjes en`,
+    `  los tres estados, y el saldo que sale de las tareas aprobadas y del canje`,
+    `  aprobado.`,
     `  Padre: ${CREDENCIALES_DE_EJEMPLO.padre.correo} / ${CREDENCIALES_DE_EJEMPLO.padre.password} / PIN ${CREDENCIALES_DE_EJEMPLO.padre.pin}`,
     ...CREDENCIALES_DE_EJEMPLO.ninos.map((n) => `  ${n.nombre}: PIN ${n.pin}`),
   ];

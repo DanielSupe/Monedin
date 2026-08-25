@@ -137,6 +137,35 @@ export const messages = {
     childRoleRequired: rolRequerido.nino,
   },
 
+  redemptions: {
+    /**
+     * Canje inexistente, de otra familia, o de un hermano.
+     *
+     * Es el MISMO mensaje para los tres casos, por la misma razón que en
+     * `children`, `tasks` y `rewards`: distinguirlos confirmaría que ese canje
+     * existe.
+     */
+    notFound: "No encontramos ese canje.",
+    /**
+     * La transición no encontró el estado del que decía partir, o el saldo ya
+     * no alcanzaba al momento de aprobar.
+     *
+     * Es el MISMO mensaje para los dos casos a propósito: el código HTTP —409—
+     * es el contrato, no el texto. Ver la decisión 3 del design de
+     * `add-redemptions`.
+     */
+    transitionConflict:
+      "Ese canje ya no se puede resolver así. Vuelve a cargar la lista para verlo como está ahora.",
+    /** El saldo no alcanza el precio del premio al momento de solicitarlo. */
+    insufficientBalance: "No te alcanzan las monedas para este premio.",
+    /** Ya existe una solicitud pendiente del mismo premio. */
+    duplicatePending: "Ya tienes una solicitud pendiente para este premio.",
+    /** Aprobar y rechazar son cosa del adulto. */
+    parentRoleRequired: rolRequerido.adulto,
+    /** Solicitar un canje lo hace el niño sobre su propio perfil. */
+    childRoleRequired: rolRequerido.nino,
+  },
+
   health: {
     /** Etiqueta del servicio en la respuesta de salud. */
     serviceName: "monedin-api",
