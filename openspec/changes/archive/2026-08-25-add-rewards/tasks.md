@@ -146,10 +146,12 @@
 - [x] 9.4 Corregir el estado del proyecto en `README.md`, que sigue diciendo que no hay módulos de
       dominio cuando `/children` y `/tasks` llevan dos changes construidos. Se detectó aquí, se
       arregla aquí.
-- [ ] 9.5 Pasar `pnpm db:generate`, `lint`, `typecheck` y `test` en verde **desde `apps/api`** para la
-      batería de la API, lanzándola en segundo plano porque tarda unos 14 minutos.
+- [x] 9.5 Pasar `pnpm db:generate`, `lint`, `typecheck` y `test` en verde **desde `apps/api`** para la
+      batería de la API, lanzándola en segundo plano porque tarda unos 14 minutos. Verificado durante
+      el cierre de `add-redemptions`: la batería completa (520/520 tests, incluidos todos los de
+      `rewards`) corrió en verde dos veces desde `apps/api`.
 - [x] 9.6 Recorrer a mano con `pnpm dev`: publicar un premio con precio distinto para dos hijos,
       entrar como el menor y ver **su** precio y que no le alcanza, aprobarle tareas hasta que le
       alcance, volver como padre a quitarle la oferta a un hijo y comprobar que desaparece de su
       escaparate, y retirar el premio para verlo salir de los dos.
-- [ ] 9.7 Sincronizar las specs y archivar el change.
+- [x] 9.7 Sincronizar las specs y archivar el change.
