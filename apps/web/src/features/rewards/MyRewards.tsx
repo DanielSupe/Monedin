@@ -79,6 +79,13 @@ function MyRewardRow({
 
   return (
     <li style={{ border: "1px solid #ccc", padding: "0.75rem" }}>
+      {reward.image !== null && (
+        <img
+          src={reward.image}
+          alt={reward.title}
+          style={{ maxWidth: "10rem", borderRadius: "0.25rem", display: "block" }}
+        />
+      )}
       <strong>{reward.title}</strong>
       {reward.description !== null && <p>{reward.description}</p>}
 

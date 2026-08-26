@@ -1,22 +1,31 @@
 import {
   MAX_CHILDREN_PER_FAMILY,
-  type AvatarKey,
+  type AvatarValue,
   type Child,
   type CreateChildInput,
+  type ImageContentType,
   type OwnChild,
   type Page,
   type PaginationQuery,
   type UpdateChildInput,
   type UpdateOwnChildInput,
-  resolveAvatarKey,
+  type UploadUrl,
 } from "@monedin/contracts";
+import { randomUUID } from "node:crypto";
 import type { Actor } from "../../shared/actor.js";
+import { resolveAvatarForResponse } from "../../shared/avatar/resolve-avatar.js";
 import { hashCredential } from "../../shared/crypto/credentials.js";
 import { toPage, toSkipTake } from "../../shared/pagination.js";
+import {
+  extensionForContentType,
+  getStorageProvider,
+  isConfirmableUpload,
+} from "../../shared/storage/index.js";
 import * as authRepository from "../auth/auth.repository.js";
 import {
   ChildNotFoundError,
   ChildRoleRequiredError,
+  InvalidAvatarUploadError,
   MaxChildrenReachedError,
   ParentRoleRequiredError,
 } from "./children.errors.js";
@@ -94,7 +103,10 @@ export async function listChildren(
 
   const result = await repository.findChildrenPage(actor.userId, toSkipTake(query));
 
-  return toPage(query, { items: result.items.map(toChild), total: result.total });
+  return toPage(query, {
+    items: await Promise.all(result.items.map(toChild)),
+    total: result.total,
+  });
 }
 
 export async function getChild(actor: Actor, childId: string): Promise<Child> {
@@ -108,7 +120,27 @@ export async function updateChild(
 ): Promise<Child> {
   const found = await ownedChild(actor, childId);
 
-  return toChild(await repository.updateChild(found.id, input));
+  const { avatarUploadKey, ...rest } = input;
+
+  // Confirmar la foto es guardar su clave en el mismo campo que guardaría una
+  // del catálogo: son dos formas del mismo dato, no dos columnas.
+  const avatar =
+    avatarUploadKey === undefined
+      ? {}
+      : { avatar: await confirmedAvatarKey(found.id, avatarUploadKey) };
+
+  return toChild(await repository.updateChild(found.id, { ...rest, ...avatar }));
+}
+
+/** Una URL para subir la foto de un hijo de este padre. */
+export async function requestAvatarUploadUrl(
+  actor: Actor,
+  childId: string,
+  contentType: ImageContentType,
+): Promise<UploadUrl> {
+  const found = await ownedChild(actor, childId);
+
+  return createAvatarUploadUrl(found.id, contentType);
 }
 
 export async function deactivateChild(actor: Actor, childId: string): Promise<void> {
@@ -142,7 +174,38 @@ export async function updateOwnAvatar(
 ): Promise<OwnChild> {
   const found = await ownProfile(actor);
 
-  return toOwnChild(await repository.updateChild(found.id, { avatar: input.avatar }));
+  // El contrato ya garantiza que viene exactamente uno de los dos.
+  const avatar =
+    input.avatarUploadKey === undefined
+      ? input.avatar
+      : await confirmedAvatarKey(found.id, input.avatarUploadKey);
+
+  return toOwnChild(await repository.updateChild(found.id, { avatar }));
+}
+
+/** Una URL para que el niño suba su propia foto. */
+export async function requestOwnAvatarUploadUrl(
+  actor: Actor,
+  contentType: ImageContentType,
+): Promise<UploadUrl> {
+  const found = await ownProfile(actor);
+
+  return createAvatarUploadUrl(found.id, contentType);
+}
+
+/**
+ * La clave la decide el servidor y lleva el perfil dueño dentro. Quien sube no
+ * la elige: la recibe aquí y la devuelve igual al confirmar.
+ */
+async function createAvatarUploadUrl(
+  childId: string,
+  contentType: ImageContentType,
+): Promise<UploadUrl> {
+  const key = `${avatarPrefix(childId)}${randomUUID()}.${extensionForContentType(contentType)}`;
+
+  const { uploadUrl, expiresAt } = await getStorageProvider().createUploadUrl({ key, contentType });
+
+  return { uploadUrl, key, expiresAt: expiresAt.toISOString() };
 }
 
 // ---------------------------------------------------------------------------
@@ -189,16 +252,23 @@ async function ownProfile(actor: Actor): Promise<ChildRow> {
   return found;
 }
 
-/** El avatar sale siempre resuelto, para que el front no trate el caso vacío. */
-function avatarOf(row: ChildRow): AvatarKey {
-  return resolveAvatarKey(row.avatar);
+/**
+ * El avatar sale siempre resuelto: una clave del catálogo tal cual, o una URL
+ * firmada si es una foto propia. El front no ve nunca la clave del almacén ni
+ * tiene que tratar el caso vacío.
+ *
+ * Esto es lo que vuelve asíncronos a los dos serializadores de abajo, y a todo
+ * lo que los llama. Ver la decisión 5 del design de `add-file-storage`.
+ */
+function avatarOf(row: ChildRow): Promise<AvatarValue> {
+  return resolveAvatarForResponse(getStorageProvider(), row.avatar);
 }
 
-function toChild(row: ChildRow): Child {
+async function toChild(row: ChildRow): Promise<Child> {
   return {
     id: row.id,
     name: row.name,
-    avatar: avatarOf(row),
+    avatar: await avatarOf(row),
     age: row.age,
     coins: row.coins,
     locked: row.lockedUntil !== null && row.lockedUntil.getTime() > Date.now(),
@@ -207,12 +277,32 @@ function toChild(row: ChildRow): Child {
 }
 
 /** Sin `locked`: si el niño está dentro, su perfil no lo está. */
-function toOwnChild(row: ChildRow): OwnChild {
+async function toOwnChild(row: ChildRow): Promise<OwnChild> {
   return {
     id: row.id,
     name: row.name,
-    avatar: avatarOf(row),
+    avatar: await avatarOf(row),
     age: row.age,
     coins: row.coins,
   };
+}
+
+/**
+ * La foto que se confirma tiene que ser de ESTE perfil y estar subida de verdad.
+ *
+ * El prefijo es la política de este módulo: qué significa que un avatar sea de
+ * un hijo. Las dos comprobaciones las hace `isConfirmableUpload`, juntas,
+ * porque olvidar cualquiera de las dos es un agujero. Ver la decisión 3 del
+ * design.
+ */
+async function confirmedAvatarKey(childId: string, key: string): Promise<string> {
+  if (!(await isConfirmableUpload(getStorageProvider(), key, avatarPrefix(childId)))) {
+    throw new InvalidAvatarUploadError();
+  }
+
+  return key;
+}
+
+function avatarPrefix(childId: string): string {
+  return `avatars/children/${childId}/`;
 }

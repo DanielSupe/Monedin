@@ -1,5 +1,6 @@
 export * from "./constants/avatars.js";
 export * from "./constants/domain.js";
+export * from "./constants/uploads.js";
 export * from "./schemas/auth.js";
 export * from "./schemas/avatar.js";
 export * from "./schemas/children.js";
@@ -10,3 +11,4 @@ export * from "./schemas/pagination.js";
 export * from "./schemas/redemptions.js";
 export * from "./schemas/rewards.js";
 export * from "./schemas/tasks.js";
+export * from "./schemas/uploads.js";

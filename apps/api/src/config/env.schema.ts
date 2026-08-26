@@ -17,7 +17,12 @@ import { LOG_LEVELS } from "../shared/logger/index.js";
  * en una respuesta HTTP. Al reportar un problema con una de ellas se nombra la
  * variable y se enmascara el valor.
  */
-export const SECRET_ENV_KEYS = ["DATABASE_URL", "TEST_DATABASE_URL"] as const;
+export const SECRET_ENV_KEYS = [
+  "DATABASE_URL",
+  "TEST_DATABASE_URL",
+  "AWS_ACCESS_KEY_ID",
+  "AWS_SECRET_ACCESS_KEY",
+] as const;
 
 export type SecretEnvKey = (typeof SECRET_ENV_KEYS)[number];
 
@@ -61,7 +66,7 @@ export const envSchema = z.object({
     .min(1, "obligatoria")
     .url("se esperaba una URL válida"),
 
-  /** Nivel de log. Único campo con valor por defecto razonable. */
+  /** Nivel de log. */
   LOG_LEVEL: z.enum(LOG_LEVELS).default("info"),
 
   /**
@@ -77,6 +82,65 @@ export const envSchema = z.object({
     .refine((value) => value.startsWith("postgresql://") || value.startsWith("postgres://"), {
       message: "se esperaba una cadena de conexión que empiece por postgresql://",
     }),
+
+  /** Región del bucket de imágenes. */
+  S3_REGION: z.string({ required_error: "obligatoria" }).min(1, "obligatoria"),
+
+  /** Bucket donde viven avatares, fotos de premios y evidencias. */
+  S3_BUCKET_NAME: z.string({ required_error: "obligatoria" }).min(1, "obligatoria"),
+
+  /**
+   * Bucket de la batería de tests. Separado del de desarrollo por la misma
+   * razón que `TEST_DATABASE_URL`: los tests VACÍAN su bucket entre pasadas, y
+   * apuntarlo por accidente al de desarrollo borraría las fotos con las que se
+   * está trabajando.
+   */
+  TEST_S3_BUCKET_NAME: z.string({ required_error: "obligatoria" }).min(1, "obligatoria"),
+
+  /**
+   * Dirección del almacén que usa la batería de tests.
+   *
+   * SEPARADA de `S3_ENDPOINT` y OBLIGATORIA con valor, no opcional-vía-vacío
+   * como aquella. Desarrollo puede apuntar al S3 real dejando `S3_ENDPOINT`
+   * vacía; los tests NUNCA, porque su arranque vacía el bucket que se le
+   * indique. Con una sola variable para las dos cosas, apuntar desarrollo a AWS
+   * arrastraría a los tests con él, y la primera pasada borraría el bucket real.
+   *
+   * Que no admita vacío es justamente la defensa: no hay forma de escribir aquí
+   * "el S3 de AWS".
+   */
+  TEST_S3_ENDPOINT: z
+    .string({ required_error: "obligatoria" })
+    .trim()
+    .refine((value) => value.startsWith("http://") || value.startsWith("https://"), {
+      message:
+        "se esperaba la URL de un almacén propio (MinIO). Los tests vacían su bucket: " +
+        "no pueden apuntar al S3 real",
+    }),
+
+  /**
+   * Dirección del almacén, cuando no es el S3 real de AWS.
+   *
+   * VACÍA significa AWS. Con valor, apunta a un S3-compatible propio, que es
+   * como el entorno local habla con MinIO sin necesitar credenciales reales.
+   * Se declara opcional-vía-vacío y no simplemente opcional para que
+   * `.env.example` pueda documentarla sin que su presencia cambie el
+   * comportamiento.
+   */
+  S3_ENDPOINT: z
+    .string()
+    .trim()
+    .refine((value) => value === "" || value.startsWith("http://") || value.startsWith("https://"), {
+      message: "se esperaba una URL http(s), o vacío para usar el S3 real",
+    })
+    .transform((value) => (value === "" ? undefined : value))
+    .default(""),
+
+  /** Credencial del almacén. Secreta. */
+  AWS_ACCESS_KEY_ID: z.string({ required_error: "obligatoria" }).min(1, "obligatoria"),
+
+  /** Credencial del almacén. Secreta. */
+  AWS_SECRET_ACCESS_KEY: z.string({ required_error: "obligatoria" }).min(1, "obligatoria"),
 });
 
 /** Configuración validada de la API. */

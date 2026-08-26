@@ -1,5 +1,6 @@
 import {
   createRewardSchema,
+  createUploadUrlSchema,
   listOwnRewardsQuerySchema,
   listRewardsQuerySchema,
   replaceAssignmentsSchema,
@@ -67,4 +68,13 @@ export const handleOwnList: RequestHandler = async (req, res) => {
   const query = validatedPart(req, "query", listOwnRewardsQuerySchema);
 
   res.status(200).json(await service.listOwnRewards(actorOf(req), query));
+};
+
+export const handleImageUploadUrl: RequestHandler = async (req, res) => {
+  const { rewardId } = validatedPart(req, "params", rewardParamsSchema);
+  const { contentType } = validatedPart(req, "body", createUploadUrlSchema);
+
+  res
+    .status(200)
+    .json(await service.requestRewardImageUploadUrl(actorOf(req), rewardId, contentType));
 };

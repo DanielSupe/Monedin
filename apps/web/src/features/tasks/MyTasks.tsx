@@ -1,5 +1,8 @@
 import type { OwnTask } from "@monedin/contracts";
+import { useState } from "react";
+import * as api from "../../api/tasks.js";
 import { messages } from "../../lib/messages.js";
+import { ImageUploadField } from "../uploads/ImageUploadField.js";
 import { describeTasksError, useCompleteTask, useOwnTasks } from "./use-tasks.js";
 
 /**
@@ -49,6 +52,9 @@ export function MyTasks({ onDone }: { onDone: () => void }): React.ReactElement 
 
 function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
   const complete = useCompleteTask();
+  // La foto se sube ANTES de marcar: aquí solo se guarda su clave hasta que el
+  // niño pulsa. Si nunca la sube, se marca igual y `evidenceUploadKey` no viaja.
+  const [evidencia, setEvidencia] = useState<string | undefined>();
 
   return (
     <li style={{ border: "1px solid #ccc", padding: "0.75rem" }}>
@@ -66,13 +72,39 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
       </p>
 
       {task.status === "PENDING" && (
-        <button
-          type="button"
-          disabled={complete.isPending}
-          onClick={() => complete.mutate(task.id)}
-        >
-          {messages.tasks.markDone}
-        </button>
+        <>
+          {/* Opcional a propósito: enseñar el trabajo, no un peaje para
+              declararlo hecho. */}
+          <ImageUploadField
+            requestUploadUrl={(contentType) => api.requestEvidenceUploadUrl(task.id, contentType)}
+            onUploaded={setEvidencia}
+            label={messages.tasks.addEvidence}
+          />
+          {evidencia !== undefined && <p>{messages.tasks.evidenceReady}</p>}
+
+          <button
+            type="button"
+            disabled={complete.isPending}
+            onClick={() =>
+              complete.mutate({
+                taskId: task.id,
+                ...(evidencia === undefined ? {} : { evidenceUploadKey: evidencia }),
+              })
+            }
+          >
+            {messages.tasks.markDone}
+          </button>
+        </>
+      )}
+
+      {task.evidence !== null && (
+        <p>
+          <img
+            src={task.evidence}
+            alt={messages.tasks.evidenceAlt}
+            style={{ maxWidth: "12rem", borderRadius: "0.25rem" }}
+          />
+        </p>
       )}
 
       {/* Marcarla no paga: lo que sigue es que su padre la revise. */}

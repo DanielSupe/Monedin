@@ -154,6 +154,14 @@ model Task {
   /// add-tasks.
   batchId String
 
+  /// Clave en el almacen de la foto que el nino adjunto al marcarla como hecha.
+  ///
+  /// OPCIONAL a proposito: la evidencia es una forma de ENSENAR el trabajo, no
+  /// un peaje para declararlo hecho. Un nino sin camara a mano marca su tarea
+  /// igual. Guarda la CLAVE, no una URL: las URLs de lectura se firman al
+  /// serializar y caducan, asi que una guardada aqui estaria rota en una hora.
+  evidenceKey String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

@@ -18,3 +18,25 @@ export const avatarKeySchema = z.enum(AVATAR_KEYS, {
 });
 
 export type AvatarKeyInput = z.infer<typeof avatarKeySchema>;
+
+/**
+ * Un avatar tal como se LEE: o una clave del catálogo, o una URL ya firmada
+ * lista para un `<img src>`.
+ *
+ * Es la otra mitad del par, y la distinción importa:
+ *
+ *   - `avatarKeySchema` valida lo que se ESCRIBE al elegir del catálogo, y
+ *     sigue siendo un enum cerrado. Subir una foto propia es otro campo
+ *     distinto (`avatarUploadKey`), no un valor más de este.
+ *   - `avatarValueSchema` describe lo que se DEVUELVE, ya resuelto por el
+ *     servidor. El front nunca ve la clave cruda del almacén: o una clave corta
+ *     que sabe pintar como ilustración, o una dirección que sabe pintar como
+ *     imagen.
+ *
+ * Que ninguna clave del catálogo empiece por `http` es lo que hace que las dos
+ * formas se distingan sin ambigüedad. Ver las decisiones 4 y 5 del design de
+ * `add-file-storage`.
+ */
+export const avatarValueSchema = z.union([avatarKeySchema, z.string().url()]);
+
+export type AvatarValue = z.infer<typeof avatarValueSchema>;

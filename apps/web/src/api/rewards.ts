@@ -10,6 +10,9 @@ import {
   ownRewardsPageSchema,
   rewardSchema,
   rewardsPageSchema,
+  type ImageContentType,
+  type UploadUrl,
+  uploadUrlSchema,
 } from "@monedin/contracts";
 import { z } from "zod";
 import { apiFetch } from "../lib/http-client.js";
@@ -66,6 +69,16 @@ export function replaceAssignments(
   return apiFetch(`/rewards/${rewardId}/assignments`, rewardSchema, {
     method: "PUT",
     body: JSON.stringify(input),
+  });
+}
+
+export function requestRewardImageUploadUrl(
+  rewardId: string,
+  contentType: ImageContentType,
+): Promise<UploadUrl> {
+  return apiFetch(`/rewards/${rewardId}/image/upload-url`, uploadUrlSchema, {
+    method: "POST",
+    body: JSON.stringify({ contentType }),
   });
 }
 

@@ -9,6 +9,9 @@ import {
   childSchema,
   childrenPageSchema,
   ownChildSchema,
+  type ImageContentType,
+  type UploadUrl,
+  uploadUrlSchema,
 } from "@monedin/contracts";
 import { z } from "zod";
 import { apiFetch } from "../lib/http-client.js";
@@ -48,6 +51,28 @@ export function updateChild(childId: string, input: UpdateChildInput): Promise<C
   return apiFetch(`/children/${childId}`, childSchema, {
     method: "PATCH",
     body: JSON.stringify(input),
+  });
+}
+
+/**
+ * Pide dónde subir la foto de un hijo. La clave la decide el servidor: aquí
+ * solo se recibe y se devuelve al confirmar.
+ */
+export function requestChildAvatarUploadUrl(
+  childId: string,
+  contentType: ImageContentType,
+): Promise<UploadUrl> {
+  return apiFetch(`/children/${childId}/avatar/upload-url`, uploadUrlSchema, {
+    method: "POST",
+    body: JSON.stringify({ contentType }),
+  });
+}
+
+/** Lo mismo para el propio niño. Sin identificador: sale de su sesión. */
+export function requestOwnAvatarUploadUrl(contentType: ImageContentType): Promise<UploadUrl> {
+  return apiFetch("/children/me/avatar/upload-url", uploadUrlSchema, {
+    method: "POST",
+    body: JSON.stringify({ contentType }),
   });
 }
 

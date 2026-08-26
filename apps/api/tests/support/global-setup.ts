@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "pg";
 import { getConfig } from "../../src/config/index.js";
+import { closeTestS3, vaciarBucketDeTests } from "./storage.js";
 
 /**
  * Prepara la base de datos de tests una sola vez, antes de toda la batería.
@@ -83,5 +84,14 @@ export default async function setup(): Promise<void> {
     }
   } finally {
     await target.end();
+  }
+
+  // El almacén se vacía igual que se recrea el esquema: la batería empieza sin
+  // nada de la pasada anterior. El guardián de que este NO es el bucket de
+  // desarrollo vive en `testBucket()`.
+  try {
+    await vaciarBucketDeTests();
+  } finally {
+    closeTestS3();
   }
 }

@@ -1,6 +1,7 @@
 import {
   childParamsSchema,
   createChildSchema,
+  createUploadUrlSchema,
   listChildrenQuerySchema,
   updateChildSchema,
   updateOwnChildSchema,
@@ -68,4 +69,21 @@ export const handleOwnUpdate: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", updateOwnChildSchema);
 
   res.status(200).json(await service.updateOwnAvatar(actorOf(req), input));
+};
+
+// ---------------------------------------------------------------------------
+// Subida del avatar
+// ---------------------------------------------------------------------------
+
+export const handleOwnAvatarUploadUrl: RequestHandler = async (req, res) => {
+  const { contentType } = validatedPart(req, "body", createUploadUrlSchema);
+
+  res.status(200).json(await service.requestOwnAvatarUploadUrl(actorOf(req), contentType));
+};
+
+export const handleAvatarUploadUrl: RequestHandler = async (req, res) => {
+  const { childId } = validatedPart(req, "params", childParamsSchema);
+  const { contentType } = validatedPart(req, "body", createUploadUrlSchema);
+
+  res.status(200).json(await service.requestAvatarUploadUrl(actorOf(req), childId, contentType));
 };

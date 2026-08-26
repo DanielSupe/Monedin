@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { CHILD_AGE_MAX, CHILD_AGE_MIN, NAME_MAX_LENGTH, NAME_MIN_LENGTH } from "../constants/domain.js";
 import { pinSchema } from "./auth.js";
-import { avatarKeySchema } from "./avatar.js";
+import { avatarKeySchema, avatarValueSchema } from "./avatar.js";
 import { paginationQuerySchema, pageOf } from "./pagination.js";
+import { uploadKeySchema } from "./uploads.js";
 
 /**
  * Contratos de los perfiles de hijo, compartidos por la API y el front.
@@ -30,6 +31,24 @@ export const childAgeSchema = z
 // ---------------------------------------------------------------------------
 // Entrada
 // ---------------------------------------------------------------------------
+
+/**
+ * Elegir del catálogo y subir una foto son DOS formas del mismo campo, y hay
+ * que usar como mucho una.
+ *
+ * Mandar las dos no es una entrada que se pueda resolver eligiendo una: quien
+ * la manda cree que va a pasar algo concreto, y cualquiera de las dos cosas que
+ * el servidor decidiera sería la contraria de lo que la mitad de quienes
+ * llaman esperaban. Ver la decisión 4 del design de `add-file-storage`.
+ */
+function hasAtMostOneAvatarForm(value: {
+  avatar?: string | undefined;
+  avatarUploadKey?: string | undefined;
+}): boolean {
+  return value.avatar === undefined || value.avatarUploadKey === undefined;
+}
+
+const AVATAR_FORMS_MESSAGE = "Elige un avatar del catálogo o sube una foto, pero no las dos cosas.";
 
 /**
  * Alta de un hijo.
@@ -65,25 +84,37 @@ export const updateChildSchema = z
     name: childNameSchema.optional(),
     age: childAgeSchema.nullable().optional(),
     avatar: avatarKeySchema.optional(),
+    /** La foto ya subida que se confirma como avatar. Excluyente con `avatar`. */
+    avatarUploadKey: uploadKeySchema.optional(),
   })
   .strict()
   .refine((value) => Object.keys(value).length > 0, {
     message: "No hay nada que cambiar.",
-  });
+  })
+  .refine(hasAtMostOneAvatarForm, { message: AVATAR_FORMS_MESSAGE });
 
 export type UpdateChildInput = z.infer<typeof updateChildSchema>;
 
 /**
- * Lo único que un niño puede cambiar de su propio perfil.
+ * Lo único que un niño puede cambiar de su propio perfil: su avatar, en
+ * cualquiera de sus dos formas.
  *
  * Su nombre y su edad los lleva su padre. Su PIN se cambia por la vía de `auth`,
  * porque tocar una credencial revoca sesiones y esa tabla es de aquel módulo.
+ *
+ * Los dos campos son opcionales por separado pero hay que mandar EXACTAMENTE
+ * uno: sin ninguno no hay nada que cambiar, y con los dos no se sabe cuál gana.
  */
 export const updateOwnChildSchema = z
   .object({
-    avatar: avatarKeySchema,
+    avatar: avatarKeySchema.optional(),
+    avatarUploadKey: uploadKeySchema.optional(),
   })
-  .strict();
+  .strict()
+  .refine((value) => value.avatar !== undefined || value.avatarUploadKey !== undefined, {
+    message: "No hay nada que cambiar.",
+  })
+  .refine(hasAtMostOneAvatarForm, { message: AVATAR_FORMS_MESSAGE });
 
 export type UpdateOwnChildInput = z.infer<typeof updateOwnChildSchema>;
 
@@ -114,7 +145,7 @@ export const listChildrenQuerySchema = paginationQuerySchema;
 export const childSchema = z.object({
   id: z.string(),
   name: z.string(),
-  avatar: avatarKeySchema,
+  avatar: avatarValueSchema,
   age: z.number().int().nullable(),
   coins: z.number().int(),
   locked: z.boolean(),
@@ -130,7 +161,7 @@ export type ChildrenPage = z.infer<typeof childrenPageSchema>;
 export const ownChildSchema = z.object({
   id: z.string(),
   name: z.string(),
-  avatar: avatarKeySchema,
+  avatar: avatarValueSchema,
   age: z.number().int().nullable(),
   coins: z.number().int(),
 });

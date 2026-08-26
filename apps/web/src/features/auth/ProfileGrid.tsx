@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ApiRequestError } from "../../lib/http-client.js";
 import { messages } from "../../lib/messages.js";
 import { CreateProfileScreen } from "../children/CreateProfileScreen.js";
-import { avatarGlyph } from "./avatars.js";
+import { Avatar } from "./Avatar.js";
 import { ResetPinScreen } from "./ResetPinScreen.js";
 import { describeAuthError, isLockout, useEnterProfile, useProfiles } from "./use-session.js";
 
@@ -73,7 +73,7 @@ export function ProfileGrid(): React.ReactElement {
                 fontSize: "1.1rem",
               }}
             >
-              <span style={{ fontSize: "2.5rem" }}>{avatarGlyph(profile.avatar)}</span>
+              <Avatar value={profile.avatar} size={40} />
               <span>
                 {profile.name}
                 {profile.locked && ` (${messages.auth.profileLocked})`}

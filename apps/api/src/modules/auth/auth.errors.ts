@@ -3,6 +3,7 @@ import {
   ConflictError,
   ForbiddenError,
   UnauthorizedError,
+  ValidationError,
 } from "../../shared/errors/domain-errors.js";
 
 /**
@@ -57,5 +58,18 @@ export class ParentSessionRequiredError extends ForbiddenError {
 export class ChildSessionRequiredError extends ForbiddenError {
   constructor() {
     super(messages.auth.childSessionRequired);
+  }
+}
+
+/**
+ * La foto que el padre confirma como su avatar no es suya, o no llegó a
+ * subirse.
+ */
+export class InvalidAvatarUploadError extends ValidationError {
+  constructor() {
+    super(
+      [{ field: "avatarUploadKey", code: "invalid_upload", message: messages.auth.invalidAvatarUpload }],
+      messages.auth.invalidAvatarUpload,
+    );
   }
 }

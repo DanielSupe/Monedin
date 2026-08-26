@@ -80,6 +80,13 @@ export function findParentById(
   );
 }
 
+/** Cambia la imagen del padre. `null` la quita. */
+export function updateParentImage(id: string, image: string | null): Promise<void> {
+  return withTranslatedErrors(async () => {
+    await getPrisma().user.update({ where: { id }, data: { image } });
+  });
+}
+
 export function createParent(data: {
   name: string;
   email: string;

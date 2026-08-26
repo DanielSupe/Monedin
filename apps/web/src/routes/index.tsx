@@ -2,6 +2,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AuthGate, ChildOnly, ParentOnly } from "../features/auth/AuthGate.js";
 import { ChangePinScreen } from "../features/auth/ChangePinScreen.js";
+import { ParentAvatarScreen } from "../features/auth/ParentAvatarScreen.js";
 import { useLeaveProfile, useLogout, useSession } from "../features/auth/use-session.js";
 import { ChildSettings } from "../features/children/ChildSettings.js";
 import { MyRedemptions } from "../features/redemptions/MyRedemptions.js";
@@ -30,6 +31,7 @@ function Home(): React.ReactElement {
 function SignedIn(): React.ReactElement {
   const { session } = useSession();
   const [changingPin, setChangingPin] = useState(false);
+  const [miFoto, setMiFoto] = useState(false);
   const [misAjustes, setMisAjustes] = useState(false);
   const [misTareas, setMisTareas] = useState(false);
   const [misPremios, setMisPremios] = useState(false);
@@ -42,6 +44,10 @@ function SignedIn(): React.ReactElement {
 
   if (changingPin) {
     return <ChangePinScreen onDone={() => setChangingPin(false)} />;
+  }
+
+  if (miFoto) {
+    return <ParentAvatarScreen onDone={() => setMiFoto(false)} />;
   }
 
   if (misAjustes) {
@@ -92,6 +98,9 @@ function SignedIn(): React.ReactElement {
           <Link to="/rewards">{messages.rewards.title}</Link>
           <Link to="/redemptions">{messages.redemptions.title}</Link>
           <Link to="/children">{messages.children.title}</Link>
+          <button type="button" onClick={() => setMiFoto(true)}>
+            {messages.auth.myAvatarTitle}
+          </button>
           <button type="button" onClick={() => setChangingPin(true)}>
             {messages.auth.changePinTitle}
           </button>

@@ -3,12 +3,14 @@ import {
   changeAdultPinSchema,
   changeOwnChildPinSchema,
   changePasswordSchema,
+  createUploadUrlSchema,
   enterProfileSchema,
   loginParentSchema,
   registerParentSchema,
   resetAdultPinSchema,
   resolveAvatarKey,
   setChildPinSchema,
+  updateParentAvatarSchema,
 } from "@monedin/contracts";
 import type { Request, RequestHandler } from "express";
 import {
@@ -151,6 +153,7 @@ export const handleEnterProfile: RequestHandler = async (req, res) => {
             id: profile.id,
             name: profile.name,
             email: profile.email ?? "",
+            avatar: profile.avatar,
           },
     hasAccount: true,
   } satisfies SessionState);
@@ -241,7 +244,13 @@ async function buildSessionState(req: Request): Promise<SessionState> {
   return parent === null
     ? accountWithoutProfile()
     : {
-        actor: { familyRole: "PARENT", id: parent.id, name: parent.name, email: parent.email },
+        actor: {
+          familyRole: "PARENT",
+          id: parent.id,
+          name: parent.name,
+          email: parent.email,
+          avatar: parent.avatar,
+        },
         hasAccount: true,
       };
 }
@@ -250,3 +259,26 @@ async function buildSessionState(req: Request): Promise<SessionState> {
 function accountWithoutProfile(): SessionState {
   return { actor: null, hasAccount: true };
 }
+
+// ---------------------------------------------------------------------------
+// Avatar propio del padre
+// ---------------------------------------------------------------------------
+
+export const handleAvatarUploadUrl: RequestHandler = async (req, res) => {
+  const { contentType } = validatedPart(req, "body", createUploadUrlSchema);
+
+  res.status(200).json(await service.requestParentAvatarUploadUrl(actorOf(req), contentType));
+};
+
+export const handleUpdateAvatar: RequestHandler = async (req, res) => {
+  const input = validatedPart(req, "body", updateParentAvatarSchema);
+  const parent = await service.updateParentAvatar(actorOf(req), input);
+
+  res.status(200).json({
+    familyRole: "PARENT" as const,
+    id: parent.id,
+    name: parent.name,
+    email: parent.email,
+    avatar: parent.avatar,
+  });
+};

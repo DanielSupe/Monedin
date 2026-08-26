@@ -24,6 +24,8 @@ export interface RewardRow {
   id: string;
   title: string;
   description: string | null;
+  /** Clave en el almacén, no una URL: las URLs se firman al serializar. */
+  image: string | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -35,6 +37,7 @@ export interface OwnRewardRow {
   id: string;
   title: string;
   description: string | null;
+  image: string | null;
   coins: number;
   createdAt: Date;
 }
@@ -44,6 +47,7 @@ const REWARD_FIELDS = {
   id: true,
   title: true,
   description: true,
+  image: true,
   isActive: true,
   createdAt: true,
   updatedAt: true,
@@ -60,6 +64,7 @@ interface RewardSelection {
   id: string;
   title: string;
   description: string | null;
+  image: string | null;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -71,6 +76,7 @@ function toRewardRow(reward: RewardSelection): RewardRow {
     id: reward.id,
     title: reward.title,
     description: reward.description,
+    image: reward.image,
     isActive: reward.isActive,
     createdAt: reward.createdAt,
     updatedAt: reward.updatedAt,
@@ -220,7 +226,9 @@ export function findOwnRewardsPage(
         where,
         select: {
           coins: true,
-          reward: { select: { id: true, title: true, description: true, createdAt: true } },
+          reward: {
+            select: { id: true, title: true, description: true, image: true, createdAt: true },
+          },
         },
         orderBy: [{ reward: { createdAt: "desc" } }, { rewardId: "desc" }],
         skip,
@@ -235,6 +243,7 @@ export function findOwnRewardsPage(
         id: assignment.reward.id,
         title: assignment.reward.title,
         description: assignment.reward.description,
+        image: assignment.reward.image,
         coins: assignment.coins,
         createdAt: assignment.reward.createdAt,
       })),
@@ -270,7 +279,11 @@ export function findChildBalance(childId: string): Promise<number> {
 /** Cambia título y/o descripción. Nunca el precio: eso es `replaceAssignments`. */
 export function updateReward(
   id: string,
-  data: { title?: string | undefined; description?: string | null | undefined },
+  data: {
+    title?: string | undefined;
+    description?: string | null | undefined;
+    image?: string | null | undefined;
+  },
 ): Promise<RewardRow> {
   return withTranslatedErrors(async () => {
     const reward = await getPrisma().reward.update({
@@ -278,6 +291,7 @@ export function updateReward(
       data: {
         ...(data.title === undefined ? {} : { title: data.title }),
         ...(data.description === undefined ? {} : { description: data.description }),
+        ...(data.image === undefined ? {} : { image: data.image }),
       },
       select: REWARD_FIELDS,
     });

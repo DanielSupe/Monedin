@@ -1,7 +1,7 @@
 import { PIN_LENGTH, type Child } from "@monedin/contracts";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
-import { avatarGlyph } from "../auth/avatars.js";
+import { Avatar } from "../auth/Avatar.js";
 import { useSetChildPin, useUnlockChildProfile } from "../auth/use-session.js";
 import { ChildForm } from "./ChildForm.js";
 import { describeChildrenError, useChildren, useDeactivateChild } from "./use-children.js";
@@ -98,7 +98,7 @@ function ChildRow({ child, onEdit }: { child: Child; onEdit: () => void }): Reac
   return (
     <li style={{ border: "1px solid #ccc", padding: "0.75rem" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-        <span style={{ fontSize: "2rem" }}>{avatarGlyph(child.avatar)}</span>
+        <Avatar value={child.avatar} size={32} />
         <span style={{ flex: 1 }}>
           <strong>{child.name}</strong>
           {child.age !== null && <span> · {child.age}</span>}

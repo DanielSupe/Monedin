@@ -13,6 +13,9 @@ import {
   ownTasksPageSchema,
   taskBatchesPageSchema,
   taskSchema,
+  type ImageContentType,
+  type UploadUrl,
+  uploadUrlSchema,
 } from "@monedin/contracts";
 import { z } from "zod";
 import { apiFetch } from "../lib/http-client.js";
@@ -101,8 +104,22 @@ export function fetchOwnTasks(query: Partial<ListOwnTasksQuery> = {}): Promise<O
   );
 }
 
-export function completeTask(taskId: string): Promise<OwnTask> {
-  return apiFetch(`/tasks/${taskId}/complete`, ownTaskSchema, { method: "POST" });
+export function requestEvidenceUploadUrl(
+  taskId: string,
+  contentType: ImageContentType,
+): Promise<UploadUrl> {
+  return apiFetch(`/tasks/${taskId}/evidence/upload-url`, uploadUrlSchema, {
+    method: "POST",
+    body: JSON.stringify({ contentType }),
+  });
+}
+
+/** La evidencia es OPCIONAL: sin ella, el cuerpo va vacío y todo sigue igual. */
+export function completeTask(taskId: string, evidenceUploadKey?: string): Promise<OwnTask> {
+  return apiFetch(`/tasks/${taskId}/complete`, ownTaskSchema, {
+    method: "POST",
+    body: JSON.stringify(evidenceUploadKey === undefined ? {} : { evidenceUploadKey }),
+  });
 }
 
 // --- Claves de consulta -----------------------------------------------------

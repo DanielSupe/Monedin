@@ -2,6 +2,7 @@ import {
   ConflictError,
   ForbiddenError,
   NotFoundError,
+  ValidationError,
 } from "../../shared/errors/domain-errors.js";
 import { messages } from "../../shared/messages/index.js";
 
@@ -64,5 +65,21 @@ export class ParentRoleRequiredError extends ForbiddenError {
 export class ChildRoleRequiredError extends ForbiddenError {
   constructor() {
     super(messages.tasks.childRoleRequired);
+  }
+}
+
+/**
+ * La evidencia adjunta no es de esta tarea, o nunca llegó a subirse.
+ *
+ * Se lanza ANTES de la transición, así que la tarea sigue pendiente: es
+ * preferible que el niño reintente a que quede como hecha con una foto que no
+ * está.
+ */
+export class InvalidEvidenceUploadError extends ValidationError {
+  constructor() {
+    super(
+      [{ field: "evidenceUploadKey", code: "invalid_upload", message: messages.tasks.invalidEvidenceUpload }],
+      messages.tasks.invalidEvidenceUpload,
+    );
   }
 }

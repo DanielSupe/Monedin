@@ -1,5 +1,7 @@
 import {
+  completeTaskSchema,
   createTaskSchema,
+  createUploadUrlSchema,
   listOwnTasksQuerySchema,
   listTasksQuerySchema,
   taskParamsSchema,
@@ -71,8 +73,16 @@ export const handleOwnList: RequestHandler = async (req, res) => {
 
 export const handleComplete: RequestHandler = async (req, res) => {
   const { taskId } = validatedPart(req, "params", taskParamsSchema);
+  const input = validatedPart(req, "body", completeTaskSchema);
 
-  res.status(200).json(await service.completeTask(actorOf(req), taskId));
+  res.status(200).json(await service.completeTask(actorOf(req), taskId, input));
+};
+
+export const handleEvidenceUploadUrl: RequestHandler = async (req, res) => {
+  const { taskId } = validatedPart(req, "params", taskParamsSchema);
+  const { contentType } = validatedPart(req, "body", createUploadUrlSchema);
+
+  res.status(200).json(await service.requestEvidenceUploadUrl(actorOf(req), taskId, contentType));
 };
 
 export const handleApprove: RequestHandler = async (req, res) => {

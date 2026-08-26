@@ -1,7 +1,8 @@
-import { PIN_LENGTH, changeOwnChildPinSchema, type AvatarKey } from "@monedin/contracts";
+import { PIN_LENGTH, changeOwnChildPinSchema } from "@monedin/contracts";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
 import { describeAuthError, useChangeOwnChildPin } from "../auth/use-session.js";
+import * as childrenApi from "../../api/children.js";
 import { AvatarPicker } from "./AvatarPicker.js";
 import { describeChildrenError, useOwnChild, useUpdateOwnChild } from "./use-children.js";
 
@@ -40,9 +41,11 @@ export function ChildSettings({ onDone }: { onDone: () => void }): React.ReactEl
       </p>
 
       <AvatarPicker
-        value={data.avatar as AvatarKey}
+        value={data.avatar}
         onChange={(avatar) => updateAvatar.mutate({ avatar })}
         label={messages.children.chooseAvatar}
+        requestUploadUrl={childrenApi.requestOwnAvatarUploadUrl}
+        onUpload={(avatarUploadKey) => updateAvatar.mutate({ avatarUploadKey })}
       />
 
       {updateAvatar.isSuccess && <p>{messages.children.avatarSaved}</p>}

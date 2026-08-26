@@ -172,6 +172,12 @@ async function seed(): Promise<void> {
     );
   }
 
+  // --- Imagenes ---------------------------------------------------------------
+  //
+  // La siembra NO sube ninguna foto, y es deliberado: sembrar objetos exigiria
+  // que el almacen estuviera levantado, y entonces `pnpm db:seed` dejaria de
+  // funcionar con solo la base de datos. Los avatares del catalogo ya ensenan el
+  // caso por defecto, y subir una foto es justo lo que se prueba a mano.
   const cine = await prisma.reward.create({
     data: { title: "Ir al cine", description: "Una película a elegir.", parentId: padre.id },
   });

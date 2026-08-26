@@ -10,8 +10,44 @@ function validEnv(): Record<string, string | undefined> {
     TEST_DATABASE_URL: "postgresql://monedin:monedin@localhost:5432/monedin_test",
     WEB_ORIGIN: "http://localhost:5173",
     LOG_LEVEL: "info",
+    S3_REGION: "us-east-1",
+    S3_BUCKET_NAME: "monedin-dev",
+    TEST_S3_BUCKET_NAME: "monedin-test",
+    TEST_S3_ENDPOINT: "http://localhost:9000",
+    S3_ENDPOINT: "http://localhost:9000",
+    AWS_ACCESS_KEY_ID: "una-clave",
+    AWS_SECRET_ACCESS_KEY: "un-secreto",
   };
 }
+
+describe("el endpoint de los tests nunca puede ser el S3 real", () => {
+  it("exige una URL propia: vacío no vale", () => {
+    // Vacío significa "el S3 de AWS" en `S3_ENDPOINT`. Aquí no puede
+    // significar nada: la batería VACÍA su bucket, así que no debe existir
+    // forma de apuntarla a un almacén real.
+    const sinEndpoint = { ...validEnv(), TEST_S3_ENDPOINT: "" };
+
+    expect(parseEnv(sinEndpoint).ok).toBe(false);
+  });
+
+  it("tampoco vale omitirla", () => {
+    const { TEST_S3_ENDPOINT: _omitida, ...resto } = validEnv();
+
+    expect(parseEnv(resto).ok).toBe(false);
+  });
+
+  it("`S3_ENDPOINT` SÍ admite vacío: es como desarrollo apunta a AWS", () => {
+    const conAws = { ...validEnv(), S3_ENDPOINT: "" };
+    const result = parseEnv(conAws);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.env.S3_ENDPOINT).toBeUndefined();
+      // Y los tests siguen con el suyo, sin arrastrarse detrás.
+      expect(result.env.TEST_S3_ENDPOINT).toBe("http://localhost:9000");
+    }
+  });
+});
 
 describe("validación de la configuración de entorno", () => {
   it("acepta una configuración completa y válida", () => {

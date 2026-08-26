@@ -2,12 +2,14 @@ import {
   CHILD_AGE_MAX,
   CHILD_AGE_MIN,
   PIN_LENGTH,
-  type AvatarKey,
   type Child,
   createChildSchema,
+  isAvatarKey,
+  type ImageContentType,
   updateChildSchema,
 } from "@monedin/contracts";
 import { useState } from "react";
+import * as childrenApi from "../../api/children.js";
 import { messages } from "../../lib/messages.js";
 import { AvatarPicker } from "./AvatarPicker.js";
 import { describeChildrenError, useCreateChild, useUpdateChild } from "./use-children.js";
@@ -38,7 +40,10 @@ export function ChildForm({
   const [name, setName] = useState(child?.name ?? "");
   const [pin, setPin] = useState("");
   const [age, setAge] = useState(child?.age === null || child?.age === undefined ? "" : String(child.age));
-  const [avatar, setAvatar] = useState<AvatarKey | undefined>(child?.avatar);
+  // Puede arrancar como una URL —si el hijo ya tiene foto— o como una clave del
+  // catálogo. Solo se manda al servidor cuando es una clave: una URL es lo que
+  // YA está guardado, no un cambio que pedir.
+  const [avatar, setAvatar] = useState<string | undefined>(child?.avatar);
   const [fieldError, setFieldError] = useState<string | undefined>();
 
   const create = useCreateChild();
@@ -52,11 +57,15 @@ export function ChildForm({
     // Vacío significa «sin edad», que es distinto de una edad mal escrita.
     const edad = age.trim() === "" ? undefined : Number(age);
 
+    // Solo una clave del catálogo viaja como `avatar`. Una foto se confirma por
+    // su propia vía en cuanto se sube, así que aquí nunca hay que reenviarla.
+    const avatarDelCatalogo = isAvatarKey(avatar) ? avatar : undefined;
+
     if (editing) {
       const parsed = updateChildSchema.safeParse({
         name,
         age: edad ?? null,
-        ...(avatar === undefined ? {} : { avatar }),
+        ...(avatarDelCatalogo === undefined ? {} : { avatar: avatarDelCatalogo }),
       });
       if (!parsed.success) {
         setFieldError(parsed.error.issues[0]?.message);
@@ -70,7 +79,7 @@ export function ChildForm({
       name,
       pin,
       ...(edad === undefined ? {} : { age: edad }),
-      ...(avatar === undefined ? {} : { avatar }),
+      ...(avatarDelCatalogo === undefined ? {} : { avatar: avatarDelCatalogo }),
     });
     if (!parsed.success) {
       setFieldError(parsed.error.issues[0]?.message);
@@ -123,7 +132,23 @@ export function ChildForm({
           />
         </label>
 
-        <AvatarPicker value={avatar} onChange={setAvatar} label={messages.children.avatar} />
+        {/* Subir foto solo al EDITAR: la clave lleva dentro el identificador
+            del perfil, que no existe mientras se está creando. */}
+        <AvatarPicker
+          value={avatar}
+          onChange={setAvatar}
+          label={messages.children.avatar}
+          {...(editing
+            ? {
+                requestUploadUrl: (contentType: ImageContentType) =>
+                  childrenApi.requestChildAvatarUploadUrl(child.id, contentType),
+                onUpload: (avatarUploadKey: string) => {
+                  update.mutate({ childId: child.id, input: { avatarUploadKey } });
+                  setAvatar(undefined);
+                },
+              }
+            : {})}
+        />
 
         <button type="submit" disabled={mutation.isPending}>
           {mutation.isPending

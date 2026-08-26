@@ -3,6 +3,7 @@ import {
   ConflictError,
   ForbiddenError,
   NotFoundError,
+  ValidationError,
 } from "../../shared/errors/domain-errors.js";
 
 /**
@@ -48,5 +49,21 @@ export class ParentRoleRequiredError extends ForbiddenError {
 export class ChildRoleRequiredError extends ForbiddenError {
   constructor() {
     super(messages.children.childRoleRequired);
+  }
+}
+
+/**
+ * La foto que se confirma como avatar no es de este perfil, o nunca llegó a
+ * subirse.
+ *
+ * Es 422 y no 404: lo que falla es el dato que viene en la petición, no el
+ * perfil sobre el que se opera —ese ya se comprobó y es suyo—.
+ */
+export class InvalidAvatarUploadError extends ValidationError {
+  constructor() {
+    super(
+      [{ field: "avatarUploadKey", code: "invalid_upload", message: messages.children.invalidAvatarUpload }],
+      messages.children.invalidAvatarUpload,
+    );
   }
 }

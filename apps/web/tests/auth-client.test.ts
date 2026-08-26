@@ -123,7 +123,18 @@ describe("cliente de la rejilla", () => {
   it("entra a un perfil con su identificador y su PIN", async () => {
     const fetchMock = vi
       .fn()
-      .mockResolvedValue(jsonResponse(200, { actor: { familyRole: "PARENT", id: "u1", name: "Lucía", email: "l@x.test" }, hasAccount: true }));
+      .mockResolvedValue(
+        jsonResponse(200, {
+          actor: {
+            familyRole: "PARENT",
+            id: "u1",
+            name: "Lucía",
+            email: "l@x.test",
+            avatar: "nutria",
+          },
+          hasAccount: true,
+        }),
+      );
     vi.stubGlobal("fetch", fetchMock);
 
     await api.enterProfile({ profileId: "parent", pin: "1357" });
@@ -209,7 +220,13 @@ describe("la guarda tiene tres estados, no dos", () => {
   it("con perfil activo, la aplicación", () => {
     expect(
       screenFor({
-        actor: { familyRole: "PARENT", id: "u1", name: "Lucía", email: "l@x.test" },
+        actor: {
+          familyRole: "PARENT",
+          id: "u1",
+          name: "Lucía",
+          email: "l@x.test",
+          avatar: "nutria",
+        },
         hasAccount: true,
       }),
     ).toBe("app");

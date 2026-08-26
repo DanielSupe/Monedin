@@ -14,11 +14,15 @@ import {
   MAX_PAGE_SIZE,
   REDEMPTION_STATUSES,
   REWARD_STATUSES,
+  ALLOWED_IMAGE_CONTENT_TYPES,
   apiErrorSchema,
   avatarKeySchema,
+  avatarValueSchema,
+  completeTaskSchema,
   createChildSchema,
   createRedemptionSchema,
   createRewardSchema,
+  createUploadUrlSchema,
   healthResponseSchema,
   isAvatarKey,
   listOwnRedemptionsQuerySchema,
@@ -38,8 +42,10 @@ import {
   taskBatchesPageSchema,
   updateChildSchema,
   updateOwnChildSchema,
+  updateParentAvatarSchema,
   updateRewardSchema,
   updateTaskSchema,
+  uploadUrlSchema,
 } from "../src/index.js";
 
 describe("constantes de dominio", () => {
@@ -483,6 +489,7 @@ describe("contrato de las tareas", () => {
               coins: 25,
               status: "PENDING",
               dueDate: null,
+              evidence: null,
               child: { id: "hijo-1", name: "Mateo", avatar: DEFAULT_AVATAR_KEY },
               createdAt: "2026-08-24T10:00:00.000Z",
               updatedAt: "2026-08-24T10:00:00.000Z",
@@ -636,6 +643,7 @@ describe("contrato de los premios", () => {
       id: "premio-1",
       title: "Ir al cine",
       description: null,
+      image: null,
       status: "ACTIVE",
       offers: [
         { child: { id: "hijo-1", name: "Ana", avatar: DEFAULT_AVATAR_KEY }, coins: 200 },
@@ -653,6 +661,7 @@ describe("contrato de los premios", () => {
       id: "premio-1",
       title: "Ir al cine",
       description: null,
+      image: null,
       status: "ACTIVE",
       offers: [],
       createdAt: "2026-08-24T10:00:00.000Z",
@@ -705,5 +714,115 @@ describe("contrato de los canjes", () => {
     });
 
     expect(result.success).toBe(true);
+  });
+});
+
+describe("contrato de la subida de imágenes", () => {
+  it("un avatar se lee como clave del catálogo o como URL, y nada más", () => {
+    expect(avatarValueSchema.safeParse(DEFAULT_AVATAR_KEY).success).toBe(true);
+    expect(avatarValueSchema.safeParse("https://bucket.example/avatars/x.jpg").success).toBe(true);
+
+    // Una clave cruda del almacén NO es una forma válida de lectura: si se
+    // colara, el front la pintaría como si fuera una ilustración del catálogo y
+    // acabaría enseñando el avatar por defecto sin que nadie se enterara.
+    expect(avatarValueSchema.safeParse("avatars/children/hijo-1/abc.jpg").success).toBe(false);
+    expect(avatarValueSchema.safeParse("").success).toBe(false);
+  });
+
+  it("pedir una URL de subida solo acepta el tipo de contenido", () => {
+    expect(createUploadUrlSchema.safeParse({ contentType: "image/jpeg" }).success).toBe(true);
+    expect(createUploadUrlSchema.safeParse({ contentType: "image/gif" }).success).toBe(false);
+    expect(createUploadUrlSchema.safeParse({ contentType: "image/svg+xml" }).success).toBe(false);
+
+    // La clave la decide el servidor: mandarla es 422 y no un campo ignorado.
+    expect(
+      createUploadUrlSchema.safeParse({ contentType: "image/jpeg", key: "la/que/yo/quiera.jpg" })
+        .success,
+    ).toBe(false);
+  });
+
+  it("los tipos admitidos son exactamente los tres que el navegador produce", () => {
+    expect([...ALLOWED_IMAGE_CONTENT_TYPES]).toEqual(["image/jpeg", "image/png", "image/webp"]);
+  });
+
+  it("la respuesta de subida trae dónde subir, con qué clave y hasta cuándo", () => {
+    const result = uploadUrlSchema.safeParse({
+      uploadUrl: "https://bucket.example/avatars/children/hijo-1/abc.jpg?firma=x",
+      key: "avatars/children/hijo-1/abc.jpg",
+      expiresAt: "2026-08-25T10:05:00.000Z",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("el niño elige catálogo O foto, pero nunca las dos ni ninguna", () => {
+    expect(updateOwnChildSchema.safeParse({ avatar: DEFAULT_AVATAR_KEY }).success).toBe(true);
+    expect(updateOwnChildSchema.safeParse({ avatarUploadKey: "avatars/children/x/a.jpg" }).success).toBe(
+      true,
+    );
+
+    expect(updateOwnChildSchema.safeParse({}).success).toBe(false);
+    expect(
+      updateOwnChildSchema.safeParse({
+        avatar: DEFAULT_AVATAR_KEY,
+        avatarUploadKey: "avatars/children/x/a.jpg",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("el padre tampoco puede mandar las dos formas al editar a un hijo", () => {
+    expect(updateChildSchema.safeParse({ avatar: DEFAULT_AVATAR_KEY }).success).toBe(true);
+    expect(updateChildSchema.safeParse({ avatarUploadKey: "avatars/children/x/a.jpg" }).success).toBe(
+      true,
+    );
+    expect(
+      updateChildSchema.safeParse({
+        avatar: DEFAULT_AVATAR_KEY,
+        avatarUploadKey: "avatars/children/x/a.jpg",
+      }).success,
+    ).toBe(false);
+  });
+
+  it("el avatar del padre se confirma solo con la foto subida", () => {
+    expect(updateParentAvatarSchema.safeParse({ avatarUploadKey: "avatars/parents/p/a.jpg" }).success).toBe(
+      true,
+    );
+    expect(updateParentAvatarSchema.safeParse({ avatar: DEFAULT_AVATAR_KEY }).success).toBe(false);
+    expect(updateParentAvatarSchema.safeParse({}).success).toBe(false);
+  });
+
+  it("el alta de un premio NO acepta foto: se añade al editarlo", () => {
+    const base = { title: "Ir al cine", childIds: ["hijo-1"], coins: 200 };
+
+    expect(createRewardSchema.safeParse(base).success).toBe(true);
+    expect(
+      createRewardSchema.safeParse({ ...base, imageUploadKey: "rewards/premio-1/a.jpg" }).success,
+    ).toBe(false);
+  });
+
+  it("la edición de un premio acepta la foto, y null explícito para borrarla", () => {
+    expect(updateRewardSchema.safeParse({ imageUploadKey: "rewards/premio-1/a.jpg" }).success).toBe(
+      true,
+    );
+    expect(updateRewardSchema.safeParse({ imageUploadKey: null }).success).toBe(true);
+  });
+
+  it("completar una tarea SIN CUERPO sigue siendo válido", () => {
+    // Es como se marcaba una tarea antes de que existiera la evidencia, y como
+    // la sigue marcando quien no adjunta foto. Sin esto, añadir la evidencia
+    // habría roto a todo el que no la usa: pasó, y estos tests lo cazaron.
+    expect(completeTaskSchema.safeParse(undefined).success).toBe(true);
+    expect(completeTaskSchema.parse(undefined)).toEqual({});
+  });
+
+  it("completar una tarea sin evidencia sigue siendo un cuerpo vacío válido", () => {
+    // Es el caso normal, y el que garantiza que la foto no se vuelva un peaje.
+    expect(completeTaskSchema.safeParse({}).success).toBe(true);
+    expect(completeTaskSchema.safeParse({ evidenceUploadKey: "tasks/t1/evidence/a.jpg" }).success).toBe(
+      true,
+    );
+
+    // La tarea sale de la ruta, no del cuerpo.
+    expect(completeTaskSchema.safeParse({ taskId: "otra-tarea" }).success).toBe(false);
   });
 });

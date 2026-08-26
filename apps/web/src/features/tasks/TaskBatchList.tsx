@@ -1,7 +1,7 @@
 import type { Task, TaskStatus } from "@monedin/contracts";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
-import { avatarGlyph } from "../auth/avatars.js";
+import { Avatar } from "../auth/Avatar.js";
 import { TaskForm } from "./TaskForm.js";
 import {
   describeTaskStatus,
@@ -142,11 +142,23 @@ function TaskRow({ task }: { task: Task }): React.ReactElement {
 
   return (
     <li style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-      <span style={{ fontSize: "1.5rem" }}>{avatarGlyph(task.child.avatar)}</span>
+      <Avatar value={task.child.avatar} size={24} />
       <span style={{ flex: 1 }}>
         {task.child.name} · {task.coins} {messages.tasks.coins.toLowerCase()} ·{" "}
         {describeTaskStatus(task.status)}
       </span>
+
+      {/* La evidencia va ANTES de los botones: es para decidir con ella, no
+          después de haber decidido. */}
+      {task.evidence !== null && (
+        <a href={task.evidence} target="_blank" rel="noreferrer" style={{ width: "100%" }}>
+          <img
+            src={task.evidence}
+            alt={messages.tasks.evidenceAlt}
+            style={{ maxWidth: "8rem", borderRadius: "0.25rem", display: "block" }}
+          />
+        </a>
+      )}
 
       {task.status === "COMPLETED" && (
         <>

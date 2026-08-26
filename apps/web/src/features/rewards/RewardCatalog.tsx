@@ -1,7 +1,9 @@
 import { COINS_MAX, COINS_MIN, MAX_CHILDREN_PER_FAMILY, type Reward } from "@monedin/contracts";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
-import { avatarGlyph } from "../auth/avatars.js";
+import * as rewardsApi from "../../api/rewards.js";
+import { Avatar } from "../auth/Avatar.js";
+import { ImageUploadField } from "../uploads/ImageUploadField.js";
 import { useChildren } from "../children/use-children.js";
 import { RewardForm } from "./RewardForm.js";
 import {
@@ -159,9 +161,40 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
           <button type="button" onClick={() => setEditingTitle(false)}>
             {messages.rewards.cancel}
           </button>
+
+          {/* La foto se añade AQUÍ y no al publicar: su clave lleva dentro el
+              identificador del premio, que no existe mientras se está creando. */}
+          <ImageUploadField
+            requestUploadUrl={(contentType) =>
+              rewardsApi.requestRewardImageUploadUrl(reward.id, contentType)
+            }
+            onUploaded={(key) =>
+              update.mutate({ rewardId: reward.id, input: { imageUploadKey: key } })
+            }
+            label={messages.rewards.addImage}
+          />
+
+          {reward.image !== null && (
+            <button
+              type="button"
+              disabled={update.isPending}
+              onClick={() =>
+                update.mutate({ rewardId: reward.id, input: { imageUploadKey: null } })
+              }
+            >
+              {messages.rewards.removeImage}
+            </button>
+          )}
         </div>
       ) : (
         <>
+          {reward.image !== null && (
+            <img
+              src={reward.image}
+              alt={reward.title}
+              style={{ maxWidth: "10rem", borderRadius: "0.25rem", display: "block" }}
+            />
+          )}
           <strong>{reward.title}</strong>
           {reward.description !== null && <p>{reward.description}</p>}
         </>
@@ -180,7 +213,7 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
         <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "0.25rem" }}>
           {reward.offers.map((offer) => (
             <li key={offer.child.id}>
-              <span style={{ fontSize: "1.25rem" }}>{avatarGlyph(offer.child.avatar)}</span>{" "}
+              <Avatar value={offer.child.avatar} size={20} />{" "}
               {offer.child.name} · {offer.coins} {messages.rewards.coins.toLowerCase()}
             </li>
           ))}
@@ -263,7 +296,7 @@ function OffersEditor({
               checked={replace.elegidos.includes(hijo.id)}
               onChange={() => replace.alternar(hijo.id)}
             />
-            <span style={{ fontSize: "1.25rem" }}>{avatarGlyph(hijo.avatar)}</span> {hijo.name}
+            <Avatar value={hijo.avatar} size={20} /> {hijo.name}
           </label>
 
           {replace.elegidos.includes(hijo.id) && (

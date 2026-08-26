@@ -59,6 +59,7 @@ export const messages = {
     back: "Volver",
 
     /** Cambiar el PIN sabiendo el actual. Requiere perfil de padre activo. */
+    myAvatarTitle: "Mi foto",
     changePinTitle: "Cambiar PIN",
     currentPin: "PIN actual",
     newPin: "PIN nuevo",
@@ -161,6 +162,10 @@ export const messages = {
     myTasksTitle: "Mis tareas",
     myTasksEmpty: "No tienes tareas ahora mismo. ¡Disfruta!",
     markDone: "¡Ya la hice!",
+    addEvidence: "Súbele una foto (opcional)",
+    evidenceReady: "¡Foto lista! Ahora marca la tarea.",
+    evidenceAlt: "La foto que subiste",
+    evidenceLabel: "Lo que mandó",
     waitingReview: "Se lo dijimos a tu papá o a tu mamá.",
     earned: "¡Ganaste estas monedas!",
     myTasks: "Ver mis tareas",
@@ -200,6 +205,8 @@ export const messages = {
     /** Edición del premio: solo título y descripción. */
     edit: "Editar",
     editRewardTitle: "Editar premio",
+    addImage: "Ponerle una foto",
+    removeImage: "Quitar la foto",
     save: "Guardar",
 
     /** Reemplazo del conjunto de ofertas. */
@@ -280,6 +287,25 @@ export const messages = {
     /** Paginación de la bandeja. */
     previousPage: "Anterior",
     nextPage: "Siguiente",
+  },
+
+  uploads: {
+    /** Selector y recorte. */
+    choose: "Elegir una foto",
+    change: "Cambiar la foto",
+    remove: "Quitar la foto",
+    crop: "Ajusta el encuadre",
+    cropConfirm: "Usar esta foto",
+    cancel: "Cancelar",
+    preparing: "Preparando la foto…",
+    uploading: "Subiendo…",
+    zoom: "Acercar",
+
+    /** Lo que puede salir mal, en el idioma de quien lo lee. */
+    failed: "No se pudo subir la foto. Vuelve a intentarlo.",
+    network: "No pudimos conectar para subir la foto. Revisa tu conexión.",
+    tooLarge: "Esa imagen es demasiado grande, incluso comprimida.",
+    wrongType: "Solo se admiten imágenes JPG, PNG o WEBP.",
   },
 
   errors: {

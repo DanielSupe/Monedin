@@ -25,6 +25,18 @@ const rolRequerido = {
   nino: "Esto solo lo puede hacer un perfil de niño.",
 } as const;
 
+/**
+ * Una subida que no se pudo confirmar, compartido por los cuatro modulos que
+ * guardan imagenes.
+ *
+ * Es el MISMO texto para las tres causas —la foto no llego a subirse, la
+ * referencia es de otro recurso, o esta mal formada— por la misma razon que un
+ * hijo ajeno y uno inexistente dan el mismo 404: distinguirlas le diria a quien
+ * prueba cual de sus intentos iba por buen camino. Para quien subio de buena fe,
+ * las tres se arreglan igual: volver a intentarlo.
+ */
+const subidaInvalida = "Esa foto no se pudo confirmar. Vuelve a subirla.";
+
 export const messages = {
   errors: {
     /** 401 — no hay sesión. */
@@ -69,6 +81,8 @@ export const messages = {
     parentSessionRequired: "Necesitas la sesión de un adulto para hacer esto.",
     /** La operación es la de un niño sobre su propio perfil. */
     childSessionRequired: "Esto solo lo puede hacer un perfil de niño sobre el suyo.",
+    /** La foto que el padre confirma como avatar no es suya, o no se subió. */
+    invalidAvatarUpload: subidaInvalida,
   },
 
   children: {
@@ -88,6 +102,8 @@ export const messages = {
     parentRoleRequired: rolRequerido.adulto,
     /** La operación es la vista propia de un niño. */
     childRoleRequired: rolRequerido.nino,
+    /** La foto que se confirma como avatar no es de este perfil, o no se subió. */
+    invalidAvatarUpload: subidaInvalida,
   },
 
   tasks: {
@@ -120,6 +136,8 @@ export const messages = {
     parentRoleRequired: rolRequerido.adulto,
     /** Marcar una tarea como hecha la hace el niño al que le tocó. */
     childRoleRequired: rolRequerido.nino,
+    /** La evidencia adjunta no es de esta tarea, o no llegó a subirse. */
+    invalidEvidenceUpload: subidaInvalida,
   },
 
   rewards: {
@@ -135,6 +153,8 @@ export const messages = {
     parentRoleRequired: rolRequerido.adulto,
     /** El escaparate propio lo ve un niño sobre su propio perfil. */
     childRoleRequired: rolRequerido.nino,
+    /** La foto que se confirma no es de este premio, o no llegó a subirse. */
+    invalidImageUpload: subidaInvalida,
   },
 
   redemptions: {

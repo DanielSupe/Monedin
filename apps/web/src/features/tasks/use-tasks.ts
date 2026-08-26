@@ -98,7 +98,11 @@ export function useOwnTasks(query: Partial<ListOwnTasksQuery> = {}) {
 export function useCompleteTask() {
   const refresh = useRefreshTasks();
 
-  return useMutation({ mutationFn: api.completeTask, onSuccess: refresh });
+  return useMutation({
+    mutationFn: ({ taskId, evidenceUploadKey }: { taskId: string; evidenceUploadKey?: string }) =>
+      api.completeTask(taskId, evidenceUploadKey),
+    onSuccess: refresh,
+  });
 }
 
 /**

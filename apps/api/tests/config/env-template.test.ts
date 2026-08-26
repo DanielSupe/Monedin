@@ -17,6 +17,12 @@ const INFRASTRUCTURE_ONLY_KEYS = [
   "POSTGRES_PORT",
   "ADMINER_PORT",
   "WEB_PORT",
+  // MinIO: lo levanta docker-compose, no lo lee la API. Esta habla con el
+  // almacén por S3_ENDPOINT y las credenciales, que sí están en el esquema.
+  "MINIO_ROOT_USER",
+  "MINIO_ROOT_PASSWORD",
+  "MINIO_PORT",
+  "MINIO_CONSOLE_PORT",
 ];
 
 function repositoryRoot(): string {

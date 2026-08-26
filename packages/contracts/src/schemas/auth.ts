@@ -6,6 +6,8 @@ import {
   PASSWORD_MIN_LENGTH,
   PIN_LENGTH,
 } from "../constants/domain.js";
+import { avatarValueSchema } from "./avatar.js";
+import { uploadKeySchema } from "./uploads.js";
 
 /**
  * Contratos de autenticación, compartidos por la API y el front.
@@ -127,6 +129,23 @@ export const setChildPinSchema = z.object({
 
 export type SetChildPinInput = z.infer<typeof setChildPinSchema>;
 
+/**
+ * El padre confirma la foto que acaba de subir como su avatar.
+ *
+ * Solo acepta la foto, no una clave del catálogo: hoy no hay ninguna pantalla
+ * donde el padre elija ilustración —la suya se la puso el registro—, y añadir
+ * aquí un campo que ninguna interfaz manda sería inventar contrato. Cuando esa
+ * pantalla exista, este esquema gana el `avatar` y su regla de exclusión, como
+ * ya la tienen los de `children`.
+ */
+export const updateParentAvatarSchema = z
+  .object({
+    avatarUploadKey: uploadKeySchema,
+  })
+  .strict();
+
+export type UpdateParentAvatarInput = z.infer<typeof updateParentAvatarSchema>;
+
 // ---------------------------------------------------------------------------
 // Respuestas
 // ---------------------------------------------------------------------------
@@ -136,6 +155,15 @@ export const parentActorSchema = z.object({
   id: z.string(),
   name: z.string(),
   email: z.string(),
+  /**
+   * Resuelto y nunca nulo, igual que en `childActorSchema`.
+   *
+   * Faltaba: el padre elegía su avatar en la rejilla y lo perdía al entrar a su
+   * propio perfil, porque su actor no lo llevaba. Es el mismo dato en los dos
+   * sitios y ahora se comporta igual en los dos. Ver la decisión 6 del design de
+   * `add-file-storage`.
+   */
+  avatar: avatarValueSchema,
 });
 
 export const childActorSchema = z.object({
@@ -145,7 +173,7 @@ export const childActorSchema = z.object({
   // Resuelto al de por defecto, nunca nulo, igual que en `selectableProfileSchema`:
   // eran dos formas del mismo dato en el mismo paquete. Estrechar el tipo no
   // rompe a nadie, porque el front ya trataba el caso vacío.
-  avatar: z.string(),
+  avatar: avatarValueSchema,
   coins: z.number().int(),
 });
 
@@ -155,7 +183,7 @@ export const selectableProfileSchema = z.object({
   id: z.string(),
   familyRole: z.enum(["PARENT", "CHILD"]),
   name: z.string(),
-  avatar: z.string(),
+  avatar: avatarValueSchema,
   locked: z.boolean(),
 });
 

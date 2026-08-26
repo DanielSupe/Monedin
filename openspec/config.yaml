@@ -26,8 +26,8 @@ context: |
   - apps/web: Vite + React + TanStack Query + TanStack Router.
   - packages/contracts: schemas Zod, tipos y constantes de dominio compartidos front/back.
   - packages/config: tsconfig, eslint y prettier compartidos.
-  Infra local: docker-compose con PostgreSQL 16 + Adminer.
-  Archivos subidos (imágenes, documentos): S3 detrás de una interfaz StorageProvider.
+  Infra local: docker-compose con PostgreSQL 16 + Adminer + MinIO (almacen S3-compatible).
+  Archivos subidos (imágenes): S3 detrás de una interfaz StorageProvider, con URLs firmadas.
   Tests: Vitest + Supertest, contra PostgreSQL real en una base separada.
 
   ARQUITECTURA
@@ -138,6 +138,31 @@ context: |
                 ni DELETE-. Sin cancelacion del niño en este alcance: solo el padre resuelve.
                 Sin migracion: `RewardRedemption`, `RedemptionStatus` y
                 `CoinReason.REDEMPTION_APPROVED` ya estaban desde `add-data-model`.
+    IMAGENES    El binario NUNCA pasa por la API. Tres pasos: el cliente pide una URL firmada al
+                endpoint del modulo dueño, sube con un PUT directo al almacen, y confirma la MISMA
+                clave contra el endpoint de dominio que YA existia para guardar esa referencia.
+                POST /children/me/avatar/upload-url (niño) y /children/:childId/avatar/upload-url
+                (padre); POST /auth/avatar/upload-url y PATCH /auth/avatar (el avatar del padre vive
+                en `auth` porque `User.image` es de ese modulo, y su actor ahora SI lo expone);
+                POST /rewards/:rewardId/image/upload-url; POST /tasks/:taskId/evidence/upload-url
+                (niño, solo mientras la tarea siga PENDING).
+                Antes de guardar una clave se comprueban DOS cosas y hacen falta las dos: que
+                empiece por el prefijo del dueño -si no, quien vio la clave de otro la confirmaria
+                como suya- y que el objeto exista -si no, se guarda una referencia rota-. El
+                prefijo lo decide cada modulo; `isConfirmableUpload` hace las dos juntas.
+                La firma ata el `Content-Type` con `signableHeaders`: sin eso el SDK solo firma
+                `host` y una URL para una imagen sirve para subir cualquier cosa.
+                Se guarda la CLAVE, nunca una URL: las de lectura se firman al serializar y caducan.
+                El avatar tiene DOS formas de entrada excluyentes -`avatar` del catalogo o
+                `avatarUploadKey`- y UNA de lectura -clave corta o URL firmada-.
+                El alta de un premio NO acepta foto: su clave lleva el `rewardId`, que no existe
+                mientras se crea. Se añade al editarlo.
+                La evidencia de una tarea es OPCIONAL y se valida ANTES de la transicion: si falla,
+                la tarea sigue PENDING.
+                Una sola migracion: `Task.evidenceKey`. `ChildProfile.avatar`, `User.image` y
+                `Reward.image` ya estaban desde `add-data-model`.
+                MinIO en docker-compose para desarrollo y tests; S3 real en produccion con
+                S3_ENDPOINT vacio.
 
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
@@ -162,7 +187,13 @@ context: |
     registrando un movimiento que la compense. Ese mecanismo todavia no lo expone ningun endpoint.
   - Cambiar un PIN sabiendo el actual NO revoca sesiones, ni la propia ni la de otro dispositivo.
     Para echar a alguien de otro dispositivo esta cerrar la sesion de cuenta, que si revoca.
-  - Los avatares y las imágenes se suben a S3 (bucket privado, URLs firmadas de corta vida).
+  - Los avatares y las imágenes se suben a S3 (bucket privado, URLs firmadas de corta vida). Ya
+  construido en `add-file-storage`, detrás de la interfaz `StorageProvider`.
+- Un avatar propio CONVIVE con el catálogo de 12 animales, no lo reemplaza: son dos formas del
+  mismo campo, y por eso ningún perfil existente necesitó migrarse.
+- Los objetos huérfanos NO se borran (avatar reemplazado, premio retirado): se acepta que el bucket
+  crezca. Un borrado sin transacción distribuida es siempre a mejor esfuerzo, y equivocarse
+  borrando pesa más que guardar de más con este volumen.
 
   ABIERTO
   - Cuántos dígitos tiene el PIN y con qué algoritmo se hashean las credenciales: se cierra en

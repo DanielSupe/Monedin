@@ -11,6 +11,9 @@ import {
   type SetChildPinInput,
   selectableProfilesSchema,
   sessionStateSchema,
+  type ImageContentType,
+  type UploadUrl,
+  uploadUrlSchema,
 } from "@monedin/contracts";
 import { z } from "zod";
 import { apiFetch } from "../lib/http-client.js";
@@ -105,3 +108,19 @@ export async function changePassword(input: ChangePasswordInput): Promise<void> 
 
 export const sessionQueryKey = ["auth", "session"] as const;
 export const profilesQueryKey = ["auth", "profiles"] as const;
+
+// --- Avatar propio del padre --------------------------------------------------
+
+export function requestParentAvatarUploadUrl(contentType: ImageContentType): Promise<UploadUrl> {
+  return apiFetch("/auth/avatar/upload-url", uploadUrlSchema, {
+    method: "POST",
+    body: JSON.stringify({ contentType }),
+  });
+}
+
+export async function updateParentAvatar(avatarUploadKey: string): Promise<void> {
+  await apiFetch("/auth/avatar", z.unknown(), {
+    method: "PATCH",
+    body: JSON.stringify({ avatarUploadKey }),
+  });
+}

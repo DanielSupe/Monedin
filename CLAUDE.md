@@ -381,7 +381,83 @@ hasheado: leer la tabla entera no permite suplantar a nadie.
 
 ---
 
-## 6. Base de datos
+## 6. Archivos e imágenes
+
+**El binario nunca pasa por la API.** Subir una imagen son tres pasos, y ninguno mueve el archivo a
+través de nuestro servidor:
+
+```
+1. el cliente pide       POST /<recurso>/<id>/<que>/upload-url  ->  { uploadUrl, key, expiresAt }
+2. el cliente sube       PUT  directo al almacén, con la URL firmada
+3. el cliente confirma   PATCH /<recurso>/<id>  con la MISMA key que recibió
+```
+
+El paso 3 usa el endpoint de dominio **que ya existía** para guardar esa referencia, no uno nuevo de
+«confirmar subida»: ese tendría que saber qué significa cada clave y a qué fila pertenece, que es
+justo lo que el módulo dueño ya sabe.
+
+**Antes de guardar una clave se comprueban DOS cosas, y hacen falta las dos**:
+
+```ts
+if (!(await isConfirmableUpload(getStorageProvider(), key, prefijoDelDueño))) {
+  throw new InvalidXUploadError(); // 422
+}
+```
+
+Solo el prefijo deja guardar referencias a archivos que nunca se subieron. Solo la existencia deja
+apuntar a la imagen de otro, que sí existe. `isConfirmableUpload` las hace juntas para que ninguna
+se pueda olvidar; el **prefijo** lo decide cada módulo, porque «ser dueño de esto» es su política.
+
+**`shared/storage` no sabe de negocio.** Recibe una clave ya decidida y firma, igual que
+`applyCoinMovement` recibe una transacción y no la abre. Quién puede subir qué lo comprueba el
+servicio del módulo con el actor, antes de llamar.
+
+**La firma tiene que atar el tipo de contenido explícitamente.** Pasar `ContentType` en el comando NO
+basta: el firmante deja `X-Amz-SignedHeaders: host` y una URL emitida para una imagen acepta subir
+cualquier cosa. Hay que pedirlo con `signableHeaders: new Set(["content-type"])`. Lo cazó un test
+contra MinIO, no una revisión.
+
+**Lo que se guarda es la CLAVE, nunca una URL.** Las URLs de lectura se firman al serializar y
+caducan; una guardada en la base estaría rota en una hora. `resolveAvatarForResponse()` es el único
+sitio que traduce lo guardado a lo que sale por la respuesta —clave de catálogo tal cual, o URL
+firmada—, y por eso los serializadores de los cuatro módulos son asíncronos.
+
+**Los tests van contra MinIO real**, no contra un doble, por la misma razón que los de datos van
+contra PostgreSQL: lo que hay que probar es que una firma rechaza otro tipo, que una URL caduca y que
+`HeadObject` responde 404. Un doble diría que sí a todo.
+
+Y van contra MinIO **siempre**, aunque desarrollo apunte al S3 real: su arranque VACÍA el bucket que
+se le indique. Por eso `TEST_S3_ENDPOINT` es una variable aparte de `S3_ENDPOINT` y **no admite
+vacío** —vacío es como se dice «el S3 de AWS»—, y por eso `testBucket()` comprueba dos cosas y no
+una. Equivocarse ahí es la única forma de perder datos de verdad con este módulo.
+
+### La política IAM necesita `s3:ListBucket`, y no es opcional
+
+Sobre S3 real, `HeadObject` de una clave inexistente responde **403 y no 404** si el usuario no tiene
+`s3:ListBucket` sobre el bucket: AWS no quiere revelar si un objeto existe a quien no puede listar.
+Como `objectExists()` solo trata el 404 como «no está» y relanza lo demás, sin ese permiso **cada
+confirmación de una foto ausente sería un 500 en vez de un 422**.
+
+No se arregla ablandando `objectExists()`: devolver `false` ante un 403 haría pasar una política mal
+puesta por «el usuario no subió la foto», que es justo lo que ese código evita a propósito. Se
+arregla en la política:
+
+```json
+{ "Effect": "Allow", "Action": "s3:ListBucket", "Resource": "arn:aws:s3:::EL-BUCKET" }
+```
+
+Fíjate en el ARN: **sin** `/*`, porque `ListBucket` es un permiso sobre el bucket y no sobre sus
+objetos. MinIO responde 404 igualmente, así que esto solo se manifiesta al desplegar.
+
+### Y el bucket necesita CORS
+
+El navegador hace el `PUT` directo contra el almacén, así que es una petición de origen cruzado. MinIO
+la acepta por defecto; S3 la rechaza sin una regla que permita `PUT` desde el origen de la aplicación
+y `AllowedHeaders` que incluya `Content-Type` —que va dentro de la firma—.
+
+---
+
+## 7. Base de datos
 
 **Los invariantes viven en el motor**, no solo en el código. La migración inicial instala
 restricciones `CHECK` (saldo no negativo, rangos de monedas y de edad) y un disparador que hace
@@ -424,7 +500,7 @@ que es justo lo que hay que probar.
 
 ---
 
-## 7. Convenciones
+## 8. Convenciones
 
 ### Rutas
 
@@ -484,7 +560,7 @@ ver la decisión 11 del design de `setup-foundations` antes de tocar la configur
 
 ---
 
-## 8. Tests
+## 9. Tests
 
 **Ningún change se da por terminado sin tests.** No es una fase final: las tareas de test van junto a
 la funcionalidad que cubren.
@@ -502,7 +578,7 @@ Herramientas: Vitest en todo el proyecto, Supertest para la API.
 
 ---
 
-## 9. Cómo se trabaja
+## 10. Cómo se trabaja
 
 El proceso lo lleva OpenSpec. Nada de código sin un change aprobado que lo cubra.
 

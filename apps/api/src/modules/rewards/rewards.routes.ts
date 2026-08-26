@@ -1,5 +1,6 @@
 import {
   createRewardSchema,
+  createUploadUrlSchema,
   listOwnRewardsQuerySchema,
   listRewardsQuerySchema,
   replaceAssignmentsSchema,
@@ -80,6 +81,13 @@ rewards.put(
   requireParent,
   validate({ params: rewardParamsSchema, body: replaceAssignmentsSchema }),
   controller.handleReplaceAssignments,
+);
+
+rewards.post(
+  "/rewards/:rewardId/image/upload-url",
+  requireParent,
+  validate({ params: rewardParamsSchema, body: createUploadUrlSchema }),
+  controller.handleImageUploadUrl,
 );
 
 rewards.delete(

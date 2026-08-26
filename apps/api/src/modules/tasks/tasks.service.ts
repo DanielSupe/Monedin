@@ -9,9 +9,17 @@ import {
   type TaskBatch,
   type UpdateTaskInput,
   normalizeCoinsPerChild,
-  resolveAvatarKey,
+  type CompleteTaskInput,
+  type ImageContentType,
+  type UploadUrl,
 } from "@monedin/contracts";
 import type { Actor } from "../../shared/actor.js";
+import { resolveAvatarForResponse, resolveImageForResponse } from "../../shared/avatar/resolve-avatar.js";
+import {
+  extensionForContentType,
+  getStorageProvider,
+  isConfirmableUpload,
+} from "../../shared/storage/index.js";
 import { toPage, toSkipTake } from "../../shared/pagination.js";
 // El hijo ajeno, el inexistente y el dado de baja son el mismo error que ya
 // tiene `children`, con el mismo texto. Definir aquí un segundo error para
@@ -20,6 +28,7 @@ import { toPage, toSkipTake } from "../../shared/pagination.js";
 import { ChildNotFoundError } from "../children/children.errors.js";
 import {
   ChildRoleRequiredError,
+  InvalidEvidenceUploadError,
   ParentRoleRequiredError,
   TaskNotEditableError,
   TaskNotFoundError,
@@ -78,7 +87,7 @@ export async function createBatch(actor: Actor, input: CreateTaskInput): Promise
     ...(input.dueDate === undefined ? {} : { dueDate: new Date(input.dueDate) }),
   });
 
-  return rows.map(toTask);
+  return Promise.all(rows.map(toTask));
 }
 
 
@@ -141,7 +150,13 @@ export async function listBatches(
     ];
   });
 
-  return toPage(query, { items, total: result.total });
+  // Cada reparto trae sus tareas a medio serializar: se resuelven todas juntas,
+  // no una por una, para no encadenar una firma detrás de otra.
+  const resueltos = await Promise.all(
+    items.map(async (batch) => ({ ...batch, tasks: await Promise.all(batch.tasks) })),
+  );
+
+  return toPage(query, { items: resueltos, total: result.total });
 }
 
 export async function getTask(actor: Actor, taskId: string): Promise<Task> {
@@ -182,7 +197,10 @@ export async function listOwnTasks(
     toSkipTake(query),
   );
 
-  return toPage(query, { items: result.items.map(toOwnTask), total: result.total });
+  return toPage(query, {
+    items: await Promise.all(result.items.map(toOwnTask)),
+    total: result.total,
+  });
 }
 
 export async function getOwnTask(actor: Actor, taskId: string): Promise<OwnTask> {
@@ -237,11 +255,63 @@ export async function deleteTask(actor: Actor, taskId: string): Promise<void> {
 // Transiciones
 // ---------------------------------------------------------------------------
 
-/** El niño marca como hecha una tarea suya que estaba pendiente. */
-export async function completeTask(actor: Actor, taskId: string): Promise<OwnTask> {
+/**
+ * El niño marca como hecha una tarea suya que estaba pendiente, adjuntando
+ * opcionalmente una foto como evidencia.
+ *
+ * La evidencia se valida ANTES de transicionar: si la clave no es de esta tarea
+ * o el archivo no llegó a subirse, la tarea SIGUE PENDIENTE. Es preferible que
+ * el niño lo reintente a dejarla marcada con una foto que no está.
+ */
+export async function completeTask(
+  actor: Actor,
+  taskId: string,
+  input: CompleteTaskInput = {},
+): Promise<OwnTask> {
   const found = await ownTask(actor, taskId);
 
-  return toOwnTask(await repository.transition(found.id, "PENDING", "COMPLETED"));
+  const evidence =
+    input.evidenceUploadKey === undefined
+      ? {}
+      : { evidenceKey: await confirmedEvidenceKey(found.id, input.evidenceUploadKey) };
+
+  return toOwnTask(await repository.transition(found.id, "PENDING", "COMPLETED", evidence));
+}
+
+/**
+ * Una URL para que el niño suba la evidencia de una tarea suya.
+ *
+ * Solo mientras siga PENDIENTE: lo que se enseña es el trabajo antes de
+ * declararlo hecho, no después de que su padre lo resolviera.
+ */
+export async function requestEvidenceUploadUrl(
+  actor: Actor,
+  taskId: string,
+  contentType: ImageContentType,
+): Promise<UploadUrl> {
+  const found = await ownTask(actor, taskId);
+
+  if (found.status !== "PENDING") {
+    throw new TaskNotEditableError();
+  }
+
+  const key = `${evidencePrefix(found.id)}${randomUUID()}.${extensionForContentType(contentType)}`;
+
+  const { uploadUrl, expiresAt } = await getStorageProvider().createUploadUrl({ key, contentType });
+
+  return { uploadUrl, key, expiresAt: expiresAt.toISOString() };
+}
+
+function evidencePrefix(taskId: string): string {
+  return `tasks/${taskId}/evidence/`;
+}
+
+async function confirmedEvidenceKey(taskId: string, key: string): Promise<string> {
+  if (!(await isConfirmableUpload(getStorageProvider(), key, evidencePrefix(taskId)))) {
+    throw new InvalidEvidenceUploadError();
+  }
+
+  return key;
 }
 
 /**
@@ -307,7 +377,9 @@ async function ownTask(actor: Actor, taskId: string): Promise<TaskRow> {
 }
 
 /** Una tarea para el padre: con su hijo, sin `parentId`. */
-function toTask(row: TaskRow): Task {
+async function toTask(row: TaskRow): Promise<Task> {
+  const storage = getStorageProvider();
+
   return {
     id: row.id,
     batchId: row.batchId,
@@ -316,11 +388,13 @@ function toTask(row: TaskRow): Task {
     coins: row.coins,
     status: row.status,
     dueDate: row.dueDate?.toISOString() ?? null,
+    // El padre ve la evidencia ANTES de aprobar o rechazar: para eso está.
+    evidence: await resolveImageForResponse(storage, row.evidenceKey),
     child: {
       id: row.child.id,
       name: row.child.name,
       // Resuelto siempre, para que el front no trate el caso vacío.
-      avatar: resolveAvatarKey(row.child.avatar),
+      avatar: await resolveAvatarForResponse(storage, row.child.avatar),
     },
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -328,7 +402,7 @@ function toTask(row: TaskRow): Task {
 }
 
 /** Una tarea para el niño: sin el hijo, porque es él, y sin el reparto. */
-function toOwnTask(row: OwnTaskRow): OwnTask {
+async function toOwnTask(row: OwnTaskRow): Promise<OwnTask> {
   return {
     id: row.id,
     title: row.title,
@@ -336,6 +410,7 @@ function toOwnTask(row: OwnTaskRow): OwnTask {
     coins: row.coins,
     status: row.status,
     dueDate: row.dueDate?.toISOString() ?? null,
+    evidence: await resolveImageForResponse(getStorageProvider(), row.evidenceKey),
     createdAt: row.createdAt.toISOString(),
   };
 }

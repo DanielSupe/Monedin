@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { REWARD_STATUSES } from "../constants/domain.js";
-import { avatarKeySchema } from "./avatar.js";
+import { avatarValueSchema } from "./avatar.js";
 import {
   coinsAmountSchema,
   coinsPerChildAssignmentSchema,
@@ -9,6 +9,7 @@ import {
 } from "./coins-per-child.js";
 import { pageOf, paginationQuerySchema } from "./pagination.js";
 import { taskDescriptionSchema, taskTitleSchema } from "./tasks.js";
+import { uploadKeySchema } from "./uploads.js";
 
 /**
  * Contratos del catálogo de premios, compartidos por la API y el front.
@@ -62,6 +63,16 @@ export const updateRewardSchema = z
   .object({
     title: taskTitleSchema.optional(),
     description: taskDescriptionSchema.nullable().optional(),
+    /**
+     * La foto ya subida que se confirma para este premio. `null` explícito la
+     * BORRA, que es distinto de no mandar el campo.
+     *
+     * Vive aquí y no en el alta porque la clave del almacén lleva dentro el
+     * identificador del premio, y ese identificador no existe mientras el
+     * premio se está creando. Ver la decisión 7 del design de
+     * `add-file-storage`.
+     */
+    imageUploadKey: uploadKeySchema.nullable().optional(),
   })
   .strict()
   .refine((value) => Object.keys(value).length > 0, {
@@ -133,7 +144,7 @@ export type ListOwnRewardsQuery = z.infer<typeof listOwnRewardsQuerySchema>;
 export const rewardOfferChildSchema = z.object({
   id: z.string(),
   name: z.string(),
-  avatar: avatarKeySchema,
+  avatar: avatarValueSchema,
 });
 
 export type RewardOfferChild = z.infer<typeof rewardOfferChildSchema>;
@@ -156,6 +167,8 @@ export const rewardSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string().nullable(),
+  /** URL ya firmada, o `null` si el premio no tiene foto. Nunca la clave cruda. */
+  image: z.string().url().nullable(),
   status: rewardStatusSchema,
   offers: z.array(rewardOfferSchema),
   createdAt: z.string().datetime(),
@@ -179,6 +192,7 @@ export const ownRewardSchema = z.object({
   id: z.string(),
   title: z.string(),
   description: z.string().nullable(),
+  image: z.string().url().nullable(),
   coins: coinsAmountSchema,
   affordable: z.boolean(),
   createdAt: z.string().datetime(),

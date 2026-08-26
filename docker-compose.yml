@@ -4,6 +4,12 @@
 # corren en el host con `pnpm dev`, porque montar volumenes con recarga en
 # caliente sobre Windows es lento y fragil.
 #
+# MinIO es el almacen S3-compatible de DESARROLLO. Habla el mismo protocolo que
+# S3, asi que la API le habla con el mismo cliente apuntando `S3_ENDPOINT` aqui.
+# Existe para que nadie necesite credenciales reales de AWS ni un bucket de
+# verdad para levantar el proyecto o correr la bateria de tests. En produccion
+# `S3_ENDPOINT` va VACIO y se usa el S3 real.
+#
 # Las credenciales salen del `.env`; aqui no hay ningun valor incrustado.
 
 services:
@@ -45,6 +51,57 @@ services:
     environment:
       ADMINER_DEFAULT_SERVER: postgres
 
+  minio:
+    image: minio/minio:latest
+    container_name: monedin-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      # El primero es el protocolo S3, contra el que habla la API.
+      - "${MINIO_PORT}:9000"
+      # El segundo es la consola web, para mirar el bucket con los ojos.
+      - "${MINIO_CONSOLE_PORT}:9001"
+    volumes:
+      - monedin-minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------------------
+  # Crea los buckets y se va. No es un servicio: es el equivalente a la
+  # migracion inicial de la base de datos, pero para el almacen.
+  #
+  # Son DOS buckets por la misma razon que hay dos bases de datos: la bateria de
+  # tests vacia el suyo entre pasadas, y compartirlo con el de desarrollo
+  # borraria las fotos con las que se esta trabajando.
+  # ---------------------------------------------------------------------------
+  minio-init:
+    image: minio/mc:latest
+    container_name: monedin-minio-init
+    restart: "no"
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      TEST_S3_BUCKET_NAME: ${TEST_S3_BUCKET_NAME}
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
+      mc mb --ignore-existing local/$${S3_BUCKET_NAME} &&
+      mc mb --ignore-existing local/$${TEST_S3_BUCKET_NAME} &&
+      echo 'Buckets listos.'
+      "
+
 volumes:
   monedin-postgres-data:
     name: monedin-postgres-data
+  monedin-minio-data:
+    name: monedin-minio-data

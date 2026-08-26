@@ -1,6 +1,7 @@
 import {
   childParamsSchema,
   createChildSchema,
+  createUploadUrlSchema,
   listChildrenQuerySchema,
   updateChildSchema,
   updateOwnChildSchema,
@@ -49,6 +50,14 @@ children.patch(
   controller.handleOwnUpdate,
 );
 
+// Por el mismo orden: «me» tiene que ganarle a `:childId` también aquí.
+children.post(
+  "/children/me/avatar/upload-url",
+  requireChild,
+  validate({ body: createUploadUrlSchema }),
+  controller.handleOwnAvatarUploadUrl,
+);
+
 // --- Gestión del padre ------------------------------------------------------
 
 children.get(
@@ -70,6 +79,13 @@ children.patch(
   requireParent,
   validate({ params: childParamsSchema, body: updateChildSchema }),
   controller.handleUpdate,
+);
+
+children.post(
+  "/children/:childId/avatar/upload-url",
+  requireParent,
+  validate({ params: childParamsSchema, body: createUploadUrlSchema }),
+  controller.handleAvatarUploadUrl,
 );
 
 children.delete(

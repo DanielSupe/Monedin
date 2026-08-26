@@ -1,5 +1,7 @@
 import {
+  completeTaskSchema,
   createTaskSchema,
+  createUploadUrlSchema,
   listOwnTasksQuerySchema,
   listTasksQuerySchema,
   taskParamsSchema,
@@ -86,11 +88,20 @@ tasks.delete(
 
 // --- Transiciones -----------------------------------------------------------
 
+// La evidencia va en el CUERPO y es opcional: hasta este change esta ruta no
+// validaba ninguno.
 tasks.post(
   "/tasks/:taskId/complete",
   requireChild,
-  validate({ params: taskParamsSchema }),
+  validate({ params: taskParamsSchema, body: completeTaskSchema }),
   controller.handleComplete,
+);
+
+tasks.post(
+  "/tasks/:taskId/evidence/upload-url",
+  requireChild,
+  validate({ params: taskParamsSchema, body: createUploadUrlSchema }),
+  controller.handleEvidenceUploadUrl,
 );
 
 tasks.post(

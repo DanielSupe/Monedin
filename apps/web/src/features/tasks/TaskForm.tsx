@@ -8,7 +8,7 @@ import {
 } from "@monedin/contracts";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
-import { avatarGlyph } from "../auth/avatars.js";
+import { Avatar } from "../auth/Avatar.js";
 import { useChildren } from "../children/use-children.js";
 import { describeTasksError, useCreateTasks } from "./use-tasks.js";
 
@@ -142,7 +142,7 @@ export function TaskForm({
                 checked={elegidos.includes(hijo.id)}
                 onChange={() => alternar(hijo.id)}
               />
-              <span style={{ fontSize: "1.5rem" }}>{avatarGlyph(hijo.avatar)}</span> {hijo.name}
+              <Avatar value={hijo.avatar} size={24} /> {hijo.name}
             </label>
 
             {!mismoValor && elegidos.includes(hijo.id) && (

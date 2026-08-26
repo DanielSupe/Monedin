@@ -2,11 +2,13 @@ import {
   changeAdultPinSchema,
   changeOwnChildPinSchema,
   changePasswordSchema,
+  createUploadUrlSchema,
   enterProfileSchema,
   loginParentSchema,
   registerParentSchema,
   resetAdultPinSchema,
   setChildPinSchema,
+  updateParentAvatarSchema,
 } from "@monedin/contracts";
 import type { Router as ExpressRouter } from "express";
 import { moduleRouter } from "../../shared/http/module-router.js";
@@ -106,4 +108,23 @@ auth.post(
   "/auth/child-profiles/:childProfileId/unlock",
   requireParent,
   controller.handleUnlockChildProfile,
+);
+
+// --- Avatar propio del padre -------------------------------------------------
+//
+// Vive aquí y no en `children` porque `User.image` es de este módulo: ningún
+// otro lee ni escribe esa columna.
+
+auth.post(
+  "/auth/avatar/upload-url",
+  requireParent,
+  validate({ body: createUploadUrlSchema }),
+  controller.handleAvatarUploadUrl,
+);
+
+auth.patch(
+  "/auth/avatar",
+  requireParent,
+  validate({ body: updateParentAvatarSchema }),
+  controller.handleUpdateAvatar,
 );

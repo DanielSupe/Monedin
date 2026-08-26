@@ -9,16 +9,27 @@ import {
   PARENT_PROFILE_ID,
   PARENT_SESSION_DAYS,
   resolveAvatarKey,
-  type AvatarKey,
+  type AvatarValue,
+  type ImageContentType,
+  type UpdateParentAvatarInput,
+  type UploadUrl,
 } from "@monedin/contracts";
+import { randomUUID } from "node:crypto";
 import type { Actor } from "../../shared/actor.js";
+import { resolveAvatarForResponse } from "../../shared/avatar/resolve-avatar.js";
 import { hashCredential, verifyCredential } from "../../shared/crypto/credentials.js";
 import { generateSessionToken } from "../../shared/crypto/session-token.js";
 import { NotFoundError, TooManyAttemptsError } from "../../shared/errors/domain-errors.js";
+import {
+  extensionForContentType,
+  getStorageProvider,
+  isConfirmableUpload,
+} from "../../shared/storage/index.js";
 import * as repository from "./auth.repository.js";
 import {
   ChildSessionRequiredError,
   EmailAlreadyRegisteredError,
+  InvalidAvatarUploadError,
   InvalidCredentialsError,
   InvalidPinError,
   ParentSessionRequiredError,
@@ -77,6 +88,11 @@ export interface ParentSummary {
   id: string;
   name: string;
   email: string;
+}
+
+/** Lo mismo, más el avatar YA resuelto: lo que hace falta para armar el actor. */
+export interface ParentProfileSummary extends ParentSummary {
+  avatar: AvatarValue;
 }
 
 export interface IssuedSession {
@@ -251,7 +267,8 @@ export interface SelectableProfile {
   id: string;
   familyRole: "PARENT" | "CHILD";
   name: string;
-  avatar: AvatarKey;
+  /** Clave del catálogo o URL firmada, ya resuelta. */
+  avatar: AvatarValue;
   locked: boolean;
 }
 
@@ -273,21 +290,25 @@ export async function listProfiles(accountUserId: string): Promise<SelectablePro
   const profile = await repository.findParentById(accountUserId);
   const children = await repository.findSelectableChildren(accountUserId);
 
+  const storage = getStorageProvider();
+
   return [
     {
       id: PARENT_PROFILE_ID,
       familyRole: "PARENT",
       name: parent.name,
-      avatar: resolveAvatarKey(profile?.image),
+      avatar: await resolveAvatarForResponse(storage, profile?.image ?? null),
       locked: activeLockout(parent.pinLockedUntil) !== undefined,
     },
-    ...children.map((child) => ({
-      id: child.id,
-      familyRole: "CHILD" as const,
-      name: child.name,
-      avatar: resolveAvatarKey(child.avatar),
-      locked: activeLockout(child.lockedUntil) !== undefined,
-    })),
+    ...(await Promise.all(
+      children.map(async (child) => ({
+        id: child.id,
+        familyRole: "CHILD" as const,
+        name: child.name,
+        avatar: await resolveAvatarForResponse(storage, child.avatar),
+        locked: activeLockout(child.lockedUntil) !== undefined,
+      })),
+    )),
   ];
 }
 
@@ -295,7 +316,7 @@ export interface ActiveProfile {
   familyRole: "PARENT" | "CHILD";
   id: string;
   name: string;
-  avatar: AvatarKey;
+  avatar: AvatarValue;
   /** Solo en un perfil de niño. */
   coins?: number;
   /** Solo en el perfil del padre. */
@@ -363,7 +384,7 @@ async function enterParentProfile(
       id: PARENT_PROFILE_ID,
       name: found.name,
       email: found.email,
-      avatar: resolveAvatarKey(profile?.image),
+      avatar: await resolveAvatarForResponse(getStorageProvider(), profile?.image ?? null),
     },
     session,
   };
@@ -543,8 +564,73 @@ export async function unlockChildProfile(actor: Actor, childProfileId: string): 
 // Descripción de quien está dentro
 // ---------------------------------------------------------------------------
 
-export function describeParent(userId: string): Promise<ParentSummary | null> {
-  return repository.findParentById(userId);
+export async function describeParent(userId: string): Promise<ParentProfileSummary | null> {
+  const parent = await repository.findParentById(userId);
+  if (parent === null) return null;
+
+  return {
+    id: parent.id,
+    name: parent.name,
+    email: parent.email,
+    avatar: await resolveAvatarForResponse(getStorageProvider(), parent.image),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Avatar propio del padre
+// ---------------------------------------------------------------------------
+
+/**
+ * El avatar del padre vive aquí y no en `children` porque `User.image` es de
+ * este módulo: nadie más lee ni escribe esa columna. Ver la decisión 6 del
+ * design de `add-file-storage`.
+ */
+function parentAvatarPrefix(userId: string): string {
+  return `avatars/parents/${userId}/`;
+}
+
+export async function requestParentAvatarUploadUrl(
+  actor: Actor,
+  contentType: ImageContentType,
+): Promise<UploadUrl> {
+  if (actor.familyRole !== "PARENT") {
+    throw new ParentSessionRequiredError();
+  }
+
+  const key = `${parentAvatarPrefix(actor.userId)}${randomUUID()}.${extensionForContentType(contentType)}`;
+
+  const { uploadUrl, expiresAt } = await getStorageProvider().createUploadUrl({ key, contentType });
+
+  return { uploadUrl, key, expiresAt: expiresAt.toISOString() };
+}
+
+export async function updateParentAvatar(
+  actor: Actor,
+  input: UpdateParentAvatarInput,
+): Promise<ParentProfileSummary> {
+  if (actor.familyRole !== "PARENT") {
+    throw new ParentSessionRequiredError();
+  }
+
+  const confirmable = await isConfirmableUpload(
+    getStorageProvider(),
+    input.avatarUploadKey,
+    parentAvatarPrefix(actor.userId),
+  );
+
+  if (!confirmable) {
+    throw new InvalidAvatarUploadError();
+  }
+
+  await repository.updateParentImage(actor.userId, input.avatarUploadKey);
+
+  const updated = await describeParent(actor.userId);
+  if (updated === null) {
+    // Inalcanzable: el actor sale de una sesión viva.
+    throw new NotFoundError();
+  }
+
+  return updated;
 }
 
 export interface ChildSummary {

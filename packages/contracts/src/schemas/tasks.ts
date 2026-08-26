@@ -5,7 +5,7 @@ import {
   TITLE_MAX_LENGTH,
   TITLE_MIN_LENGTH,
 } from "../constants/domain.js";
-import { avatarKeySchema } from "./avatar.js";
+import { avatarValueSchema } from "./avatar.js";
 import {
   childIdSchema,
   coinsAmountSchema,
@@ -14,6 +14,7 @@ import {
   withCoinsPerChildRules,
 } from "./coins-per-child.js";
 import { pageOf, paginationQuerySchema } from "./pagination.js";
+import { uploadKeySchema } from "./uploads.js";
 
 /**
  * Contratos de las tareas, compartidos por la API y el front.
@@ -126,6 +127,31 @@ export const updateTaskSchema = z
 
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 
+/**
+ * Marcar una tarea como hecha, opcionalmente adjuntando la foto que ya se
+ * subió como evidencia.
+ *
+ * Un cuerpo vacío es válido y es el caso normal: la evidencia es una forma de
+ * ENSEÑAR el trabajo, no un peaje para declararlo hecho. Un niño sin cámara a
+ * mano marca su tarea igual que siempre.
+ *
+ * Al ser `.strict()`, mandar aquí el identificador de otra tarea o cualquier
+ * otro campo es 422. Que la clave adjunta sea de ESTA tarea no lo comprueba el
+ * esquema sino el servicio, que es quien sabe cuál es.
+ */
+export const completeTaskSchema = z
+  .object({
+    evidenceUploadKey: uploadKeySchema.optional(),
+  })
+  .strict()
+  // `.default({})` no es cosmético: un `POST` SIN cuerpo —que es como se marcaba
+  // una tarea antes de que existiera la evidencia, y como la sigue marcando
+  // quien no adjunta foto— llega como `undefined`, y sin esto sería un 422.
+  // Añadir la evidencia no puede romper a quien no la usa.
+  .default({});
+
+export type CompleteTaskInput = z.infer<typeof completeTaskSchema>;
+
 /** Identificador de tarea en la ruta. Validado, no leído a mano. */
 export const taskParamsSchema = z
   .object({
@@ -180,7 +206,7 @@ export type ListOwnTasksQuery = z.infer<typeof listOwnTasksQuerySchema>;
 export const taskChildSchema = z.object({
   id: z.string(),
   name: z.string(),
-  avatar: avatarKeySchema,
+  avatar: avatarValueSchema,
 });
 
 export type TaskChild = z.infer<typeof taskChildSchema>;
@@ -199,6 +225,8 @@ export const taskSchema = z.object({
   coins: z.number().int(),
   status: taskStatusSchema,
   dueDate: z.string().datetime().nullable(),
+  /** URL ya firmada de la foto que el niño adjuntó al marcarla, o `null`. */
+  evidence: z.string().url().nullable(),
   child: taskChildSchema,
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -250,6 +278,7 @@ export const ownTaskSchema = z.object({
   coins: z.number().int(),
   status: taskStatusSchema,
   dueDate: z.string().datetime().nullable(),
+  evidence: z.string().url().nullable(),
   createdAt: z.string().datetime(),
 });
 

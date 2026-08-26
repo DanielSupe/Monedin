@@ -24,6 +24,7 @@ const UNA_TAREA = {
   coins: 25,
   status: "PENDING",
   dueDate: null,
+  evidence: null,
   child: { id: "hijo-1", name: "Ana", avatar: DEFAULT_AVATAR_KEY },
   createdAt: "2026-08-24T10:00:00.000Z",
   updatedAt: "2026-08-24T10:00:00.000Z",
@@ -36,6 +37,7 @@ const UNA_TAREA_PROPIA = {
   coins: 25,
   status: "PENDING",
   dueDate: null,
+  evidence: null,
   createdAt: "2026-08-24T10:00:00.000Z",
 };
 
@@ -45,6 +47,7 @@ function unaPaginaDeRepartos(items: unknown[] = [
     title: "Sacar la basura",
     description: null,
     dueDate: null,
+    evidence: null,
     createdAt: "2026-08-24T10:00:00.000Z",
     tasks: [UNA_TAREA],
   },
@@ -194,6 +197,7 @@ describe("cliente de tareas", () => {
               title: "Sacar la basura",
               description: null,
               dueDate: null,
+              evidence: null,
               createdAt: "2026-08-24T10:00:00.000Z",
             },
           ]),

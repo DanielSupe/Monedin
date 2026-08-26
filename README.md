@@ -13,6 +13,9 @@ pagos y no hay interoperabilidad entre familias.
 > rechazarla, con la acreditación de monedas—, `rewards` el catálogo de premios —publicarlos, ponerles
 > precio por hijo, editarlos y retirarlos— y `redemptions` cierra el ciclo: el niño pide un premio que
 > le alcanza y el padre lo aprueba —descontando el precio congelado al solicitar— o lo rechaza.
+> `file-storage` añade imágenes de verdad: avatar propio del padre y de cada hijo —que convive con el
+> catálogo de animales—, foto del premio, y una evidencia opcional que el niño adjunta al marcar una
+> tarea. En local las guarda MinIO; en producción, S3.
 
 ---
 
@@ -22,7 +25,7 @@ pagos y no hay interoperabilidad entre familias.
 | -------------- | -------- | ---------------------------------------------------- |
 | Node           | 22 LTS   | Fijada en `engines` y en `.nvmrc`                    |
 | pnpm           | 11+      | Fijada en `packageManager`                           |
-| Docker Desktop | cualquier | Levanta PostgreSQL y Adminer                        |
+| Docker Desktop | cualquier | Levanta PostgreSQL, Adminer y MinIO                 |
 
 ```bash
 node -v   # v22.x
@@ -40,7 +43,7 @@ Dos comandos, más copiar la plantilla de entorno:
 
 ```bash
 cp .env.example .env    # los valores de ejemplo funcionan tal cual en local
-docker compose up -d    # PostgreSQL + Adminer
+docker compose up -d    # PostgreSQL + Adminer + MinIO (almacén de imágenes)
 pnpm install && pnpm dev
 ```
 
@@ -50,6 +53,7 @@ Y ya está:
 | ------- | -------------------------------- |
 | Front   | http://localhost:5173            |
 | API     | http://localhost:3000/api/v1     |
+| MinIO   | http://localhost:9001            |
 | Salud   | http://localhost:3000/api/v1/health |
 | Adminer | http://localhost:8080            |
 
@@ -132,7 +136,7 @@ monedin/
 │   ├── contracts/            schemas Zod, tipos y constantes compartidos
 │   └── config/               tsconfig, ESLint y Prettier compartidos
 ├── openspec/                 proposals, designs, specs y tasks
-├── docker-compose.yml        PostgreSQL 16 + Adminer (solo desarrollo)
+├── docker-compose.yml        PostgreSQL 16 + Adminer + MinIO (solo desarrollo)
 ├── .env.example              plantilla de entorno versionada
 └── CLAUDE.md                 reglas de desarrollo — léelo antes de tocar código
 ```

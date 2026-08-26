@@ -33,6 +33,7 @@ const TASK_FIELDS = {
   coins: true,
   status: true,
   dueDate: true,
+  evidenceKey: true,
   createdAt: true,
   updatedAt: true,
   child: { select: { id: true, name: true, avatar: true } },
@@ -46,6 +47,7 @@ const OWN_TASK_FIELDS = {
   coins: true,
   status: true,
   dueDate: true,
+  evidenceKey: true,
   createdAt: true,
 } as const;
 
@@ -58,6 +60,8 @@ export interface TaskRow {
   coins: number;
   status: TaskStatus;
   dueDate: Date | null;
+  /** Clave en el almacén de la evidencia, o `null`. No es una URL. */
+  evidenceKey: string | null;
   createdAt: Date;
   updatedAt: Date;
   child: { id: string; name: string; avatar: string | null };
@@ -71,6 +75,7 @@ export interface OwnTaskRow {
   coins: number;
   status: TaskStatus;
   dueDate: Date | null;
+  evidenceKey: string | null;
   createdAt: Date;
 }
 
@@ -288,13 +293,23 @@ export function findOwnTasksPage(
  * Basta con Read Committed. No hace falta subir el aislamiento ni mapear
  * `P2034`. Ver las decisiones 1 y 2 del design.
  */
-export function transition(taskId: string, from: TaskStatus, to: TaskStatus): Promise<TaskRow> {
+export function transition(
+  taskId: string,
+  from: TaskStatus,
+  to: TaskStatus,
+  extra: { evidenceKey?: string } = {},
+): Promise<TaskRow> {
   return withTranslatedErrors(async () => {
     const prisma = getPrisma();
 
+    // La evidencia se escribe EN LA MISMA actualización condicional que el
+    // estado: si la transición pierde la carrera, tampoco se guarda la foto.
     const affected = await prisma.task.updateMany({
       where: { id: taskId, status: from },
-      data: { status: to },
+      data: {
+        status: to,
+        ...(extra.evidenceKey === undefined ? {} : { evidenceKey: extra.evidenceKey }),
+      },
     });
 
     if (affected.count !== 1) {

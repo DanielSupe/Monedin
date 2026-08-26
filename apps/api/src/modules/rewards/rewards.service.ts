@@ -8,9 +8,17 @@ import {
   type Reward,
   type UpdateRewardInput,
   normalizeCoinsPerChild,
-  resolveAvatarKey,
+  type ImageContentType,
+  type UploadUrl,
 } from "@monedin/contracts";
+import { randomUUID } from "node:crypto";
 import type { Actor } from "../../shared/actor.js";
+import { resolveAvatarForResponse, resolveImageForResponse } from "../../shared/avatar/resolve-avatar.js";
+import {
+  extensionForContentType,
+  getStorageProvider,
+  isConfirmableUpload,
+} from "../../shared/storage/index.js";
 import { toPage, toSkipTake } from "../../shared/pagination.js";
 // El hijo ajeno, el inexistente y el dado de baja son el mismo error que ya
 // tiene `children`, con el mismo texto: es la misma razón por la que `tasks`
@@ -18,6 +26,7 @@ import { toPage, toSkipTake } from "../../shared/pagination.js";
 import { ChildNotFoundError } from "../children/children.errors.js";
 import {
   ChildRoleRequiredError,
+  InvalidImageUploadError,
   ParentRoleRequiredError,
   RewardNotFoundError,
 } from "./rewards.errors.js";
@@ -87,7 +96,10 @@ export async function listRewards(actor: Actor, query: ListRewardsQuery): Promis
     toSkipTake(query),
   );
 
-  return toPage(query, { items: result.items.map(toReward), total: result.total });
+  return toPage(query, {
+    items: await Promise.all(result.items.map(toReward)),
+    total: result.total,
+  });
 }
 
 export async function getReward(actor: Actor, rewardId: string): Promise<Reward> {
@@ -123,7 +135,7 @@ export async function listOwnRewards(
   const result = await repository.findOwnRewardsPage(actor.childProfileId, toSkipTake(query));
 
   return toPage(query, {
-    items: result.items.map((row) => toOwnReward(row, result.balance)),
+    items: await Promise.all(result.items.map((row) => toOwnReward(row, result.balance))),
     total: result.total,
   });
 }
@@ -136,6 +148,7 @@ export async function getOwnReward(actor: Actor, rewardId: string): Promise<OwnR
       id: reward.id,
       title: reward.title,
       description: reward.description,
+      image: reward.image,
       coins,
       createdAt: reward.createdAt,
     },
@@ -154,12 +167,53 @@ export async function updateReward(
 ): Promise<Reward> {
   const found = await ownedReward(actor, rewardId);
 
+  // `null` explícito quita la foto; una clave la confirma. No mandar el campo
+  // deja la que hubiera.
+  const image =
+    input.imageUploadKey === undefined
+      ? {}
+      : { image: input.imageUploadKey === null ? null : await confirmedImageKey(found.id, input.imageUploadKey) };
+
   const updated = await repository.updateReward(found.id, {
     ...(input.title === undefined ? {} : { title: input.title }),
     ...(input.description === undefined ? {} : { description: input.description }),
+    ...image,
   });
 
   return toReward(updated);
+}
+
+/**
+ * Una URL para subir la foto de un premio.
+ *
+ * Solo existe para un premio YA CREADO: la clave lleva su identificador dentro,
+ * y ese identificador no existe mientras el premio se está creando. Ver la
+ * decisión 7 del design de `add-file-storage`.
+ */
+export async function requestRewardImageUploadUrl(
+  actor: Actor,
+  rewardId: string,
+  contentType: ImageContentType,
+): Promise<UploadUrl> {
+  const found = await ownedReward(actor, rewardId);
+
+  const key = `${imagePrefix(found.id)}${randomUUID()}.${extensionForContentType(contentType)}`;
+
+  const { uploadUrl, expiresAt } = await getStorageProvider().createUploadUrl({ key, contentType });
+
+  return { uploadUrl, key, expiresAt: expiresAt.toISOString() };
+}
+
+function imagePrefix(rewardId: string): string {
+  return `rewards/${rewardId}/`;
+}
+
+async function confirmedImageKey(rewardId: string, key: string): Promise<string> {
+  if (!(await isConfirmableUpload(getStorageProvider(), key, imagePrefix(rewardId)))) {
+    throw new InvalidImageUploadError();
+  }
+
+  return key;
 }
 
 /**
@@ -265,36 +319,40 @@ async function ownReward(
 }
 
 /** Un premio para el padre: con TODAS sus ofertas, sin `parentId`. */
-function toReward(row: RewardRow): Reward {
+async function toReward(row: RewardRow): Promise<Reward> {
+  const storage = getStorageProvider();
+
   return {
     id: row.id,
     title: row.title,
     description: row.description,
+    image: await resolveImageForResponse(storage, row.image),
     status: row.isActive ? "ACTIVE" : "RETIRED",
-    offers: row.offers.map(toRewardOffer),
+    offers: await Promise.all(row.offers.map(toRewardOffer)),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
 }
 
-function toRewardOffer(offer: RewardOfferRow): Reward["offers"][number] {
+async function toRewardOffer(offer: RewardOfferRow): Promise<Reward["offers"][number]> {
   return {
     child: {
       id: offer.child.id,
       name: offer.child.name,
       // Resuelto siempre, para que el front no trate el caso vacío.
-      avatar: resolveAvatarKey(offer.child.avatar),
+      avatar: await resolveAvatarForResponse(getStorageProvider(), offer.child.avatar),
     },
     coins: offer.coins,
   };
 }
 
 /** Un premio para el niño al que se le ofrece: solo SU precio. */
-function toOwnReward(row: OwnRewardRow, balance: number): OwnReward {
+async function toOwnReward(row: OwnRewardRow, balance: number): Promise<OwnReward> {
   return {
     id: row.id,
     title: row.title,
     description: row.description,
+    image: await resolveImageForResponse(getStorageProvider(), row.image),
     coins: row.coins,
     affordable: balance >= row.coins,
     createdAt: row.createdAt.toISOString(),
