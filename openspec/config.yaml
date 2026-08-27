@@ -228,6 +228,24 @@ context: |
         basta: poner la duracion a 1ms deja el titular en su primera letra y la cuenta en cero.
       - Cero dependencias nuevas: ni fuentes remotas, ni librerias de animacion, ni imagenes ajenas.
 
+    `add-brand-typography` cumple una promesa que el sistema de diseno ya se habia hecho. El token
+    `--font-sans` era solo una pila del sistema, asi que la marca se veia redondeada en Apple y NO en
+    Windows ni en Android -la tablet compartida de la casa, el escenario mas probable-. Se elegia una
+    cosa y en la mitad de los casos se entregaba otra. Lo que deja construido:
+      - Nunito variable, AUTOALOJADA con `@fontsource-variable/nunito`. Dependencia npm, no un CDN: en
+        ejecucion no sale nada a la red, y ninguna peticion del front va a un tercero. Un usuario en
+        espanol descarga UN archivo de 38 KB: el paquete declara cada subconjunto con su
+        `unicode-range`, asi que los otros cuatro no se piden nunca.
+      - La pila del sistema se queda DETRAS como respaldo, y no es decorativa: sin ella un fallo de
+        carga da la serif por defecto del navegador. Con `font-display: swap`, el texto es visible
+        desde el primer fotograma.
+      - Cifras tabulares en `Coins`, para que una columna de saldos alinee. En la pieza y no en
+        `body`: alinear cifras es correcto en una columna de numeros e incorrecto en un texto corrido.
+      - Tres tests impiden la vuelta atras: que la primera familia no sea del dispositivo, que esa
+        familia este importada, y que detras quede respaldo. Cambiar de familia es legitimo; volver a
+        una pila del sistema, no.
+      - Ni un peso, ni un tamano, ni un color. Solo con que formas se dibujan.
+
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
   - El niño NO es un User: vive entero como ChildProfile dentro de la cuenta de su padre, y

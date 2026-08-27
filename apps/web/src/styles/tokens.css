@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/*
+ * La tipografía de la marca, AUTOALOJADA. No es un CDN: el paquete trae los
+ * archivos y los sirve nuestro propio origen, así que en tiempo de ejecución no
+ * sale nada a la red. Ni una IP de una familia llega a un tercero.
+ *
+ * `wght.css` y no un subconjunto suelto: declara cada subconjunto con su
+ * `unicode-range`, así que el navegador descarga SOLO el que necesita —para el
+ * español, `latin`, 38 KB— y nunca el cirílico ni el vietnamita. Sin la variante
+ * itálica, que este producto no usa.
+ *
+ * El import va aquí y no en cada punto de entrada porque `main.tsx` y
+ * `ui-catalog.tsx` ya importan este archivo. Si estuviera solo en el primero, el
+ * catálogo vivo enseñaría las piezas con otra tipografía que la aplicación.
+ */
+@import "@fontsource-variable/nunito/wght.css";
+
 /**
  * Tokens de Monedín. Fuente ÚNICA de todo valor visual del front.
  *
@@ -96,11 +112,20 @@
   --color-danger-soft: var(--mnd-red-100);
 
   /*
-   * Familia. Redondeada donde el sistema la tenga, que es lo más cerca de
-   * «amable» que se llega sin cargar una fuente. La tipografía de marca llega
-   * en `polish-brand-and-a11y`; cambiarla será editar esta línea.
+   * Familia de la marca. Redondeada, y AHORA en todos los dispositivos.
+   *
+   * Antes esto era solo una pila del sistema, y el resultado era que la marca se
+   * veía distinta en cada aparato de la familia: redondeada en Apple, y en
+   * Windows y Android lo que hubiera. Elegíamos una cosa y en la mitad de los
+   * casos se entregaba otra, incluida la tablet compartida, que es el escenario
+   * más probable del producto.
+   *
+   * La pila se queda DETRÁS y no es decorativa: si la fuente tarda o falla, lo
+   * peor que pasa es que se vea como se veía ayer. Sin ella, el navegador daría
+   * su serif por defecto — Times New Roman en una aplicación para niños.
    */
-  --font-sans: ui-rounded, "SF Pro Rounded", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Nunito Variable", ui-rounded, "SF Pro Rounded", "Segoe UI Variable", "Segoe UI",
+    system-ui, sans-serif;
 
   --shadow-card: 0 1px 2px oklch(25% 0.024 265 / 0.06), 0 4px 12px oklch(25% 0.024 265 / 0.05);
   --shadow-raised: 0 2px 4px oklch(25% 0.024 265 / 0.08), 0 12px 28px oklch(25% 0.024 265 / 0.08);

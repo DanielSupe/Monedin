@@ -155,3 +155,105 @@ describe("las piezas no conocen el dominio", () => {
     );
   });
 });
+
+/*
+ * Lo que impide volver a una tipografía POR DISPOSITIVO.
+ *
+ * El token era una pila del sistema, y eso entregaba una marca redondeada en
+ * Apple y otra distinta en Windows y en Android. Estos tests no comprueban que
+ * la familia sea Nunito —cambiarla algún día es legítimo—, sino que la entrega
+ * el proyecto y no el sistema operativo de cada quien.
+ */
+describe("la tipografía la entrega el sistema, no el dispositivo", () => {
+  /*
+   * Familias y palabras clave que resuelven a «lo que tenga instalado este
+   * aparato». Poner cualquiera de estas la PRIMERA es exactamente el defecto
+   * que este archivo existe para no repetir.
+   */
+  const DEL_DISPOSITIVO = [
+    "ui-rounded",
+    "ui-sans-serif",
+    "ui-serif",
+    "ui-monospace",
+    "system-ui",
+    "sans-serif",
+    "serif",
+    "monospace",
+    "-apple-system",
+    "blinkmacsystemfont",
+    "sf pro rounded",
+    "segoe ui",
+    "segoe ui variable",
+    "roboto",
+    "helvetica",
+    "arial",
+  ];
+
+  const CSS = readFileSync(TOKENS, "utf8");
+
+  /** La pila declarada, partida en familias. Vale en varias líneas. */
+  function pilaDeclarada(): string[] {
+    const declaracion = /--font-sans:\s*([^;]+);/.exec(CSS);
+    expect(declaracion, "no hay declaración de --font-sans en tokens.css").not.toBeNull();
+
+    return (declaracion?.[1] ?? "")
+      .split(",")
+      .map((familia) => familia.trim().replace(/\s+/g, " "))
+      .filter((familia) => familia.length > 0);
+  }
+
+  it("la primera familia de --font-sans no es del dispositivo", () => {
+    const primera = pilaDeclarada()[0] ?? "";
+    const nombre = primera.replace(/^["']|["']$/g, "").toLowerCase();
+
+    expect(
+      DEL_DISPOSITIVO,
+      `--font-sans empieza por «${primera}», que resuelve a lo que cada aparato tenga instalado`,
+    ).not.toContain(nombre);
+  });
+
+  it("la familia de la marca la sirve el proyecto", () => {
+    const primera = (pilaDeclarada()[0] ?? "").replace(/^["']|["']$/g, "");
+    // La primera palabra basta: el paquete se llama `nunito` y la familia
+    // «Nunito Variable». Lo que se comprueba es que la fuente esté IMPORTADA,
+    // no que se llame de una manera concreta.
+    const raiz = (primera.split(" ")[0] ?? "").toLowerCase();
+    const importes = CSS.match(/@import\s+["'][^"']+["']/g) ?? [];
+
+    expect(
+      importes.some((linea) => linea.toLowerCase().includes(raiz)),
+      `--font-sans empieza por «${primera}» y tokens.css no importa esa fuente: sin el import ` +
+        `no se entrega nada y cada aparato pinta lo que quiere`,
+    ).toBe(true);
+  });
+
+  it("detrás de la marca queda un respaldo del sistema", () => {
+    const pila = pilaDeclarada();
+    const detras = pila.slice(1).map((familia) => familia.replace(/^["']|["']$/g, "").toLowerCase());
+
+    // Sin respaldo, un fallo de carga da la serif por defecto del navegador:
+    // Times New Roman en una aplicación para niños.
+    expect(
+      detras.filter((familia) => DEL_DISPOSITIVO.includes(familia)).length,
+      `--font-sans no deja respaldo del sistema detrás de la marca: ${pila.join(", ")}`,
+    ).toBeGreaterThan(0);
+
+    expect(detras.at(-1), "la pila tiene que acabar en una familia genérica").toBe("sans-serif");
+  });
+});
+
+/*
+ * En una columna de saldos, `120` y `1.250` tienen que alinear sus dígitos.
+ * Va en la pieza y no en `body` porque alinear cifras es correcto en una
+ * columna de números e incorrecto en un texto corrido.
+ */
+describe("las cifras de una columna alinean", () => {
+  it("Coins pide cifras tabulares", () => {
+    const contenido = readFileSync(join(SRC, "ui", "Coins.tsx"), "utf8");
+
+    expect(
+      sinComentarios(contenido),
+      "Coins es la pieza que dibuja cantidades: sin cifras tabulares una lista de saldos no alinea",
+    ).toContain("tabular-nums");
+  });
+});

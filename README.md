@@ -36,6 +36,14 @@ pagos y no hay interoperabilidad entre familias.
 > aprueba— y **todo destino sin sesión lleva allí**. Como la mitad de quien llega ya es usuario con la
 > sesión caducada, «Entrar» pesa lo mismo que «Empezar».
 >
+> `add-brand-typography` cumple una promesa que el sistema de diseño se había hecho a sí mismo. El
+> token de familia era solo una pila del sistema, así que **la marca se veía distinta en cada
+> aparato**: redondeada en Apple y no en Windows ni en Android, que es la tablet compartida de la
+> casa. Ahora es **Nunito variable, autoalojada**: la sirve nuestro propio origen, sin una sola
+> petición a un tercero, y un usuario en español descarga un archivo de 38 KB. La pila del sistema se
+> queda detrás como respaldo, y `Coins` pide cifras tabulares para que una columna de saldos alinee.
+> Ni un peso, ni un tamaño, ni un color cambian: solo con qué formas se dibujan.
+>
 > Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
 > reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
 > siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en

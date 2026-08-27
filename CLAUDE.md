@@ -606,6 +606,19 @@ Desde `add-design-system`, el front tiene sistema de diseño y **ya no se escrib
 - **El catálogo vivo está en `ui.html`**, un punto de entrada aparte que no se compila en producción.
   `pnpm dev` y `http://localhost:5173/ui.html`. Una pieza nueva sin entrada en el catálogo falla un
   test.
+- **La tipografía la entrega el proyecto, no el dispositivo.** Desde `add-brand-typography`,
+  `--font-sans` empieza por **Nunito variable, autoalojada** con `@fontsource-variable/nunito`. No es
+  un CDN: en ejecución no sale nada a la red, y **ninguna petición del front va a un tercero**. Antes
+  era solo una pila del sistema, así que la marca salía redondeada en Apple y no en Windows ni en
+  Android —la tablet compartida, que es el escenario más probable—. La pila se queda **detrás** como
+  respaldo y no es decorativa: sin ella, un fallo de carga da la serif por defecto del navegador.
+  Tres tests lo sostienen: que la primera familia no sea del dispositivo, que esa familia esté
+  importada en `tokens.css`, y que detrás quede respaldo acabado en genérica. Cambiar de familia
+  algún día es legítimo; volver a una pila del sistema, no.
+- **Las cantidades se dibujan con `Coins`, y `Coins` pide cifras tabulares** para que una columna de
+  saldos alinee. Va en la pieza y **no** en `body`: alinear cifras es correcto en una columna de
+  números e incorrecto en un texto corrido. Hoy no cambia nada de lo que se ve —Nunito ya trae cifras
+  de ancho fijo—, y ese es justo el motivo de declararlo: deja de depender de qué familia gane.
 - **Deuda declarada con fecha de caducidad**: las pantallas de `features/` y `routes/` siguen con
   estilos en línea y colores a mano, y están exceptuadas en dos listas —en `apps/web/eslint.config.js`
   y en `tests/ui/style-rules.test.ts`—. Cada change de rediseño **borra su entrada**. Una entrada que
