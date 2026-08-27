@@ -89,9 +89,16 @@ describe("aprobar y rechazar a la vez el mismo canje", () => {
       expect(historial).toHaveLength(1);
       expect(await estadoDeCanje(canje.id)).toBe("APPROVED");
     } else {
+      // Ganó RECHAZAR, y en un canje eso es TERMINAL: `PENDING → REJECTED`, sin
+      // devolver nada porque el descuento solo ocurre al aprobar.
+      //
+      // Decía `PENDING`, heredado de copiar el test equivalente de tareas, donde
+      // sí es correcto porque ahí rechazar devuelve a `COMPLETED → PENDING` y la
+      // tarea se puede reintentar. Las dos máquinas de estado no son la misma, y
+      // este test solo fallaba cuando rechazar ganaba la carrera.
       expect(saldo).toBe(100);
       expect(historial).toHaveLength(0);
-      expect(await estadoDeCanje(canje.id)).toBe("PENDING");
+      expect(await estadoDeCanje(canje.id)).toBe("REJECTED");
     }
   }, 180_000);
 });
