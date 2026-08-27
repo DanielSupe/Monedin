@@ -30,6 +30,12 @@ pagos y no hay interoperabilidad entre familias.
 > dirección, hay un marco por rol —cabecera para el padre, barra inferior para el niño— y el filtro de
 > un listado viaja en la URL.
 >
+> `add-landing-page` le pone **puerta** al producto. Antes, quien llegaba sin sesión aterrizaba en un
+> formulario de acceso sin una sola frase sobre qué es Monedín. Ahora hay una página pública en
+> `/welcome` que explica el ciclo —las tareas valen monedas, los premios cuestan monedas, el padre
+> aprueba— y **todo destino sin sesión lleva allí**. Como la mitad de quien llega ya es usuario con la
+> sesión caducada, «Entrar» pesa lo mismo que «Empezar».
+>
 > Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
 > reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
 > siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en

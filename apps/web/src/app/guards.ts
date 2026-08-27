@@ -17,8 +17,21 @@ import { screenFor } from "../features/auth/use-session.js";
  * un parpadeo de la pantalla equivocada. Ver decisión 1 del design.
  */
 
-/** Dónde vive cada uno de los tres estados que distingue `screenFor()`. */
-const SIGN_IN = "/sign-in";
+/**
+ * Dónde vive cada uno de los tres estados que distingue `screenFor()`.
+ *
+ * Sin sesión se va a la PUERTA PÚBLICA, no al formulario de acceso. Es una sola
+ * regla para todos los destinos, sin excepciones por ruta: quien llega sin
+ * sesión puede no conocer el producto, y un formulario no se lo explica. Desde
+ * la landing se llega a `/sign-in`, que sigue existiendo y siendo alcanzable.
+ *
+ * Se consideró que solo la raíz llevara a la landing y que los enlaces profundos
+ * siguieran yendo al formulario. Se descartó: una regla con una excepción hay
+ * que recordarla, y el coste de la excepción —que quien perdió la sesión vea una
+ * página que ya conoce— se paga con un toque, porque «Entrar» es acción de
+ * primer nivel ahí. Ver decisión 1 del design de `add-landing-page`.
+ */
+const WELCOME = "/welcome";
 const PROFILES = "/profiles";
 const HOME = "/";
 
@@ -48,7 +61,7 @@ export async function requireAccount(queryClient: QueryClient): Promise<SessionS
   const session = await sessionOf(queryClient);
 
   if (screenFor(session) === "signIn") {
-    throw redirect({ to: SIGN_IN });
+    throw redirect({ to: WELCOME });
   }
 
   return session;
@@ -67,7 +80,7 @@ export async function requireProfileChoice(queryClient: QueryClient): Promise<Se
 
   switch (screenFor(session)) {
     case "signIn":
-      throw redirect({ to: SIGN_IN });
+      throw redirect({ to: WELCOME });
     case "app":
       throw redirect({ to: HOME });
     case "profiles":
@@ -81,7 +94,7 @@ export async function requireActor(queryClient: QueryClient): Promise<SessionSta
 
   switch (screenFor(session)) {
     case "signIn":
-      throw redirect({ to: SIGN_IN });
+      throw redirect({ to: WELCOME });
     case "profiles":
       throw redirect({ to: PROFILES });
     case "app":

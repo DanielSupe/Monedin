@@ -1,6 +1,6 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { messages } from "../lib/messages.js";
-import { Avatar } from "../ui/index.js";
+import { Avatar, Logo } from "../ui/index.js";
 
 /**
  * El marco del padre: cabecera con navegación y avatar.
@@ -17,8 +17,8 @@ export function ParentShell({ avatar }: { avatar: string | null }): React.ReactE
   return (
     <div data-scale="parent" className="flex min-h-dvh flex-col bg-surface text-ink">
       <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-border bg-surface-raised px-4 py-2">
-        <Link to="/" className="text-title font-extrabold no-underline">
-          {messages.app.title}
+        <Link to="/" className="no-underline">
+          <Logo size="medium" />
         </Link>
 
         <nav

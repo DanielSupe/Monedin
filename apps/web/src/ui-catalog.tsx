@@ -11,6 +11,7 @@ import {
   EmptyState,
   Field,
   Input,
+  Logo,
   ProgressBar,
   Select,
   Skeleton,
@@ -139,6 +140,19 @@ function Piezas(): React.ReactElement {
           <Badge tone="success">Aprobada</Badge>
           <Badge tone="warning">En conflicto</Badge>
           <Badge tone="danger">Rechazada</Badge>
+        </Fila>
+      </Seccion>
+
+      <Seccion titulo="Logo">
+        <Fila>
+          <Logo size="small" />
+          <Logo size="medium" />
+        </Fila>
+        <Logo size="large" />
+        <Fila>
+          <Logo size="small" markOnly />
+          <Logo size="medium" markOnly />
+          <Logo size="large" markOnly />
         </Fila>
       </Seccion>
 

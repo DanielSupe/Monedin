@@ -625,6 +625,16 @@ y eso lo hace `useRefreshSession()` en un solo sitio. Navegar desde el `onSucces
 NO funciona: al cambiar la sesión, la raíz cambia de marco y desmonta el componente que llamó a
 `mutate`.
 
+**Sin sesión se va a la PUERTA PÚBLICA**, `/welcome`, y no al formulario de acceso. Es una constante
+en `guards.ts`, no una excepción por ruta: quien llega sin sesión puede no conocer el producto, y un
+formulario no se lo explica. Desde ahí se llega a `/sign-in`, que sigue existiendo — y **ese camino es
+crítico**, porque es el único que le queda a quien ya es usuario y se le caducó la sesión.
+
+**Navegar es trabajo de un enlace.** Un `<Link>` envolviendo un `<Button>` anida dos elementos
+interactivos y se anuncia como «enlace que contiene un botón». Para que un enlace se vea como un
+botón está `buttonClasses(variant, block)`, que exporta `ui/Button.tsx`. Se cayó dos veces en esto
+antes de extraerlo.
+
 **El rol equivocado redirige en silencio.** Un niño que abre una dirección del padre aterriza en su
 inicio, sin mensaje: a los siete años «no tienes permiso» se lee como «hiciste algo mal». Es
 interfaz, no seguridad — la guarda de verdad sigue siendo el 401 o el 403 del servidor.

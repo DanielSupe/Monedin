@@ -108,6 +108,28 @@
   /* Anchos con nombre, para que ninguna pieza escriba `max-w-[28rem]`. */
   --container-dialog: 28rem;
   --container-reading: 40rem;
+  --container-orbit: 20rem;
+  --container-wide: 72rem;
+
+  /*
+   * El giro de las órbitas de la puerta pública. Los dos sentidos son tokens
+   * porque `animate-[girar_linear_infinite]` sería un valor arbitrario, y esos
+   * están prohibidos. La DURACIÓN la pone cada órbita, porque es geometría.
+   */
+  --animate-orbit: mnd-orbit linear infinite;
+  --animate-orbit-reverse: mnd-orbit-reverse linear infinite;
+}
+
+@keyframes mnd-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes mnd-orbit-reverse {
+  to {
+    transform: rotate(-360deg);
+  }
 }
 
 /* ------------------------------------------------------------------ *

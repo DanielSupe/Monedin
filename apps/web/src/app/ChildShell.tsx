@@ -1,6 +1,6 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { messages } from "../lib/messages.js";
-import { Avatar } from "../ui/index.js";
+import { Avatar, Logo } from "../ui/index.js";
 
 /**
  * El marco del niño: barra inferior de cuatro destinos.
@@ -25,7 +25,7 @@ export function ChildShell({ avatar }: { avatar: string | null }): React.ReactEl
   return (
     <div data-scale="child" className="flex min-h-dvh flex-col bg-surface text-ink">
       <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-2">
-        <span className="text-title font-extrabold">{messages.app.title}</span>
+        <Logo size="medium" />
         {/* Los ajustes cuelgan del avatar y no ocupan un destino de la barra:
             cuatro cosas ya son bastantes para un niño de seis años. */}
         <Link to="/me/settings" aria-label={messages.children.myProfileTitle}>

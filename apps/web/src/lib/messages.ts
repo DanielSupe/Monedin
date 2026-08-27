@@ -20,6 +20,36 @@ export const messages = {
   },
 
   /**
+   * La puerta pública: lo único que ve alguien que todavía no es nadie.
+   *
+   * Recibe a DOS personas distintas —quien no conoce el producto y quien lo usa
+   * y perdió la sesión—, y por eso las dos acciones pesan igual.
+   */
+  landing: {
+    /** El titular. Se escribe solo, pero el texto completo siempre está en el DOM. */
+    headline: "Sus tareas valen monedas. Sus premios cuestan monedas.",
+    subhead:
+      "Monedín le enseña a tu hijo el ciclo completo: se esfuerza, gana, y decide en qué gastarlo. Tú apruebas cada paso.",
+
+    /** Las dos acciones. Ninguna escondida detrás de la otra. */
+    start: "Empezar",
+    signIn: "Entrar",
+    signInHint: "¿Ya tienes cuenta?",
+
+    /** El centro de la visualización. La cifra es un ejemplo, no un dato real. */
+    balanceLabel: "sus monedas",
+    orbitLabel: "El ciclo de Monedín: tareas, premios y los perfiles de la familia",
+
+    /** Las tres promesas. Sustituyen a los logos de socios que no tenemos. */
+    promiseEarnTitle: "Haz tus tareas",
+    promiseEarnBody: "Cada tarea vale las monedas que tú decidas.",
+    promiseSpendTitle: "Elige tu premio",
+    promiseSpendBody: "Del cine a una hora más de consola, con el precio que le pongas.",
+    promiseApproveTitle: "Tú apruebas",
+    promiseApproveBody: "Nada se acredita ni se gasta sin que lo revises.",
+  },
+
+  /**
    * Textos de la navegación: los destinos de cada marco y la pantalla de una
    * dirección que no existe.
    */

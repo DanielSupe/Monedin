@@ -14,6 +14,24 @@ const VARIANTS: Record<ButtonVariant, string> = {
   danger: "border-danger bg-danger text-ink-inverted hover:brightness-110",
 };
 
+/**
+ * Las clases de un botón, para lo que NO es un botón.
+ *
+ * Navegar es trabajo de un enlace: se abre en otra pestaña, se copia, y un
+ * lector de pantalla lo anuncia como enlace. Envolver un `<Button>` en un
+ * `<Link>` anida dos elementos interactivos, que es un defecto de accesibilidad
+ * — y uno en el que ya se cayó dos veces. Con esto, un enlace se ve igual que un
+ * botón sin dejar de ser un enlace.
+ */
+export function buttonClasses(variant: ButtonVariant = "secondary", block = false): string {
+  return cx(
+    "tap-target rounded-control text-body inline-flex items-center justify-center gap-2 border px-4 font-semibold no-underline transition-colors duration-normal",
+    "disabled:cursor-not-allowed disabled:opacity-55",
+    VARIANTS[variant],
+    block && "w-full",
+  );
+}
+
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   /**
@@ -39,13 +57,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       type={type ?? "button"}
       disabled={disabled === true || pending}
       aria-busy={pending || undefined}
-      className={cx(
-        "tap-target rounded-control text-body inline-flex items-center justify-center gap-2 border px-4 font-semibold transition-colors duration-normal",
-        "disabled:cursor-not-allowed disabled:opacity-55",
-        VARIANTS[variant],
-        block && "w-full",
-        className,
-      )}
+      className={cx(buttonClasses(variant, block), className)}
     />
   );
 });

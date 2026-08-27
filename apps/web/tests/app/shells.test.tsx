@@ -43,6 +43,20 @@ describe("cada rol recibe su marco", () => {
   });
 });
 
+describe("la marca sale de la pieza, no de texto suelto", () => {
+  it.each([
+    ["el niño", comoNino],
+    ["el padre", comoPadre],
+  ])("el marco %s la rinde desde `Logo`", async (_quien, sesion) => {
+    await montarApp("/", sesion());
+
+    // `Logo` es lo único que expone la marca como imagen con nombre. Un `<span>`
+    // con el título no tiene rol, así que esto falla en cuanto alguien vuelva a
+    // escribirlo a mano.
+    expect(screen.getByRole("img", { name: messages.app.title })).toBeInTheDocument();
+  });
+});
+
 describe("el marco sobrevive a la navegación", () => {
   it("la barra del niño sigue siendo el MISMO nodo tras cambiar de destino", async () => {
     const app = await montarApp("/", comoNino());

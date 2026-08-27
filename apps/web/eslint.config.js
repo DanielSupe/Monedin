@@ -10,7 +10,16 @@ export default [
    * un niño y de lo que cuesta un premio, así que no hay token que lo exprese.
    * Ver la spec `design-system`, escenario «Una excepción legítima».
    */
-  allowInlineStyles(["src/ui/ProgressBar.tsx"]),
+  allowInlineStyles([
+    "src/ui/ProgressBar.tsx",
+    // La SEGUNDA, y por eso conviene justificarla: el radio de cada órbita y el
+    // ángulo de cada pieza son geometría que se calcula —nueve veces
+    // `rotate(a) translate(r) rotate(-a)`—, y no hay token que exprese eso. La
+    // alternativa era meter doce utilidades de una sola pantalla en el archivo
+    // de tokens. Toda la geometría está concentrada en ese archivo para que
+    // esta excepción cubra lo mínimo.
+    "src/features/landing/Orbits.tsx",
+  ]),
 
   /*
    * `react-refresh` vigila las fronteras de recarga en caliente, y eso solo

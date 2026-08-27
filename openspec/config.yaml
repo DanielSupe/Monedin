@@ -213,6 +213,21 @@ context: |
         defecto -lo contrario del 422 de la API, porque aqui quien llama es una persona con un enlace
         viejo-.
 
+    `add-landing-page` le pone PUERTA al producto. Antes, quien llegaba sin sesion aterrizaba en un
+    formulario: ni una frase sobre que es Monedin ni para quien. Lo que deja construido:
+      - Una pagina publica en `/welcome`, sin guarda, que explica el ciclo sin pedir un solo dato.
+      - Sin sesion, TODO destino lleva alli. Es una constante en `guards.ts`, no una excepcion por
+        ruta. `/sign-in` sigue existiendo y se llega desde la landing.
+      - Y por eso «Entrar» es accion de primer nivel junto a «Empezar»: la mitad de quien llegue ya es
+        usuario con la sesion caducada, y esa proporcion crece con el tiempo.
+      - Lo que orbita es el CICLO -tareas, premios, perfiles alrededor de un saldo-, no retratos. La
+        visualizacion explica el producto en vez de decorarlo.
+      - Pieza `Logo` en `ui/`, con tres consumidores desde el primer dia: la landing y los dos marcos,
+        donde «Monedin» era texto suelto repetido.
+      - Toda animacion declara su ESTADO FINAL bajo movimiento reducido. El bloque de `tokens.css` no
+        basta: poner la duracion a 1ms deja el titular en su primera letra y la cuenta en cero.
+      - Cero dependencias nuevas: ni fuentes remotas, ni librerias de animacion, ni imagenes ajenas.
+
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
   - El niño NO es un User: vive entero como ChildProfile dentro de la cuenta de su padre, y

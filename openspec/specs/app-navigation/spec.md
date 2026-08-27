@@ -95,10 +95,16 @@ Esta guarda NO es la de verdad: la de verdad sigue en el servidor, que responde 
 debe. Esta solo evita enseñar una interfaz que no va a funcionar, y evita dejar a alguien parado en
 una dirección que no es suya.
 
+Cuando no hay sesión de ningún tipo, el destino SHALL ser la **puerta pública**, no la pantalla de
+acceso. Es una sola regla para todos los destinos, sin excepciones por ruta: quien llega sin sesión
+puede no conocer el producto, y un formulario no se lo explica. Desde la puerta pública se llega a la
+pantalla de acceso, que sigue existiendo y siendo alcanzable.
+
 #### Scenario: Sin sesión
 
 - **WHEN** alguien sin sesión abre cualquier destino de la aplicación
-- **THEN** acaba en la pantalla de acceso
+- **THEN** acaba en la puerta pública
+- **AND** desde ahí puede llegar a la pantalla de acceso
 
 #### Scenario: Con cuenta acreditada y sin perfil elegido
 
@@ -122,6 +128,12 @@ una dirección que no es suya.
 - **WHEN** se abre una dirección que no corresponde a ningún destino
 - **THEN** se muestra una pantalla que lo dice
 - **AND** ofrece una salida hacia un destino válido
+
+#### Scenario: La pantalla de acceso sigue siendo alcanzable
+
+- **WHEN** alguien sin sesión pide la pantalla de acceso desde la puerta pública
+- **THEN** la ve
+- **AND** no se le devuelve a la puerta pública
 
 ### Requirement: El filtro y la página de un listado viajan en la dirección
 

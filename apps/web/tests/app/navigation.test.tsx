@@ -14,19 +14,21 @@ describe("una dirección que no existe", () => {
     expect(screen.getByText(messages.nav.notFoundTitle)).toBeInTheDocument();
 
     // Sin salida, quien llega aquí en una tablet no tiene barra de direcciones
-    // a mano para corregirlo. Y es un BOTÓN que navega, no un enlace envolviendo
-    // un botón: eso anida dos elementos interactivos y un lector de pantalla
-    // anuncia un enlace que contiene un botón.
-    expect(screen.getByRole("button", { name: messages.nav.notFoundBack })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: messages.nav.notFoundBack })).toBeNull();
+    // a mano para corregirlo. Y es un ENLACE vestido de botón, no un `Link`
+    // envolviendo un `Button`: eso anida dos elementos interactivos.
+    const salida = screen.getByRole("link", { name: messages.nav.notFoundBack });
+    expect(salida).toBeInTheDocument();
+    expect(salida.querySelector("button")).toBeNull();
   });
 });
 
 describe("las guardas deciden antes de pintar", () => {
-  it("sin sesión, cualquier destino acaba en el acceso", async () => {
+  it("sin sesión, cualquier destino acaba en la puerta pública", async () => {
     const app = await montarApp("/tasks", SIN_SESION);
 
-    expect(app.direccion()).toBe("/sign-in");
+    // Desde `add-landing-page`: quien llega sin sesión puede no conocer el
+    // producto, y un formulario no se lo explica.
+    expect(app.direccion()).toBe("/welcome");
   });
 
   it("con cuenta y sin perfil, un destino que exige actor acaba en la rejilla", async () => {
@@ -41,10 +43,10 @@ describe("las guardas deciden antes de pintar", () => {
     expect(app.direccion()).toBe("/profiles");
   });
 
-  it("sin sesión, la rejilla manda al acceso", async () => {
+  it("sin sesión, la rejilla manda a la puerta pública", async () => {
     const app = await montarApp("/profiles", SIN_SESION);
 
-    expect(app.direccion()).toBe("/sign-in");
+    expect(app.direccion()).toBe("/welcome");
   });
 
   it("a quien ya tiene perfil no se le enseña el acceso", async () => {

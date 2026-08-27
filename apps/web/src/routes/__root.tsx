@@ -1,10 +1,15 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { Outlet, createRootRouteWithContext, useNavigate } from "@tanstack/react-router";
+import {
+  Link,
+  Outlet,
+  createRootRouteWithContext,
+  useRouterState,
+} from "@tanstack/react-router";
 import { ChildShell } from "../app/ChildShell.js";
 import { ParentShell } from "../app/ParentShell.js";
 import { useSession } from "../features/auth/use-session.js";
 import { messages } from "../lib/messages.js";
-import { Button, EmptyState } from "../ui/index.js";
+import { EmptyState, buttonClasses } from "../ui/index.js";
 
 /**
  * Lo que toda ruta recibe en su contexto.
@@ -15,6 +20,23 @@ import { Button, EmptyState } from "../ui/index.js";
  */
 export interface RouterContext {
   queryClient: QueryClient;
+}
+
+/**
+ * Lo que una ruta puede declarar sobre cómo quiere que la enmarquen.
+ *
+ * `fullBleed` lo pide la puerta pública: es lo único que se rinde a todo lo
+ * ancho. Las pantallas previas a tener un rol —acceso y rejilla— quieren el
+ * ancho de lectura, que es lo de por defecto.
+ *
+ * Se declara en la ruta y no con un `if` sobre la dirección en este archivo:
+ * una dirección escrita a mano aquí se desincroniza el día que alguien renombre
+ * la ruta, y el typecheck no lo vería.
+ */
+declare module "@tanstack/react-router" {
+  interface StaticDataRouteOption {
+    fullBleed?: boolean;
+  }
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -35,6 +57,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 function AppFrame(): React.ReactElement {
   const { session } = useSession();
   const actor = session?.actor;
+  const aSangre = useRouterState({
+    select: (estado) => estado.matches.some((match) => match.staticData.fullBleed === true),
+  });
 
   if (actor?.familyRole === "CHILD") {
     return <ChildShell avatar={actor.avatar} />;
@@ -44,7 +69,9 @@ function AppFrame(): React.ReactElement {
     return <ParentShell avatar={actor.avatar} />;
   }
 
-  return (
+  return aSangre ? (
+    <Outlet />
+  ) : (
     <main className="mx-auto max-w-(--container-reading) px-4 py-8">
       <Outlet />
     </main>
@@ -59,22 +86,20 @@ function AppFrame(): React.ReactElement {
  * corregirlo.
  */
 function NotFound(): React.ReactElement {
-  const navigate = useNavigate();
-
   return (
     <EmptyState
       glyph="🧭"
       title={messages.nav.notFoundTitle}
       description={messages.nav.notFoundBody}
       /*
-        Un botón que navega, y NO un `Link` envolviendo un `Button`: eso anida
-        dos elementos interactivos, y un lector de pantalla anuncia un enlace
-        que contiene un botón. Lo cazó el repaso manual.
+        Un ENLACE vestido de botón. Navegar es trabajo de un enlace: se abre en
+        otra pestaña y se anuncia como lo que es. Antes era un `Link` envolviendo
+        un `Button`, que anida dos elementos interactivos.
       */
       action={
-        <Button variant="primary" onClick={() => void navigate({ to: "/" })}>
+        <Link to="/" className={buttonClasses("primary")}>
           {messages.nav.notFoundBack}
-        </Button>
+        </Link>
       }
     />
   );
