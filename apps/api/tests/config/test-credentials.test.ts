@@ -27,7 +27,9 @@ const valido = {
  */
 describe("las credenciales de la batería", () => {
   it("son obligatorias y no caen hacia las de producción", () => {
-    for (const clave of ["TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY"]) {
+    // `as const` para que las claves sean literales y no `string`: sin eso, la
+    // desestructuración calculada no encuentra su firma de índice y no compila.
+    for (const clave of ["TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY"] as const) {
       const { [clave]: _falta, ...sinElla } = valido;
       const r = envSchema.safeParse(sinElla);
       expect(r.success, `${clave} debería ser obligatoria`).toBe(false);
