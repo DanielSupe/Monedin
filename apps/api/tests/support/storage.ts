@@ -20,19 +20,29 @@ import { S3StorageProvider } from "../../src/shared/storage/index.js";
 let client: S3Client | undefined;
 
 /**
- * El bucket de pruebas, con las DOS comprobaciones que impiden borrar datos de
+ * El bucket de pruebas, y las TRES separaciones que impiden tocar datos de
  * verdad.
  *
  * La batería VACÍA este bucket en su arranque, así que equivocarse aquí es la
  * única forma de perder algo irrecuperable con este módulo. Por eso no basta
  * con que el nombre sea distinto del de desarrollo:
  *
- *   1. Distinto nombre que `S3_BUCKET_NAME`.
+ *   1. Distinto nombre que `S3_BUCKET_NAME`. Lo comprueba esta función.
  *   2. Detrás de un endpoint PROPIO. Desarrollo puede apuntar al S3 real
  *      dejando `S3_ENDPOINT` vacía; los tests no tienen forma de hacerlo,
  *      porque `TEST_S3_ENDPOINT` no admite vacío. Sin esta segunda, pasar
  *      desarrollo a AWS arrastraría a los tests y la primera pasada vaciaría un
  *      bucket real.
+ *   3. Con credenciales PROPIAS, `TEST_AWS_*`. La tercera llegó tarde, en
+ *      `split-test-storage-credentials`, y su ausencia se notó en cuanto
+ *      alguien hizo justo lo que el punto 2 contempla: al poner una llave de
+ *      AWS en `AWS_ACCESS_KEY_ID`, la batería seguía hablando con MinIO —el
+ *      endpoint sí estaba separado— pero con credenciales que MinIO rechaza, y
+ *      la suite entera moría con `InvalidAccessKeyId`.
+ *
+ * Ninguna de las tres sobra: cada una tapa un camino distinto por el que la
+ * batería podría acabar hablando con el almacén real, y basta que falte una
+ * para que cambiar la configuración de desarrollo arrastre a los tests.
  */
 export function testBucket(): string {
   const config = getConfig();
@@ -58,9 +68,11 @@ export function testS3Client(): S3Client {
 
   client ??= new S3Client({
     region: config.S3_REGION,
+    // Las de la batería, NUNCA las de la aplicación: ver la tercera separación
+    // en el comentario de `testBucket()`.
     credentials: {
-      accessKeyId: config.AWS_ACCESS_KEY_ID,
-      secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
+      accessKeyId: config.TEST_AWS_ACCESS_KEY_ID,
+      secretAccessKey: config.TEST_AWS_SECRET_ACCESS_KEY,
     },
     endpoint: testEndpoint(),
     forcePathStyle: true,
@@ -76,8 +88,11 @@ export function testStorageProvider(): S3StorageProvider {
   return new S3StorageProvider({
     bucket: testBucket(),
     region: config.S3_REGION,
-    accessKeyId: config.AWS_ACCESS_KEY_ID,
-    secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
+    // Igual que en `testS3Client()`: las de la batería. El proveedor es el mismo
+    // que el de producción y no sabe de entornos —ni debe—, así que quien lo
+    // construye es responsable de darle las credenciales que le tocan.
+    accessKeyId: config.TEST_AWS_ACCESS_KEY_ID,
+    secretAccessKey: config.TEST_AWS_SECRET_ACCESS_KEY,
     endpoint: testEndpoint(),
   });
 }

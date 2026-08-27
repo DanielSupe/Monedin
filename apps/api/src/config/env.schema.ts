@@ -22,6 +22,8 @@ export const SECRET_ENV_KEYS = [
   "TEST_DATABASE_URL",
   "AWS_ACCESS_KEY_ID",
   "AWS_SECRET_ACCESS_KEY",
+  "TEST_AWS_ACCESS_KEY_ID",
+  "TEST_AWS_SECRET_ACCESS_KEY",
 ] as const;
 
 export type SecretEnvKey = (typeof SECRET_ENV_KEYS)[number];
@@ -141,6 +143,24 @@ export const envSchema = z.object({
 
   /** Credencial del almacén. Secreta. */
   AWS_SECRET_ACCESS_KEY: z.string({ required_error: "obligatoria" }).min(1, "obligatoria"),
+
+  /*
+   * Credenciales de la batería de tests. Secretas, y SEPARADAS de las de arriba.
+   *
+   * Son la tercera separación entre la batería y el almacén real, junto al
+   * bucket y al endpoint. Sin ellas, apuntar el desarrollo a un almacén real
+   * arrastra a los tests: siguen hablando con MinIO —el endpoint sí está
+   * separado— pero con credenciales que MinIO rechaza, y la suite entera muere
+   * con `InvalidAccessKeyId`.
+   *
+   * No llevan valor por defecto a propósito, aunque en local siempre valgan lo
+   * mismo. Un defecto que tapa una variable ausente es cómo se acaba apuntando
+   * al almacén equivocado sin enterarse, que es este mismo fallo en la otra
+   * dirección. Ver la decisión 2 del design de `split-test-storage-credentials`.
+   */
+  TEST_AWS_ACCESS_KEY_ID: z.string({ required_error: "obligatoria" }).min(1, "obligatoria"),
+
+  TEST_AWS_SECRET_ACCESS_KEY: z.string({ required_error: "obligatoria" }).min(1, "obligatoria"),
 });
 
 /** Configuración validada de la API. */
