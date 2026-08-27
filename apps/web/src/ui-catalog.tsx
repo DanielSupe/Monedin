@@ -161,6 +161,7 @@ function Piezas(): React.ReactElement {
           <Avatar value="nutria" size="small" alt={EJEMPLO.hija} />
           <Avatar value="zorro" size="medium" alt={EJEMPLO.hija} />
           <Avatar value="pulpo" size="large" alt={EJEMPLO.hija} />
+          <Avatar value="koala" size="xlarge" alt={EJEMPLO.hija} />
         </Fila>
       </Seccion>
 

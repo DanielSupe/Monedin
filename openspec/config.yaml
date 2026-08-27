@@ -267,6 +267,26 @@ context: |
       - La deuda declarada de `features/auth` deja de ser un glob del directorio y nombra los cuatro
         archivos que siguen sin vestir, que son de `redesign-access`.
 
+    `add-entry-frame` cierra un hueco que se veia y no se nombraba: las cinco pantallas previas a tener
+    rol -acceso, rejilla, teclado de PIN, alta de perfil y restablecer PIN- no tenian marco. Caian en
+    el contenedor de lectura de la raiz, pegadas arriba y SIN MARCA: se entraba por una pagina con
+    logo, se pasaba por cuatro pantallas anonimas, y el logo volvia al final. Lo que deja construido:
+      - `EntryShell`, tercer marco junto a los del padre y el nino: logo arriba a la izquierda y
+        contenido centrado en los dos ejes. NO declara escala, porque la escala la elige la audiencia
+        y ahi todavia no se sabe quien esta delante.
+      - Quienes lo reciben se DEDUCE y no se lista: es la ultima rama de la raiz, o sea sin actor y sin
+        pedir ancho completo. Como toda ruta de la aplicacion exige actor, ese conjunto es exactamente
+        el camino de entrada, y una pantalla nueva lo hereda sin que nadie se acuerde.
+      - El marco centra pero NO impone ancho. Lo intento con el de lectura y partia la rejilla en dos
+        filas: solo cada pantalla sabe si es un formulario de 22rem o una fila de caras.
+      - Talla `xlarge` en `Avatar`, 8rem, para la rejilla. Es la respuesta que el design de
+        `redesign-profile-grid` habia dejado escrita para este caso exacto.
+
+    PENDIENTE Y SIN DECIDIR: no se puede subir una foto al CREAR un perfil, solo elegir un animal. La
+    clave de subida lleva dentro el identificador del hijo, que aun no existe. Dos caminos: en dos
+    momentos sin tocar la API, o en uno solo con una via de subida bajo el prefijo del padre,
+    `avatarUploadKey` en el alta y una politica para las fotos huerfanas. Merece su propio change.
+
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
   - El niño NO es un User: vive entero como ChildProfile dentro de la cuenta de su padre, y

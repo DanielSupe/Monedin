@@ -26,7 +26,7 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
   const profiles = data?.profiles ?? [];
 
   return (
-    <section className="flex flex-col items-center gap-8 py-8">
+    <section className="flex w-full max-w-(--container-wide) flex-col items-center gap-8">
       <h2 className="text-title text-center font-bold">
         {manage ? messages.auth.manageProfilesTitle : messages.auth.whoIsPlaying}
       </h2>
@@ -51,7 +51,7 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
                 className={cx(tileClasses, "hover:bg-surface-sunken")}
               >
                 <span className="relative">
-                  <Avatar value={profile.avatar} size="large" />
+                  <Avatar value={profile.avatar} size="xlarge" />
                   {manage && <PencilBadge />}
                 </span>
                 <span className="text-body font-semibold">{profile.name}</span>
@@ -69,7 +69,9 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
           <Link to="/profiles/new" className={cx(tileClasses, "hover:bg-surface-sunken")}>
             <span
               aria-hidden="true"
-              className="text-hero flex size-24 items-center justify-center rounded-full bg-surface-sunken text-ink-muted leading-none"
+              // `size-32` es la misma medida que `Avatar size="xlarge"`: son la misma
+              // fila, y una tesela más baja que las demás se lee como un error.
+              className="text-hero flex size-32 items-center justify-center rounded-full bg-surface-sunken text-ink-muted leading-none"
             >
               +
             </span>
@@ -91,7 +93,7 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
 
 /** La caja de una tesela. Misma forma para un perfil y para «agregar». */
 const tileClasses =
-  "rounded-card flex w-32 flex-col items-center gap-2 p-3 text-center no-underline text-ink transition-colors duration-normal";
+  "rounded-card flex w-40 flex-col items-center gap-2 p-3 text-center no-underline text-ink transition-colors duration-normal";
 
 /**
  * Un perfil bloqueado NO es un enlace y NO lleva lápiz.
@@ -110,7 +112,7 @@ function LockedTile({
 }): React.ReactElement {
   return (
     <span className={cx(tileClasses, "opacity-55")}>
-      <Avatar value={avatar} size="large" />
+      <Avatar value={avatar} size="xlarge" />
       <span className="text-body font-semibold">{name}</span>
       <span className="text-small text-ink-muted">{messages.auth.profileLocked}</span>
     </span>

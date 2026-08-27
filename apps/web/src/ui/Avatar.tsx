@@ -1,13 +1,22 @@
 import { cx } from "./cx.js";
 import { avatarGlyph, isAvatarUrl } from "./avatars.js";
 
-export type AvatarSize = "small" | "medium" | "large";
+export type AvatarSize = "small" | "medium" | "large" | "xlarge";
 
-/** Las tres medidas del sistema. Ninguna pantalla pide píxeles. */
+/**
+ * Las medidas del sistema. Ninguna pantalla pide píxeles.
+ *
+ * `xlarge` la trajo `add-entry-frame` para la rejilla de perfiles, que se toca
+ * con el dedo de un niño de seis años. Es la respuesta que el design de
+ * `redesign-profile-grid` dejó escrita: si a `large` la tesela queda pequeña,
+ * la talla se le añade a la pieza y NO se escribe una medida suelta en la
+ * pantalla que la usa.
+ */
 const SIZES: Record<AvatarSize, string> = {
   small: "size-8 text-body",
   medium: "size-12 text-title",
   large: "size-24 text-hero",
+  xlarge: "size-32 text-hero",
 };
 
 export interface AvatarProps {

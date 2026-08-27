@@ -666,6 +666,24 @@ antes de extraerlo.
 inicio, sin mensaje: a los siete años «no tienes permiso» se lee como «hiciste algo mal». Es
 interfaz, no seguridad — la guarda de verdad sigue siendo el 401 o el 403 del servidor.
 
+**Hay TRES marcos, no dos.** Desde `add-entry-frame`, las pantallas por las que se pasa antes de ser
+alguien —acceso, rejilla, teclado de PIN, alta de perfil y restablecer PIN— llevan `EntryShell`: logo
+arriba a la izquierda y contenido centrado en los dos ejes. Antes caían en un contenedor de lectura
+**sin marca**, así que se entraba por una página con logo, se pasaba por cuatro pantallas anónimas y
+el logo volvía al final. Quiénes lo reciben **no se lista**: es la última rama de la raíz, o sea todo
+lo que llega sin actor y sin pedir ancho completo, y como toda ruta de la aplicación exige actor ese
+conjunto es exactamente el camino de entrada. No declara escala: la elige la audiencia, y ahí todavía
+no se sabe quién está delante.
+
+**Un marco centra; el ancho lo declara cada pantalla.** `EntryShell` lo intentó imponer y partía la
+rejilla en dos filas. Solo la pantalla sabe si es un formulario de 22rem o una fila de caras.
+
+**Deuda conocida y sin decidir: no se puede subir una foto al CREAR un perfil**, solo elegir un
+animal. No es un olvido — la clave de subida lleva dentro el identificador del hijo, que no existe
+todavía—. Hay dos caminos con precios muy distintos: hacerlo en dos momentos sin tocar la API, o en
+uno solo abriendo una vía de subida bajo el prefijo del padre, con `avatarUploadKey` en el alta y una
+política para las fotos huérfanas. **No lo resuelvas de pasada en otro change.**
+
 **Tres capas en el front, y la de en medio es nueva**: `ui/` no sabe de dominio ni de rutas; `app/`
 —los dos marcos— sabe de rol y de destinos pero no de negocio; `features/` sabe de negocio y ya no
 sabe de navegación.

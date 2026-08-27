@@ -6,6 +6,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { ChildShell } from "../app/ChildShell.js";
+import { EntryShell } from "../app/EntryShell.js";
 import { ParentShell } from "../app/ParentShell.js";
 import { useSession } from "../features/auth/use-session.js";
 import { messages } from "../lib/messages.js";
@@ -51,8 +52,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
  * spec exige que el marco sobreviva. Si colgara de cada destino, la barra del
  * niño se reconstruiría en cada toque.
  *
- * Las pantallas previas a tener un rol —el acceso y la rejilla— no llevan
- * marco: todavía no se sabe de quién sería.
+ * Las pantallas previas a tener un rol llevan el suyo, `EntryShell`: no se
+ * sabe de quién sería el marco, pero sí que hay que decir dónde está uno. Antes
+ * caían en un contenedor de lectura sin marca.
  */
 function AppFrame(): React.ReactElement {
   const { session } = useSession();
@@ -69,13 +71,7 @@ function AppFrame(): React.ReactElement {
     return <ParentShell avatar={actor.avatar} />;
   }
 
-  return aSangre ? (
-    <Outlet />
-  ) : (
-    <main className="mx-auto max-w-(--container-reading) px-4 py-8">
-      <Outlet />
-    </main>
-  );
+  return aSangre ? <Outlet /> : <EntryShell />;
 }
 
 /**

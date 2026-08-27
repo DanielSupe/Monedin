@@ -51,6 +51,11 @@ pagos y no hay interoperabilidad entre familias.
 > mitad del flujo, y gana una **tecla de borrar**: sin ella, un error de dedo obligaba a completar un
 > PIN equivocado y gastar un intento, y los intentos bloquean el perfil.
 >
+> `add-entry-frame` le pone marco a las cinco pantallas por las que se pasa **antes de ser alguien**:
+> logo arriba a la izquierda y contenido centrado. Antes no tenían ninguno, así que se entraba por una
+> página con marca, se pasaba por cuatro pantallas anónimas y la marca volvía al final. Los círculos
+> de la rejilla crecen a 8 rem, que es el dedo de un niño y no el cursor de un adulto.
+>
 > Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
 > reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
 > siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en
