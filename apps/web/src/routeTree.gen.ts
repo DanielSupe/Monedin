@@ -10,73 +10,271 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ChildrenRouteImport } from './routes/children'
-import { Route as RedemptionsRouteImport } from './routes/redemptions'
-import { Route as RewardsRouteImport } from './routes/rewards'
-import { Route as TasksRouteImport } from './routes/tasks'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as ChildrenIndexRouteImport } from './routes/children.index'
+import { Route as ChildrenNewRouteImport } from './routes/children.new'
+import { Route as MeRedemptionsRouteImport } from './routes/me.redemptions'
+import { Route as MeRewardsRouteImport } from './routes/me.rewards'
+import { Route as MeSettingsRouteImport } from './routes/me.settings'
+import { Route as MeTasksRouteImport } from './routes/me.tasks'
+import { Route as ProfilesIndexRouteImport } from './routes/profiles.index'
+import { Route as ProfilesNewRouteImport } from './routes/profiles.new'
+import { Route as ProfilesResetPinRouteImport } from './routes/profiles.reset-pin'
+import { Route as RedemptionsIndexRouteImport } from './routes/redemptions.index'
+import { Route as RewardsIndexRouteImport } from './routes/rewards.index'
+import { Route as RewardsNewRouteImport } from './routes/rewards.new'
+import { Route as TasksIndexRouteImport } from './routes/tasks.index'
+import { Route as TasksNewRouteImport } from './routes/tasks.new'
+import { Route as ChildrenChildIdEditRouteImport } from './routes/children.$childId.edit'
+import { Route as ProfilesProfileIdPinRouteImport } from './routes/profiles.$profileId.pin'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChildrenRoute = ChildrenRouteImport.update({
-  id: '/children',
-  path: '/children',
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RedemptionsRoute = RedemptionsRouteImport.update({
-  id: '/redemptions',
-  path: '/redemptions',
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RewardsRoute = RewardsRouteImport.update({
-  id: '/rewards',
-  path: '/rewards',
+const ChildrenIndexRoute = ChildrenIndexRouteImport.update({
+  id: '/children/',
+  path: '/children/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TasksRoute = TasksRouteImport.update({
-  id: '/tasks',
-  path: '/tasks',
+const ChildrenNewRoute = ChildrenNewRouteImport.update({
+  id: '/children/new',
+  path: '/children/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeRedemptionsRoute = MeRedemptionsRouteImport.update({
+  id: '/me/redemptions',
+  path: '/me/redemptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeRewardsRoute = MeRewardsRouteImport.update({
+  id: '/me/rewards',
+  path: '/me/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeSettingsRoute = MeSettingsRouteImport.update({
+  id: '/me/settings',
+  path: '/me/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeTasksRoute = MeTasksRouteImport.update({
+  id: '/me/tasks',
+  path: '/me/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilesIndexRoute = ProfilesIndexRouteImport.update({
+  id: '/profiles/',
+  path: '/profiles/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilesNewRoute = ProfilesNewRouteImport.update({
+  id: '/profiles/new',
+  path: '/profiles/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilesResetPinRoute = ProfilesResetPinRouteImport.update({
+  id: '/profiles/reset-pin',
+  path: '/profiles/reset-pin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedemptionsIndexRoute = RedemptionsIndexRouteImport.update({
+  id: '/redemptions/',
+  path: '/redemptions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RewardsIndexRoute = RewardsIndexRouteImport.update({
+  id: '/rewards/',
+  path: '/rewards/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RewardsNewRoute = RewardsNewRouteImport.update({
+  id: '/rewards/new',
+  path: '/rewards/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksIndexRoute = TasksIndexRouteImport.update({
+  id: '/tasks/',
+  path: '/tasks/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TasksNewRoute = TasksNewRouteImport.update({
+  id: '/tasks/new',
+  path: '/tasks/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChildrenChildIdEditRoute = ChildrenChildIdEditRouteImport.update({
+  id: '/children/$childId/edit',
+  path: '/children/$childId/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilesProfileIdPinRoute = ProfilesProfileIdPinRouteImport.update({
+  id: '/profiles/$profileId/pin',
+  path: '/profiles/$profileId/pin',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/children': typeof ChildrenRoute
-  '/redemptions': typeof RedemptionsRoute
-  '/rewards': typeof RewardsRoute
-  '/tasks': typeof TasksRoute
+  '/account': typeof AccountRoute
+  '/sign-in': typeof SignInRoute
+  '/children/new': typeof ChildrenNewRoute
+  '/me/redemptions': typeof MeRedemptionsRoute
+  '/me/rewards': typeof MeRewardsRoute
+  '/me/settings': typeof MeSettingsRoute
+  '/me/tasks': typeof MeTasksRoute
+  '/profiles/new': typeof ProfilesNewRoute
+  '/profiles/reset-pin': typeof ProfilesResetPinRoute
+  '/rewards/new': typeof RewardsNewRoute
+  '/tasks/new': typeof TasksNewRoute
+  '/children/': typeof ChildrenIndexRoute
+  '/profiles/': typeof ProfilesIndexRoute
+  '/redemptions/': typeof RedemptionsIndexRoute
+  '/rewards/': typeof RewardsIndexRoute
+  '/tasks/': typeof TasksIndexRoute
+  '/children/$childId/edit': typeof ChildrenChildIdEditRoute
+  '/profiles/$profileId/pin': typeof ProfilesProfileIdPinRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/children': typeof ChildrenRoute
-  '/redemptions': typeof RedemptionsRoute
-  '/rewards': typeof RewardsRoute
-  '/tasks': typeof TasksRoute
+  '/account': typeof AccountRoute
+  '/sign-in': typeof SignInRoute
+  '/children/new': typeof ChildrenNewRoute
+  '/me/redemptions': typeof MeRedemptionsRoute
+  '/me/rewards': typeof MeRewardsRoute
+  '/me/settings': typeof MeSettingsRoute
+  '/me/tasks': typeof MeTasksRoute
+  '/profiles/new': typeof ProfilesNewRoute
+  '/profiles/reset-pin': typeof ProfilesResetPinRoute
+  '/rewards/new': typeof RewardsNewRoute
+  '/tasks/new': typeof TasksNewRoute
+  '/children': typeof ChildrenIndexRoute
+  '/profiles': typeof ProfilesIndexRoute
+  '/redemptions': typeof RedemptionsIndexRoute
+  '/rewards': typeof RewardsIndexRoute
+  '/tasks': typeof TasksIndexRoute
+  '/children/$childId/edit': typeof ChildrenChildIdEditRoute
+  '/profiles/$profileId/pin': typeof ProfilesProfileIdPinRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/children': typeof ChildrenRoute
-  '/redemptions': typeof RedemptionsRoute
-  '/rewards': typeof RewardsRoute
-  '/tasks': typeof TasksRoute
+  '/account': typeof AccountRoute
+  '/sign-in': typeof SignInRoute
+  '/children/new': typeof ChildrenNewRoute
+  '/me/redemptions': typeof MeRedemptionsRoute
+  '/me/rewards': typeof MeRewardsRoute
+  '/me/settings': typeof MeSettingsRoute
+  '/me/tasks': typeof MeTasksRoute
+  '/profiles/new': typeof ProfilesNewRoute
+  '/profiles/reset-pin': typeof ProfilesResetPinRoute
+  '/rewards/new': typeof RewardsNewRoute
+  '/tasks/new': typeof TasksNewRoute
+  '/children/': typeof ChildrenIndexRoute
+  '/profiles/': typeof ProfilesIndexRoute
+  '/redemptions/': typeof RedemptionsIndexRoute
+  '/rewards/': typeof RewardsIndexRoute
+  '/tasks/': typeof TasksIndexRoute
+  '/children/$childId/edit': typeof ChildrenChildIdEditRoute
+  '/profiles/$profileId/pin': typeof ProfilesProfileIdPinRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/children' | '/redemptions' | '/rewards' | '/tasks'
+  fullPaths:
+    | '/'
+    | '/account'
+    | '/sign-in'
+    | '/children/new'
+    | '/me/redemptions'
+    | '/me/rewards'
+    | '/me/settings'
+    | '/me/tasks'
+    | '/profiles/new'
+    | '/profiles/reset-pin'
+    | '/rewards/new'
+    | '/tasks/new'
+    | '/children/'
+    | '/profiles/'
+    | '/redemptions/'
+    | '/rewards/'
+    | '/tasks/'
+    | '/children/$childId/edit'
+    | '/profiles/$profileId/pin'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/children' | '/redemptions' | '/rewards' | '/tasks'
-  id: '__root__' | '/' | '/children' | '/redemptions' | '/rewards' | '/tasks'
+  to:
+    | '/'
+    | '/account'
+    | '/sign-in'
+    | '/children/new'
+    | '/me/redemptions'
+    | '/me/rewards'
+    | '/me/settings'
+    | '/me/tasks'
+    | '/profiles/new'
+    | '/profiles/reset-pin'
+    | '/rewards/new'
+    | '/tasks/new'
+    | '/children'
+    | '/profiles'
+    | '/redemptions'
+    | '/rewards'
+    | '/tasks'
+    | '/children/$childId/edit'
+    | '/profiles/$profileId/pin'
+  id:
+    | '__root__'
+    | '/'
+    | '/account'
+    | '/sign-in'
+    | '/children/new'
+    | '/me/redemptions'
+    | '/me/rewards'
+    | '/me/settings'
+    | '/me/tasks'
+    | '/profiles/new'
+    | '/profiles/reset-pin'
+    | '/rewards/new'
+    | '/tasks/new'
+    | '/children/'
+    | '/profiles/'
+    | '/redemptions/'
+    | '/rewards/'
+    | '/tasks/'
+    | '/children/$childId/edit'
+    | '/profiles/$profileId/pin'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ChildrenRoute: typeof ChildrenRoute
-  RedemptionsRoute: typeof RedemptionsRoute
-  RewardsRoute: typeof RewardsRoute
-  TasksRoute: typeof TasksRoute
+  AccountRoute: typeof AccountRoute
+  SignInRoute: typeof SignInRoute
+  ChildrenNewRoute: typeof ChildrenNewRoute
+  MeRedemptionsRoute: typeof MeRedemptionsRoute
+  MeRewardsRoute: typeof MeRewardsRoute
+  MeSettingsRoute: typeof MeSettingsRoute
+  MeTasksRoute: typeof MeTasksRoute
+  ProfilesNewRoute: typeof ProfilesNewRoute
+  ProfilesResetPinRoute: typeof ProfilesResetPinRoute
+  RewardsNewRoute: typeof RewardsNewRoute
+  TasksNewRoute: typeof TasksNewRoute
+  ChildrenIndexRoute: typeof ChildrenIndexRoute
+  ProfilesIndexRoute: typeof ProfilesIndexRoute
+  RedemptionsIndexRoute: typeof RedemptionsIndexRoute
+  RewardsIndexRoute: typeof RewardsIndexRoute
+  TasksIndexRoute: typeof TasksIndexRoute
+  ChildrenChildIdEditRoute: typeof ChildrenChildIdEditRoute
+  ProfilesProfileIdPinRoute: typeof ProfilesProfileIdPinRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -88,32 +286,130 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/children': {
-      id: '/children'
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/children/': {
+      id: '/children/'
       path: '/children'
-      fullPath: '/children'
-      preLoaderRoute: typeof ChildrenRouteImport
+      fullPath: '/children/'
+      preLoaderRoute: typeof ChildrenIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/redemptions': {
-      id: '/redemptions'
+    '/children/new': {
+      id: '/children/new'
+      path: '/children/new'
+      fullPath: '/children/new'
+      preLoaderRoute: typeof ChildrenNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/me/redemptions': {
+      id: '/me/redemptions'
+      path: '/me/redemptions'
+      fullPath: '/me/redemptions'
+      preLoaderRoute: typeof MeRedemptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/me/rewards': {
+      id: '/me/rewards'
+      path: '/me/rewards'
+      fullPath: '/me/rewards'
+      preLoaderRoute: typeof MeRewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/me/settings': {
+      id: '/me/settings'
+      path: '/me/settings'
+      fullPath: '/me/settings'
+      preLoaderRoute: typeof MeSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/me/tasks': {
+      id: '/me/tasks'
+      path: '/me/tasks'
+      fullPath: '/me/tasks'
+      preLoaderRoute: typeof MeTasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profiles/': {
+      id: '/profiles/'
+      path: '/profiles'
+      fullPath: '/profiles/'
+      preLoaderRoute: typeof ProfilesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profiles/new': {
+      id: '/profiles/new'
+      path: '/profiles/new'
+      fullPath: '/profiles/new'
+      preLoaderRoute: typeof ProfilesNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profiles/reset-pin': {
+      id: '/profiles/reset-pin'
+      path: '/profiles/reset-pin'
+      fullPath: '/profiles/reset-pin'
+      preLoaderRoute: typeof ProfilesResetPinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redemptions/': {
+      id: '/redemptions/'
       path: '/redemptions'
-      fullPath: '/redemptions'
-      preLoaderRoute: typeof RedemptionsRouteImport
+      fullPath: '/redemptions/'
+      preLoaderRoute: typeof RedemptionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/rewards': {
-      id: '/rewards'
+    '/rewards/': {
+      id: '/rewards/'
       path: '/rewards'
-      fullPath: '/rewards'
-      preLoaderRoute: typeof RewardsRouteImport
+      fullPath: '/rewards/'
+      preLoaderRoute: typeof RewardsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tasks': {
-      id: '/tasks'
+    '/rewards/new': {
+      id: '/rewards/new'
+      path: '/rewards/new'
+      fullPath: '/rewards/new'
+      preLoaderRoute: typeof RewardsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks/': {
+      id: '/tasks/'
       path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof TasksRouteImport
+      fullPath: '/tasks/'
+      preLoaderRoute: typeof TasksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tasks/new': {
+      id: '/tasks/new'
+      path: '/tasks/new'
+      fullPath: '/tasks/new'
+      preLoaderRoute: typeof TasksNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/children/$childId/edit': {
+      id: '/children/$childId/edit'
+      path: '/children/$childId/edit'
+      fullPath: '/children/$childId/edit'
+      preLoaderRoute: typeof ChildrenChildIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profiles/$profileId/pin': {
+      id: '/profiles/$profileId/pin'
+      path: '/profiles/$profileId/pin'
+      fullPath: '/profiles/$profileId/pin'
+      preLoaderRoute: typeof ProfilesProfileIdPinRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -121,10 +417,24 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ChildrenRoute: ChildrenRoute,
-  RedemptionsRoute: RedemptionsRoute,
-  RewardsRoute: RewardsRoute,
-  TasksRoute: TasksRoute,
+  AccountRoute: AccountRoute,
+  SignInRoute: SignInRoute,
+  ChildrenNewRoute: ChildrenNewRoute,
+  MeRedemptionsRoute: MeRedemptionsRoute,
+  MeRewardsRoute: MeRewardsRoute,
+  MeSettingsRoute: MeSettingsRoute,
+  MeTasksRoute: MeTasksRoute,
+  ProfilesNewRoute: ProfilesNewRoute,
+  ProfilesResetPinRoute: ProfilesResetPinRoute,
+  RewardsNewRoute: RewardsNewRoute,
+  TasksNewRoute: TasksNewRoute,
+  ChildrenIndexRoute: ChildrenIndexRoute,
+  ProfilesIndexRoute: ProfilesIndexRoute,
+  RedemptionsIndexRoute: RedemptionsIndexRoute,
+  RewardsIndexRoute: RewardsIndexRoute,
+  TasksIndexRoute: TasksIndexRoute,
+  ChildrenChildIdEditRoute: ChildrenChildIdEditRoute,
+  ProfilesProfileIdPinRoute: ProfilesProfileIdPinRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

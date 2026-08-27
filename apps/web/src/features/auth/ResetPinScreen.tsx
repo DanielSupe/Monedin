@@ -1,4 +1,5 @@
 import { resetAdultPinSchema } from "@monedin/contracts";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
 import { describeAuthError, useResetAdultPin } from "./use-session.js";
@@ -11,7 +12,7 @@ import { describeAuthError, useResetAdultPin } from "./use-session.js";
  * `add-profile-selection`). Se abre desde el teclado de PIN del padre en la
  * rejilla.
  */
-export function ResetPinScreen({ onDone }: { onDone: () => void }): React.ReactElement {
+export function ResetPinScreen(): React.ReactElement {
   const [password, setPassword] = useState("");
   const [newPin, setNewPin] = useState("");
   const [fieldError, setFieldError] = useState<string | undefined>();
@@ -35,9 +36,7 @@ export function ResetPinScreen({ onDone }: { onDone: () => void }): React.ReactE
     return (
       <section>
         <p>{messages.auth.pinReset}</p>
-        <button type="button" onClick={onDone}>
-          {messages.auth.back}
-        </button>
+        <Link to="/profiles">{messages.auth.back}</Link>
       </section>
     );
   }
@@ -81,9 +80,9 @@ export function ResetPinScreen({ onDone }: { onDone: () => void }): React.ReactE
         </p>
       )}
 
-      <button type="button" onClick={onDone} style={{ marginTop: "1rem" }}>
-        {messages.auth.back}
-      </button>
+      <p style={{ marginTop: "1rem" }}>
+        <Link to="/profiles">{messages.auth.back}</Link>
+      </p>
     </section>
   );
 }

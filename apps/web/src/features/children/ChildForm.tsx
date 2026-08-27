@@ -27,12 +27,20 @@ import { describeChildrenError, useCreateChild, useUpdateChild } from "./use-chi
  */
 export function ChildForm({
   child,
-  onDone,
+  onSaved,
   onCancel,
 }: {
   /** Si viene, se edita; si no, se crea. */
   child?: Child;
-  onDone: () => void;
+  /**
+   * El perfil quedó guardado.
+   *
+   * Es un evento de DOMINIO, no una orden de cerrarse: este formulario se usa
+   * desde la rejilla y desde la gestión del padre, y cada una navega a un sitio
+   * distinto. Distinto del antiguo `onDone`, que era «ciérrame» y empujaba la
+   * navegación a quien llamara.
+   */
+  onSaved: () => void;
   onCancel: () => void;
 }): React.ReactElement {
   const editing = child !== undefined;
@@ -71,7 +79,7 @@ export function ChildForm({
         setFieldError(parsed.error.issues[0]?.message);
         return;
       }
-      update.mutate({ childId: child.id, input: parsed.data }, { onSuccess: onDone });
+      update.mutate({ childId: child.id, input: parsed.data }, { onSuccess: onSaved });
       return;
     }
 
@@ -85,7 +93,7 @@ export function ChildForm({
       setFieldError(parsed.error.issues[0]?.message);
       return;
     }
-    create.mutate(parsed.data, { onSuccess: onDone });
+    create.mutate(parsed.data, { onSuccess: onSaved });
   }
 
   const error = fieldError ?? (mutation.error ? describeChildrenError(mutation.error) : undefined);

@@ -1,5 +1,6 @@
 import { ERROR_CODES, type SessionState } from "@monedin/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import * as api from "../../api/auth.js";
 import { ApiRequestError } from "../../lib/http-client.js";
 import { messages } from "../../lib/messages.js";
@@ -24,13 +25,31 @@ export function useSession(): {
   return { session: data, isLoading: isPending };
 }
 
-/** Invalida el estado de sesión para que se vuelva a consultar. */
+/**
+ * Invalida el estado de sesión para que se vuelva a consultar, y con él las
+ * guardas de las rutas.
+ *
+ * Lo segundo importa tanto como lo primero. `beforeLoad` decide ANTES de pintar,
+ * que es lo que evita el parpadeo de la pantalla equivocada, pero por eso mismo
+ * solo corre al ENTRAR en una ruta: cuando la sesión cambia sin que cambie la
+ * dirección —entrar, salir del perfil, cerrar sesión—, no vuelve a correr sola.
+ *
+ * `router.invalidate()` las reevalúa, y entonces cada guarda manda a quien sea
+ * donde le toca. Así la respuesta a «¿dónde pertenece este estado de sesión?»
+ * vive en UN sitio, y no repartida en un `onSuccess` por cada mutación.
+ *
+ * Se intentó primero lo otro. No funciona: al cambiar la sesión, la raíz cambia
+ * de marco y desmonta el componente que llamó a `mutate`, así que su `onSuccess`
+ * no llega a ejecutarse. Ver decisión 8 del design de `add-app-shell`.
+ */
 function useRefreshSession(): () => Promise<void> {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return async () => {
     await queryClient.invalidateQueries({ queryKey: api.sessionQueryKey });
     await queryClient.invalidateQueries({ queryKey: api.profilesQueryKey });
+    await router.invalidate();
   };
 }
 

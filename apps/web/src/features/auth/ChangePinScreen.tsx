@@ -1,4 +1,5 @@
 import { changeAdultPinSchema } from "@monedin/contracts";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
 import { describeAuthError, useChangeAdultPin } from "./use-session.js";
@@ -9,7 +10,7 @@ import { describeAuthError, useChangeAdultPin } from "./use-session.js";
  * A diferencia de `ResetPinScreen`, exige perfil de padre activo: es la ruta
  * normal, no la de rescate. La monta `requireParent` en el servidor.
  */
-export function ChangePinScreen({ onDone }: { onDone: () => void }): React.ReactElement {
+export function ChangePinScreen(): React.ReactElement {
   const [currentPin, setCurrentPin] = useState("");
   const [newPin, setNewPin] = useState("");
   const [fieldError, setFieldError] = useState<string | undefined>();
@@ -33,9 +34,7 @@ export function ChangePinScreen({ onDone }: { onDone: () => void }): React.React
     return (
       <section>
         <p>{messages.auth.pinChanged}</p>
-        <button type="button" onClick={onDone}>
-          {messages.auth.back}
-        </button>
+        <Link to="/">{messages.auth.back}</Link>
       </section>
     );
   }
@@ -80,9 +79,9 @@ export function ChangePinScreen({ onDone }: { onDone: () => void }): React.React
         </p>
       )}
 
-      <button type="button" onClick={onDone} style={{ marginTop: "1rem" }}>
+      <Link to="/" style={{ display: "inline-block", marginTop: "1rem" }}>
         {messages.auth.cancel}
-      </button>
+      </Link>
     </section>
   );
 }

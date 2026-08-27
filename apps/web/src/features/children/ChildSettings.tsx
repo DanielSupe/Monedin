@@ -1,4 +1,5 @@
 import { PIN_LENGTH, changeOwnChildPinSchema } from "@monedin/contracts";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
 import { describeAuthError, useChangeOwnChildPin } from "../auth/use-session.js";
@@ -13,7 +14,7 @@ import { describeChildrenError, useOwnChild, useUpdateOwnChild } from "./use-chi
  * de `auth`, porque tocar una credencial es suyo. Para el niño es una sola cosa
  * —«mi perfil»— y no tiene por qué enterarse de la frontera.
  */
-export function ChildSettings({ onDone }: { onDone: () => void }): React.ReactElement {
+export function ChildSettings(): React.ReactElement {
   const { data, isPending, error } = useOwnChild();
   const updateAvatar = useUpdateOwnChild();
 
@@ -57,9 +58,9 @@ export function ChildSettings({ onDone }: { onDone: () => void }): React.ReactEl
 
       <OwnPinForm />
 
-      <button type="button" onClick={onDone} style={{ marginTop: "1rem" }}>
+      <Link to="/" style={{ display: "inline-block", marginTop: "1rem" }}>
         {messages.children.back}
-      </button>
+      </Link>
     </section>
   );
 }

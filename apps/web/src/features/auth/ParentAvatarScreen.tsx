@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as api from "../../api/auth.js";
 import { messages } from "../../lib/messages.js";
@@ -15,7 +16,7 @@ import { useSession } from "./use-session.js";
  * hoy donde el padre escoja ilustración, y el contrato de la API tampoco lo
  * admite todavía.
  */
-export function ParentAvatarScreen({ onDone }: { onDone: () => void }): React.ReactElement {
+export function ParentAvatarScreen(): React.ReactElement {
   const { session } = useSession();
   const queryClient = useQueryClient();
 
@@ -53,9 +54,9 @@ export function ParentAvatarScreen({ onDone }: { onDone: () => void }): React.Re
         </p>
       )}
 
-      <button type="button" onClick={onDone} style={{ marginTop: "1rem" }}>
+      <Link to="/" style={{ display: "inline-block", marginTop: "1rem" }}>
         {messages.auth.back}
-      </button>
+      </Link>
     </section>
   );
 }

@@ -195,6 +195,24 @@ context: |
     el sistema. Vestirlas una a una son los nueve changes siguientes, y cada uno borra su entrada de
     las dos listas de deuda declarada -en `apps/web/eslint.config.js` y en el test de estilo-.
 
+    `add-app-shell` es el unico change de la etapa que es arquitectura y no aspecto. El nino no tenia
+    NINGUNA ruta: sus cuatro pantallas vivian dentro de `/` con booleanos, asi que el boton atras
+    sacaba de la aplicacion. Lo que deja construido:
+      - Cada destino con su direccion, incluidas las pantallas previas a ser alguien y los formularios
+        que antes eran una vista interna. Mueren los tres `Vista` union y el prop `onDone` de quince
+        componentes; dos tests impiden que vuelvan.
+      - Tres capas en el front: `ui/` no sabe de dominio ni de rutas, `app/` -los dos marcos- sabe de
+        rol y destinos pero no de negocio, `features/` sabe de negocio y ya no sabe de navegacion.
+      - Guardas en `beforeLoad`, que deciden ANTES de pintar y por eso REDIRIGEN. El rol equivocado
+        aterriza en su inicio en silencio: es interfaz, no seguridad, y la guarda de verdad sigue
+        siendo el 401 o el 403 del servidor.
+      - Como una guarda solo corre al ENTRAR en una ruta, quien invalida la sesion invalida tambien el
+        router. Navegar desde el `onSuccess` de cada mutacion no funciona: al cambiar la sesion, la
+        raiz cambia de marco y desmonta el componente que llamo a `mutate`.
+      - El filtro y la pagina de un listado viajan en la direccion, y un valor invalido CAE al de por
+        defecto -lo contrario del 422 de la API, porque aqui quien llama es una persona con un enlace
+        viejo-.
+
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
   - El niño NO es un User: vive entero como ChildProfile dentro de la cuenta de su padre, y

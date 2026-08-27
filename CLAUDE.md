@@ -611,6 +611,28 @@ Desde `add-design-system`, el front tiene sistema de diseño y **ya no se escrib
   y en `tests/ui/style-rules.test.ts`—. Cada change de rediseño **borra su entrada**. Una entrada que
   siga ahí sin change que la reclame es que alguien se saltó el plan.
 
+**La navegación es del router, no del estado.** Desde `add-app-shell`, cada destino tiene su
+dirección y ningún componente de `features/` decide con `useState` qué pantalla enseñar. Dos tests lo
+impiden: uno falla ante un prop `onDone` —«ciérrame», que empuja la navegación a quien llama— y otro
+ante una unión de vistas. Un evento de dominio como `onSaved` —«esto ocurrió»— sí es legítimo: el
+mismo formulario se usa desde dos sitios que navegan a destinos distintos.
+
+**Las guardas van en `beforeLoad`, no en un componente.** Deciden ANTES de pintar, así que redirigen
+en vez de enseñar otra cosa bajo una dirección que no corresponde. Con una consecuencia que hay que
+saber: **solo corren al entrar en una ruta**. Cuando la sesión cambia sin que cambie la dirección
+—entrar a un perfil, salir, cerrar sesión—, quien la invalida tiene que invalidar también el router,
+y eso lo hace `useRefreshSession()` en un solo sitio. Navegar desde el `onSuccess` de cada mutación
+NO funciona: al cambiar la sesión, la raíz cambia de marco y desmonta el componente que llamó a
+`mutate`.
+
+**El rol equivocado redirige en silencio.** Un niño que abre una dirección del padre aterriza en su
+inicio, sin mensaje: a los siete años «no tienes permiso» se lee como «hiciste algo mal». Es
+interfaz, no seguridad — la guarda de verdad sigue siendo el 401 o el 403 del servidor.
+
+**Tres capas en el front, y la de en medio es nueva**: `ui/` no sabe de dominio ni de rutas; `app/`
+—los dos marcos— sabe de rol y de destinos pero no de negocio; `features/` sabe de negocio y ya no
+sabe de navegación.
+
 **`pnpm verify` puede quedarse sin memoria en una máquina cargada.** Lanza trece tareas en paralelo
 con `--force`; con Docker, el editor y un navegador abiertos, V8 muere con `allocation failure` y
 turbo devuelve 127 **con una tarea distinta cada pasada**, lo que parece un test frágil y no lo es. Si

@@ -20,10 +20,11 @@ import { describeRewardsError, useCreateReward } from "./use-rewards.js";
  * mandar nada al servidor.
  */
 export function RewardForm({
-  onDone,
+  onSaved,
   onCancel,
 }: {
-  onDone: () => void;
+  /** Quedó guardado. Evento de dominio, no una orden de cerrarse. */
+  onSaved: () => void;
   onCancel: () => void;
 }): React.ReactElement {
   const [title, setTitle] = useState("");
@@ -72,7 +73,7 @@ export function RewardForm({
       return;
     }
 
-    create.mutate(validado.data as CreateRewardInput, { onSuccess: onDone });
+    create.mutate(validado.data as CreateRewardInput, { onSuccess: onSaved });
   }
 
   if (isPending) {

@@ -1,11 +1,11 @@
 import { COINS_MAX, COINS_MIN, MAX_CHILDREN_PER_FAMILY, type Reward } from "@monedin/contracts";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
 import * as rewardsApi from "../../api/rewards.js";
 import { Avatar } from "../../ui/Avatar.js";
 import { ImageUploadField } from "../uploads/ImageUploadField.js";
 import { useChildren } from "../children/use-children.js";
-import { RewardForm } from "./RewardForm.js";
 import {
   describeRewardsError,
   useReplaceAssignments,
@@ -21,28 +21,19 @@ import {
  * tiene su propio editor (`OffersEditor`), que reemplaza el conjunto entero
  * de una vez. Ver el requisito «El precio no vive en el premio».
  */
-type Vista = { name: "list" } | { name: "new" };
-
 const FILTROS: Array<{ valor: "ACTIVE" | "RETIRED"; texto: string }> = [
   { valor: "ACTIVE", texto: messages.rewards.filterActive },
   { valor: "RETIRED", texto: messages.rewards.filterRetired },
 ];
 
-export function RewardCatalog(): React.ReactElement {
-  const [vista, setVista] = useState<Vista>({ name: "list" });
-  const [page, setPage] = useState(1);
-  const [filtro, setFiltro] = useState<"ACTIVE" | "RETIRED">("ACTIVE");
-
-  const { data, isPending, error } = useRewards({ page, status: filtro });
-
-  if (vista.name === "new") {
-    return (
-      <RewardForm
-        onDone={() => setVista({ name: "list" })}
-        onCancel={() => setVista({ name: "list" })}
-      />
-    );
-  }
+export function RewardCatalog({
+  page,
+  status,
+}: {
+  page: number;
+  status: "ACTIVE" | "RETIRED";
+}): React.ReactElement {
+  const { data, isPending, error } = useRewards({ page, status });
 
   if (isPending) {
     return <p>{messages.health.loading}</p>;
@@ -64,19 +55,16 @@ export function RewardCatalog(): React.ReactElement {
 
       <nav style={{ display: "flex", gap: "0.5rem" }}>
         {FILTROS.map((opcion) => (
-          <button
+          // Cambiar de filtro vuelve a la página 1: cambia cuántas hay, y
+          // quedarse en la 4 enseñaría una lista vacía sin explicar por qué.
+          <Link
             key={opcion.valor}
-            type="button"
-            disabled={filtro === opcion.valor}
-            onClick={() => {
-              setFiltro(opcion.valor);
-              // Cambiar de filtro cambia cuántas páginas hay: quedarse en la 4
-              // enseñaría una lista vacía sin explicar por qué.
-              setPage(1);
-            }}
+            to="/rewards"
+            search={{ page: 1, status: opcion.valor }}
+            aria-current={status === opcion.valor ? "page" : undefined}
           >
             {opcion.texto}
-          </button>
+          </Link>
         ))}
       </nav>
 
@@ -92,25 +80,25 @@ export function RewardCatalog(): React.ReactElement {
 
       {data !== undefined && data.totalPages > 1 && (
         <nav style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", alignItems: "center" }}>
-          <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-            {messages.rewards.previousPage}
-          </button>
+          {page > 1 && (
+            <Link to="/rewards" search={{ page: page - 1, status }}>
+              {messages.rewards.previousPage}
+            </Link>
+          )}
           <span>
             {data.page} / {data.totalPages}
           </span>
-          <button
-            type="button"
-            disabled={page >= data.totalPages}
-            onClick={() => setPage(page + 1)}
-          >
-            {messages.rewards.nextPage}
-          </button>
+          {page < data.totalPages && (
+            <Link to="/rewards" search={{ page: page + 1, status }}>
+              {messages.rewards.nextPage}
+            </Link>
+          )}
         </nav>
       )}
 
-      <button type="button" onClick={() => setVista({ name: "new" })} style={{ marginTop: "1rem" }}>
-        {messages.rewards.newReward}
-      </button>
+      <p style={{ marginTop: "1rem" }}>
+        <Link to="/rewards/new">{messages.rewards.newReward}</Link>
+      </p>
     </section>
   );
 }
@@ -221,7 +209,7 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
       )}
 
       {editingOffers && (
-        <OffersEditor reward={reward} onDone={() => setEditingOffers(false)} />
+        <OffersEditor reward={reward} onClose={() => setEditingOffers(false)} />
       )}
 
       <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
@@ -272,10 +260,11 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
  */
 function OffersEditor({
   reward,
-  onDone,
+  onClose,
 }: {
   reward: Reward;
-  onDone: () => void;
+  /** Cierra el editor EN LÍNEA. No navega: no es una pantalla. */
+  onClose: () => void;
 }): React.ReactElement {
   const { data, isPending } = useChildren(1, MAX_CHILDREN_PER_FAMILY);
   const replace = useReplaceAssignmentsForm(reward);
@@ -316,12 +305,12 @@ function OffersEditor({
       <button
         type="button"
         disabled={replace.mutation.isPending}
-        onClick={() => replace.enviar(onDone)}
+        onClick={() => replace.enviar(onClose)}
         style={{ marginTop: "0.5rem" }}
       >
         {messages.rewards.saveOffers}
       </button>
-      <button type="button" onClick={onDone}>
+      <button type="button" onClick={onClose}>
         {messages.rewards.cancel}
       </button>
 
@@ -340,7 +329,7 @@ function useReplaceAssignmentsForm(reward: Reward): {
   precios: Record<string, string>;
   alternar: (childId: string) => void;
   fijarPrecio: (childId: string, valor: string) => void;
-  enviar: (onDone: () => void) => void;
+  enviar: (alCerrar: () => void) => void;
   mutation: ReturnType<typeof useReplaceAssignments>;
 } {
   const [elegidos, setElegidos] = useState<string[]>(
@@ -361,7 +350,7 @@ function useReplaceAssignmentsForm(reward: Reward): {
     setPrecios((previos) => ({ ...previos, [childId]: valor }));
   }
 
-  function enviar(onDone: () => void): void {
+  function enviar(alCerrar: () => void): void {
     mutation.mutate(
       {
         rewardId: reward.id,
@@ -372,7 +361,7 @@ function useReplaceAssignmentsForm(reward: Reward): {
           })),
         },
       },
-      { onSuccess: onDone },
+      { onSuccess: alCerrar },
     );
   }
 

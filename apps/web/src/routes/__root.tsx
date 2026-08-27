@@ -1,25 +1,81 @@
-import { Outlet, createRootRoute } from "@tanstack/react-router";
+import type { QueryClient } from "@tanstack/react-query";
+import { Outlet, createRootRouteWithContext, useNavigate } from "@tanstack/react-router";
+import { ChildShell } from "../app/ChildShell.js";
+import { ParentShell } from "../app/ParentShell.js";
+import { useSession } from "../features/auth/use-session.js";
 import { messages } from "../lib/messages.js";
+import { Button, EmptyState } from "../ui/index.js";
 
 /**
- * Ruta raíz.
+ * Lo que toda ruta recibe en su contexto.
  *
- * Es el andamio mínimo que pide este change: sin sistema de diseño ni
- * componentes. Lo único que demuestra es que el router está cableado y que
- * cuelga de aquí el árbol de rutas que crearán los changes siguientes.
+ * El cliente de consultas está aquí para que las guardas puedan resolver la
+ * sesión en `beforeLoad`, antes de pintar nada. Ver decisión 1 del design de
+ * `add-app-shell`.
  */
-export const Route = createRootRoute({
-  component: RootLayout,
+export interface RouterContext {
+  queryClient: QueryClient;
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
+  component: AppFrame,
+  notFoundComponent: NotFound,
 });
 
-function RootLayout() {
+/**
+ * Elige el marco según quién está operando.
+ *
+ * Vive en la RAÍZ a propósito: es lo único que no se desmonta al navegar, y la
+ * spec exige que el marco sobreviva. Si colgara de cada destino, la barra del
+ * niño se reconstruiría en cada toque.
+ *
+ * Las pantallas previas a tener un rol —el acceso y la rejilla— no llevan
+ * marco: todavía no se sabe de quién sería.
+ */
+function AppFrame(): React.ReactElement {
+  const { session } = useSession();
+  const actor = session?.actor;
+
+  if (actor?.familyRole === "CHILD") {
+    return <ChildShell avatar={actor.avatar} />;
+  }
+
+  if (actor?.familyRole === "PARENT") {
+    return <ParentShell avatar={actor.avatar} />;
+  }
+
   return (
-    <main style={{ fontFamily: "system-ui, sans-serif", padding: "2rem", maxWidth: "40rem" }}>
-      <header style={{ marginBottom: "2rem" }}>
-        <h1 style={{ margin: 0 }}>{messages.app.title}</h1>
-        <p style={{ margin: "0.25rem 0 0", color: "#555" }}>{messages.app.tagline}</p>
-      </header>
+    <main className="mx-auto max-w-(--container-reading) px-4 py-8">
       <Outlet />
     </main>
+  );
+}
+
+/**
+ * Una dirección que no corresponde a ningún destino.
+ *
+ * Siempre con salida: dejar a alguien en un callejón sin puerta es peor que el
+ * propio error, y en una tablet no hay barra de direcciones a mano para
+ * corregirlo.
+ */
+function NotFound(): React.ReactElement {
+  const navigate = useNavigate();
+
+  return (
+    <EmptyState
+      glyph="🧭"
+      title={messages.nav.notFoundTitle}
+      description={messages.nav.notFoundBody}
+      /*
+        Un botón que navega, y NO un `Link` envolviendo un `Button`: eso anida
+        dos elementos interactivos, y un lector de pantalla anuncia un enlace
+        que contiene un botón. Lo cazó el repaso manual.
+      */
+      action={
+        <Button variant="primary" onClick={() => void navigate({ to: "/" })}>
+          {messages.nav.notFoundBack}
+        </Button>
+      }
+    />
   );
 }

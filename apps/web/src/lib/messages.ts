@@ -20,6 +20,35 @@ export const messages = {
   },
 
   /**
+   * Textos de la navegación: los destinos de cada marco y la pantalla de una
+   * dirección que no existe.
+   */
+  nav: {
+    /** Los destinos de la barra del niño. Cortos: caben debajo de un icono. */
+    childHome: "Inicio",
+    childTasks: "Tareas",
+    childRewards: "Premios",
+    childRedemptions: "Canjes",
+
+    /** Los de la cabecera del padre. */
+    parentHome: "Panel",
+    parentTasks: "Tareas",
+    parentRewards: "Premios",
+    parentRedemptions: "Canjes",
+    parentChildren: "Hijos",
+    parentAccount: "Mi cuenta",
+
+    /** Qué es cada marco, para quien no ve la disposición. */
+    childNavLabel: "Dónde ir",
+    parentNavLabel: "Secciones",
+
+    /** Una dirección que no corresponde a ningún destino. */
+    notFoundTitle: "Aquí no hay nada",
+    notFoundBody: "Esa dirección no existe o dejó de existir.",
+    notFoundBack: "Volver al inicio",
+  },
+
+  /**
    * Textos de las piezas del sistema de diseño.
    *
    * Una pieza no incrusta un texto visible, igual que una pantalla. Lo que la
@@ -80,6 +109,8 @@ export const messages = {
     adultPinWrong: "Ese PIN no es correcto.",
     adultPinLocked: "Demasiados intentos. Espera unos minutos o restablece el PIN con tu contraseña.",
     pinLocked: "Este perfil está bloqueado. Pídele a un adulto que lo desbloquee.",
+    /** El identificador de la dirección no está en la rejilla. */
+    profileNotFound: "Ese perfil ya no está disponible.",
     back: "Volver",
 
     /** Cambiar el PIN sabiendo el actual. Requiere perfil de padre activo. */

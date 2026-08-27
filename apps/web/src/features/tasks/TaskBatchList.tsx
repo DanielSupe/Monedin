@@ -1,8 +1,7 @@
 import type { Task, TaskStatus } from "@monedin/contracts";
-import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { messages } from "../../lib/messages.js";
 import { Avatar } from "../../ui/Avatar.js";
-import { TaskForm } from "./TaskForm.js";
 import {
   describeTaskStatus,
   describeTasksError,
@@ -22,8 +21,6 @@ import {
  * tareas que no casan con el filtro. Es deliberado: el padre quiere ver el
  * reparto completo aunque solo una esté para aprobar.
  */
-type Vista = { name: "list" } | { name: "new" };
-
 const FILTROS: Array<{ valor: TaskStatus | "ALL"; texto: string }> = [
   { valor: "ALL", texto: messages.tasks.filterAll },
   { valor: "PENDING", texto: messages.tasks.filterPending },
@@ -31,23 +28,16 @@ const FILTROS: Array<{ valor: TaskStatus | "ALL"; texto: string }> = [
   { valor: "APPROVED", texto: messages.tasks.filterApproved },
 ];
 
-export function TaskBatchList(): React.ReactElement {
-  const [vista, setVista] = useState<Vista>({ name: "list" });
-  const [page, setPage] = useState(1);
-  const [filtro, setFiltro] = useState<TaskStatus | "ALL">("ALL");
-
+export function TaskBatchList({
+  page,
+  status,
+}: {
+  page: number;
+  status: TaskStatus | "ALL";
+}): React.ReactElement {
   const { data, isPending, error } = useTaskBatches(
-    filtro === "ALL" ? { page } : { page, status: filtro },
+    status === "ALL" ? { page } : { page, status },
   );
-
-  if (vista.name === "new") {
-    return (
-      <TaskForm
-        onDone={() => setVista({ name: "list" })}
-        onCancel={() => setVista({ name: "list" })}
-      />
-    );
-  }
 
   if (isPending) {
     return <p>{messages.health.loading}</p>;
@@ -69,19 +59,16 @@ export function TaskBatchList(): React.ReactElement {
 
       <nav style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
         {FILTROS.map((opcion) => (
-          <button
+          // Cambiar de filtro vuelve a la página 1: cambia cuántas hay, y
+          // quedarse en la 4 enseñaría una lista vacía sin explicar por qué.
+          <Link
             key={opcion.valor}
-            type="button"
-            disabled={filtro === opcion.valor}
-            onClick={() => {
-              setFiltro(opcion.valor);
-              // Cambiar de filtro cambia cuántas páginas hay: quedarse en la 4
-              // enseñaría una lista vacía sin explicar por qué.
-              setPage(1);
-            }}
+            to="/tasks"
+            search={{ page: 1, status: opcion.valor }}
+            aria-current={status === opcion.valor ? "page" : undefined}
           >
             {opcion.texto}
-          </button>
+          </Link>
         ))}
       </nav>
 
@@ -109,25 +96,25 @@ export function TaskBatchList(): React.ReactElement {
 
       {data !== undefined && data.totalPages > 1 && (
         <nav style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", alignItems: "center" }}>
-          <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-            {messages.tasks.previousPage}
-          </button>
+          {page > 1 && (
+            <Link to="/tasks" search={{ page: page - 1, status }}>
+              {messages.tasks.previousPage}
+            </Link>
+          )}
           <span>
             {data.page} / {data.totalPages}
           </span>
-          <button
-            type="button"
-            disabled={page >= data.totalPages}
-            onClick={() => setPage(page + 1)}
-          >
-            {messages.tasks.nextPage}
-          </button>
+          {page < data.totalPages && (
+            <Link to="/tasks" search={{ page: page + 1, status }}>
+              {messages.tasks.nextPage}
+            </Link>
+          )}
         </nav>
       )}
 
-      <button type="button" onClick={() => setVista({ name: "new" })} style={{ marginTop: "1rem" }}>
-        {messages.tasks.newTask}
-      </button>
+      <p style={{ marginTop: "1rem" }}>
+        <Link to="/tasks/new">{messages.tasks.newTask}</Link>
+      </p>
     </section>
   );
 }

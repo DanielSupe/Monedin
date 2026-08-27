@@ -1,3 +1,4 @@
+import { Link, useNavigate } from "@tanstack/react-router";
 import { messages } from "../../lib/messages.js";
 import { ChildForm } from "./ChildForm.js";
 
@@ -13,14 +14,17 @@ import { ChildForm } from "./ChildForm.js";
  * Que no pida el PIN de adulto NO significa que valga cualquiera: si el perfil
  * activo es el de un niño, la API responde 403 y aquí se ve el mensaje.
  */
-export function CreateProfileScreen({ onDone }: { onDone: () => void }): React.ReactElement {
+export function CreateProfileScreen(): React.ReactElement {
+  const navigate = useNavigate();
+  const volver = (): void => void navigate({ to: "/profiles" });
+
   return (
     <section>
-      <ChildForm onDone={onDone} onCancel={onDone} />
+      <ChildForm onSaved={volver} onCancel={volver} />
 
-      <button type="button" onClick={onDone} style={{ marginTop: "0.5rem" }}>
-        {messages.children.back}
-      </button>
+      <p style={{ marginTop: "0.5rem" }}>
+        <Link to="/profiles">{messages.children.back}</Link>
+      </p>
     </section>
   );
 }

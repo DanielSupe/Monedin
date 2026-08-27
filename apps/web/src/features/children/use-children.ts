@@ -29,6 +29,20 @@ export function useChildren(page: number, pageSize?: number) {
   });
 }
 
+/**
+ * Un hijo suelto, por su identificador.
+ *
+ * Lo estrena la ruta de edición: una dirección solo puede llevar el
+ * identificador, así que la entidad se pide en vez de venir dentro de una
+ * propiedad. Cuando se llega desde el listado, la caché ya la tiene.
+ */
+export function useChild(childId: string) {
+  return useQuery({
+    queryKey: api.childQueryKey(childId),
+    queryFn: () => api.fetchChild(childId),
+  });
+}
+
 export function useCreateChild() {
   const refresh = useRefreshChildren();
 

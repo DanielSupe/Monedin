@@ -24,6 +24,12 @@ pagos y no hay interoperabilidad entre familias.
 > Monedín son dos productos en una app: para el niño cifras grandes y toque amplio, para el padre
 > densidad y escaneo rápido, con las mismas piezas y sin duplicar ninguna.
 >
+> `add-app-shell` cierra el segundo change y es el único de la etapa que es arquitectura y no
+> aspecto: **el niño no tenía ninguna ruta**. Sus cuatro pantallas vivían dentro de `/` con booleanos,
+> así que el botón atrás sacaba de la aplicación y recargar volvía al inicio. Ahora cada destino tiene
+> dirección, hay un marco por rol —cabecera para el padre, barra inferior para el niño— y el filtro de
+> un listado viaja en la URL.
+>
 > Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
 > reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
 > siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en

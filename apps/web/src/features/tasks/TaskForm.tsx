@@ -21,10 +21,11 @@ import { describeTasksError, useCreateTasks } from "./use-tasks.js";
  * error sale sin viaje al servidor, con el mismo criterio que aplicará la API.
  */
 export function TaskForm({
-  onDone,
+  onSaved,
   onCancel,
 }: {
-  onDone: () => void;
+  /** Quedó guardado. Evento de dominio, no una orden de cerrarse. */
+  onSaved: () => void;
   onCancel: () => void;
 }): React.ReactElement {
   const [title, setTitle] = useState("");
@@ -77,7 +78,7 @@ export function TaskForm({
       return;
     }
 
-    create.mutate(validado.data as CreateTaskInput, { onSuccess: onDone });
+    create.mutate(validado.data as CreateTaskInput, { onSuccess: onSaved });
   }
 
   if (isPending) {

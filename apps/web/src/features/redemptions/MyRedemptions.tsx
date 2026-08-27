@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import type { OwnRedemption } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
 import { describeRedemptionStatus, describeRedemptionsError, useOwnRedemptions } from "./use-redemptions.js";
@@ -8,7 +9,7 @@ import { describeRedemptionStatus, describeRedemptionsError, useOwnRedemptions }
  * Sin selector de hijo: el perfil sale de la sesión, así que esta pantalla no
  * tiene ningún identificador que pudiera apuntar a otro niño.
  */
-export function MyRedemptions({ onDone }: { onDone: () => void }): React.ReactElement {
+export function MyRedemptions(): React.ReactElement {
   const { data, isPending, error } = useOwnRedemptions();
 
   if (isPending) {
@@ -39,9 +40,9 @@ export function MyRedemptions({ onDone }: { onDone: () => void }): React.ReactEl
         </ul>
       )}
 
-      <button type="button" onClick={onDone} style={{ marginTop: "1rem" }}>
+      <Link to="/" style={{ display: "inline-block", marginTop: "1rem" }}>
         {messages.redemptions.back}
-      </button>
+      </Link>
     </section>
   );
 }

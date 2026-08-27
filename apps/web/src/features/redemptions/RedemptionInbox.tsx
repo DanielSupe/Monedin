@@ -1,5 +1,5 @@
 import type { Redemption, RedemptionStatus } from "@monedin/contracts";
-import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { messages } from "../../lib/messages.js";
 import { Avatar } from "../../ui/Avatar.js";
 import {
@@ -23,12 +23,15 @@ const FILTROS: Array<{ valor: RedemptionStatus | "ALL"; texto: string }> = [
   { valor: "REJECTED", texto: messages.redemptions.filterRejected },
 ];
 
-export function RedemptionInbox(): React.ReactElement {
-  const [page, setPage] = useState(1);
-  const [filtro, setFiltro] = useState<RedemptionStatus | "ALL">("ALL");
-
+export function RedemptionInbox({
+  page,
+  status,
+}: {
+  page: number;
+  status: RedemptionStatus | "ALL";
+}): React.ReactElement {
   const { data, isPending, error } = useRedemptions(
-    filtro === "ALL" ? { page } : { page, status: filtro },
+    status === "ALL" ? { page } : { page, status },
   );
 
   if (isPending) {
@@ -51,19 +54,16 @@ export function RedemptionInbox(): React.ReactElement {
 
       <nav style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
         {FILTROS.map((opcion) => (
-          <button
+          // Cambiar de filtro vuelve a la página 1: cambia cuántas hay, y
+          // quedarse en la 4 enseñaría una lista vacía sin explicar por qué.
+          <Link
             key={opcion.valor}
-            type="button"
-            disabled={filtro === opcion.valor}
-            onClick={() => {
-              setFiltro(opcion.valor);
-              // Cambiar de filtro cambia cuántas páginas hay: quedarse en la 4
-              // enseñaría una lista vacía sin explicar por qué.
-              setPage(1);
-            }}
+            to="/redemptions"
+            search={{ page: 1, status: opcion.valor }}
+            aria-current={status === opcion.valor ? "page" : undefined}
           >
             {opcion.texto}
-          </button>
+          </Link>
         ))}
       </nav>
 
@@ -79,19 +79,19 @@ export function RedemptionInbox(): React.ReactElement {
 
       {data !== undefined && data.totalPages > 1 && (
         <nav style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", alignItems: "center" }}>
-          <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-            {messages.redemptions.previousPage}
-          </button>
+          {page > 1 && (
+            <Link to="/redemptions" search={{ page: page - 1, status }}>
+              {messages.redemptions.previousPage}
+            </Link>
+          )}
           <span>
             {data.page} / {data.totalPages}
           </span>
-          <button
-            type="button"
-            disabled={page >= data.totalPages}
-            onClick={() => setPage(page + 1)}
-          >
-            {messages.redemptions.nextPage}
-          </button>
+          {page < data.totalPages && (
+            <Link to="/redemptions" search={{ page: page + 1, status }}>
+              {messages.redemptions.nextPage}
+            </Link>
+          )}
         </nav>
       )}
     </section>

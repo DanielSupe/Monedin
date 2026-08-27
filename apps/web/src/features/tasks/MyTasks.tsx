@@ -1,4 +1,5 @@
 import type { OwnTask } from "@monedin/contracts";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import * as api from "../../api/tasks.js";
 import { messages } from "../../lib/messages.js";
@@ -12,7 +13,7 @@ import { describeTasksError, useCompleteTask, useOwnTasks } from "./use-tasks.js
  * y no significa nada aquí. El perfil sale de la sesión, así que esta pantalla
  * no tiene ningún identificador que pudiera apuntar a otro niño.
  */
-export function MyTasks({ onDone }: { onDone: () => void }): React.ReactElement {
+export function MyTasks(): React.ReactElement {
   const { data, isPending, error } = useOwnTasks();
 
   if (isPending) {
@@ -43,9 +44,9 @@ export function MyTasks({ onDone }: { onDone: () => void }): React.ReactElement 
         </ul>
       )}
 
-      <button type="button" onClick={onDone} style={{ marginTop: "1rem" }}>
+      <Link to="/" style={{ display: "inline-block", marginTop: "1rem" }}>
         {messages.tasks.back}
-      </button>
+      </Link>
     </section>
   );
 }

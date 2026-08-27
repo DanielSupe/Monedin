@@ -22,6 +22,7 @@ export function SignInScreen(): React.ReactElement {
   const register = useRegister();
   const active = mode === "signIn" ? login : register;
 
+
   function submit(event: React.FormEvent): void {
     event.preventDefault();
     setFieldError(undefined);

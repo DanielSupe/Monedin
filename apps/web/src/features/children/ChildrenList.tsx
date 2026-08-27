@@ -1,9 +1,9 @@
 import { PIN_LENGTH, type Child } from "@monedin/contracts";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
 import { Avatar } from "../../ui/Avatar.js";
 import { useSetChildPin, useUnlockChildProfile } from "../auth/use-session.js";
-import { ChildForm } from "./ChildForm.js";
 import { describeChildrenError, useChildren, useDeactivateChild } from "./use-children.js";
 
 /**
@@ -12,26 +12,8 @@ import { describeChildrenError, useChildren, useDeactivateChild } from "./use-ch
  * Reponer el PIN y desbloquear NO son endpoints de este módulo: son los de
  * `auth` que ya existían. Cambiar una credencial y revocar sesiones es suyo.
  */
-type View = { name: "list" } | { name: "new" } | { name: "edit"; child: Child };
-
-export function ChildrenList(): React.ReactElement {
-  const [view, setView] = useState<View>({ name: "list" });
-  const [page, setPage] = useState(1);
+export function ChildrenList({ page }: { page: number }): React.ReactElement {
   const { data, isPending, error } = useChildren(page);
-
-  if (view.name === "new") {
-    return <ChildForm onDone={() => setView({ name: "list" })} onCancel={() => setView({ name: "list" })} />;
-  }
-
-  if (view.name === "edit") {
-    return (
-      <ChildForm
-        child={view.child}
-        onDone={() => setView({ name: "list" })}
-        onCancel={() => setView({ name: "list" })}
-      />
-    );
-  }
 
   if (isPending) {
     return <p>{messages.health.loading}</p>;
@@ -56,37 +38,37 @@ export function ChildrenList(): React.ReactElement {
       ) : (
         <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "0.75rem" }}>
           {hijos.map((child) => (
-            <ChildRow key={child.id} child={child} onEdit={() => setView({ name: "edit", child })} />
+            <ChildRow key={child.id} child={child} />
           ))}
         </ul>
       )}
 
       {data !== undefined && data.totalPages > 1 && (
         <nav style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", alignItems: "center" }}>
-          <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)}>
-            {messages.children.previousPage}
-          </button>
+          {page > 1 && (
+            <Link to="/children" search={{ page: page - 1 }}>
+              {messages.children.previousPage}
+            </Link>
+          )}
           <span>
             {data.page} / {data.totalPages}
           </span>
-          <button
-            type="button"
-            disabled={page >= data.totalPages}
-            onClick={() => setPage(page + 1)}
-          >
-            {messages.children.nextPage}
-          </button>
+          {page < data.totalPages && (
+            <Link to="/children" search={{ page: page + 1 }}>
+              {messages.children.nextPage}
+            </Link>
+          )}
         </nav>
       )}
 
-      <button type="button" onClick={() => setView({ name: "new" })} style={{ marginTop: "1rem" }}>
-        {messages.children.addChild}
-      </button>
+      <p style={{ marginTop: "1rem" }}>
+        <Link to="/children/new">{messages.children.addChild}</Link>
+      </p>
     </section>
   );
 }
 
-function ChildRow({ child, onEdit }: { child: Child; onEdit: () => void }): React.ReactElement {
+function ChildRow({ child }: { child: Child }): React.ReactElement {
   const [confirming, setConfirming] = useState(false);
   const [newPin, setNewPin] = useState("");
   const [changingPin, setChangingPin] = useState(false);
@@ -111,9 +93,9 @@ function ChildRow({ child, onEdit }: { child: Child; onEdit: () => void }): Reac
       </div>
 
       <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
-        <button type="button" onClick={onEdit}>
+        <Link to="/children/$childId/edit" params={{ childId: child.id }}>
           {messages.children.edit}
-        </button>
+        </Link>
 
         <button type="button" onClick={() => setChangingPin(!changingPin)}>
           {messages.children.resetPin}

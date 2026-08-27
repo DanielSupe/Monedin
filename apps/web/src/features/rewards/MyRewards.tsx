@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import type { OwnReward } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
 import { useSession } from "../auth/use-session.js";
@@ -14,7 +15,7 @@ import { describeRewardsError, useOwnRewards } from "./use-rewards.js";
  * en `PENDING`: es cómo se sabe "ya lo pediste" sin tocar el contrato de
  * `rewards`. Ver la decisión 8 del design de `add-redemptions`.
  */
-export function MyRewards({ onDone }: { onDone: () => void }): React.ReactElement {
+export function MyRewards(): React.ReactElement {
   const { data, isPending, error } = useOwnRewards();
   const pendientes = useOwnRedemptions({ status: "PENDING" });
   const { session } = useSession();
@@ -54,9 +55,9 @@ export function MyRewards({ onDone }: { onDone: () => void }): React.ReactElemen
         </ul>
       )}
 
-      <button type="button" onClick={onDone} style={{ marginTop: "1rem" }}>
+      <Link to="/" style={{ display: "inline-block", marginTop: "1rem" }}>
         {messages.rewards.back}
-      </button>
+      </Link>
     </section>
   );
 }

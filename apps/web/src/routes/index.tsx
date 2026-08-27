@@ -1,114 +1,131 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
-import { AuthGate, ChildOnly, ParentOnly } from "../features/auth/AuthGate.js";
-import { ChangePinScreen } from "../features/auth/ChangePinScreen.js";
-import { ParentAvatarScreen } from "../features/auth/ParentAvatarScreen.js";
+import { requireActor } from "../app/guards.js";
 import { useLeaveProfile, useLogout, useSession } from "../features/auth/use-session.js";
-import { ChildSettings } from "../features/children/ChildSettings.js";
-import { MyRedemptions } from "../features/redemptions/MyRedemptions.js";
-import { MyRewards } from "../features/rewards/MyRewards.js";
-import { MyTasks } from "../features/tasks/MyTasks.js";
 import { messages } from "../lib/messages.js";
 
+/**
+ * El inicio, consciente del rol.
+ *
+ * Hasta `add-app-shell` esta ruta era la aplicación entera del niño: seis
+ * booleanos decidían qué pantalla enseñar, así que nunca salía de aquí y el
+ * botón atrás lo sacaba de Monedín. Ahora cada destino tiene su dirección y
+ * esto vuelve a ser lo que su nombre dice.
+ */
 export const Route = createFileRoute("/")({
+  beforeLoad: ({ context }) => requireActor(context.queryClient),
   component: Home,
 });
 
 function Home(): React.ReactElement {
-  return (
-    <AuthGate>
-      <SignedIn />
-    </AuthGate>
-  );
-}
-
-/**
- * Lo que se ve con un perfil activo, padre o hijo.
- *
- * Andamio: enseña quién está dentro y deja volver a la rejilla. Las pantallas
- * de producto llegan con sus módulos.
- */
-function SignedIn(): React.ReactElement {
   const { session } = useSession();
-  const [changingPin, setChangingPin] = useState(false);
-  const [miFoto, setMiFoto] = useState(false);
-  const [misAjustes, setMisAjustes] = useState(false);
-  const [misTareas, setMisTareas] = useState(false);
-  const [misPremios, setMisPremios] = useState(false);
-  const [misCanjes, setMisCanjes] = useState(false);
-  const logout = useLogout();
-  const leave = useLeaveProfile();
-
   const actor = session?.actor;
-  if (actor == null) return <p>{messages.health.loading}</p>;
 
-  if (changingPin) {
-    return <ChangePinScreen onDone={() => setChangingPin(false)} />;
-  }
-
-  if (miFoto) {
-    return <ParentAvatarScreen onDone={() => setMiFoto(false)} />;
-  }
-
-  if (misAjustes) {
-    return <ChildSettings onDone={() => setMisAjustes(false)} />;
-  }
-
-  if (misTareas) {
-    return <MyTasks onDone={() => setMisTareas(false)} />;
-  }
-
-  if (misPremios) {
-    return <MyRewards onDone={() => setMisPremios(false)} />;
-  }
-
-  if (misCanjes) {
-    return <MyRedemptions onDone={() => setMisCanjes(false)} />;
+  if (actor == null) {
+    return <p>{messages.health.loading}</p>;
   }
 
   return (
     <section>
       <h2>Hola, {actor.name}</h2>
-
-      <ChildOnly>
-        <p>
-          Tienes <strong>{actor.familyRole === "CHILD" ? actor.coins : 0}</strong> monedas.
-        </p>
-        <button type="button" onClick={() => setMisTareas(true)}>
-          {messages.tasks.myTasks}
-        </button>
-        <button type="button" onClick={() => setMisPremios(true)}>
-          {messages.rewards.myRewards}
-        </button>
-        <button type="button" onClick={() => setMisCanjes(true)}>
-          {messages.redemptions.myRedemptions}
-        </button>
-        <button type="button" onClick={() => setMisAjustes(true)}>
-          {messages.children.myProfileTitle}
-        </button>
-      </ChildOnly>
-
-      <div style={{ display: "flex", gap: "0.75rem", marginTop: "1rem", flexWrap: "wrap" }}>
-        <button type="button" onClick={() => leave.mutate()}>
-          {messages.auth.changeProfile}
-        </button>
-
-        <ParentOnly>
-          <Link to="/tasks">{messages.tasks.title}</Link>
-          <Link to="/rewards">{messages.rewards.title}</Link>
-          <Link to="/redemptions">{messages.redemptions.title}</Link>
-          <Link to="/children">{messages.children.title}</Link>
-          <button type="button" onClick={() => setMiFoto(true)}>
-            {messages.auth.myAvatarTitle}
-          </button>
-          <button type="button" onClick={() => setChangingPin(true)}>
-            {messages.auth.changePinTitle}
-          </button>
-          <button type="button" onClick={() => logout.mutate()}>
-            {messages.auth.signOut}
-          </button>
-        </ParentOnly>
-      </div>
+      {actor.familyRole === "CHILD" ? <ChildHome coins={actor.coins} /> : <ParentHome />}
+      <LeaveProfile />
     </section>
+  );
+}
+
+/**
+ * El inicio del niño: su saldo y sus cuatro destinos.
+ *
+ * El saldo sigue aquí y no en la cabecera. Tenerlo siempre a la vista refuerza
+ * el ciclo que el producto enseña, pero es una decisión de diseño de
+ * `redesign-child-home` y este change no la toma.
+ */
+function ChildHome({ coins }: { coins: number }): React.ReactElement {
+  return (
+    <>
+      <p>
+        Tienes <strong>{coins}</strong> monedas.
+      </p>
+
+      <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "0.5rem" }}>
+        <li>
+          <Link to="/me/tasks">{messages.tasks.myTasks}</Link>
+        </li>
+        <li>
+          <Link to="/me/rewards">{messages.rewards.myRewards}</Link>
+        </li>
+        <li>
+          <Link to="/me/redemptions">{messages.redemptions.myRedemptions}</Link>
+        </li>
+        <li>
+          <Link to="/me/settings">{messages.children.myProfileTitle}</Link>
+        </li>
+      </ul>
+    </>
+  );
+}
+
+/** El inicio del padre: sus cuatro áreas de gestión y su cuenta. */
+function ParentHome(): React.ReactElement {
+  const logout = useLogout();
+
+  return (
+    <>
+      <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "0.5rem" }}>
+        <li>
+          <Link to="/tasks" search={{ page: 1, status: "ALL" }}>
+            {messages.tasks.title}
+          </Link>
+        </li>
+        <li>
+          <Link to="/rewards" search={{ page: 1, status: "ACTIVE" }}>
+            {messages.rewards.title}
+          </Link>
+        </li>
+        <li>
+          <Link to="/redemptions" search={{ page: 1, status: "ALL" }}>
+            {messages.redemptions.title}
+          </Link>
+        </li>
+        <li>
+          <Link to="/children" search={{ page: 1 }}>
+            {messages.children.title}
+          </Link>
+        </li>
+        <li>
+          <Link to="/account">{messages.auth.myAvatarTitle}</Link>
+        </li>
+      </ul>
+
+      <button
+        type="button"
+        disabled={logout.isPending}
+        onClick={() => logout.mutate()}
+        style={{ marginTop: "1rem" }}
+      >
+        {messages.auth.signOut}
+      </button>
+    </>
+  );
+}
+
+/**
+ * Volver a la rejilla.
+ *
+ * No navega: salir pone el actor a nulo, y la guarda de esta ruta reevaluada
+ * manda sola a la rejilla. Lo mismo vale para cerrar sesión.
+ */
+function LeaveProfile(): React.ReactElement {
+  const leave = useLeaveProfile();
+
+  return (
+    <button
+      type="button"
+      disabled={leave.isPending}
+      onClick={() => leave.mutate()}
+      style={{ marginTop: "1rem" }}
+    >
+      {messages.auth.changeProfile}
+    </button>
   );
 }
