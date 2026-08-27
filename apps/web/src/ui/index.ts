@@ -12,7 +12,7 @@
  */
 
 export { Alert, type AlertProps, type AlertTone } from "./Alert.js";
-export { Avatar, type AvatarProps, type AvatarSize } from "./Avatar.js";
+export { Avatar, type AvatarProps, type AvatarShape, type AvatarSize } from "./Avatar.js";
 export { Badge, type BadgeProps, type BadgeTone } from "./Badge.js";
 export { Button, buttonClasses, type ButtonProps, type ButtonVariant } from "./Button.js";
 export { Card, type CardProps } from "./Card.js";

@@ -666,6 +666,25 @@ antes de extraerlo.
 inicio, sin mensaje: a los siete años «no tienes permiso» se lee como «hiciste algo mal». Es
 interfaz, no seguridad — la guarda de verdad sigue siendo el 401 o el 403 del servidor.
 
+**Una pieza declara sus variantes; no se le imponen con clases.** `cx` no es `twMerge` —lo dice su
+propio comentario— así que dos utilidades del mismo grupo las resuelve el orden del CSS generado, no
+el del código: un fallo que no se ve leyendo y que no tiene por qué ser estable entre compilaciones.
+Por eso la forma de `Avatar` es una prop (`shape`) y no un `rounded-*` pasado desde la rejilla.
+
+**Una animación de realce va bajo `motion-safe:`, no bajo una duración corta.** El bloque de
+movimiento reducido del sistema pone las duraciones a 1 ms, y eso convierte un crecimiento suave en
+un salto instantáneo — peor para quien pidió no ver movimiento, no mejor. La regla completa: el
+movimiento se envuelve en `motion-safe:` y **siempre** queda un realce que no es movimiento —color—
+encendido en los dos casos, para que el elemento nunca deje de responder. De regalo, Tailwind añade
+`@media (hover:hover)`, así que en la tablet táctil una tesela no se queda pegada tras un toque.
+
+**Decisión cerrada: el saldo NO se ve en la rejilla de perfiles.** Se propuso en
+`polish-profile-tiles` y se descartó. No es una limitación técnica: `GET /auth/profiles` no lo
+devuelve porque `profile-selection` exige que un perfil se identifique «por su nombre y su avatar, y
+NO SHALL exponer ningún otro dato antes de entrar». Los dos precios de abrirlo: cualquiera con la
+tablet desbloqueada vería todos los saldos **sin teclear un PIN**, y **los hermanos se compararían
+cada vez que se abre la aplicación**. No se reabre sin un argumento nuevo sobre eso segundo.
+
 **Hay TRES marcos, no dos.** Desde `add-entry-frame`, las pantallas por las que se pasa antes de ser
 alguien —acceso, rejilla, teclado de PIN, alta de perfil y restablecer PIN— llevan `EntryShell`: logo
 arriba a la izquierda y contenido centrado en los dos ejes. Antes caían en un contenedor de lectura

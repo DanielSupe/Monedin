@@ -282,6 +282,21 @@ context: |
       - Talla `xlarge` en `Avatar`, 8rem, para la rejilla. Es la respuesta que el design de
         `redesign-profile-grid` habia dejado escrita para este caso exacto.
 
+    `polish-profile-tiles` le da PRESENCIA a la rejilla, que se leia como una lista de contactos:
+      - Cuadrados redondeados de 9rem en vez de circulos. La forma es una PROP de `Avatar` y no una
+        clase desde fuera: `cx` no fusiona utilidades de Tailwind, asi que dos radios los resuelve el
+        orden del CSS generado y no el del codigo.
+      - Una CORONA en la esquina de la tesela del adulto, con nombre accesible. Antes solo se
+        distinguia por la foto, y por nada si el adulto no habia puesto ninguna.
+      - Crecimiento al senalar bajo `motion-safe`, con el realce de color encendido en los dos casos.
+        Bajar la duracion NO vale: el bloque del sistema pone 1ms y eso convierte el crecimiento en un
+        salto instantaneo, peor para quien pidio no ver movimiento.
+
+    DECISION CERRADA: el SALDO no se ve en la rejilla. Se pidio y se descarto. No es una limitacion
+    tecnica -`GET /auth/profiles` no lo devuelve porque `profile-selection` lo prohibe-. Dos precios:
+    cualquiera con la tablet desbloqueada veria todos los saldos SIN teclear un PIN, y los hermanos se
+    compararian cada vez que se abre la aplicacion. No se reabre sin argumento nuevo sobre lo segundo.
+
     PENDIENTE Y SIN DECIDIR: no se puede subir una foto al CREAR un perfil, solo elegir un animal. La
     clave de subida lleva dentro el identificador del hijo, que aun no existe. Dos caminos: en dos
     momentos sin tocar la API, o en uno solo con una via de subida bajo el prefijo del padre,

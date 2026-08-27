@@ -130,6 +130,39 @@ describe("la rejilla en modo de administración", () => {
     expect(app.direccion()).toBe("/");
   });
 
+  /*
+   * La corona lleva NOMBRE y no es decorativa: un icono suelto hay que
+   * aprenderlo, y quien no ve la pantalla no lo aprende nunca. Ver la decisión
+   * 2 del design de `polish-profile-tiles`.
+   */
+  it("el perfil del adulto se anuncia como tal, y los de los hijos no", async () => {
+    await montarApp("/profiles", SOLO_CUENTA, PERFILES);
+
+    const adulto = await screen.findByRole("link", { name: /Lucía/ });
+    expect(within(adulto).getByRole("img", { name: messages.auth.adultProfile })).toBeInTheDocument();
+
+    const hijo = screen.getByRole("link", { name: /Mateo/ });
+    expect(within(hijo).queryByRole("img", { name: messages.auth.adultProfile })).toBeNull();
+  });
+
+  /*
+   * El crecimiento va bajo `motion-safe` y el realce de color NO. Bajo
+   * movimiento reducido el sistema pone las duraciones a 1 ms, y eso convierte
+   * el crecimiento en un salto instantáneo: peor para quien pidió no ver
+   * movimiento, no mejor. Es la lección de `add-landing-page`.
+   */
+  it("el crecimiento al señalar solo ocurre si el movimiento está permitido", async () => {
+    await montarApp("/profiles", SOLO_CUENTA, PERFILES);
+
+    const tesela = await screen.findByRole("link", { name: /Mateo/ });
+
+    expect(tesela.className).toContain("motion-safe:hover:scale-105");
+    // El realce que NO es movimiento se queda encendido en los dos casos, para
+    // que con movimiento reducido la tesela siga respondiendo.
+    expect(tesela.className).toContain("hover:bg-surface-sunken");
+    expect(tesela.className).not.toMatch(/(?<!motion-safe:)hover:scale/);
+  });
+
   it("el botón enciende el modo, y «Listo» lo apaga", async () => {
     const app = await montarApp("/profiles", SOLO_CUENTA, PERFILES);
 

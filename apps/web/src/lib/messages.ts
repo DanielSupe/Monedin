@@ -132,6 +132,12 @@ export const messages = {
     /** Rejilla de perfiles. */
     whoIsPlaying: "¿Quién eres?",
     createProfile: "Crear perfil",
+    /**
+     * Distintivo de la tesela del adulto. Es su NOMBRE ACCESIBLE, no un adorno:
+     * un icono suelto hay que aprenderlo, y quien no ve la pantalla no lo
+     * aprende nunca.
+     */
+    adultProfile: "Adulto",
 
     /**
      * Modo de administración de la rejilla.

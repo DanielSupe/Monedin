@@ -48,10 +48,11 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
                  * paradas para una sola cosa. Ver la decisión 3 del design.
                  */
                 aria-label={manage ? `${messages.auth.editProfile} ${profile.name}` : undefined}
-                className={cx(tileClasses, "hover:bg-surface-sunken")}
+                className={tileClasses}
               >
                 <span className="relative">
-                  <Avatar value={profile.avatar} size="xlarge" />
+                  <Avatar value={profile.avatar} size="xlarge" shape="rounded" />
+                  {profile.familyRole === "PARENT" && <CrownBadge />}
                   {manage && <PencilBadge />}
                 </span>
                 <span className="text-body font-semibold">{profile.name}</span>
@@ -66,12 +67,12 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
             crear el primer hijo es lo que hace que el producto haga algo, y
             enterrarlo bajo la rejilla lo escondía.
           */}
-          <Link to="/profiles/new" className={cx(tileClasses, "hover:bg-surface-sunken")}>
+          <Link to="/profiles/new" className={tileClasses}>
             <span
               aria-hidden="true"
-              // `size-32` es la misma medida que `Avatar size="xlarge"`: son la misma
+              // `size-36` es la misma medida que `Avatar size="xlarge"`: son la misma
               // fila, y una tesela más baja que las demás se lee como un error.
-              className="text-hero flex size-32 items-center justify-center rounded-full bg-surface-sunken text-ink-muted leading-none"
+              className="rounded-card text-hero flex size-36 items-center justify-center bg-surface-sunken text-ink-muted leading-none"
             >
               +
             </span>
@@ -91,9 +92,20 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
   );
 }
 
-/** La caja de una tesela. Misma forma para un perfil y para «agregar». */
+/*
+ * La caja de una tesela. Misma forma para un perfil y para «agregar».
+ *
+ * `p-2` y no `p-3`: con el avatar en 9rem, dos teselas y su hueco tienen que
+ * caber en los 358 px útiles de una pantalla de 390. Medido, no deducido.
+ *
+ * El crecimiento va bajo `motion-safe`, y el realce de fondo NO. Bajo
+ * movimiento reducido el sistema pone las duraciones a 1 ms, y eso convierte
+ * este crecimiento en un salto instantáneo — que es peor para quien pidió no
+ * ver movimiento, no mejor. Así, con movimiento reducido la tesela sigue
+ * respondiendo por color y no se mueve. Ver la decisión 3 del design.
+ */
 const tileClasses =
-  "rounded-card flex w-40 flex-col items-center gap-2 p-3 text-center no-underline text-ink transition-colors duration-normal";
+  "rounded-card flex w-40 flex-col items-center gap-2 p-2 text-center no-underline text-ink transition duration-normal hover:bg-surface-sunken motion-safe:hover:scale-105";
 
 /**
  * Un perfil bloqueado NO es un enlace y NO lleva lápiz.
@@ -112,7 +124,7 @@ function LockedTile({
 }): React.ReactElement {
   return (
     <span className={cx(tileClasses, "opacity-55")}>
-      <Avatar value={avatar} size="xlarge" />
+      <Avatar value={avatar} size="xlarge" shape="rounded" />
       <span className="text-body font-semibold">{name}</span>
       <span className="text-small text-ink-muted">{messages.auth.profileLocked}</span>
     </span>
@@ -125,12 +137,39 @@ function PencilBadge(): React.ReactElement {
     <span
       aria-hidden="true"
       // Mismo velo que el diálogo, que es el precedente del sistema.
-      className="absolute inset-0 flex items-center justify-center rounded-full bg-ink/40 text-ink-inverted"
+      className="rounded-card absolute inset-0 flex items-center justify-center bg-ink/40 text-ink-inverted"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-10">
         <path
           d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"
           strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
+}
+
+/**
+ * La corona del adulto.
+ *
+ * NO es decorativa: lleva nombre. Un icono suelto hay que aprenderlo, y quien
+ * no ve la pantalla no lo aprende nunca, así que la distinción existe en los
+ * dos canales o no existe. Va en la esquina y no bajo el nombre para que todas
+ * las teselas queden a la misma altura.
+ */
+function CrownBadge(): React.ReactElement {
+  return (
+    <span
+      role="img"
+      aria-label={messages.auth.adultProfile}
+      className="rounded-control absolute -top-1 -right-1 flex size-8 items-center justify-center border border-border bg-surface-raised text-coin-ink shadow-card"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-5">
+        <path
+          d="M3 8l4 3 5-6 5 6 4-3-2 11H5L3 8Z"
+          strokeWidth="1.8"
           strokeLinecap="round"
           strokeLinejoin="round"
         />

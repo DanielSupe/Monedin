@@ -56,6 +56,12 @@ pagos y no hay interoperabilidad entre familias.
 > página con marca, se pasaba por cuatro pantallas anónimas y la marca volvía al final. Los círculos
 > de la rejilla crecen a 8 rem, que es el dedo de un niño y no el cursor de un adulto.
 >
+> `polish-profile-tiles` le da presencia a la rejilla: cuadrados redondeados de 9 rem en vez de
+> círculos, una **corona** que marca cuál es el perfil del adulto —con nombre, para quien no ve la
+> pantalla— y un crecimiento al señalar que **solo ocurre si el sistema no pide movimiento reducido**.
+> El saldo bajo el nombre se propuso y se descartó: los hermanos se compararían cada vez que se abre
+> la aplicación, y cualquiera con la tablet vería todos los saldos sin teclear un PIN.
+>
 > Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
 > reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
 > siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en

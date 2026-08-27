@@ -40,3 +40,32 @@ describe("Avatar", () => {
     expect(container.querySelector("[aria-hidden='true']")).not.toBeNull();
   });
 });
+
+/**
+ * La forma es una OPCIÓN de la pieza, no una clase que se pasa desde fuera.
+ *
+ * `cx` no fusiona utilidades de Tailwind, así que dos radios en la misma cadena
+ * los resuelve el orden del CSS generado y no el del código. Eso no se ve
+ * leyendo y no tiene por qué ser estable entre compilaciones.
+ */
+describe("la forma del avatar", () => {
+  it("sin pedir forma sigue siendo redondo, y las pantallas de hoy no cambian", () => {
+    render(<Avatar value="zorro" alt="Ana" />);
+
+    expect(screen.getByRole("img", { name: "Ana" })).toHaveClass("rounded-full");
+  });
+
+  it("con `rounded` deja de serlo", () => {
+    render(<Avatar value="zorro" shape="rounded" alt="Ana" />);
+
+    const avatar = screen.getByRole("img", { name: "Ana" });
+    expect(avatar).not.toHaveClass("rounded-full");
+    expect(avatar).toHaveClass("rounded-card");
+  });
+
+  it("la forma también manda cuando el avatar es una foto", () => {
+    render(<Avatar value="https://s3.example/foto.jpg?firma" shape="rounded" alt="Ana" />);
+
+    expect(screen.getByRole("img", { name: "Ana" })).not.toHaveClass("rounded-full");
+  });
+});
