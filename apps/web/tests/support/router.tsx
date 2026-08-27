@@ -1,4 +1,9 @@
-import { API_PREFIX, DEFAULT_AVATAR_KEY, type SessionState } from "@monedin/contracts";
+import {
+  API_PREFIX,
+  DEFAULT_AVATAR_KEY,
+  type SelectableProfile,
+  type SessionState,
+} from "@monedin/contracts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createMemoryHistory, createRouter } from "@tanstack/react-router";
 import { render } from "@testing-library/react";
@@ -52,7 +57,7 @@ function jsonResponse(body: unknown, status = 200): Response {
  * importa es la navegación. Una lista vacía las deja pintar su estado vacío en
  * vez de reventar.
  */
-export function servirSesion(session: SessionState): void {
+export function servirSesion(session: SessionState, profiles: SelectableProfile[] = []): void {
   vi.stubGlobal(
     "fetch",
     vi.fn((input: RequestInfo | URL) => {
@@ -62,7 +67,7 @@ export function servirSesion(session: SessionState): void {
         return Promise.resolve(jsonResponse(session));
       }
       if (url.startsWith(`${API_PREFIX}/auth/profiles`)) {
-        return Promise.resolve(jsonResponse({ profiles: [] }));
+        return Promise.resolve(jsonResponse({ profiles }));
       }
 
       return Promise.resolve(
@@ -90,8 +95,12 @@ function crearRouter(inicial: string, queryClient: QueryClient) {
  * Monta la aplicación en `inicial` y espera a que el router termine, incluidas
  * las redirecciones que decidan las guardas.
  */
-export async function montarApp(inicial: string, session: SessionState): Promise<AppMontada> {
-  servirSesion(session);
+export async function montarApp(
+  inicial: string,
+  session: SessionState,
+  profiles: SelectableProfile[] = [],
+): Promise<AppMontada> {
+  servirSesion(session, profiles);
 
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },

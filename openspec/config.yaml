@@ -246,6 +246,27 @@ context: |
         una pila del sistema, no.
       - Ni un peso, ni un tamano, ni un color. Solo con que formas se dibujan.
 
+    `redesign-profile-grid` viste la rejilla «quien eres?», que es la pantalla que una familia ve cada
+    vez que abre la aplicacion y era la menos vestida: una lista en linea con avatares de 3rem. Adopta
+    la ESTRUCTURA de Netflix -pregunta centrada, teselas grandes, nombre debajo, modo administrar- con
+    nuestros colores, sin paleta oscura y sin cambiar la forma del avatar. Lo que deja construido:
+      - Modo ADMINISTRAR: un boton pone un lapiz sobre cada perfil entrable. Al tocar uno se pide EL
+        PIN DE ESE PERFIL y se aterriza en su pantalla de edicion: /account para el padre,
+        /me/settings para un hijo. Cada quien edita lo suyo con su propia llave.
+      - El modo viaja en la DIRECCION y no en un useState, porque tiene que sobrevivir al viaje al
+        teclado de PIN: despues de acertarlo quien navega es la guarda, no el componente. De regalo,
+        el boton atras sale del modo y recargar lo conserva.
+      - El destino lo decide la guarda a partir del ROL DE LA SESION, nunca de lo que pida la
+        direccion: nadie puede pedir aterrizar en la pantalla del otro rol.
+      - Las dos rutas de perfiles usan ya `requireProfileChoice`. La rejilla se guardaba con
+        `requireAccount`, que admite un perfil ya activo, y entonces el lapiz sobre otro perfil
+        rebotaba a los ajustes del que estaba dentro SIN PEDIR NINGUN PIN. Lo cazo abrir la
+        aplicacion, no un test.
+      - El teclado de PIN, vestido y con TECLA DE BORRAR. Sin ella, equivocarse en un digito obligaba
+        a completar un PIN que se sabia mal y gastar un intento, y los intentos bloquean el perfil.
+      - La deuda declarada de `features/auth` deja de ser un glob del directorio y nombra los cuatro
+        archivos que siguen sin vestir, que son de `redesign-access`.
+
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
   - El niño NO es un User: vive entero como ChildProfile dentro de la cuenta de su padre, y

@@ -132,6 +132,24 @@ export const messages = {
     /** Rejilla de perfiles. */
     whoIsPlaying: "¿Quién eres?",
     createProfile: "Crear perfil",
+
+    /**
+     * Modo de administración de la rejilla.
+     *
+     * `editProfile` se compone con el nombre en el punto de uso —«Editar
+     * Mateo»— porque es el nombre ACCESIBLE de la tesela entera: quien no ve la
+     * pantalla tiene que oír a quién edita, no un «editar» suelto repetido
+     * cuatro veces.
+     */
+    manageProfiles: "Administrar perfiles",
+    manageProfilesTitle: "Administrar perfiles:",
+    manageDone: "Listo",
+    editProfile: "Editar",
+    /** Título del teclado de PIN cuando se viene a administrar. */
+    pinPromptToEdit: "Escribe tu PIN para editar tu perfil",
+    /** Borrar el último dígito tecleado. Es un icono, así que necesita nombre. */
+    pinDelete: "Borrar",
+
     changeProfile: "Cambiar de perfil",
     profileLocked: "Bloqueado",
     pinPrompt: "Escribe tu PIN",

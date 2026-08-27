@@ -52,7 +52,16 @@ export default [
    */
   allowInlineStyles([
     "src/routes/**/*.tsx",
-    "src/features/auth/**/*.tsx",
+    /*
+     * `features/auth` ya no entra entero: `redesign-profile-grid` vistió la
+     * rejilla y el teclado de PIN, y los otros cuatro archivos son de
+     * `redesign-access`. Se nombran uno a uno para que la excepción no tape lo
+     * que ya está hecho. Ver la decisión 6 de su design.
+     */
+    "src/features/auth/SignInScreen.tsx",
+    "src/features/auth/ResetPinScreen.tsx",
+    "src/features/auth/ChangePinScreen.tsx",
+    "src/features/auth/ParentAvatarScreen.tsx",
     "src/features/children/**/*.tsx",
     "src/features/redemptions/**/*.tsx",
     "src/features/rewards/**/*.tsx",

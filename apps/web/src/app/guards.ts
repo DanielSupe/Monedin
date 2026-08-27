@@ -36,6 +36,15 @@ const PROFILES = "/profiles";
 const HOME = "/";
 
 /**
+ * Dónde edita cada rol lo suyo.
+ *
+ * Las dos pantallas ya existían: `/account` es la foto y el PIN del padre, y
+ * `/me/settings` el avatar y el PIN de un hijo. Este mapa es lo único que hacía
+ * falta para que administrar un perfil desde la rejilla aterrice dentro de él.
+ */
+const EDIT_HOME = { PARENT: "/account", CHILD: "/me/settings" } as const;
+
+/**
  * La sesión, esperándola si aún no está.
  *
  * `ensureQueryData` reutiliza la caché: solo la primera navegación de la sesión
@@ -75,14 +84,33 @@ export async function requireAccount(queryClient: QueryClient): Promise<SessionS
  * pregunta que ya respondió. Volver a la rejilla se hace saliendo del perfil,
  * que es lo que vuelve a poner el actor a nulo.
  */
-export async function requireProfileChoice(queryClient: QueryClient): Promise<SessionState> {
+export async function requireProfileChoice(
+  queryClient: QueryClient,
+  /**
+   * Se venía a ADMINISTRAR un perfil, no solo a entrar en él.
+   *
+   * Quien navega después de acertar el PIN es esta guarda y no el componente:
+   * `useEnterProfile` invalida la sesión y el router, la raíz cambia de marco y
+   * desmonta a quien llamó a `mutate`. Por eso la intención tiene que llegar
+   * hasta aquí en la dirección. Ver la decisión 2 del design.
+   */
+  manage = false,
+): Promise<SessionState> {
   const session = await sessionOf(queryClient);
 
   switch (screenFor(session)) {
     case "signIn":
       throw redirect({ to: WELCOME });
-    case "app":
-      throw redirect({ to: HOME });
+    case "app": {
+      // El rol sale de la SESIÓN, nunca de lo que pida el cliente: si el
+      // destino lo eligiera la dirección, se podría pedir aterrizar en la
+      // pantalla del otro rol. Sin actor no hay caso «app», pero el tipo lo
+      // admite, y sin destino se cae al inicio de siempre.
+      const role = session.actor?.familyRole;
+      const editar = manage && role !== undefined ? EDIT_HOME[role] : undefined;
+
+      throw redirect({ to: editar ?? HOME });
+    }
     case "profiles":
       return session;
   }

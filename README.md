@@ -44,6 +44,13 @@ pagos y no hay interoperabilidad entre familias.
 > queda detrás como respaldo, y `Coins` pide cifras tabulares para que una columna de saldos alinee.
 > Ni un peso, ni un tamaño, ni un color cambian: solo con qué formas se dibujan.
 >
+> `redesign-profile-grid` viste la pantalla que una familia ve **cada vez que abre la aplicación**:
+> la rejilla «¿quién eres?», con la estructura de Netflix y nuestros colores. Trae un modo
+> **administrar** —un botón pone un lápiz sobre cada perfil— y al tocar uno se pide **su** PIN y se
+> aterriza dentro, en su pantalla de edición. El teclado de PIN entra en el mismo change porque es la
+> mitad del flujo, y gana una **tecla de borrar**: sin ella, un error de dedo obligaba a completar un
+> PIN equivocado y gastar un intento, y los intentos bloquean el perfil.
+>
 > Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
 > reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
 > siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en

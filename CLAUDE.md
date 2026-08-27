@@ -630,6 +630,20 @@ impiden: uno falla ante un prop `onDone` —«ciérrame», que empuja la navegac
 ante una unión de vistas. Un evento de dominio como `onSaved` —«esto ocurrió»— sí es legítimo: el
 mismo formulario se usa desde dos sitios que navegan a destinos distintos.
 
+**Un modo de pantalla que tiene que sobrevivir a una navegación va en la DIRECCIÓN.** Desde
+`redesign-profile-grid`, el modo «administrar» de la rejilla es `?manage=true` y no un `useState`.
+Las tres razones, en orden de peso: la intención **cruza** hasta el teclado de PIN, que es donde hace
+falta para decidir el destino; el botón atrás sale del modo y no de la aplicación; y recargar lo
+conserva. Apagado se escribe como **ausencia del parámetro**, no como `false`: un valor que solo dice
+«lo de siempre» es ruido en la barra. Y nada de `z.coerce.boolean()`, que convierte `"false"` en
+`true`.
+
+**Editar un perfil desde la rejilla exige el PIN de ESE perfil**, y el destino lo decide la guarda a
+partir del rol de la sesión —`/account` o `/me/settings`—, nunca lo que pida la dirección. Las dos
+rutas de perfiles usan `requireProfileChoice`: si la rejilla admitiera un perfil ya activo, el lápiz
+sobre otro perfil aterrizaría en los ajustes del que está dentro **sin pedir ningún PIN**. Pasó, y lo
+cazó abrir la aplicación.
+
 **Las guardas van en `beforeLoad`, no en un componente.** Deciden ANTES de pintar, así que redirigen
 en vez de enseñar otra cosa bajo una dirección que no corresponde. Con una consecuencia que hay que
 saber: **solo corren al entrar en una ruta**. Cuando la sesión cambia sin que cambie la dirección

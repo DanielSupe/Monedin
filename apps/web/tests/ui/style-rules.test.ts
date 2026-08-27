@@ -31,7 +31,20 @@ function archivosDe(directorio: string): string[] {
  * saltó el plan.
  */
 const SIN_VESTIR = [
-  "features/auth",
+  /*
+   * `features/auth` ya NO entra entero.
+   *
+   * `redesign-profile-grid` vistió dos de sus seis archivos —la rejilla y el
+   * teclado de PIN— y los otros cuatro son de `redesign-access`. Borrar la
+   * entrada habría destapado cuatro pantallas que siguen en crudo; dejar el
+   * directorio habría tapado dos que ya están vestidas. La lista sigue
+   * ENCOGIENDO, que es lo que la regla protege, y ahora dice la verdad sobre lo
+   * que falta. Ver la decisión 6 de su design.
+   */
+  "features/auth/SignInScreen.tsx",
+  "features/auth/ResetPinScreen.tsx",
+  "features/auth/ChangePinScreen.tsx",
+  "features/auth/ParentAvatarScreen.tsx",
   "features/children",
   "features/redemptions",
   "features/rewards",
@@ -73,7 +86,11 @@ describe("el estilo no se escribe fuera de los tokens", () => {
   it("la lista de pantallas sin vestir solo puede encoger", () => {
     // Si alguien añade una entrada en vez de quitarla, este número no cuadra y
     // hay que venir aquí a explicarse.
-    expect(SIN_VESTIR).toHaveLength(7);
+    //
+    // Subió de 7 a 10 al ESTRECHAR `features/auth` a sus cuatro archivos aún
+    // sin vestir. Es más entradas y menos deuda: lo que encoge es lo tapado, no
+    // la longitud de la lista. `redesign-access` se lleva las cuatro de golpe.
+    expect(SIN_VESTIR).toHaveLength(10);
   });
 
   it("ningún color literal fuera de tokens.css", () => {
