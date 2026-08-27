@@ -292,7 +292,24 @@ context: |
         Bajar la duracion NO vale: el bloque del sistema pone 1ms y eso convierte el crecimiento en un
         salto instantaneo, peor para quien pidio no ver movimiento.
 
-    DECISION CERRADA: el SALDO no se ve en la rejilla. Se pidio y se descarto. No es una limitacion
+    `redesign-access` viste la puerta de entrada y arregla un defecto de arquitectura que llevaba dias
+    anotado: entrar y registrarse eran la MISMA pantalla con `useState<"signIn"|"signUp">`, estado
+    haciendo de router. Por eso «Empezar» en la puerta publica abria el formulario de ENTRAR, y quien
+    venia a registrarse aterrizaba donde no podia. Lo que deja construido:
+      - Dos rutas, `/sign-in` y `/sign-up`. Un marco comun recibe el formulario como HIJO y no decide
+        cual: si tuviera un `if`, habriamos movido el problema en vez de resolverlo.
+      - Los cuatro enlaces de la puerta publica repartidos: «Empezar» al registro, «Entrar» al acceso.
+      - Campos en PILDORA con icono, como variante de `Input`, y envio circular con flecha. El tipo de
+        `Button` EXIGE `aria-label` cuando es solo icono: una flecha sola no dice si envia o vuelve.
+      - La etiqueta se queda encima. La maqueta de referencia usa solo marcador de posicion, y eso
+        borra que campo era en cuanto alguien escribe.
+      - Una CINTA bajo el saludo: el ciclo -tarea, moneda, premio- en linea recta y sin fin, lo mismo
+        que orbita en la puerta publica. Con clases y un keyframe, SIN pedir una tercera excepcion de
+        `allowInlineStyles()`: no es geometria calculada como las orbitas.
+      - El minimo de la contrasena se lee antes de fallar, desde la constante del contrato, y el
+        registro explica para que sirve cada una de las dos credenciales.
+
+        DECISION CERRADA: el SALDO no se ve en la rejilla. Se pidio y se descarto. No es una limitacion
     tecnica -`GET /auth/profiles` no lo devuelve porque `profile-selection` lo prohibe-. Dos precios:
     cualquiera con la tablet desbloqueada veria todos los saldos SIN teclear un PIN, y los hermanos se
     compararian cada vez que se abre la aplicacion. No se reabre sin argumento nuevo sobre lo segundo.

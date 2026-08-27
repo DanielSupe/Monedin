@@ -95,8 +95,13 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
 /*
  * La caja de una tesela. Misma forma para un perfil y para «agregar».
  *
- * `p-2` y no `p-3`: con el avatar en 9rem, dos teselas y su hueco tienen que
- * caber en los 358 px útiles de una pantalla de 390. Medido, no deducido.
+ * `w-36` y sin relleno lateral: la tesela mide EXACTAMENTE lo que el avatar.
+ *
+ * Se midió mal la primera vez. Con `w-40` hacían falta 344 px para dos teselas
+ * y su hueco, y en una pantalla de 390 hay 343 en cuanto aparece la barra de
+ * desplazamiento — que aparece justo cuando hay perfiles de sobra—. Fallaba por
+ * UN píxel, y al caer a una columna la página se alargaba y la barra se quedaba:
+ * un bucle. Ahora hacen falta 312, con 31 de holgura.
  *
  * El crecimiento va bajo `motion-safe`, y el realce de fondo NO. Bajo
  * movimiento reducido el sistema pone las duraciones a 1 ms, y eso convierte
@@ -105,7 +110,7 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
  * respondiendo por color y no se mueve. Ver la decisión 3 del design.
  */
 const tileClasses =
-  "rounded-card flex w-40 flex-col items-center gap-2 p-2 text-center no-underline text-ink transition duration-normal hover:bg-surface-sunken motion-safe:hover:scale-105";
+  "rounded-card flex w-36 flex-col items-center gap-2 px-0 py-2 text-center no-underline text-ink transition duration-normal hover:bg-surface-sunken motion-safe:hover:scale-105";
 
 /**
  * Un perfil bloqueado NO es un enlace y NO lleva lápiz.

@@ -101,6 +101,20 @@ function Piezas(): React.ReactElement {
             Todo el ancho
           </Button>
         </Fila>
+        <Fila>
+          {/* Redondo y sin texto. El tipo EXIGE `aria-label`: una flecha sola no
+              dice si envía, avanza o vuelve. */}
+          <Button variant="primary" iconOnly aria-label="Entrar a mi cuenta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-6">
+              <path
+                d="M5 12h14m-6-6 6 6-6 6"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Button>
+        </Fila>
       </Seccion>
 
       <Seccion titulo="Coins">
@@ -130,6 +144,9 @@ function Piezas(): React.ReactElement {
             <option value="ana">Ana</option>
             <option value="luis">Luis</option>
           </Select>
+        </Field>
+        <Field label="Correo" help="En píldora, con sitio para un icono.">
+          <Input shape="pill" type="email" placeholder="alguien@ejemplo.com" />
         </Field>
       </Seccion>
 

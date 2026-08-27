@@ -24,7 +24,7 @@ export function LandingPage(): React.ReactElement {
           <Link to="/sign-in" className={buttonClasses("secondary")}>
             {messages.landing.signIn}
           </Link>
-          <Link to="/sign-in" className={buttonClasses("primary")}>
+          <Link to="/sign-up" className={buttonClasses("primary")}>
             {messages.landing.start}
           </Link>
         </nav>
@@ -68,7 +68,13 @@ function Hero(): React.ReactElement {
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
-        <Link to="/sign-in" className={buttonClasses("primary")}>
+        {/*
+          «Empezar» lleva al REGISTRO, no al acceso. Apuntaba a `/sign-in`, que
+          abría el formulario de entrar, así que quien venía a registrarse
+          aterrizaba en una pantalla que no podía usar. Ver el «Why» de
+          `redesign-access`.
+        */}
+        <Link to="/sign-up" className={buttonClasses("primary")}>
           {messages.landing.start}
         </Link>
         <span className="text-small text-ink-muted">

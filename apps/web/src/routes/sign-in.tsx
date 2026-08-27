@@ -3,7 +3,10 @@ import { requireSignedOut } from "../app/guards.js";
 import { SignInScreen } from "../features/auth/SignInScreen.js";
 
 /**
- * Entrar o crear cuenta. Una de las dos rutas públicas del sistema.
+ * Entrar con una cuenta que ya existe.
+ *
+ * Crear cuenta es `/sign-up`, un destino aparte desde `redesign-access`: eran
+ * dos pantallas decididas con un `useState`.
  *
  * La guarda va en la dirección contraria a las demás: a quien ya tiene cuenta
  * no se le enseña un formulario de acceso que no necesita.

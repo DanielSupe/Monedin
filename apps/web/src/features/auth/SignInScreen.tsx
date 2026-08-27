@@ -1,133 +1,117 @@
-import { loginParentSchema, registerParentSchema } from "@monedin/contracts";
+import { loginParentSchema } from "@monedin/contracts";
+import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
-import { describeAuthError, useLogin, useRegister } from "./use-session.js";
+import { Alert, Button, Field, Input } from "../../ui/index.js";
+import { AccessLayout } from "./AccessLayout.js";
+import { AtSign, ArrowRight, Lock } from "./access-icons.js";
+import { describeAuthError, useLogin } from "./use-session.js";
 
 /**
- * Acceso y registro del padre.
+ * Entrar con una cuenta que ya existe.
  *
- * Andamio funcional, sin sistema de diseño: eso es otro change. Lo que sí tiene
- * que estar bien es el tratamiento del error, que se decide por el CÓDIGO que
- * devuelve la API y no por el texto del mensaje.
+ * Antes esta pantalla era también la de registro, alternando con
+ * `useState<"signIn" | "signUp">`. Eran DOS destinos decididos con estado
+ * local: recargar perdía cuál era, el botón atrás sacaba de la aplicación, y
+ * «Empezar» en la puerta pública abría este formulario y no el otro. Ahora cada
+ * uno tiene su dirección. Ver la decisión 1 del design de `redesign-access`.
+ *
+ * Lo que NO cambió es el tratamiento del error, que se decide por el CÓDIGO que
+ * devuelve la API y nunca por el texto del mensaje.
  */
 export function SignInScreen(): React.ReactElement {
-  const [mode, setMode] = useState<"signIn" | "signUp">("signIn");
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [pin, setPin] = useState("");
   const [fieldError, setFieldError] = useState<string | undefined>();
 
   const login = useLogin();
-  const register = useRegister();
-  const active = mode === "signIn" ? login : register;
-
 
   function submit(event: React.FormEvent): void {
     event.preventDefault();
     setFieldError(undefined);
 
-    if (mode === "signIn") {
-      const parsed = loginParentSchema.safeParse({ email, password });
-      if (!parsed.success) {
-        setFieldError(parsed.error.issues[0]?.message);
-        return;
-      }
-      login.mutate(parsed.data);
-      return;
-    }
-
-    const parsed = registerParentSchema.safeParse({ name, email, password, pin });
+    const parsed = loginParentSchema.safeParse({ email, password });
     if (!parsed.success) {
       setFieldError(parsed.error.issues[0]?.message);
       return;
     }
-    register.mutate(parsed.data);
+    login.mutate(parsed.data);
   }
 
-  const error = fieldError ?? (active.error ? describeAuthError(active.error) : undefined);
+  const error = fieldError ?? (login.error ? describeAuthError(login.error) : undefined);
 
   return (
-    <section style={{ maxWidth: "22rem" }}>
-      <h2>{mode === "signIn" ? messages.auth.signInTitle : messages.auth.signUpTitle}</h2>
-
-      <form onSubmit={submit} style={{ display: "grid", gap: "0.75rem" }}>
-        {mode === "signUp" && (
-          <label>
-            {messages.auth.name}
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoComplete="name"
-              style={{ display: "block", width: "100%" }}
+    <AccessLayout lead={messages.auth.accessSignInLead}>
+      <form onSubmit={submit} className="flex flex-col gap-4">
+        <Field label={messages.auth.email}>
+          <PillField icon={<AtSign />}>
+            <Input
+              shape="pill"
+              type="email"
+              value={email}
+              onChange={(evento) => setEmail(evento.target.value)}
+              autoComplete="email"
             />
-          </label>
-        )}
+          </PillField>
+        </Field>
 
-        <label>
-          {messages.auth.email}
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
-            style={{ display: "block", width: "100%" }}
-          />
-        </label>
-
-        <label>
-          {messages.auth.password}
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete={mode === "signIn" ? "current-password" : "new-password"}
-            style={{ display: "block", width: "100%" }}
-          />
-        </label>
-
-        {mode === "signUp" && (
-          <label>
-            {messages.auth.pin}
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={4}
-              value={pin}
-              onChange={(e) => setPin(e.target.value)}
-              autoComplete="off"
-              style={{ display: "block", width: "100%" }}
+        <Field label={messages.auth.password}>
+          <PillField icon={<Lock />}>
+            <Input
+              shape="pill"
+              type="password"
+              value={password}
+              onChange={(evento) => setPassword(evento.target.value)}
+              autoComplete="current-password"
             />
-            <small>{messages.auth.pinHelp}</small>
-          </label>
-        )}
+          </PillField>
+        </Field>
 
-        <button type="submit" disabled={active.isPending}>
-          {active.isPending
-            ? messages.auth.working
-            : mode === "signIn"
-              ? messages.auth.signIn
-              : messages.auth.signUp}
-        </button>
+        {error !== undefined && <Alert tone="danger">{error}</Alert>}
+
+        <div className="flex items-center justify-between gap-3">
+          <Link to="/sign-up" className="text-small">
+            {messages.auth.toSignUp}
+          </Link>
+
+          <Button
+            type="submit"
+            variant="primary"
+            iconOnly
+            aria-label={messages.auth.submitSignIn}
+            pending={login.isPending}
+          >
+            <ArrowRight />
+          </Button>
+        </div>
       </form>
+    </AccessLayout>
+  );
+}
 
-      {error !== undefined && (
-        <p role="alert" style={{ color: "#b00020" }}>
-          {error}
-        </p>
-      )}
-
-      <button
-        type="button"
-        onClick={() => {
-          setMode(mode === "signIn" ? "signUp" : "signIn");
-          setFieldError(undefined);
-        }}
-        style={{ marginTop: "1rem", background: "none", border: "none", textDecoration: "underline", padding: 0 }}
+/**
+ * El envoltorio que coloca el icono dentro de un campo en píldora.
+ *
+ * El icono es DECORATIVO: lo que nombra al campo es su etiqueta, que `Field`
+ * pone encima y cablea con el control. La maqueta de referencia usa solo
+ * marcador de posición, y eso borra qué campo era en cuanto alguien escribe.
+ */
+export function PillField({
+  icon,
+  children,
+}: {
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}): React.ReactElement {
+  return (
+    <span className="relative block">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-ink-muted"
       >
-        {mode === "signIn" ? messages.auth.toSignUp : messages.auth.toSignIn}
-      </button>
-    </section>
+        {icon}
+      </span>
+      {children}
+    </span>
   );
 }

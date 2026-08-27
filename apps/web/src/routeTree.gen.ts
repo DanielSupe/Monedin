@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ChildrenIndexRouteImport } from './routes/children.index'
 import { Route as ChildrenNewRouteImport } from './routes/children.new'
@@ -43,6 +44,11 @@ const AccountRoute = AccountRouteImport.update({
 const SignInRoute = SignInRouteImport.update({
   id: '/sign-in',
   path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WelcomeRoute = WelcomeRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/welcome': typeof WelcomeRoute
   '/children/new': typeof ChildrenNewRoute
   '/me/redemptions': typeof MeRedemptionsRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/welcome': typeof WelcomeRoute
   '/children/new': typeof ChildrenNewRoute
   '/me/redemptions': typeof MeRedemptionsRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/sign-in': typeof SignInRoute
+  '/sign-up': typeof SignUpRoute
   '/welcome': typeof WelcomeRoute
   '/children/new': typeof ChildrenNewRoute
   '/me/redemptions': typeof MeRedemptionsRoute
@@ -204,6 +213,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/sign-in'
+    | '/sign-up'
     | '/welcome'
     | '/children/new'
     | '/me/redemptions'
@@ -226,6 +236,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/sign-in'
+    | '/sign-up'
     | '/welcome'
     | '/children/new'
     | '/me/redemptions'
@@ -248,6 +259,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/sign-in'
+    | '/sign-up'
     | '/welcome'
     | '/children/new'
     | '/me/redemptions'
@@ -271,6 +283,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   SignInRoute: typeof SignInRoute
+  SignUpRoute: typeof SignUpRoute
   WelcomeRoute: typeof WelcomeRoute
   ChildrenNewRoute: typeof ChildrenNewRoute
   MeRedemptionsRoute: typeof MeRedemptionsRoute
@@ -311,6 +324,13 @@ declare module '@tanstack/react-router' {
       path: '/sign-in'
       fullPath: '/sign-in'
       preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/welcome': {
@@ -439,6 +459,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   SignInRoute: SignInRoute,
+  SignUpRoute: SignUpRoute,
   WelcomeRoute: WelcomeRoute,
   ChildrenNewRoute: ChildrenNewRoute,
   MeRedemptionsRoute: MeRedemptionsRoute,

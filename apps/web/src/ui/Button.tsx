@@ -32,7 +32,20 @@ export function buttonClasses(variant: ButtonVariant = "secondary", block = fals
   );
 }
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+/**
+ * Un botón redondo con SOLO un símbolo dentro.
+ *
+ * Existe para el envío del acceso, que la maqueta dibuja como una flecha. Va
+ * aquí y no como clases sueltas en la pantalla porque `cx` no fusiona
+ * utilidades: `rounded-full` junto al radio de la pieza lo resolvería el orden
+ * del CSS generado.
+ *
+ * Quien la use TIENE que dar `aria-label`: una flecha sola no dice si envía,
+ * avanza o vuelve. El tipo lo exige, así que olvidarlo no compila.
+ */
+const ICON_ONLY = "size-14 shrink-0 rounded-full px-0";
+
+interface ButtonBaseProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   /**
    * La operación está en curso. Deshabilita ademas de anunciar: la spec exige
@@ -44,8 +57,19 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   block?: boolean;
 }
 
+/**
+ * Redondo y sin texto EXIGE nombre, y lo exige el tipo.
+ *
+ * Es una unión y no una prop opcional a propósito: con `iconOnly?: true` y
+ * `aria-label` suelto, olvidar el nombre compila y el botón se anuncia como
+ * «botón» a secas. Así no compila, que es como este proyecto hace cumplir una
+ * regla que importa.
+ */
+export type ButtonProps = ButtonBaseProps &
+  ({ iconOnly: true; "aria-label": string } | { iconOnly?: false | undefined });
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = "secondary", pending = false, block = false, className, disabled, type, ...rest },
+  { variant = "secondary", pending = false, block = false, iconOnly, className, disabled, type, ...rest },
   ref,
 ) {
   return (
@@ -57,7 +81,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       type={type ?? "button"}
       disabled={disabled === true || pending}
       aria-busy={pending || undefined}
-      className={cx(buttonClasses(variant, block), className)}
+      className={cx(buttonClasses(variant, block), iconOnly === true && ICON_ONLY, className)}
     />
   );
 });

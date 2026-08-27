@@ -143,6 +143,14 @@
    */
   --animate-orbit: mnd-orbit linear infinite;
   --animate-orbit-reverse: mnd-orbit-reverse linear infinite;
+
+  /*
+   * La cinta del acceso: lo mismo que orbita en la puerta pública, en línea
+   * recta. La tira se escribe DOS veces y se desplaza la mitad, así que al
+   * terminar la copia está exactamente donde empezó la primera y el salto no se
+   * ve. Aquí la duración SÍ va en el token: no es geometría, es una sola tira.
+   */
+  --animate-strip: mnd-strip 32s linear infinite;
 }
 
 @keyframes mnd-orbit {
@@ -154,6 +162,12 @@
 @keyframes mnd-orbit-reverse {
   to {
     transform: rotate(-360deg);
+  }
+}
+
+@keyframes mnd-strip {
+  to {
+    transform: translateX(-50%);
   }
 }
 

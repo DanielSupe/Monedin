@@ -666,6 +666,18 @@ antes de extraerlo.
 inicio, sin mensaje: a los siete años «no tienes permiso» se lee como «hiciste algo mal». Es
 interfaz, no seguridad — la guarda de verdad sigue siendo el 401 o el 403 del servidor.
 
+**Entrar y registrarse son DOS destinos**, `/sign-in` y `/sign-up`, desde `redesign-access`. Eran uno
+con `useState<"signIn" | "signUp">` —estado haciendo de router, que es lo que `add-app-shell` retiró
+de quince componentes— y se escapaba de los dos tests que lo impiden porque buscan
+`useState<Vista|View>`. Su consecuencia: «Empezar» en la puerta pública abría el formulario de
+ENTRAR. Cuando dos formularios tienen campos y validación distintos, son dos rutas; un parámetro de
+búsqueda sería el mismo `if` con otro sitio donde vivir.
+
+**Un formulario dice lo que exige ANTES de rechazarlo**, y el número sale de la constante del
+contrato, nunca escrito a mano: tenerlo en dos sitios acaba con uno de los dos mintiendo. Y cuando se
+piden dos credenciales en la misma pantalla, se explica para qué sirve cada una — si no, parece un
+error del producto.
+
 **Una pieza declara sus variantes; no se le imponen con clases.** `cx` no es `twMerge` —lo dice su
 propio comentario— así que dos utilidades del mismo grupo las resuelve el orden del CSS generado, no
 el del código: un fallo que no se ve leyendo y que no tiene por qué ser estable entre compilaciones.

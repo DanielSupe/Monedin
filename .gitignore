@@ -37,3 +37,6 @@ Desktop.ini
 # Cliente de Prisma: se genera, no se versiona. Son cientos de archivos que
 # ensuciarian cada revision. La tarea `db:generate` lo reconstruye.
 apps/api/src/generated/
+
+# Caché del plugin de rutas de TanStack. Se regenera sola con `pnpm dev`.
+apps/web/.tanstack/

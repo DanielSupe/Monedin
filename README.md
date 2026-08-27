@@ -62,6 +62,13 @@ pagos y no hay interoperabilidad entre familias.
 > El saldo bajo el nombre se propuso y se descartó: los hermanos se compararían cada vez que se abre
 > la aplicación, y cualquiera con la tablet vería todos los saldos sin teclear un PIN.
 >
+> `redesign-access` viste la puerta de entrada y arregla un defecto de arquitectura: entrar y
+> registrarse eran **la misma pantalla con un `useState`**, y por eso «Empezar» en la puerta pública
+> abría el formulario de *entrar*. Ahora son `/sign-in` y `/sign-up`, cada uno con su dirección.
+> La pantalla trae saludo, campos en píldora con icono y una **cinta** que recorre en línea recta el
+> mismo ciclo que orbita en `/welcome`. Y dice lo que exige antes de rechazarlo: el mínimo de la
+> contraseña se lee sin fallar, y el registro explica por qué pide dos claves distintas.
+>
 > Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
 > reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
 > siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en

@@ -20,7 +20,7 @@ export { Coins, type CoinsProps } from "./Coins.js";
 export { Dialog, type DialogProps } from "./Dialog.js";
 export { EmptyState, type EmptyStateProps } from "./EmptyState.js";
 export { Field, type FieldProps, useField } from "./Field.js";
-export { Input, type InputProps } from "./Input.js";
+export { Input, type InputProps, type InputShape } from "./Input.js";
 export { Logo, type LogoProps, type LogoSize } from "./Logo.js";
 export { ProgressBar, type ProgressBarProps } from "./ProgressBar.js";
 export { Select, type SelectProps } from "./Select.js";

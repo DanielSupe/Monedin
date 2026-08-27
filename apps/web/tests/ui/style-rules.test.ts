@@ -34,14 +34,13 @@ const SIN_VESTIR = [
   /*
    * `features/auth` ya NO entra entero.
    *
-   * `redesign-profile-grid` vistió dos de sus seis archivos —la rejilla y el
-   * teclado de PIN— y los otros cuatro son de `redesign-access`. Borrar la
-   * entrada habría destapado cuatro pantallas que siguen en crudo; dejar el
-   * directorio habría tapado dos que ya están vestidas. La lista sigue
-   * ENCOGIENDO, que es lo que la regla protege, y ahora dice la verdad sobre lo
-   * que falta. Ver la decisión 6 de su design.
+   * `redesign-profile-grid` vistió dos de sus archivos —la rejilla y el teclado
+   * de PIN—, y `redesign-access` se llevó el acceso. Los tres que quedan son
+   * pantallas de credenciales, pero ninguna está en el camino de entrar por
+   * primera vez. Se nombran una a una en vez de tapar el directorio entero: así
+   * la excepción no cubre lo que ya está vestido, y la lista sigue ENCOGIENDO,
+   * que es lo que la regla protege.
    */
-  "features/auth/SignInScreen.tsx",
   "features/auth/ResetPinScreen.tsx",
   "features/auth/ChangePinScreen.tsx",
   "features/auth/ParentAvatarScreen.tsx",
@@ -87,10 +86,10 @@ describe("el estilo no se escribe fuera de los tokens", () => {
     // Si alguien añade una entrada en vez de quitarla, este número no cuadra y
     // hay que venir aquí a explicarse.
     //
-    // Subió de 7 a 10 al ESTRECHAR `features/auth` a sus cuatro archivos aún
-    // sin vestir. Es más entradas y menos deuda: lo que encoge es lo tapado, no
-    // la longitud de la lista. `redesign-access` se lleva las cuatro de golpe.
-    expect(SIN_VESTIR).toHaveLength(10);
+    // Subió de 7 a 10 al ESTRECHAR `features/auth` a sus archivos aún sin
+    // vestir, y baja a 9 porque `redesign-access` se llevó el acceso. Quedan
+    // `ResetPinScreen`, `ChangePinScreen` y `ParentAvatarScreen`.
+    expect(SIN_VESTIR).toHaveLength(9);
   });
 
   it("ningún color literal fuera de tokens.css", () => {

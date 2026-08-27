@@ -129,6 +129,29 @@ export const messages = {
     pin: "PIN de 4 dígitos",
     pinHelp: "Lo usarás cada vez que entres a tu perfil. La contraseña solo al vincular un dispositivo.",
 
+    /**
+     * Lo que el formulario no decía y ahora dice ANTES de rechazar.
+     *
+     * `passwordHelp` lleva el número dentro compuesto en el punto de uso, desde
+     * la constante del contrato: escribirlo aquí a mano sería tener el mínimo en
+     * dos sitios, y el día que cambie uno se quedaría mintiendo el otro.
+     */
+    passwordMinHelp: "Al menos",
+    passwordMinHelpTail: "caracteres.",
+    /** Por qué son DOS credenciales. Sin esto parece un error del producto. */
+    twoKeysTitle: "Dos claves, para dos cosas distintas",
+    twoKeysBody:
+      "La contraseña solo la usarás al vincular un dispositivo nuevo. El PIN es lo que teclearás cada vez que entres a tu perfil.",
+
+    /** El saludo del acceso, y la cinta que lo acompaña. */
+    accessGreeting: "¡Bienvenido!",
+    accessSignInLead: "Entra para continuar",
+    accessSignUpLead: "Crea tu cuenta para empezar",
+    accessStripLabel: "El ciclo de Monedín: se hace una tarea, se gana una moneda, se gasta en un premio",
+    /** El envío es una flecha, así que su nombre no es opcional. */
+    submitSignIn: "Entrar a mi cuenta",
+    submitSignUp: "Crear mi cuenta",
+
     /** Rejilla de perfiles. */
     whoIsPlaying: "¿Quién eres?",
     createProfile: "Crear perfil",
