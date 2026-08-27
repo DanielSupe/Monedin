@@ -1,7 +1,7 @@
 import { API_PREFIX, AVATAR_KEYS, DEFAULT_AVATAR_KEY, ERROR_CODES } from "@monedin/contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as api from "../src/api/auth.js";
-import { AVATAR_OPTIONS, avatarGlyph } from "../src/features/auth/avatars.js";
+import { AVATAR_OPTIONS, avatarGlyph } from "../src/ui/avatars.js";
 import { describeAuthError, isLockout, screenFor } from "../src/features/auth/use-session.js";
 import { ApiRequestError } from "../src/lib/http-client.js";
 import { messages } from "../src/lib/messages.js";

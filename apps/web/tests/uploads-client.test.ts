@@ -4,7 +4,7 @@ import * as authApi from "../src/api/auth.js";
 import * as childrenApi from "../src/api/children.js";
 import * as rewardsApi from "../src/api/rewards.js";
 import * as tasksApi from "../src/api/tasks.js";
-import { isAvatarUrl } from "../src/features/auth/avatars.js";
+import { isAvatarUrl } from "../src/ui/avatars.js";
 import { putToUploadUrl, UploadError } from "../src/lib/s3-upload.js";
 
 function jsonResponse(status: number, body: unknown): Response {

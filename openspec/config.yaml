@@ -163,6 +163,37 @@ context: |
                 `Reward.image` ya estaban desde `add-data-model`.
                 MinIO en docker-compose para desarrollo y tests; S3 real en produccion con
                 S3_ENDPOINT vacio.
+                La bateria de tests esta aislada del almacen real por TRES vias, no dos: bucket
+                propio, endpoint propio -TEST_S3_ENDPOINT, que no admite vacio- y credenciales
+                propias -TEST_AWS_*-. La tercera llego en `split-test-storage-credentials`, y su
+                ausencia se noto en cuanto alguien apunto desarrollo al S3 real: los tests seguian
+                hablando con MinIO pero con una llave de AWS, y morian con InvalidAccessKeyId.
+
+  FRONT (etapa de interfaz y diseno, en curso)
+    El front era un andamio funcional sin una sola linea de CSS: clientes de API validados con Zod,
+    hooks de TanStack Query y veinticuatro componentes con estilos en linea. La API esta terminada;
+    lo que se construye ahora es lo que se ve.
+
+    `add-design-system` es el cimiento y no toca ninguna pantalla de producto:
+      - Tailwind 4 con el tema en CSS (`@theme` dentro de `apps/web/src/styles/tokens.css`), que es
+        la fuente UNICA de color, medida, radio, sombra y duracion. Tres capas, y un componente solo
+        puede usar la de en medio: los primitivos viven fuera de `@theme` para que Tailwind no genere
+        utilidades con ellos y saltarse la regla sea imposible, no solo desaconsejado.
+      - DOBLE ESCALA: `data-scale="child" | "parent"` en el contenedor reasigna tipografia, radios y
+        objetivo de toque SIN duplicar una sola pieza. Es la traduccion tecnica de que Monedin son
+        dos productos en una app. El shell lo pondra en `add-app-shell`.
+      - Quince piezas en `apps/web/src/ui/`, con Radix solo donde la accesibilidad no se improvisa
+        (dialogo, pestanas, avisos). Una pieza NO importa nada de `features/` ni de `api/`, y por eso
+        se prueba sin servidor.
+      - Infraestructura de test de componentes (jsdom + testing-library), que antes no existia.
+      - Tres reglas cumplibles: ESLint prohibe el prop `style` -con `allowInlineStyles()` para la
+        excepcion declarada-, y dos tests cazan colores literales y valores arbitrarios.
+      - Catalogo vivo en `ui.html`, un punto de entrada APARTE que no se compila en produccion. Sin
+        proveedores: si una pieza necesitara uno, el catalogo se rompe, y ese es el aviso.
+
+    Las pantallas de producto siguen SIN vestir y se ven mas planas: el reinicio de estilos entra con
+    el sistema. Vestirlas una a una son los nueve changes siguientes, y cada uno borra su entrada de
+    las dos listas de deuda declarada -en `apps/web/eslint.config.js` y en el test de estilo-.
 
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
@@ -188,12 +219,12 @@ context: |
   - Cambiar un PIN sabiendo el actual NO revoca sesiones, ni la propia ni la de otro dispositivo.
     Para echar a alguien de otro dispositivo esta cerrar la sesion de cuenta, que si revoca.
   - Los avatares y las imágenes se suben a S3 (bucket privado, URLs firmadas de corta vida). Ya
-  construido en `add-file-storage`, detrás de la interfaz `StorageProvider`.
-- Un avatar propio CONVIVE con el catálogo de 12 animales, no lo reemplaza: son dos formas del
-  mismo campo, y por eso ningún perfil existente necesitó migrarse.
-- Los objetos huérfanos NO se borran (avatar reemplazado, premio retirado): se acepta que el bucket
-  crezca. Un borrado sin transacción distribuida es siempre a mejor esfuerzo, y equivocarse
-  borrando pesa más que guardar de más con este volumen.
+    construido en `add-file-storage`, detrás de la interfaz `StorageProvider`.
+  - Un avatar propio CONVIVE con el catálogo de 12 animales, no lo reemplaza: son dos formas del
+    mismo campo, y por eso ningún perfil existente necesitó migrarse.
+  - Los objetos huérfanos NO se borran (avatar reemplazado, premio retirado): se acepta que el bucket
+    crezca. Un borrado sin transacción distribuida es siempre a mejor esfuerzo, y equivocarse
+    borrando pesa más que guardar de más con este volumen.
 
   ABIERTO
   - Cuántos dígitos tiene el PIN y con qué algoritmo se hashean las credenciales: se cierra en

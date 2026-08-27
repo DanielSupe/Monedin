@@ -2,7 +2,7 @@ import { COINS_MAX, COINS_MIN, MAX_CHILDREN_PER_FAMILY, type Reward } from "@mon
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
 import * as rewardsApi from "../../api/rewards.js";
-import { Avatar } from "../auth/Avatar.js";
+import { Avatar } from "../../ui/Avatar.js";
 import { ImageUploadField } from "../uploads/ImageUploadField.js";
 import { useChildren } from "../children/use-children.js";
 import { RewardForm } from "./RewardForm.js";
@@ -213,7 +213,7 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
         <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "0.25rem" }}>
           {reward.offers.map((offer) => (
             <li key={offer.child.id}>
-              <Avatar value={offer.child.avatar} size={20} />{" "}
+              <Avatar value={offer.child.avatar} size="small" />{" "}
               {offer.child.name} · {offer.coins} {messages.rewards.coins.toLowerCase()}
             </li>
           ))}
@@ -296,7 +296,7 @@ function OffersEditor({
               checked={replace.elegidos.includes(hijo.id)}
               onChange={() => replace.alternar(hijo.id)}
             />
-            <Avatar value={hijo.avatar} size={20} /> {hijo.name}
+            <Avatar value={hijo.avatar} size="small" /> {hijo.name}
           </label>
 
           {replace.elegidos.includes(hijo.id) && (

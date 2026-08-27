@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as api from "../../api/auth.js";
 import { messages } from "../../lib/messages.js";
 import { ImageUploadField } from "../uploads/ImageUploadField.js";
-import { Avatar } from "./Avatar.js";
+import { Avatar } from "../../ui/Avatar.js";
 import { useSession } from "./use-session.js";
 
 /**
@@ -35,7 +35,7 @@ export function ParentAvatarScreen({ onDone }: { onDone: () => void }): React.Re
       <h2>{messages.auth.myAvatarTitle}</h2>
 
       <p>
-        <Avatar value={avatar} size={96} alt={messages.auth.myAvatarTitle} />
+        <Avatar value={avatar} size="large" alt={messages.auth.myAvatarTitle} />
       </p>
 
       <ImageUploadField

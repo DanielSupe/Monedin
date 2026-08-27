@@ -1,0 +1,334 @@
+@import "tailwindcss";
+
+/**
+ * Tokens de Monedín. Fuente ÚNICA de todo valor visual del front.
+ *
+ * Mismo criterio que `constants/domain.ts` con los límites de negocio: si un
+ * valor tiene significado, vive aquí y en ningún otro sitio. Ningún componente
+ * escribe un color, un radio, un espaciado ni una duración literal.
+ *
+ * Tres capas, y un componente SOLO puede usar la de en medio:
+ *
+ *   CAPA 1  primitivos     --mnd-amber-400      la paleta cruda
+ *   CAPA 2  semánticos     --color-coin         lo ÚNICO que usa un componente
+ *   CAPA 3  escala         --text-hero          lo mismo, con otro valor por audiencia
+ *
+ * La capa 1 vive en `:root` a propósito y NO en `@theme`: así Tailwind no genera
+ * ninguna utilidad para ella y `bg-mnd-amber-400` sencillamente no existe. La
+ * regla «solo la capa 2» no depende de que nadie se despiste.
+ *
+ * Por qué importa: el modo oscuro será después reasignar la capa 2 y nada más.
+ * Si un componente apuntara a la paleta, habría que visitarlos todos. Es la
+ * misma razón por la que la API guarda la CLAVE de una imagen y nunca su URL.
+ */
+
+/* ------------------------------------------------------------------ *
+ * CAPA 1 — Primitivos. No se usan en un componente. No generan utilidad.
+ * ------------------------------------------------------------------ */
+
+:root {
+  /* Neutros, con una pizca de azul para que el gris no sea sucio. */
+  --mnd-slate-0: oklch(100% 0 0);
+  --mnd-slate-50: oklch(98.5% 0.003 265);
+  --mnd-slate-100: oklch(96.5% 0.005 265);
+  --mnd-slate-200: oklch(92% 0.008 265);
+  --mnd-slate-300: oklch(85% 0.012 265);
+  --mnd-slate-500: oklch(58% 0.018 265);
+  --mnd-slate-900: oklch(25% 0.024 265);
+
+  /* Índigo: la acción. Serio sin ser corporativo. */
+  --mnd-indigo-100: oklch(94% 0.03 275);
+  --mnd-indigo-500: oklch(55% 0.19 275);
+  --mnd-indigo-600: oklch(48% 0.19 275);
+
+  /* Ámbar: la MONEDA, y solo la moneda. */
+  --mnd-amber-100: oklch(96% 0.05 85);
+  --mnd-amber-400: oklch(80% 0.16 80);
+  --mnd-amber-800: oklch(45% 0.11 70);
+
+  /* Los cuatro tonos de aviso. */
+  --mnd-green-100: oklch(95% 0.04 150);
+  --mnd-green-600: oklch(52% 0.14 150);
+  --mnd-orange-100: oklch(96% 0.04 65);
+  --mnd-orange-700: oklch(52% 0.14 55);
+  --mnd-red-100: oklch(95% 0.03 25);
+  --mnd-red-600: oklch(52% 0.2 27);
+  --mnd-blue-100: oklch(95% 0.03 240);
+  --mnd-blue-600: oklch(52% 0.15 245);
+}
+
+/* ------------------------------------------------------------------ *
+ * CAPA 2 — Semánticos. Lo ÚNICO que un componente tiene permitido usar.
+ * ------------------------------------------------------------------ */
+
+@theme {
+  /* Superficies y tinta. */
+  --color-surface: var(--mnd-slate-50);
+  --color-surface-raised: var(--mnd-slate-0);
+  --color-surface-sunken: var(--mnd-slate-100);
+  --color-ink: var(--mnd-slate-900);
+  --color-ink-muted: var(--mnd-slate-500);
+  --color-ink-inverted: var(--mnd-slate-0);
+  --color-border: var(--mnd-slate-200);
+  --color-border-strong: var(--mnd-slate-300);
+
+  /* Acción. */
+  --color-primary: var(--mnd-indigo-500);
+  --color-primary-hover: var(--mnd-indigo-600);
+  --color-primary-soft: var(--mnd-indigo-100);
+
+  /*
+   * La moneda. Reservada: si el ámbar también pinta botones genéricos, deja de
+   * significar «monedas». Ver la pregunta abierta del design.
+   */
+  --color-coin: var(--mnd-amber-400);
+  --color-coin-soft: var(--mnd-amber-100);
+  --color-coin-ink: var(--mnd-amber-800);
+
+  /* Los cuatro tonos de aviso, cada uno con su fondo suave y su tinta. */
+  --color-info: var(--mnd-blue-600);
+  --color-info-soft: var(--mnd-blue-100);
+  --color-success: var(--mnd-green-600);
+  --color-success-soft: var(--mnd-green-100);
+  --color-warning: var(--mnd-orange-700);
+  --color-warning-soft: var(--mnd-orange-100);
+  --color-danger: var(--mnd-red-600);
+  --color-danger-soft: var(--mnd-red-100);
+
+  /*
+   * Familia. Redondeada donde el sistema la tenga, que es lo más cerca de
+   * «amable» que se llega sin cargar una fuente. La tipografía de marca llega
+   * en `polish-brand-and-a11y`; cambiarla será editar esta línea.
+   */
+  --font-sans: ui-rounded, "SF Pro Rounded", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+
+  --shadow-card: 0 1px 2px oklch(25% 0.024 265 / 0.06), 0 4px 12px oklch(25% 0.024 265 / 0.05);
+  --shadow-raised: 0 2px 4px oklch(25% 0.024 265 / 0.08), 0 12px 28px oklch(25% 0.024 265 / 0.08);
+
+  /* Anchos con nombre, para que ninguna pieza escriba `max-w-[28rem]`. */
+  --container-dialog: 28rem;
+  --container-reading: 40rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * CAPA 3 — Escala. El MISMO token con otro valor según la audiencia.
+ *
+ * Monedín son dos productos en una app. La diferencia no se resuelve
+ * duplicando piezas ni con una prop `size` que cada pantalla puede
+ * equivocar: se declara UNA vez, en el contenedor, donde ya se sabe quién
+ * está operando. Ver decisión 3 del design.
+ *
+ * Estos valores NO van en `@theme` para no chocar con utilidades nativas
+ * —`text-balance` ya existe en Tailwind y significa otra cosa— y para que
+ * cada uno tenga un solo origen. Las utilidades se declaran abajo a mano.
+ *
+ * `add-app-shell` pondrá el atributo. Hasta entonces lo declara el catálogo
+ * vivo, y la escala del padre es la de por defecto.
+ * ------------------------------------------------------------------ */
+
+:root,
+[data-scale="parent"] {
+  --text-hero: 1.75rem;
+  --text-title: 1.375rem;
+  --text-body: 1rem;
+  --text-small: 0.875rem;
+
+  --radius-control: 0.5rem;
+  --radius-card: 0.75rem;
+
+  /* 40px: un padre usa el pulgar sobre una lista densa. */
+  --tap-min: 2.5rem;
+
+  --duration-quick: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 320ms;
+}
+
+/* Se repite el bloque del padre porque una escala puede anidarse dentro de la
+   otra: sin esto, un panel del padre dentro de uno del niño heredaría la suya. */
+[data-scale="child"] {
+  /* El saldo es el elemento más grande de la aplicación, y es a propósito:
+     es lo que el producto enseña. */
+  --text-hero: 4rem;
+  --text-title: 1.75rem;
+  --text-body: 1.125rem;
+  --text-small: 1rem;
+
+  --radius-control: 0.875rem;
+  --radius-card: 1.5rem;
+
+  /* 44px es el mínimo, no el objetivo. Lo exige la spec. */
+  --tap-min: 2.75rem;
+}
+
+/* Las utilidades de la capa 3, para que ninguna pieza escriba una medida. */
+
+@utility text-hero {
+  font-size: var(--text-hero);
+  line-height: 1.05;
+}
+
+@utility text-title {
+  font-size: var(--text-title);
+  line-height: 1.25;
+}
+
+@utility text-body {
+  font-size: var(--text-body);
+  line-height: 1.5;
+}
+
+@utility text-small {
+  font-size: var(--text-small);
+  line-height: 1.45;
+}
+
+@utility rounded-control {
+  border-radius: var(--radius-control);
+}
+
+@utility rounded-card {
+  border-radius: var(--radius-card);
+}
+
+/* Transicionar el tamaño sin escribir `transition-[width]` en el punto de uso. */
+@utility transition-size {
+  transition-property: inline-size, block-size;
+}
+
+@utility tap-target {
+  min-block-size: var(--tap-min);
+  min-inline-size: var(--tap-min);
+}
+
+@utility duration-quick {
+  transition-duration: var(--duration-quick);
+}
+
+@utility duration-normal {
+  transition-duration: var(--duration-normal);
+}
+
+@utility duration-slow {
+  transition-duration: var(--duration-slow);
+}
+
+/* ------------------------------------------------------------------ *
+ * CAPA BASE — Cómo se ve el marcado desnudo.
+ *
+ * El reinicio de Tailwind quita los estilos del navegador: sin esto, un
+ * `<input>` no tiene borde y es literalmente invisible. Definir el aspecto
+ * de los elementos sin vestir es parte del sistema, no un parche: cuando
+ * una pantalla se vista, esta capa deja de notarse en vez de borrarse.
+ * Ver decisión 1b del design.
+ * ------------------------------------------------------------------ */
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.5;
+  }
+
+  h1 {
+    font-size: var(--text-hero);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+
+  h2 {
+    font-size: var(--text-title);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: var(--text-body);
+    font-weight: 700;
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  /* Un control sin vestir tiene que verse y poder tocarse. */
+  input,
+  select,
+  textarea {
+    min-block-size: var(--tap-min);
+    padding-inline: 0.75rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    background-color: var(--color-surface-raised);
+    color: var(--color-ink);
+  }
+
+  textarea {
+    padding-block: 0.5rem;
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    min-block-size: 0;
+    min-inline-size: 0;
+    padding-inline: 0;
+    accent-color: var(--color-primary);
+  }
+
+  button {
+    min-block-size: var(--tap-min);
+    padding-inline: 1rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    background-color: var(--color-surface-raised);
+    color: var(--color-ink);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  /* El foco visible es un token, no una decisión de cada pantalla. */
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Movimiento reducido. Se respeta AQUÍ, en el sistema, para que ninguna
+ * pantalla tenga que acordarse. Lo exige la spec.
+ * ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  [data-scale="parent"],
+  [data-scale="child"] {
+    --duration-quick: 1ms;
+    --duration-normal: 1ms;
+    --duration-slow: 1ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

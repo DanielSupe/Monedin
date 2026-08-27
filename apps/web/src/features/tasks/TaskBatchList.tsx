@@ -1,7 +1,7 @@
 import type { Task, TaskStatus } from "@monedin/contracts";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
-import { Avatar } from "../auth/Avatar.js";
+import { Avatar } from "../../ui/Avatar.js";
 import { TaskForm } from "./TaskForm.js";
 import {
   describeTaskStatus,
@@ -142,7 +142,7 @@ function TaskRow({ task }: { task: Task }): React.ReactElement {
 
   return (
     <li style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-      <Avatar value={task.child.avatar} size={24} />
+      <Avatar value={task.child.avatar} size="small" />
       <span style={{ flex: 1 }}>
         {task.child.name} · {task.coins} {messages.tasks.coins.toLowerCase()} ·{" "}
         {describeTaskStatus(task.status)}

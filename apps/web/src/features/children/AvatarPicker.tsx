@@ -1,7 +1,7 @@
 import type { AvatarKey, ImageContentType, UploadUrl } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
-import { Avatar } from "../auth/Avatar.js";
-import { AVATAR_OPTIONS } from "../auth/avatars.js";
+import { Avatar } from "../../ui/Avatar.js";
+import { AVATAR_OPTIONS } from "../../ui/avatars.js";
 import { ImageUploadField } from "../uploads/ImageUploadField.js";
 
 /**
@@ -70,7 +70,7 @@ export function AvatarPicker({
           {/* La foto actual, para que se vea qué hay puesto ahora mismo. */}
           {value !== undefined && value.startsWith("http") && (
             <p>
-              <Avatar value={value} size={64} alt={label} />
+              <Avatar value={value} size="large" alt={label} />
             </p>
           )}
         </div>

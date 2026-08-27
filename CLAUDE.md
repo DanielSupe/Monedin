@@ -457,6 +457,32 @@ y `AllowedHeaders` que incluya `Content-Type` —que va dentro de la firma—.
 
 ---
 
+### La batería de tests está aislada del almacén real por TRES vías
+
+Esta sección decía dos. Eran dos, y la tercera faltaba.
+
+La batería **vacía su bucket al arrancar**, así que el aislamiento respecto del almacén de la
+aplicación se sostiene sobre tres separaciones, y hacen falta las tres:
+
+1. **Bucket propio** (`TEST_S3_BUCKET_NAME`), distinto del de desarrollo. `testBucket()` lo comprueba.
+2. **Endpoint propio** (`TEST_S3_ENDPOINT`), que **no admite vacío**, porque vacío es como se dice
+   «el S3 de AWS».
+3. **Credenciales propias** (`TEST_AWS_ACCESS_KEY_ID` y `TEST_AWS_SECRET_ACCESS_KEY`).
+
+La tercera llegó tarde, en `split-test-storage-credentials`, y su ausencia se notó en cuanto alguien
+hizo justo lo que la segunda contempla: al poner una llave de AWS de verdad en `AWS_ACCESS_KEY_ID`
+para apuntar el desarrollo al S3 real, la batería siguió hablando con MinIO —el endpoint sí estaba
+separado— pero con credenciales que MinIO rechaza, y **toda la suite murió con
+`InvalidAccessKeyId`**.
+
+Conviene quedarse con las dos mitades de esa historia. La que falló: compartir una variable entre dos
+consumidores con necesidades opuestas se paga el día que uno de los dos cambia. La que funcionó: el
+aislamiento **evitó el desastre**, porque los tests fueron a MinIO y se llevaron un 403 en vez de ir a
+AWS y vaciar un bucket real.
+
+Ninguna de las tres es redundante: cada una tapa un camino distinto, y basta que falte una para que
+cambiar la configuración de desarrollo arrastre a los tests.
+
 ## 7. Base de datos
 
 **Los invariantes viven en el motor**, no solo en el código. La migración inicial instala
@@ -559,6 +585,36 @@ que exige Node en ESM aunque el archivo fuente sea `.ts`. Está verificado que P
 ver la decisión 11 del design de `setup-foundations` antes de tocar la configuración de Prisma.
 
 ---
+
+### El front
+
+Desde `add-design-system`, el front tiene sistema de diseño y **ya no se escribe estilo a mano**.
+
+- **`apps/web/src/styles/tokens.css` es la fuente única** de todo color, medida, radio, sombra y
+  duración, igual que `constants/domain.ts` lo es de los límites de negocio. Tres capas, y un
+  componente solo puede usar la de en medio —los tokens semánticos, `--color-coin` y no
+  `--mnd-amber-400`—. La capa de primitivos vive **fuera de `@theme`** a propósito: así Tailwind no
+  genera utilidades con ella y saltarse la regla no es posible, no solo desaconsejado.
+- **Las piezas viven en `apps/web/src/ui/`** y **no importan nada de `features/` ni de `api/`**. Por
+  eso se prueban sin servidor y el catálogo vivo no necesita proveedores. Hay un test que lo
+  comprueba.
+- **Tres reglas lo hacen cumplible**: ESLint prohíbe el prop `style` —con `allowInlineStyles()` para
+  la excepción declarada, hoy solo `ProgressBar`, cuyo ancho depende del saldo de un niño—, y dos
+  tests cazan colores literales y valores arbitrarios de Tailwind.
+- **La doble escala es un atributo, no una prop**: `data-scale="child" | "parent"` en el contenedor.
+  Si aparecen dos piezas cuya única diferencia es la audiencia, es un defecto.
+- **El catálogo vivo está en `ui.html`**, un punto de entrada aparte que no se compila en producción.
+  `pnpm dev` y `http://localhost:5173/ui.html`. Una pieza nueva sin entrada en el catálogo falla un
+  test.
+- **Deuda declarada con fecha de caducidad**: las pantallas de `features/` y `routes/` siguen con
+  estilos en línea y colores a mano, y están exceptuadas en dos listas —en `apps/web/eslint.config.js`
+  y en `tests/ui/style-rules.test.ts`—. Cada change de rediseño **borra su entrada**. Una entrada que
+  siga ahí sin change que la reclame es que alguien se saltó el plan.
+
+**`pnpm verify` puede quedarse sin memoria en una máquina cargada.** Lanza trece tareas en paralelo
+con `--force`; con Docker, el editor y un navegador abiertos, V8 muere con `allocation failure` y
+turbo devuelve 127 **con una tarea distinta cada pasada**, lo que parece un test frágil y no lo es. Si
+pasa, `pnpm turbo run lint typecheck test build --force --concurrency=1`.
 
 ## 9. Tests
 

@@ -8,6 +8,30 @@ export const messages = {
   app: {
     title: "Monedín",
     tagline: "Educación financiera para chicos de 6 a 11 años",
+    /**
+     * Con qué convenciones se formatea un número.
+     *
+     * Está aquí y no en un componente porque es una decisión de producto —el
+     * primer mercado es Latinoamérica hispanohablante— y porque dejarla al
+     * idioma del navegador haría que el mismo saldo se escribiera «1.250» o
+     * «1,250» según el dispositivo de cada hijo.
+     */
+    locale: "es",
+  },
+
+  /**
+   * Textos de las piezas del sistema de diseño.
+   *
+   * Una pieza no incrusta un texto visible, igual que una pantalla. Lo que la
+   * distingue es que aquí casi todo es para tecnologías de asistencia: la
+   * cifra de monedas se VE, pero «25 monedas» hay que decirlo.
+   */
+  ui: {
+    coinsUnit: "monedas",
+    coinsUnitSingular: "moneda",
+    progressLabel: "Progreso",
+    dismiss: "Cerrar",
+    loading: "Cargando…",
   },
 
   health: {

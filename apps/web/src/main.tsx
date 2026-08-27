@@ -4,6 +4,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { queryClient } from "./lib/query-client.js";
 import { routeTree } from "./routeTree.gen";
+import "./styles/tokens.css";
 
 const router = createRouter({ routeTree });
 

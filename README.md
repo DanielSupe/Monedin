@@ -16,6 +16,18 @@ pagos y no hay interoperabilidad entre familias.
 > `file-storage` añade imágenes de verdad: avatar propio del padre y de cada hijo —que convive con el
 > catálogo de animales—, foto del premio, y una evidencia opcional que el niño adjunta al marcar una
 > tarea. En local las guarda MinIO; en producción, S3.
+>
+> **Etapa actual: interfaz y diseño.** La API está completa; lo que se construye ahora es lo que se
+> ve. `add-design-system` pone el cimiento: tokens en un único archivo, quince piezas en
+> `apps/web/src/ui/`, tests de componente, y tres reglas —una de lint y dos de test— que impiden
+> escribir un color o una medida fuera de los tokens. Trae también una **doble escala**, porque
+> Monedín son dos productos en una app: para el niño cifras grandes y toque amplio, para el padre
+> densidad y escaneo rápido, con las mismas piezas y sin duplicar ninguna.
+>
+> Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
+> reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
+> siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en
+> desarrollo.
 
 ---
 

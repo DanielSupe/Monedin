@@ -1,7 +1,7 @@
 import type { Redemption, RedemptionStatus } from "@monedin/contracts";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
-import { Avatar } from "../auth/Avatar.js";
+import { Avatar } from "../../ui/Avatar.js";
 import {
   describeRedemptionStatus,
   describeRedemptionsError,
@@ -116,7 +116,7 @@ function RedemptionRow({ redemption }: { redemption: Redemption }): React.ReactE
         padding: "0.75rem",
       }}
     >
-      <Avatar value={redemption.child.avatar} size={24} />
+      <Avatar value={redemption.child.avatar} size="small" />
       <span style={{ flex: 1 }}>
         {redemption.child.name} · {redemption.reward.title} · {redemption.coins}{" "}
         {messages.redemptions.coins.toLowerCase()} · {describeRedemptionStatus(redemption.status)}
