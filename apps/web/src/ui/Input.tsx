@@ -20,7 +20,7 @@ const SHAPES: Record<InputShape, string> = {
   box: "rounded-control px-3",
   // El relleno izquierdo deja hueco al icono, que lo posiciona `Field` con el
   // envoltorio de abajo. El derecho iguala para que el texto no quede pegado.
-  pill: "rounded-full pl-11 pr-4",
+  pill: "rounded-full border-transparent shadow-card pl-11 pr-4",
 };
 
 /**

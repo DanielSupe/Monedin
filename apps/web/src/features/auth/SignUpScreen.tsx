@@ -46,7 +46,15 @@ export function SignUpScreen(): React.ReactElement {
   const error = fieldError ?? (register.error ? describeAuthError(register.error) : undefined);
 
   return (
-    <AccessLayout lead={messages.auth.accessSignUpLead}>
+    <AccessLayout
+      lead={messages.auth.accessSignUpLead}
+      tagline={messages.auth.accessSignUpTagline}
+      footer={
+        <Link to="/sign-in" className="text-small">
+          {messages.auth.toSignIn}
+        </Link>
+      }
+    >
       <form onSubmit={submit} className="flex flex-col gap-4">
         <Field label={messages.auth.name}>
           <PillField icon={<Person />}>
@@ -113,11 +121,7 @@ export function SignUpScreen(): React.ReactElement {
 
         {error !== undefined && <Alert tone="danger">{error}</Alert>}
 
-        <div className="flex items-center justify-between gap-3">
-          <Link to="/sign-in" className="text-small">
-            {messages.auth.toSignIn}
-          </Link>
-
+        <div className="flex justify-end">
           <Button
             type="submit"
             variant="primary"

@@ -97,6 +97,18 @@
    * La moneda. Reservada: si el ámbar también pinta botones genéricos, deja de
    * significar «monedas». Ver la pregunta abierta del design.
    */
+  /*
+   * El color de la MARCA como superficie, para las pantallas que se pintan
+   * enteras con él —hoy el acceso y el registro—.
+   *
+   * Comparte primitivo con `--color-coin` y aun así es un token aparte, a
+   * propósito: si el token de moneda pintara también fondos, dejaría de
+   * significar «monedas» y la advertencia del design de `add-design-system` se
+   * cumpliría. Un mismo valor puede tener dos papeles; lo que no puede es
+   * tener un solo nombre para los dos.
+   */
+  --color-brand: var(--mnd-amber-400);
+
   --color-coin: var(--mnd-amber-400);
   --color-coin-soft: var(--mnd-amber-100);
   --color-coin-ink: var(--mnd-amber-800);
@@ -151,6 +163,16 @@
    * ve. Aquí la duración SÍ va en el token: no es geometría, es una sola tira.
    */
   --animate-strip: mnd-strip 32s linear infinite;
+
+  /*
+   * El disco del acceso. Los dos sentidos y la MISMA duración: el aro gira y
+   * cada emoji gira al revés a la vez, así que orbita sin ponerse cabeza abajo.
+   * Con la duración dentro del token no hace falta un valor arbitrario ni una
+   * excepción de estilos en línea, que es lo que sí necesitan las órbitas de la
+   * puerta pública porque su geometría se calcula.
+   */
+  --animate-disc: mnd-orbit 44s linear infinite;
+  --animate-disc-reverse: mnd-orbit-reverse 44s linear infinite;
 }
 
 @keyframes mnd-orbit {
@@ -169,6 +191,20 @@
   to {
     transform: translateX(-50%);
   }
+}
+
+/* ------------------------------------------------------------------ *
+ * La tinta secundaria depende de DÓNDE está.
+ *
+ * Sobre el color de la marca, el gris de la superficie clara se lava y el texto
+ * de ayuda deja de leerse. El token no cambia de significado —sigue siendo
+ * «texto secundario»—, cambia de valor según la superficie, igual que la escala
+ * cambia los tamaños según la audiencia. Así ninguna pantalla tiene que
+ * acordarse, que es justo lo que la capa semántica existe para evitar.
+ * ------------------------------------------------------------------ */
+
+[data-surface="brand"] {
+  --color-ink-muted: var(--mnd-amber-800);
 }
 
 /* ------------------------------------------------------------------ *
@@ -196,6 +232,8 @@
 
   --radius-control: 0.5rem;
   --radius-card: 0.75rem;
+  /* La lámina blanca que sube desde abajo en el acceso. */
+  --radius-sheet: 2rem;
 
   /* 40px: un padre usa el pulgar sobre una lista densa. */
   --tap-min: 2.5rem;
@@ -246,6 +284,11 @@
 
 @utility rounded-control {
   border-radius: var(--radius-control);
+}
+
+@utility rounded-t-sheet {
+  border-top-left-radius: var(--radius-sheet);
+  border-top-right-radius: var(--radius-sheet);
 }
 
 @utility rounded-card {

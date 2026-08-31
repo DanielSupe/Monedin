@@ -41,7 +41,15 @@ export function SignInScreen(): React.ReactElement {
   const error = fieldError ?? (login.error ? describeAuthError(login.error) : undefined);
 
   return (
-    <AccessLayout lead={messages.auth.accessSignInLead}>
+    <AccessLayout
+      lead={messages.auth.accessSignInLead}
+      tagline={messages.auth.accessSignInTagline}
+      footer={
+        <Link to="/sign-up" className="text-small">
+          {messages.auth.toSignUp}
+        </Link>
+      }
+    >
       <form onSubmit={submit} className="flex flex-col gap-4">
         <Field label={messages.auth.email}>
           <PillField icon={<AtSign />}>
@@ -69,11 +77,7 @@ export function SignInScreen(): React.ReactElement {
 
         {error !== undefined && <Alert tone="danger">{error}</Alert>}
 
-        <div className="flex items-center justify-between gap-3">
-          <Link to="/sign-up" className="text-small">
-            {messages.auth.toSignUp}
-          </Link>
-
+        <div className="flex justify-end">
           <Button
             type="submit"
             variant="primary"

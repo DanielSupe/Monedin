@@ -118,31 +118,37 @@ describe("el formulario dice lo que exige antes de rechazarlo", () => {
 });
 
 /**
- * La cinta del ciclo.
+ * El disco del ciclo.
  *
- * Doce emojis leídos en voz alta no explican nada, así que es UNA imagen con su
- * descripción, igual que las órbitas de la puerta pública.
+ * Cinco emojis leídos en voz alta no explican nada, así que es UNA imagen con
+ * su descripción, igual que las órbitas de la puerta pública.
  */
-describe("la cinta del ciclo", () => {
+describe("el disco del ciclo", () => {
   it("se anuncia como una sola imagen con su descripción", async () => {
     await montarApp("/sign-in", SIN_SESION);
 
-    const cinta = screen.getByRole("img", { name: messages.auth.accessStripLabel });
-    expect(within(cinta).queryAllByRole("img")).toHaveLength(0);
+    const disco = screen.getByRole("img", { name: messages.auth.accessDiscLabel });
+    expect(within(disco).queryAllByRole("img")).toHaveLength(0);
   });
 
   /*
    * Bajar la duración a 1ms —que es lo que hace el bloque del sistema—
-   * convertiría el deslizamiento en un salto instantáneo, peor para quien pidió
-   * no ver movimiento. Parada, la cinta sigue completa.
+   * convertiría el giro en un parpadeo, peor para quien pidió no ver
+   * movimiento. Parado, el disco sigue completo y con sus piezas en su sitio.
    */
-  it("el movimiento está bajo `motion-safe`", async () => {
+  it("el giro está bajo `motion-safe`, en el aro y en cada pieza", async () => {
     await montarApp("/sign-in", SIN_SESION);
 
-    const cinta = screen.getByRole("img", { name: messages.auth.accessStripLabel });
-    const tira = cinta.firstElementChild;
+    const disco = screen.getByRole("img", { name: messages.auth.accessDiscLabel });
 
-    expect(tira?.className).toContain("motion-safe:animate-strip");
-    expect(tira?.className).not.toMatch(/(?<!motion-safe:)animate-strip/);
+    // Las dos mitades del truco: el aro gira y cada pieza gira al revés. Si una
+    // sola se quedara fuera de `motion-safe`, con movimiento reducido los
+    // emojis acabarían boca abajo.
+    for (const animado of disco.querySelectorAll('[class*="animate-disc"]')) {
+      expect(animado.className).toMatch(/motion-safe:animate-disc/);
+      expect(animado.className).not.toMatch(/(?<!motion-safe:)animate-disc/);
+    }
+
+    expect(disco.querySelectorAll('[class*="animate-disc"]').length).toBeGreaterThan(1);
   });
 });

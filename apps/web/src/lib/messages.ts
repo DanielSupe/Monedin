@@ -147,7 +147,11 @@ export const messages = {
     accessGreeting: "¡Bienvenido!",
     accessSignInLead: "Entra para continuar",
     accessSignUpLead: "Crea tu cuenta para empezar",
-    accessStripLabel: "El ciclo de Monedín: se hace una tarea, se gana una moneda, se gasta en un premio",
+    /** La frase del panel de presentación, una por pantalla. */
+    accessSignInTagline: "Tu casa, sus monedas. Entra y sigue el ciclo.",
+    accessSignUpTagline: "Empieza a repartir tareas y a ver crecer sus monedas.",
+    accessDiscLabel:
+      "El ciclo de Monedín: se hace una tarea, se gana una moneda, se gasta en un premio",
     /** El envío es una flecha, así que su nombre no es opcional. */
     submitSignIn: "Entrar a mi cuenta",
     submitSignUp: "Crear mi cuenta",
