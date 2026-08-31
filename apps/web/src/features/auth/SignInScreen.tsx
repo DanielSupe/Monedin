@@ -80,7 +80,7 @@ export function SignInScreen(): React.ReactElement {
         <div className="flex justify-end">
           <Button
             type="submit"
-            variant="primary"
+            variant="contrast"
             iconOnly
             aria-label={messages.auth.submitSignIn}
             pending={login.isPending}

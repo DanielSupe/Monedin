@@ -69,6 +69,15 @@ pagos y no hay interoperabilidad entre familias.
 > mismo ciclo que orbita en `/welcome`. Y dice lo que exige antes de rechazarlo: el mínimo de la
 > contraseña se lee sin fallar, y el registro explica por qué pide dos claves distintas.
 >
+> `polish-brand-surface` empezó como un arreglo de acabado del panel ámbar del acceso y acabó
+> cambiando el color, porque el acabado no era el problema. **El acceso es la única pantalla que mira
+> un adulto**: la calidez le corresponde al niño, y en la puerta se lee como juguete. Ahora va en
+> **índigo profundo** y el ámbar pasa de fondo a **acento** —el botón y la moneda—, que es devolverle
+> su significado. Por debajo deja tres reglas que valen para cualquier superficie de color: los
+> neutros **y las superficies** se reasignan según dónde están, un componente con fondo claro propio
+> declara que lo es, y una utilidad de color resuelve el token donde se escribe. El resto de la
+> aplicación no cambia.
+>
 > Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
 > reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
 > siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en

@@ -3,105 +3,122 @@ import { messages } from "../../lib/messages.js";
 /**
  * El ciclo del producto, en órbitas.
  *
- * Ocupa el sitio y la forma que la maqueta de referencia le daba a una foto.
- * Es la misma idea que la puerta pública —lo que se hace y lo que se gana dando
- * vueltas alrededor de la moneda— con **dos anillos en vez de tres**: aquí es
- * el adorno de un panel, no la ilustración principal de la página.
+ * Es **la misma órbita de la puerta pública, simplificada**: los mismos tres
+ * anillos y los mismos radios —64, 100 y 136 sobre un escenario de 20rem—, el
+ * mismo lenguaje de piezas —cuadrados redondeados blancos con sombra y sin
+ * borde— y las mismas trazas de 1px que solo se insinúan. Lo que cambia es la
+ * cantidad: **dos piezas por anillo en vez de tres**, porque aquí decora un
+ * panel y allí lleva la página entera.
  *
- * SIN estilos en línea, y eso es lo que decide la forma. `Orbits` es una
- * excepción declarada porque su geometría se calcula: nueve piezas en ángulos
- * arbitrarios sobre tres radios. Aquí cada anillo pone sus piezas en los cuatro
- * puntos cardinales —utilidades normales— y el de fuera se gira 45° entero para
- * que caigan en las diagonales. Posiciones distintas sin un solo valor
- * arbitrario, y una tercera llamada a `allowInlineStyles()` que no hace falta.
+ * SIN estilos en línea, y eso es lo único que se hace distinto. `Orbits` los
+ * necesita porque calcula `rotate(a) translate(r) rotate(-a)` para nueve
+ * ángulos arbitrarios; aquí cada anillo pone sus dos piezas arriba y abajo
+ * —utilidades normales— y se gira el anillo ENTERO para repartirlas: 0°, 45° y
+ * 90°. Mismo resultado a la vista, y una tercera llamada a
+ * `allowInlineStyles()` que no hace falta.
  *
- * Lo que impide que las piezas se pongan cabeza abajo: cada anillo gira en un
- * sentido y cada pieza gira al revés a la vez. En Tailwind 4 la posición y el
- * giro estático usan las propiedades `translate` y `rotate`, y la animación usa
- * `transform`, así que se componen en vez de pisarse.
+ * Lo que impide que las piezas se pongan cabeza abajo es doble: cada pieza
+ * deshace el giro estático de su anillo y además gira al revés que la
+ * animación. En Tailwind 4 el giro estático usa la propiedad `rotate` y la
+ * animación usa `transform`, así que se componen en vez de pisarse.
  *
- * `motion-safe:` en todo lo que gira. Bajar la duración a 1ms —que es lo que
- * hace el bloque del sistema— convertiría el giro en un parpadeo. Parado, el
- * dibujo sigue completo y con sus piezas en su sitio: su estado final es él
- * mismo.
+ * `motion-safe:` en todo lo que gira. Bajar la duración a 1ms —lo que hace el
+ * bloque del sistema— convertiría el giro en un parpadeo. Parado, el dibujo
+ * sigue completo y con sus piezas en su sitio.
  *
  * Para las tecnologías de asistencia es UNA imagen con su descripción, igual
- * que las órbitas: siete emojis leídos en voz alta no explican nada.
+ * que las órbitas: seis emojis leídos en voz alta no explican nada.
  */
 
-/** El anillo de fuera: lo que se hace y lo que se gana, alternando. */
-const FUERA = [
-  { glifo: "🧹", sitio: "left-1/2 top-0 -translate-x-1/2" },
-  { glifo: "🎬", sitio: "right-0 top-1/2 -translate-y-1/2" },
-  { glifo: "📚", sitio: "bottom-0 left-1/2 -translate-x-1/2" },
-  { glifo: "🍦", sitio: "left-0 top-1/2 -translate-y-1/2" },
-] as const;
+interface Anillo {
+  /** Cuánto se mete respecto al escenario. Fija el radio: 160 menos esto. */
+  hueco: string;
+  /** Reparte las piezas sin cambiarlas de sitio: gira el anillo entero. */
+  giro: string;
+  /** Y cada pieza deshace ese mismo giro para quedar derecha. */
+  contragiro: string;
+  /** Cuanto más fuera, más despacio. Los anillos alternan sentido. */
+  vuelta: string;
+  contravuelta: string;
+  piezas: readonly [string, string];
+}
 
-/** El de dentro, más pequeño y con menos piezas: da profundidad sin recargar. */
-const DENTRO = [
-  { glifo: "🛏️", sitio: "left-1/2 top-0 -translate-x-1/2" },
-  { glifo: "🎮", sitio: "bottom-0 left-1/2 -translate-x-1/2" },
-] as const;
+const ANILLOS: readonly Anillo[] = [
+  {
+    hueco: "inset-6",
+    giro: "rotate-0",
+    contragiro: "rotate-0",
+    vuelta: "motion-safe:animate-disc-slow",
+    contravuelta: "motion-safe:animate-disc-slow-reverse",
+    piezas: ["🧹", "🎬"],
+  },
+  {
+    hueco: "inset-15",
+    giro: "rotate-45",
+    contragiro: "-rotate-45",
+    vuelta: "motion-safe:animate-disc-reverse",
+    contravuelta: "motion-safe:animate-disc",
+    piezas: ["📚", "🍦"],
+  },
+  {
+    hueco: "inset-24",
+    giro: "rotate-90",
+    contragiro: "-rotate-90",
+    vuelta: "motion-safe:animate-disc",
+    contravuelta: "motion-safe:animate-disc-reverse",
+    piezas: ["🛏️", "🎮"],
+  },
+];
+
+/**
+ * Arriba y abajo. El giro del anillo se encarga de repartirlas.
+ *
+ * `-top-5` y `-bottom-5` y NO `top-0`: la ficha mide 2.5rem, así que hay que
+ * sacarla media ficha para que su CENTRO caiga sobre la línea del anillo. Con
+ * `top-0` se alinea el borde, y las seis piezas quedaban 20px por dentro de su
+ * órbita —medido: 115 donde tocaba 136—. Es el mismo centrado que hace la
+ * puerta pública con `-ml-5 -mt-5`.
+ */
+const SITIOS = ["left-1/2 -top-5 -translate-x-1/2", "-bottom-5 left-1/2 -translate-x-1/2"] as const;
 
 export function CycleDisc(): React.ReactElement {
   return (
     <div
       role="img"
       aria-label={messages.auth.accessDiscLabel}
-      className="relative mx-auto size-64 shrink-0"
+      /*
+        El mismo escenario que la puerta pública, y por el mismo motivo: los
+        radios son proporciones de este cuadrado, así que tiene que medir
+        siempre lo mismo. `max-w-full` para que en un panel estrecho encoja en
+        vez de desbordar.
+      */
+      className="relative mx-auto size-(--container-orbit) max-w-full shrink-0"
     >
-      {/*
-        Las trazas de las dos órbitas, del color de la MARCA.
-
-        Antes el disco iba relleno y las trazas en blanco translúcido. Sin
-        relleno, el color se mueve al trazo: la órbita se dibuja en vez de
-        pintarse, y el panel blanco respira.
-
-        Los radios están elegidos para que NADA se toque, sobre un disco de
-        16rem: el anillo de fuera ocupa de 80 a 128 px del centro, el de dentro
-        de 48 a 80, y la moneda llega a 32. La primera versión los tenía
-        encimados y el dibujo se leía como un amasijo.
-      */}
-      <span
-        aria-hidden="true"
-        className="absolute inset-6 rounded-full border-2 border-brand"
-      />
-      <span
-        aria-hidden="true"
-        className="absolute inset-16 rounded-full border-2 border-brand"
-      />
-
-      <div aria-hidden="true" className="absolute inset-6 rotate-45 motion-safe:animate-disc">
-        {FUERA.map((pieza) => (
-          <span key={pieza.glifo} className={`absolute ${pieza.sitio}`}>
-            <span className="text-title flex size-12 -rotate-45 items-center justify-center rounded-full border-2 border-brand bg-surface-raised shadow-card leading-none motion-safe:animate-disc-reverse">
-              {pieza.glifo}
+      {ANILLOS.map((anillo) => (
+        <div
+          key={anillo.hueco}
+          aria-hidden="true"
+          className={`absolute ${anillo.hueco} ${anillo.giro} ${anillo.vuelta} rounded-full border border-brand-soft`}
+        >
+          {anillo.piezas.map((glifo, indice) => (
+            <span key={glifo} className={`absolute ${SITIOS[indice]}`}>
+              <span
+                className={`rounded-card text-title grid size-10 place-items-center bg-surface-raised shadow-card ${anillo.contragiro} ${anillo.contravuelta}`}
+              >
+                {glifo}
+              </span>
             </span>
-          </span>
-        ))}
-      </div>
-
-      {/* El de dentro gira al revés que el de fuera: da sensación de profundidad. */}
-      <div aria-hidden="true" className="absolute inset-16 motion-safe:animate-disc-reverse">
-        {DENTRO.map((pieza) => (
-          <span key={pieza.glifo} className={`absolute ${pieza.sitio}`}>
-            <span className="text-body flex size-8 items-center justify-center rounded-full border-2 border-brand bg-surface-raised shadow-card leading-none motion-safe:animate-disc">
-              {pieza.glifo}
-            </span>
-          </span>
-        ))}
-      </div>
+          ))}
+        </div>
+      ))}
 
       {/*
-        La moneda, quieta en el centro, y con su ficha.
-
-        Sin el relleno del disco, las fichas quedaban blancas sobre un panel
-        blanco: se sostenían solo por la sombra y CORTABAN la traza por donde
-        pasaban. Con el aro del mismo color dejan de ser recortes y pasan a ser
-        NODOS de la órbita, que es lo que son.
+        El centro, con la misma forma de tarjeta que el de la puerta pública.
+        Allí lleva un saldo de ejemplo; aquí solo la moneda: en una pantalla de
+        acceso, una cifra inventada es ruido con pinta de dato.
       */}
-      <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center">
-        <span className="text-title flex size-16 items-center justify-center rounded-full border-2 border-brand bg-surface-raised shadow-raised leading-none">
+      <span aria-hidden="true" className="absolute inset-0 grid place-items-center">
+        <span className="rounded-card text-hero grid size-20 place-items-center bg-surface-raised shadow-raised">
           🪙
         </span>
       </span>

@@ -309,7 +309,31 @@ context: |
       - El minimo de la contrasena se lee antes de fallar, desde la constante del contrato, y el
         registro explica para que sirve cada una de las dos credenciales.
 
-        DECISION CERRADA: el SALDO no se ve en la rejilla. Se pidio y se descarto. No es una limitacion
+        `polish-brand-surface` empezo como un arreglo de acabado del panel ambar del acceso y acabo
+    CAMBIANDO EL COLOR, porque el acabado no era el problema. El acceso es la unica pantalla que mira
+    un adulto: la calidez le corresponde al nino -su inicio, sus tareas, sus premios- y en la puerta
+    se lee como juguete justo donde alguien decide si esto es de fiar. Lo que deja construido:
+      - INDIGO PROFUNDO como superficie del acceso, y el ambar pasa de fondo a ACENTO: el boton y la
+        moneda. Pintando media pantalla no decia nada; sobre indigo, un punto ambar ES dinero. La
+        rejilla, el PIN y la puerta publica siguen claros.
+      - Los neutros Y LAS SUPERFICIES se reasignan por superficie, igual que los tamanos por
+        audiencia. Sobre oscuro no basta con invertir la tinta: `--color-surface-raised` tambien se
+        reasigna, asi que un campo pasa a ser oscuro con texto claro y las piezas componen solas.
+      - Y hace falta el camino de VUELTA: un componente que pinta su propio fondo claro -`Alert`- es
+        una superficie clara este donde este, y lo declara el componente, no la pantalla.
+      - Una utilidad de color resuelve el token DONDE se escribe, no donde acaba el pixel. `text-ink`
+        en el contenedor de fuera bajaba ya resuelto y el saludo salia invisible sobre el indigo.
+      - Variante `contrast` en `Button`, nombrada por el PAPEL. Paso de tinta oscura a ambar al
+        cambiar la superficie SIN tocar su nombre ni un punto de uso: la prueba de por que se nombra
+        asi.
+      - La orbita del acceso pasa a ser la de la puerta publica simplificada: tres anillos, sus
+        radios, y seis iconos en vez de nueve. Sin estilos en linea, girando el anillo entero en vez
+        de calcular angulos.
+
+    Nada de esto sale de los selectores de superficie, asi que el resto de la aplicacion no cambia.
+    Eso se comprueba ABRIENDO pantallas del padre y del nino, porque no lo cubre ningun test.
+
+    DECISION CERRADA: el SALDO no se ve en la rejilla. Se pidio y se descarto. No es una limitacion
     tecnica -`GET /auth/profiles` no lo devuelve porque `profile-selection` lo prohibe-. Dos precios:
     cualquiera con la tablet desbloqueada veria todos los saldos SIN teclear un PIN, y los hermanos se
     compararian cada vez que se abre la aplicacion. No se reabre sin argumento nuevo sobre lo segundo.

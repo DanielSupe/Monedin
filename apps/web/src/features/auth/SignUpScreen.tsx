@@ -124,7 +124,7 @@ export function SignUpScreen(): React.ReactElement {
         <div className="flex justify-end">
           <Button
             type="submit"
-            variant="primary"
+            variant="contrast"
             iconOnly
             aria-label={messages.auth.submitSignUp}
             pending={register.isPending}

@@ -20,7 +20,13 @@ const SHAPES: Record<InputShape, string> = {
   box: "rounded-control px-3",
   // El relleno izquierdo deja hueco al icono, que lo posiciona `Field` con el
   // envoltorio de abajo. El derecho iguala para que el texto no quede pegado.
-  pill: "rounded-full border-transparent shadow-card pl-11 pr-4",
+  /*
+   * Con borde y no transparente: sobre una superficie de color, una sombra sola
+   * no sostiene el campo. El borde sale de `--color-border`, que la superficie
+   * de marca reasigna a su propio tono, así que sobre blanco sigue siendo el
+   * gris de siempre.
+   */
+  pill: "rounded-full shadow-card pl-11 pr-4",
 };
 
 /**

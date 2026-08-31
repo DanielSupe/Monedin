@@ -90,6 +90,12 @@ function Piezas(): React.ReactElement {
           <Button variant="ghost">Ver más</Button>
           <Button variant="danger">Dar de baja</Button>
         </Fila>
+        {/* `contrast` se enseña SOBRE la superficie de marca, que es donde vive:
+            fuera de ella no se entiende para qué existe. */}
+        <div data-surface="brand" className="rounded-card flex gap-3 bg-brand p-4">
+          <Button variant="contrast">Entrar</Button>
+          <Button variant="primary">Primario, para comparar</Button>
+        </div>
         <Fila>
           <Button variant="primary" disabled>
             Deshabilitado

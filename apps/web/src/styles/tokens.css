@@ -52,15 +52,44 @@
   --mnd-slate-500: oklch(58% 0.018 265);
   --mnd-slate-900: oklch(25% 0.024 265);
 
-  /* Índigo: la acción. Serio sin ser corporativo. */
+  /*
+   * Índigo: la acción, y desde `polish-brand-surface` también la superficie del
+   * acceso.
+   *
+   * Los pasos oscuros son para pintar un panel entero; los claros, para lo que
+   * va ENCIMA de ese panel —texto secundario y trazas—, porque sobre un fondo
+   * oscuro la tinta se invierte en vez de templarse.
+   */
   --mnd-indigo-100: oklch(94% 0.03 275);
+  --mnd-indigo-200: oklch(88% 0.05 275);
+  --mnd-indigo-300: oklch(80% 0.08 275);
   --mnd-indigo-500: oklch(55% 0.19 275);
   --mnd-indigo-600: oklch(48% 0.19 275);
+  --mnd-indigo-700: oklch(40% 0.15 273);
+  --mnd-indigo-800: oklch(31% 0.11 272);
 
-  /* Ámbar: la MONEDA, y solo la moneda. */
+  /*
+   * Ámbar: la MONEDA, y solo la moneda.
+   *
+   * Llegó a pintar el panel entero del acceso y ahí estuvo el error: un color
+   * que lo cubre todo deja de significar algo. Sobre el índigo profundo, un
+   * punto ámbar ES dinero. Tres pasos bastan porque ya no tiene que modelar
+   * ninguna superficie.
+   */
   --mnd-amber-100: oklch(96% 0.05 85);
   --mnd-amber-400: oklch(80% 0.16 80);
   --mnd-amber-800: oklch(45% 0.11 70);
+
+  /*
+   * Los componentes sueltos del índigo profundo, sin envolver en `oklch()`.
+   *
+   * Una sombra necesita el color CON alfa, y la barra de alfa solo funciona
+   * dentro de la función: `var(--algo) / 0.3` no es CSS válido. Guardando los
+   * componentes se compone `oklch(var(--mnd-indigo-shadow) / 0.3)` sin repetir
+   * los números, que es como el bloque de sombras claras acabó duplicando el
+   * valor de `slate-900`.
+   */
+  --mnd-indigo-shadow: 20% 0.08 272;
 
   /* Los cuatro tonos de aviso. */
   --mnd-green-100: oklch(95% 0.04 150);
@@ -101,13 +130,22 @@
    * El color de la MARCA como superficie, para las pantallas que se pintan
    * enteras con él —hoy el acceso y el registro—.
    *
-   * Comparte primitivo con `--color-coin` y aun así es un token aparte, a
-   * propósito: si el token de moneda pintara también fondos, dejaría de
-   * significar «monedas» y la advertencia del design de `add-design-system` se
-   * cumpliría. Un mismo valor puede tener dos papeles; lo que no puede es
-   * tener un solo nombre para los dos.
+   * Es índigo profundo y NO ámbar, y esa fue la corrección grande. El acceso es
+   * la única pantalla del producto que mira un adulto: la calidez le
+   * corresponde al niño —su inicio, sus tareas, sus premios— y en la puerta se
+   * lee como juguete justo donde alguien decide si esto es de fiar.
+   *
+   * El ámbar no desaparece, cambia de papel: deja de ser el fondo y pasa a ser
+   * el ACENTO. Pintando media pantalla no decía nada; sobre índigo, un punto
+   * ámbar es dinero.
    */
-  --color-brand: var(--mnd-amber-400);
+  --color-brand: var(--mnd-indigo-800);
+  /** El pie del degradado de un panel de marca: es lo que le da cuerpo. */
+  --color-brand-deep: var(--mnd-indigo-700);
+  /** Trazos y bordes DIBUJADOS sobre la marca, que tienen que distinguirse. */
+  --color-brand-line: var(--mnd-indigo-600);
+  /** Y el apagado, para lo que solo tiene que insinuarse: la traza de una órbita. */
+  --color-brand-soft: var(--mnd-indigo-300);
 
   --color-coin: var(--mnd-amber-400);
   --color-coin-soft: var(--mnd-amber-100);
@@ -173,6 +211,13 @@
    */
   --animate-disc: mnd-orbit 44s linear infinite;
   --animate-disc-reverse: mnd-orbit-reverse 44s linear infinite;
+  /*
+   * El anillo de fuera va más lento. Es lo mismo que hacen las órbitas de la
+   * puerta pública: cuanto más fuera, más despacio, para que el conjunto se lea
+   * como un sistema y no como tres cosas girando.
+   */
+  --animate-disc-slow: mnd-orbit 70s linear infinite;
+  --animate-disc-slow-reverse: mnd-orbit-reverse 70s linear infinite;
 }
 
 @keyframes mnd-orbit {
@@ -194,17 +239,74 @@
 }
 
 /* ------------------------------------------------------------------ *
- * La tinta secundaria depende de DÓNDE está.
+ * Los neutros dependen de DÓNDE están.
  *
- * Sobre el color de la marca, el gris de la superficie clara se lava y el texto
- * de ayuda deja de leerse. El token no cambia de significado —sigue siendo
- * «texto secundario»—, cambia de valor según la superficie, igual que la escala
- * cambia los tamaños según la audiencia. Así ninguna pantalla tiene que
- * acordarse, que es justo lo que la capa semántica existe para evitar.
+ * Es el mismo mecanismo que la escala, y por eso se eligió: un token no cambia
+ * de significado —«texto secundario» sigue siendo texto secundario—, cambia de
+ * VALOR según dónde está. Una pieza sigue pidiendo `text-ink` sin saber sobre
+ * qué superficie la han apoyado, que es justo lo que la capa semántica existe
+ * para permitir.
+ *
+ *   La escala                      La superficie
+ *   ─────────                      ─────────────
+ *   [data-scale="child"]           [data-surface="brand"]
+ *   --text-hero: 4rem              --color-ink: claro
+ *   --radius-card: 1.5rem          --color-surface-raised: oscuro
+ *   por AUDIENCIA                  por FONDO
+ *
+ * SOBRE OSCURO NO BASTA CON INVERTIR LA TINTA, y esa es la trampa. Si solo
+ * cambiara `--color-ink`, la etiqueta de un campo quedaría bien y el TEXTO
+ * DENTRO del campo saldría claro sobre un campo blanco. Por eso la superficie
+ * reasigna también las superficies: `--color-surface-raised` pasa a índigo, el
+ * campo deja de ser una píldora blanca y pasa a ser un campo oscuro con texto
+ * claro, y `Input` y `Field` componen solos sin enterarse.
+ *
+ * `Alert` NO compone, porque sus cuatro tonos traen su propio fondo claro. Lo
+ * resuelve la pantalla del registro, y está explicado allí.
+ *
+ * NADA de esto sale de este selector, así que el resto de la aplicación no se
+ * entera. Eso hay que comprobarlo abriendo pantallas, no suponerlo: es el
+ * riesgo real de tocar tokens y no lo cubre ningún test.
  * ------------------------------------------------------------------ */
 
 [data-surface="brand"] {
-  --color-ink-muted: var(--mnd-amber-800);
+  --color-ink: var(--mnd-slate-0);
+  --color-ink-muted: var(--mnd-indigo-200);
+
+  /* Un campo sobre el panel es más CLARO que él, no blanco: sobre oscuro, una
+     píldora blanca es un agujero. */
+  --color-surface-raised: var(--mnd-indigo-700);
+  --color-surface-sunken: var(--mnd-indigo-800);
+  --color-border: var(--mnd-indigo-600);
+  --color-border-strong: var(--mnd-indigo-500);
+
+  /* Sombras más profundas: sobre un fondo oscuro, la sombra clara del sistema
+     no separa nada. */
+  --shadow-card:
+    0 1px 2px oklch(var(--mnd-indigo-shadow) / 0.3), 0 4px 12px oklch(var(--mnd-indigo-shadow) / 0.25);
+  --shadow-raised:
+    0 2px 4px oklch(var(--mnd-indigo-shadow) / 0.35), 0 12px 28px oklch(var(--mnd-indigo-shadow) / 0.4);
+}
+
+/*
+ * Vuelta a la superficie CLARA, para lo que trae su propio fondo claro dentro
+ * de una superficie de color.
+ *
+ * `Alert` pinta su fondo suave y su borde: es una superficie clara esté donde
+ * esté. Sin esto, dentro del acceso su cuerpo heredaba la tinta clara del panel
+ * y salía blanco sobre azul claro. Pasó, y no lo caza ningún test.
+ *
+ * Repite las referencias a los primitivos, no sus valores: si un primitivo
+ * cambia, este bloque lo sigue. Es la contrapartida de que una superficie pueda
+ * reasignar neutros, y hace falta en cuanto una anida dentro de otra.
+ */
+[data-surface="default"] {
+  --color-ink: var(--mnd-slate-900);
+  --color-ink-muted: var(--mnd-slate-500);
+  --color-surface-raised: var(--mnd-slate-0);
+  --color-surface-sunken: var(--mnd-slate-100);
+  --color-border: var(--mnd-slate-200);
+  --color-border-strong: var(--mnd-slate-300);
 }
 
 /* ------------------------------------------------------------------ *
@@ -284,6 +386,15 @@
 
 @utility rounded-control {
   border-radius: var(--radius-control);
+}
+
+/*
+ * El radio de un PANEL. `rounded-card` son 0.75rem, correctos para una tarjeta
+ * de lista y pequeños para media pantalla: con ellos un panel parece una caja.
+ * Reutiliza el radio de la lámina, que ya describe «una superficie grande».
+ */
+@utility rounded-panel {
+  border-radius: var(--radius-sheet);
 }
 
 @utility rounded-t-sheet {

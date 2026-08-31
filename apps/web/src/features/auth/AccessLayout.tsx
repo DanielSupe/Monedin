@@ -56,7 +56,7 @@ export function AccessLayout({
       */}
       <div
         aria-hidden="true"
-        className="absolute -top-24 right-0 hidden size-96 rounded-full bg-brand/30 blur-3xl lg:block"
+        className="absolute -top-24 right-0 hidden size-96 rounded-full bg-brand/10 blur-3xl lg:block"
       />
 
       <div className="relative mx-auto flex min-h-dvh w-full max-w-(--container-wide) flex-col justify-center gap-6 lg:flex-row lg:items-stretch lg:justify-center lg:gap-10 lg:px-8 lg:py-12">
@@ -68,22 +68,26 @@ export function AccessLayout({
           texto de ayuda deja de leerse. Lo resuelve `tokens.css`, no esta
           pantalla.
         */}
-        <section
-          data-surface="brand"
-          className="rounded-card relative flex flex-col overflow-hidden bg-surface-raised text-ink shadow-raised max-lg:rounded-none lg:w-96 lg:shrink-0"
-        >
-          {/*
-            El ámbar llega al 75% y se va en degradado, como la mancha de la
-            maqueta. Es una capa detrás del contenido y no el fondo del panel:
-            así el cuarto de abajo queda blanco y la salida al otro formulario
-            se apoya en él.
-          */}
+        {/*
+          El panel: base BLANCA, y dentro un bloque oscuro que ocupa la mayor
+          parte. La superficie de marca es el BLOQUE y no el panel entero, y esa
+          distinción es lo que deja el pie en blanco: dentro del selector,
+          `--color-surface-raised` es índigo, así que un pie que lo usara se
+          volvería oscuro y el enlace se perdería. Pasó.
+        */}
+        <section className="rounded-panel flex flex-col overflow-hidden bg-surface-raised text-ink shadow-raised max-lg:rounded-none lg:w-96 lg:shrink-0">
           <div
-            aria-hidden="true"
-            className="absolute inset-x-0 top-0 h-3/4 bg-linear-to-b from-brand from-85% to-transparent"
-          />
-
-          <div className="relative flex flex-1 flex-col justify-center gap-6 px-6 pt-10 pb-6">
+            data-surface="brand"
+            /*
+              `text-ink` va AQUÍ y no en el panel de fuera, y la diferencia no
+              es cosmética: una utilidad resuelve la variable DONDE se aplica, y
+              el color ya resuelto se hereda. Puesto fuera, `text-ink` valía la
+              tinta oscura y bajaba oscura al bloque, así que el saludo salía
+              casi invisible sobre el índigo. Las etiquetas se veían bien porque
+              `Field` aplica su propio `text-ink` ya dentro del selector.
+            */
+            className="flex flex-1 flex-col justify-center gap-6 bg-brand px-6 pt-10 pb-12 text-ink"
+          >
             <div className="flex flex-col gap-1">
               <h2 className="text-hero font-extrabold">{messages.auth.accessGreeting}</h2>
               <p className="text-body">{lead}</p>
@@ -92,7 +96,16 @@ export function AccessLayout({
             {children}
           </div>
 
-          <footer className="relative px-6 pb-8 text-center">{footer}</footer>
+          {/*
+            La lámina blanca, con la esquina redondeada de la maqueta y NO un
+            degradado. El degradado se diseñó cuando el panel era ámbar claro y
+            se desvanecía hacia el blanco; de índigo profundo a blanco el mismo
+            recorrido pasa por grises y ensucia. La maqueta dibuja una lámina, y
+            sobre oscuro es además lo que se lee limpio.
+          */}
+          <footer className="rounded-t-sheet -mt-6 bg-surface-raised px-6 py-6 text-center">
+            {footer}
+          </footer>
         </section>
       </div>
     </div>
@@ -111,7 +124,7 @@ export function AccessLayout({
  */
 function PresentationPanel({ tagline }: { tagline: string }): React.ReactElement {
   return (
-    <section className="rounded-card flex flex-col justify-between gap-8 bg-surface-raised px-6 pt-6 pb-10 text-ink shadow-raised max-lg:rounded-none max-lg:shadow-none lg:mt-10 lg:mb-0 lg:w-96 lg:shrink-0 lg:px-8 lg:pt-8">
+    <section className="rounded-panel flex flex-col justify-between gap-8 bg-surface-raised px-6 pt-6 pb-10 text-ink shadow-raised max-lg:rounded-none max-lg:shadow-none lg:mt-10 lg:mb-0 lg:w-96 lg:shrink-0 lg:px-8 lg:pt-8">
       {/* La marca vuelve a la puerta pública, que es de donde se viene. */}
       <Link to="/welcome" className="self-start no-underline">
         <Logo size="medium" />

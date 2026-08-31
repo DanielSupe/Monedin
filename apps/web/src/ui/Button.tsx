@@ -1,17 +1,30 @@
 import { type ButtonHTMLAttributes, forwardRef } from "react";
 import { cx } from "./cx.js";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "contrast";
 
 /**
  * El tono no se elige por color sino por lo que la acción SIGNIFICA. Por eso
- * son cuatro nombres y no una paleta: quien usa la pieza no decide un color.
+ * son nombres y no una paleta: quien usa la pieza no decide un color.
+ *
+ * `contrast` es la acción principal cuando el fondo YA es del color de la
+ * marca. No se llama `onBrand` ni `inverse` porque eso describiría el color y
+ * no el papel; lo que promete es «destaca contra su superficie».
+ *
+ * Y esa promesa ya se cobró: nació de tinta oscura, cuando la superficie era
+ * ámbar claro, y al pasar el acceso a índigo profundo cambió a ámbar sin tocar
+ * su nombre ni un solo punto de uso. Eso es exactamente lo que se gana
+ * nombrando por el papel y no por el color.
+ *
+ * Sobre índigo, el ámbar es además el único punto cálido de la pantalla, y
+ * significa lo que el producto entero enseña: dinero.
  */
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: "border-primary bg-primary text-ink-inverted hover:bg-primary-hover",
   secondary: "border-border-strong bg-surface-raised text-ink hover:bg-surface-sunken",
   ghost: "border-transparent bg-transparent text-primary hover:bg-primary-soft",
   danger: "border-danger bg-danger text-ink-inverted hover:brightness-110",
+  contrast: "border-coin bg-coin text-coin-ink hover:brightness-105",
 };
 
 /**

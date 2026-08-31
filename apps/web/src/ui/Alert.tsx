@@ -50,6 +50,12 @@ export function Alert({
   return (
     <div
       role={ROLES[tone]}
+      /*
+        Un aviso trae su propio fondo claro, así que ES una superficie clara
+        esté donde esté. Sin decirlo, dentro de una superficie de color su
+        cuerpo hereda la tinta de esa superficie y sale claro sobre claro.
+      */
+      data-surface="default"
       className={cx("rounded-card text-body border-l-4 p-3", TONES[tone], className)}
     >
       {title !== undefined && <p className="font-bold">{title}</p>}

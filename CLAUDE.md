@@ -678,6 +678,41 @@ contrato, nunca escrito a mano: tenerlo en dos sitios acaba con uno de los dos m
 piden dos credenciales en la misma pantalla, se explica para qué sirve cada una — si no, parece un
 error del producto.
 
+**El acceso va en ÍNDIGO PROFUNDO, y el ámbar es el acento.** Es la única pantalla del producto que
+mira un adulto: la calidez le corresponde al niño —su inicio, sus tareas, sus premios— y en la puerta
+se lee como juguete justo donde alguien decide si esto es de fiar. El ámbar no desaparece, cambia de
+papel: pintando media pantalla no decía nada, y sobre índigo un punto ámbar **es dinero**. La
+rejilla, el PIN y la puerta pública siguen claros.
+
+**Los neutros y las superficies se reasignan por SUPERFICIE, igual que los tamaños por audiencia.**
+`[data-surface="brand"]` cambia el valor de la tinta, los bordes, las sombras **y
+`--color-surface-raised`**. Esto último no es un detalle: sobre un fondo oscuro no basta con invertir
+la tinta, porque un campo blanco acabaría con texto claro dentro. Reasignando también la superficie,
+el campo pasa a ser oscuro y `Input` y `Field` componen solos.
+
+**Y hace falta el camino de vuelta.** Un componente que pinta su propio fondo claro —`Alert`— es una
+superficie clara esté donde esté, y lo declara con `[data-surface="default"]`. Sin eso, dentro del
+acceso su cuerpo salía blanco sobre azul claro. Lo declara **el componente que pinta el fondo**, no
+la pantalla que lo coloca.
+
+**Una utilidad de color resuelve el token DONDE se escribe, no donde acaba el píxel.** Poner
+`text-ink` en el contenedor de fuera y esperar que un bloque interior con otra superficie lo resuelva
+distinto no funciona: el color ya resuelto se hereda. Si un bloque cambia de superficie, declara su
+tinta él mismo.
+
+**Un color de superficie necesita RAMPA, no un valor.** Pasos oscuros para pintar y claros para lo
+que va encima, en la capa 1 —que no genera utilidades—, y solo se llega a ellos por semánticos que
+dicen para qué sirven: `--color-brand-deep` para el pie de un degradado, `--color-brand-line` para lo
+que se dibuja encima y `--color-brand-soft` para lo que solo se insinúa.
+
+**La acción principal no compite con su fondo**, ni vibrando contra él ni desapareciendo en él. Para
+eso está la variante `contrast` de `Button`, que como las otras se nombra por el **papel** y no por
+el color — y esa decisión ya se cobró: pasó de tinta oscura a ámbar al cambiar la superficie, sin
+tocar su nombre ni un solo punto de uso.
+
+**Al tocar tokens hay que abrir pantallas del padre y del niño para confirmar que no se enteraron**,
+porque eso no lo cubre ningún test.
+
 **Una pieza declara sus variantes; no se le imponen con clases.** `cx` no es `twMerge` —lo dice su
 propio comentario— así que dos utilidades del mismo grupo las resuelve el orden del CSS generado, no
 el del código: un fallo que no se ve leyendo y que no tiene por qué ser estable entre compilaciones.
