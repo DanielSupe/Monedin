@@ -44,10 +44,6 @@ const SIN_VESTIR = [
    * con color escrito a mano.
    */
   "features/auth/ResetPinScreen.tsx",
-  "features/children/ChildForm.tsx",
-  "features/children/ChildrenList.tsx",
-  "features/children/CreateProfileScreen.tsx",
-  "features/children/EditChildScreen.tsx",
 ];
 
 function estaSinVestir(ruta: string): boolean {
@@ -107,7 +103,12 @@ describe("el estilo no se escribe fuera de los tokens", () => {
     // Y 5: `redesign-parent-authoring` se llevó las tres pantallas donde el
     // padre ESCRIBE. Lo que queda es entero de `children/`, más la vía de
     // rescate.
-    expect(SIN_VESTIR).toHaveLength(5);
+    //
+    // Y 1: `redesign-parent-children` se llevó las cuatro de `children/`. Lo
+    // único que queda es la vía de rescate, que se abre SIN sesión y va con la
+    // puerta de entrada. Cuando se la lleve su change, se borra este bloque y la
+    // regla cubre todo `src`.
+    expect(SIN_VESTIR).toHaveLength(1);
   });
 
   it("ningún color literal fuera de tokens.css", () => {

@@ -13,17 +13,23 @@ import { ChildForm } from "./ChildForm.js";
  *
  * Que no pida el PIN de adulto NO significa que valga cualquiera: si el perfil
  * activo es el de un niño, la API responde 403 y aquí se ve el mensaje.
+ *
+ * Al vestirla hay que recordar que su marco es `EntryShell` y no el del padre:
+ * es la única de las cuatro que vive en los dos lados, así que no puede asumir
+ * ancho ni escala. `ChildForm` ya declara el suyo.
  */
 export function CreateProfileScreen(): React.ReactElement {
   const navigate = useNavigate();
   const volver = (): void => void navigate({ to: "/profiles" });
 
   return (
-    <section>
-      <ChildForm
-        onSaved={volver}
-        cancel={<Link to="/profiles">{messages.children.cancel}</Link>}
-      />
-    </section>
+    <ChildForm
+      onSaved={volver}
+      cancel={
+        <Link to="/profiles" className="text-small">
+          {messages.children.cancel}
+        </Link>
+      }
+    />
   );
 }

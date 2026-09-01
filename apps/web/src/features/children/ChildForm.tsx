@@ -10,7 +10,9 @@ import {
 } from "@monedin/contracts";
 import { type ReactNode, useState } from "react";
 import * as childrenApi from "../../api/children.js";
+import { alertToneFor } from "../../lib/alert-tone.js";
 import { messages } from "../../lib/messages.js";
+import { Alert, Button, Card, Field, Input } from "../../ui/index.js";
 import { AvatarPicker } from "./AvatarPicker.js";
 import { describeChildrenError, useCreateChild, useUpdateChild } from "./use-children.js";
 
@@ -37,8 +39,7 @@ export function ChildForm({
    *
    * Es un evento de DOMINIO, no una orden de cerrarse: este formulario se usa
    * desde la rejilla y desde la gestión del padre, y cada una navega a un sitio
-   * distinto. Distinto del antiguo `onDone`, que era «ciérrame» y empujaba la
-   * navegación a quien llamara.
+   * distinto.
    */
   onSaved: () => void;
   /**
@@ -57,7 +58,9 @@ export function ChildForm({
 
   const [name, setName] = useState(child?.name ?? "");
   const [pin, setPin] = useState("");
-  const [age, setAge] = useState(child?.age === null || child?.age === undefined ? "" : String(child.age));
+  const [age, setAge] = useState(
+    child?.age === null || child?.age === undefined ? "" : String(child.age),
+  );
   // Puede arrancar como una URL —si el hijo ya tiene foto— o como una clave del
   // catálogo. Solo se manda al servidor cuando es una clave: una URL es lo que
   // YA está guardado, no un cambio que pedir.
@@ -109,81 +112,88 @@ export function ChildForm({
   const error = fieldError ?? (mutation.error ? describeChildrenError(mutation.error) : undefined);
 
   return (
-    <section style={{ maxWidth: "24rem" }}>
-      <h2>{editing ? messages.children.editChildTitle : messages.children.newChildTitle}</h2>
+    <section className="flex w-full max-w-md flex-col gap-4">
+      <h2 className="text-title font-bold">
+        {editing ? messages.children.editChildTitle : messages.children.newChildTitle}
+      </h2>
 
-      <form onSubmit={submit} style={{ display: "grid", gap: "0.75rem" }}>
-        <label>
-          {messages.children.name}
-          <input
-            type="text"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            style={{ display: "block", width: "100%" }}
-          />
-        </label>
-
-        {!editing && (
-          <label>
-            {messages.children.pin}
-            <input
+      <Card>
+        <form onSubmit={submit} className="flex flex-col gap-4">
+          <Field label={messages.children.name}>
+            <Input
               type="text"
-              inputMode="numeric"
-              maxLength={PIN_LENGTH}
-              value={pin}
-              onChange={(event) => setPin(event.target.value)}
-              style={{ display: "block", width: "100%" }}
+              value={name}
+              onChange={(evento) => setName(evento.target.value)}
             />
-            <small style={{ color: "#555" }}>{messages.children.pinHelp}</small>
-          </label>
-        )}
+          </Field>
 
-        <label>
-          {messages.children.ageOptional}
-          <input
-            type="number"
-            min={CHILD_AGE_MIN}
-            max={CHILD_AGE_MAX}
-            value={age}
-            onChange={(event) => setAge(event.target.value)}
-            style={{ display: "block", width: "100%" }}
+          {!editing && (
+            <Field label={messages.children.pin} help={messages.children.pinHelp}>
+              <Input
+                type="text"
+                inputMode="numeric"
+                maxLength={PIN_LENGTH}
+                value={pin}
+                onChange={(evento) => setPin(evento.target.value)}
+              />
+            </Field>
+          )}
+
+          <Field label={messages.children.ageOptional}>
+            <Input
+              type="number"
+              min={CHILD_AGE_MIN}
+              max={CHILD_AGE_MAX}
+              value={age}
+              onChange={(evento) => setAge(evento.target.value)}
+            />
+          </Field>
+
+          {/*
+            Subir foto solo al EDITAR: la clave de subida lleva dentro el
+            identificador del perfil, que no existe mientras se está creando.
+
+            Es una DEUDA CONOCIDA, no un olvido, y desde `redesign-parent-children`
+            tiene dueño: un change propio, después de que la lista de deuda de
+            estilos quede vacía. El dato que faltaba para elegir camino ya está
+            medido: los CINCO endpoints de subida del proyecto cuelgan del
+            identificador de una entidad que ya existe, así que hacerlo en un solo
+            momento exige un endpoint nuevo bajo el prefijo del padre —el primer
+            cambio de API de esta etapa— y una política para las fotos de quien
+            sube y luego no crea.
+          */}
+          <AvatarPicker
+            value={avatar}
+            onChange={setAvatar}
+            label={messages.children.avatar}
+            {...(editing
+              ? {
+                  requestUploadUrl: (contentType: ImageContentType) =>
+                    childrenApi.requestChildAvatarUploadUrl(child.id, contentType),
+                  onUpload: (avatarUploadKey: string) => {
+                    update.mutate({ childId: child.id, input: { avatarUploadKey } });
+                    setAvatar(undefined);
+                  },
+                }
+              : {})}
           />
-        </label>
 
-        {/* Subir foto solo al EDITAR: la clave lleva dentro el identificador
-            del perfil, que no existe mientras se está creando. */}
-        <AvatarPicker
-          value={avatar}
-          onChange={setAvatar}
-          label={messages.children.avatar}
-          {...(editing
-            ? {
-                requestUploadUrl: (contentType: ImageContentType) =>
-                  childrenApi.requestChildAvatarUploadUrl(child.id, contentType),
-                onUpload: (avatarUploadKey: string) => {
-                  update.mutate({ childId: child.id, input: { avatarUploadKey } });
-                  setAvatar(undefined);
-                },
-              }
-            : {})}
-        />
+          {error !== undefined && (
+            <Alert tone={mutation.error ? alertToneFor(mutation.error) : "danger"}>{error}</Alert>
+          )}
 
-        <button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending
-            ? messages.children.working
-            : editing
-              ? messages.children.save
-              : messages.children.create}
-        </button>
-      </form>
-
-      {error !== undefined && (
-        <p role="alert" style={{ color: "#b00020" }}>
-          {error}
-        </p>
-      )}
-
-      <p style={{ marginTop: "1rem" }}>{cancel}</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button type="submit" variant="primary" pending={mutation.isPending}>
+              {mutation.isPending
+                ? messages.children.working
+                : editing
+                  ? messages.children.save
+                  : messages.children.create}
+            </Button>
+            {cancel}
+          </div>
+        </form>
+      </Card>
     </section>
   );
 }

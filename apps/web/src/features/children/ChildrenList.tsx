@@ -1,8 +1,23 @@
 import { PIN_LENGTH, type Child } from "@monedin/contracts";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { alertToneFor } from "../../lib/alert-tone.js";
 import { messages } from "../../lib/messages.js";
-import { Avatar } from "../../ui/Avatar.js";
+import {
+  Alert,
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  Coins,
+  Dialog,
+  EmptyState,
+  Field,
+  Input,
+  Pagination,
+  Skeleton,
+  buttonClasses,
+} from "../../ui/index.js";
 import { useSetChildPin, useUnlockChildProfile } from "../auth/use-session.js";
 import { describeChildrenError, useChildren, useDeactivateChild } from "./use-children.js";
 
@@ -11,166 +26,240 @@ import { describeChildrenError, useChildren, useDeactivateChild } from "./use-ch
  *
  * Reponer el PIN y desbloquear NO son endpoints de este módulo: son los de
  * `auth` que ya existían. Cambiar una credencial y revocar sesiones es suyo.
+ *
+ * Era la CUARTA y última pantalla que reescribía a mano el bloque de
+ * paginación. Con esta, `Pagination` tiene todos sus consumidores y no queda
+ * ninguna copia.
  */
 export function ChildrenList({ page }: { page: number }): React.ReactElement {
   const { data, isPending, error } = useChildren(page);
 
-  if (isPending) {
-    return <p>{messages.health.loading}</p>;
-  }
-
-  if (error) {
-    return (
-      <p role="alert" style={{ color: "#b00020" }}>
-        {describeChildrenError(error)}
-      </p>
-    );
-  }
-
   const hijos = data?.items ?? [];
 
   return (
-    <section>
-      <h2>{messages.children.title}</h2>
+    <section className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-title font-bold">{messages.children.title}</h2>
+        <Link to="/children/new" className={buttonClasses("primary")}>
+          {messages.children.addChild}
+        </Link>
+      </div>
 
-      {hijos.length === 0 ? (
-        <p>{messages.children.empty}</p>
+      {isPending ? (
+        <Skeleton lines={4} />
+      ) : error ? (
+        <Alert tone={alertToneFor(error)}>{describeChildrenError(error)}</Alert>
+      ) : hijos.length === 0 ? (
+        <EmptyState glyph="🧒" title={messages.children.empty} />
       ) : (
-        <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "0.75rem" }}>
+        <ul className="flex list-none flex-col gap-3 p-0">
           {hijos.map((child) => (
             <ChildRow key={child.id} child={child} />
           ))}
         </ul>
       )}
 
-      {data !== undefined && data.totalPages > 1 && (
-        <nav style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", alignItems: "center" }}>
-          {page > 1 && (
-            <Link to="/children" search={{ page: page - 1 }}>
-              {messages.ui.previousPage}
-            </Link>
-          )}
-          <span>
-            {data.page} / {data.totalPages}
-          </span>
-          {page < data.totalPages && (
-            <Link to="/children" search={{ page: page + 1 }}>
-              {messages.ui.nextPage}
-            </Link>
-          )}
-        </nav>
+      {data !== undefined && (
+        <Pagination
+          page={data.page}
+          totalPages={data.totalPages}
+          {...(page > 1
+            ? {
+                previous: (
+                  <Link
+                    to="/children"
+                    search={{ page: page - 1 }}
+                    className={buttonClasses("secondary")}
+                  >
+                    {messages.ui.previousPage}
+                  </Link>
+                ),
+              }
+            : {})}
+          {...(page < data.totalPages
+            ? {
+                next: (
+                  <Link
+                    to="/children"
+                    search={{ page: page + 1 }}
+                    className={buttonClasses("secondary")}
+                  >
+                    {messages.ui.nextPage}
+                  </Link>
+                ),
+              }
+            : {})}
+        />
       )}
-
-      <p style={{ marginTop: "1rem" }}>
-        <Link to="/children/new">{messages.children.addChild}</Link>
-      </p>
     </section>
   );
 }
 
 function ChildRow({ child }: { child: Child }): React.ReactElement {
-  const [confirming, setConfirming] = useState(false);
-  const [newPin, setNewPin] = useState("");
-  const [changingPin, setChangingPin] = useState(false);
+  /* Dos revelaciones, no dos destinos: ninguna decide qué PANTALLA se enseña. */
+  const [confirmando, setConfirmando] = useState(false);
+  const [reponiendoPin, setReponiendoPin] = useState(false);
+  const [pinNuevo, setPinNuevo] = useState("");
 
   const deactivate = useDeactivateChild();
   const setPin = useSetChildPin();
   const unlock = useUnlockChildProfile();
 
+  function reponer(evento: React.FormEvent): void {
+    // Un `<form>` y no un campo suelto con un botón al lado: teclear cuatro
+    // dígitos y pulsar Enter es lo que hace cualquiera. Misma regla que
+    // `redesign-parent-authoring` aplicó a las tres pantallas de escritura.
+    evento.preventDefault();
+    setPin.mutate(
+      { childProfileId: child.id, pin: pinNuevo },
+      {
+        onSuccess: () => {
+          setPinNuevo("");
+          setReponiendoPin(false);
+        },
+      },
+    );
+  }
+
   return (
-    <li style={{ border: "1px solid #ccc", padding: "0.75rem" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-        <Avatar value={child.avatar} size="small" />
-        <span style={{ flex: 1 }}>
-          <strong>{child.name}</strong>
-          {child.age !== null && <span> · {child.age}</span>}
-          <span>
-            {" · "}
-            {child.coins} {messages.children.coins.toLowerCase()}
-          </span>
-          {child.locked && <span style={{ color: "#b00020" }}> · {messages.children.locked}</span>}
-        </span>
-      </div>
+    <li>
+      <Card>
+        <div className="flex min-w-0 flex-col gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-3">
+            <Avatar value={child.avatar} size="small" />
 
-      <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.5rem", flexWrap: "wrap" }}>
-        <Link to="/children/$childId/edit" params={{ childId: child.id }}>
-          {messages.children.edit}
-        </Link>
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <p className="truncate text-body font-bold">{child.name}</p>
+              {child.age !== null && (
+                <p className="text-small text-ink-muted">
+                  {messages.children.age}: {child.age}
+                </p>
+              )}
+            </div>
 
-        <button type="button" onClick={() => setChangingPin(!changingPin)}>
-          {messages.children.resetPin}
-        </button>
+            <Coins amount={child.coins} />
 
-        {child.locked && (
-          <button type="button" onClick={() => unlock.mutate(child.id)} disabled={unlock.isPending}>
-            {messages.children.unlock}
-          </button>
-        )}
+            {/*
+              Bloqueado va en ADVERTENCIA y no en peligro. Significa que ese niño
+              falló el PIN varias veces: no es una avería ni una culpa de nadie, y
+              el rojo se lo diría. Mismo criterio que un canje rechazado y que un
+              409. Y el tono acompaña al texto, nunca lo sustituye.
+            */}
+            {child.locked && <Badge tone="warning">{messages.children.locked}</Badge>}
+          </div>
 
-        <button type="button" onClick={() => setConfirming(true)}>
-          {messages.children.deactivate}
-        </button>
-      </div>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              to="/children/$childId/edit"
+              params={{ childId: child.id }}
+              className={buttonClasses("secondary")}
+            >
+              {messages.children.edit}
+            </Link>
 
-      {changingPin && (
-        <div style={{ marginTop: "0.5rem" }}>
-          <label>
-            {messages.children.pin}
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={PIN_LENGTH}
-              value={newPin}
-              onChange={(event) => setNewPin(event.target.value)}
-              style={{ display: "block" }}
-            />
-          </label>
-          <button
-            type="button"
-            disabled={setPin.isPending}
-            onClick={() =>
-              setPin.mutate(
-                { childProfileId: child.id, pin: newPin },
-                {
-                  onSuccess: () => {
-                    setNewPin("");
-                    setChangingPin(false);
-                  },
-                },
-              )
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => setReponiendoPin((abierto) => !abierto)}
+            >
+              {messages.children.resetPin}
+            </Button>
+
+            {/* Solo si lo está: ofrecer desbloquear un perfil que no está
+                bloqueado es prometer algo que no hace nada. */}
+            {child.locked && (
+              <Button
+                type="button"
+                variant="secondary"
+                pending={unlock.isPending}
+                onClick={() => unlock.mutate(child.id)}
+              >
+                {messages.children.unlock}
+              </Button>
+            )}
+
+            <Button type="button" variant="danger" onClick={() => setConfirmando(true)}>
+              {messages.children.deactivate}
+            </Button>
+          </div>
+
+          {unlock.error !== null && (
+            <Alert tone={alertToneFor(unlock.error)}>{describeChildrenError(unlock.error)}</Alert>
+          )}
+
+          {reponiendoPin && (
+            <form onSubmit={reponer} className="flex flex-col gap-3 border-t border-border pt-3">
+              <Field label={messages.children.pin} help={messages.children.pinHelp}>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={PIN_LENGTH}
+                  value={pinNuevo}
+                  onChange={(evento) => setPinNuevo(evento.target.value)}
+                  className="w-32"
+                />
+              </Field>
+
+              {setPin.error !== null && (
+                <Alert tone={alertToneFor(setPin.error)}>
+                  {describeChildrenError(setPin.error)}
+                </Alert>
+              )}
+
+              <div className="flex flex-wrap gap-2">
+                <Button type="submit" variant="primary" pending={setPin.isPending}>
+                  {messages.children.save}
+                </Button>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setReponiendoPin(false)}
+                >
+                  {messages.children.cancel}
+                </Button>
+              </div>
+            </form>
+          )}
+
+          {/*
+            La baja va en un DIÁLOGO, y el argumento es la asimetría: retirar un
+            premio se revierte publicándolo otra vez y ya se pregunta con uno;
+            dar de baja un perfil NO se deshace y se preguntaba con un párrafo y
+            dos botones sueltos dentro de la fila. En una tablet que se usa con el
+            dedo, eso deja una acción destructiva a un toque de la fila de al
+            lado.
+          */}
+          <Dialog
+            open={confirmando}
+            onOpenChange={setConfirmando}
+            title={messages.children.deactivate}
+            description={messages.children.deactivateConfirm}
+            footer={
+              <>
+                <Button type="button" variant="secondary" onClick={() => setConfirmando(false)}>
+                  {messages.children.cancel}
+                </Button>
+                <Button
+                  type="button"
+                  variant="danger"
+                  pending={deactivate.isPending}
+                  onClick={() =>
+                    deactivate.mutate(child.id, { onSuccess: () => setConfirmando(false) })
+                  }
+                >
+                  {messages.children.deactivateSubmit}
+                </Button>
+              </>
             }
           >
-            {messages.children.save}
-          </button>
-          {setPin.error !== null && (
-            <p role="alert" style={{ color: "#b00020" }}>
-              {describeChildrenError(setPin.error)}
-            </p>
-          )}
+            {deactivate.error !== null && (
+              <Alert tone={alertToneFor(deactivate.error)}>
+                {describeChildrenError(deactivate.error)}
+              </Alert>
+            )}
+          </Dialog>
         </div>
-      )}
-
-      {confirming && (
-        <div style={{ marginTop: "0.5rem" }}>
-          {/* La baja no se puede deshacer, así que se dice ANTES y no después. */}
-          <p role="alert">{messages.children.deactivateConfirm}</p>
-          <button
-            type="button"
-            disabled={deactivate.isPending}
-            onClick={() => deactivate.mutate(child.id, { onSuccess: () => setConfirming(false) })}
-          >
-            {messages.children.deactivateSubmit}
-          </button>
-          <button type="button" onClick={() => setConfirming(false)}>
-            {messages.children.cancel}
-          </button>
-          {deactivate.error !== null && (
-            <p role="alert" style={{ color: "#b00020" }}>
-              {describeChildrenError(deactivate.error)}
-            </p>
-          )}
-        </div>
-      )}
+      </Card>
     </li>
   );
 }

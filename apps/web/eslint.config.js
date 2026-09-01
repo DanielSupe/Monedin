@@ -91,9 +91,5 @@ export default [
      * resto de la puerta de entrada.
      */
     "src/features/auth/ResetPinScreen.tsx",
-    "src/features/children/ChildForm.tsx",
-    "src/features/children/ChildrenList.tsx",
-    "src/features/children/CreateProfileScreen.tsx",
-    "src/features/children/EditChildScreen.tsx",
   ]),
 ];

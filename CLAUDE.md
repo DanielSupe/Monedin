@@ -649,6 +649,18 @@ con el estado buscado. `GET /redemptions` sí pagina por fila y su `total` sí e
 cuentas del mismo panel se obtengan de dos maneras **no es una incoherencia que unificar**, es que
 las dos listas tienen unidades distintas porque sus pantallas las tienen.
 
+**Una acción irreversible se confirma con `Dialog`, y la ceremonia se mide contra lo que cuesta
+deshacerla.** Hasta `redesign-parent-children` estaba al revés: retirar un premio —que se revierte
+publicándolo otra vez— abría un diálogo, y dar de baja un perfil —que NO se deshace— preguntaba con
+un párrafo y dos botones sueltos dentro de la fila, a un toque de la fila del hijo de al lado en una
+tablet que se usa con el dedo.
+
+**Un hijo se edita en su ruta y un premio en línea, y NO es una incoherencia.** Son dos gestos de
+tamaño distinto: editar un premio es subir un precio o cambiar una foto y cabe en la tarjeta que ya
+se ve; editar un hijo es nombre, edad y avatar, y es un formulario entero. Lo incoherente sería que
+el mismo tipo de edición se hiciera de dos maneras. **Cerrado**: no se reabre sin un argumento nuevo
+sobre el tamaño de cada edición.
+
 **Reescribir un requisito es ARRASTRAR sus escenarios, no volver a redactar los que el argumento
 nuevo necesita.** `openspec archive` rechaza un bloque `MODIFIED` que se deje fuera un escenario que
 la spec vigente sí tiene, y ya lo ha hecho dos veces —en `pin-sidebar-on-desktop` y en
@@ -897,11 +909,22 @@ no se sabe quién está delante.
 **Un marco centra; el ancho lo declara cada pantalla.** `EntryShell` lo intentó imponer y partía la
 rejilla en dos filas. Solo la pantalla sabe si es un formulario de 22rem o una fila de caras.
 
-**Deuda conocida y sin decidir: no se puede subir una foto al CREAR un perfil**, solo elegir un
-animal. No es un olvido — la clave de subida lleva dentro el identificador del hijo, que no existe
-todavía—. Hay dos caminos con precios muy distintos: hacerlo en dos momentos sin tocar la API, o en
-uno solo abriendo una vía de subida bajo el prefijo del padre, con `avatarUploadKey` en el alta y una
-política para las fotos huérfanas. **No lo resuelvas de pasada en otro change.**
+**Deuda conocida: no se puede subir una foto al CREAR un perfil**, solo elegir un animal. No es un
+olvido — la clave de subida lleva dentro el identificador del hijo, que no existe todavía—.
+
+Desde `redesign-parent-children` tiene **dueño** —un change propio, cuando la lista de deuda de
+estilos quede vacía— y el dato que faltaba para elegir camino, ya medido: **los cinco endpoints de
+subida del proyecto cuelgan del identificador de una entidad que ya existe**, y ninguno del prefijo
+del padre. De ahí salen los dos precios:
+
+- **Dos momentos**: crear y aterrizar en la edición de ese hijo, donde el subidor ya está. Cero API,
+  pero **no sirve desde la rejilla** — esa alta se hace sin perfil activo y la edición exige ser el
+  padre.
+- **Un momento**: endpoint nuevo bajo el prefijo del padre, `avatarUploadKey` en el alta y una
+  política para las fotos de quien sube y luego no crea. Funciona en los dos sitios y sería el
+  **primer cambio de API de esta etapa**.
+
+**Sigue sin resolverse de pasada en otro change.**
 
 **Tres capas en el front, y la de en medio es nueva**: `ui/` no sabe de dominio ni de rutas; `app/`
 —los dos marcos— sabe de rol y de destinos pero no de negocio; `features/` sabe de negocio y ya no
