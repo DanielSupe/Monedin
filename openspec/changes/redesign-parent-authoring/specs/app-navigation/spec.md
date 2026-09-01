@@ -14,6 +14,16 @@ La regla SHALL comprobarse por la FORMA y no por una lista de nombres. `add-app-
 a `onDone`, y `onCancel` —que es lo mismo con otra palabra— pasó por delante del test en cinco
 archivos sin que saltara. Una convención que se comprueba por su nombre está a un sinónimo de morirse.
 
+#### Scenario: Un componente recibe una función de vuelta
+
+- **WHEN** un componente de pantalla declara una propiedad para que quien lo usa le diga cómo volver
+- **THEN** se considera un defecto, y la verificación del proyecto lo señala
+
+#### Scenario: Llegar a la misma pantalla desde dos sitios
+
+- **WHEN** se llega a un mismo destino desde dos pantallas distintas
+- **THEN** funciona igual en ambos casos, sin que el destino sepa desde dónde se llegó
+
 #### Scenario: Una pantalla que se abre desde dos sitios distintos
 
 - **WHEN** un formulario se usa desde dos destinos que van a sitios distintos al terminar
