@@ -19,6 +19,17 @@ export default [
     // de tokens. Toda la geometría está concentrada en ese archivo para que
     // esta excepción cubra lo mínimo.
     "src/features/landing/Orbits.tsx",
+    // La TERCERA, y cierra la pregunta que dejó abierta el design de
+    // `add-design-system`: `react-easy-crop` monta su lienzo dentro de un
+    // contenedor y necesita que tenga posición y una altura resuelta para medir
+    // su área. No hay token que exprese «lo que esa librería necesita para
+    // medir», y la alternativa era meter una utilidad de una sola pantalla en el
+    // archivo de tokens.
+    //
+    // Cubre lo MÍNIMO: de los tres estilos que traía ese archivo, el color
+    // —un `#333` literal— se fue a un token y solo quedan la altura y la
+    // posición.
+    "src/features/uploads/ImageUploadField.tsx",
   ]),
 
   /*
@@ -62,15 +73,13 @@ export default [
     "src/features/auth/ResetPinScreen.tsx",
     "src/features/auth/ChangePinScreen.tsx",
     "src/features/auth/ParentAvatarScreen.tsx",
-    "src/features/children/AvatarPicker.tsx",
     "src/features/children/ChildForm.tsx",
-    "src/features/children/ChildSettings.tsx",
     "src/features/children/ChildrenList.tsx",
     "src/features/children/CreateProfileScreen.tsx",
     "src/features/children/EditChildScreen.tsx",
     "src/features/redemptions/**/*.tsx",
     "src/features/rewards/**/*.tsx",
-    "src/features/tasks/**/*.tsx",
-    "src/features/uploads/**/*.tsx",
+    "src/features/tasks/TaskBatchList.tsx",
+    "src/features/tasks/TaskForm.tsx",
   ]),
 ];

@@ -34,14 +34,20 @@ export function ChildShell({ avatar }: { avatar: string | null }): React.ReactEl
       </header>
 
       {/*
-        `min-w-0` y `overflow-x-auto` porque las pantallas sin vestir desbordan:
-        sus listas usan grid, y un hijo ancho —el selector de archivo nativo—
-        estira la columna por el `min-width: auto` de CSS. La causa vive en esas
-        pantallas y la arregla su change de rediseño; lo que NO puede pasar
-        mientras tanto es que el documento entero se mueva de lado, y eso sí es
-        cosa del marco.
+        El `overflow-x-auto` se retiró en `redesign-child-tasks`, que es el
+        change que su comentario prometía.
+        
+        La causa era UNA: el ancho mínimo intrínseco de un `input[type=file]`
+        nativo, unos 360px, que en una rejilla arrastra a su columna. No estaba
+        en ninguna de las pantallas que desbordaban, sino en `ImageUploadField`,
+        y por eso ninguna podía arreglarlo por su cuenta. Medido antes y
+        después: las cuatro del niño caben a 390px.
+
+        `min-w-0` se queda: no es un parche, es lo que impide que un hijo ancho
+        estire la columna de un contenedor flex, y un marco tiene que sostener
+        eso pase lo que pase.
       */}
-      <main className="min-w-0 flex-1 overflow-x-auto px-4 py-4">
+      <main className="min-w-0 flex-1 px-4 py-4">
         <Outlet />
       </main>
 

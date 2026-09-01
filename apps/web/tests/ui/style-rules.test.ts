@@ -44,16 +44,14 @@ const SIN_VESTIR = [
   "features/auth/ResetPinScreen.tsx",
   "features/auth/ChangePinScreen.tsx",
   "features/auth/ParentAvatarScreen.tsx",
-  "features/children/AvatarPicker.tsx",
   "features/children/ChildForm.tsx",
-  "features/children/ChildSettings.tsx",
   "features/children/ChildrenList.tsx",
   "features/children/CreateProfileScreen.tsx",
   "features/children/EditChildScreen.tsx",
   "features/redemptions",
   "features/rewards",
-  "features/tasks",
-  "features/uploads",
+  "features/tasks/TaskBatchList.tsx",
+  "features/tasks/TaskForm.tsx",
   "routes",
 ];
 
@@ -91,12 +89,13 @@ describe("el estilo no se escribe fuera de los tokens", () => {
     // Si alguien añade una entrada en vez de quitarla, este número no cuadra y
     // hay que venir aquí a explicarse.
     //
-    // El número sube al ESTRECHAR un directorio a sus archivos: son más
-    // entradas y menos deuda, porque lo que encoge es lo TAPADO. Fue 7, luego
-    // 10 al estrechar `features/auth`, 9 al llevarse `redesign-access` el
-    // acceso, y ahora 14 al estrechar `features/children` a los seis que
-    // siguen sin vestir. `ChildHome` ya no está.
-    expect(SIN_VESTIR).toHaveLength(14);
+    // El número sube al ESTRECHAR un directorio a sus archivos y baja al
+    // vestirlos: lo que encoge de verdad es lo TAPADO, no la longitud de la
+    // lista. Fue 7, luego 10 al estrechar `features/auth`, 9 al llevarse
+    // `redesign-access` el acceso, 14 al estrechar `features/children`, y ahora
+    // 12: `redesign-child-tasks` se llevó `AvatarPicker`, `ChildSettings`,
+    // `MyTasks` y `features/uploads` ENTERO, y estrechó `features/tasks`.
+    expect(SIN_VESTIR).toHaveLength(12);
   });
 
   it("ningún color literal fuera de tokens.css", () => {

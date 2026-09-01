@@ -85,6 +85,13 @@ pagos y no hay interoperabilidad entre familias.
 > seis años acierta. De paso, las **dos** pantallas de inicio salen del archivo de ruta: un archivo de
 > ruta monta el destino, no lo dibuja. La del padre se muda sin tocarla y espera a su change.
 >
+> `redesign-child-tasks` cierra el área del niño salvo la tienda: sus **tareas** y su **perfil**. Las
+> tres etapas del ciclo —pendiente, esperando revisión, pagada— se distinguen ahora de un vistazo, y
+> solo la pendiente ofrece marcarla, que es lo único que la API permite. De paso arregla un
+> desbordamiento cuya causa no estaba en ninguna de las dos pantallas: el control de archivo nativo
+> pide 360 px de ancho mínimo y arrastraba a su columna. Con eso **cae el parche del marco** que
+> llevaba desde `add-app-shell` esperando a este change.
+>
 > Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
 > reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
 > siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en

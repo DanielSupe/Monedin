@@ -346,9 +346,21 @@ context: |
       - Al estrechar `features/auth` por archivos, mudar codigo sin vestir alli lo deja fuera de su
         excepcion. Sus estilos se tradujeron uno a uno a utilidades: traducir no es vestir.
 
-    PENDIENTE: `/me/settings` -«Mi perfil» del nino- desborda y NO lo reclama ningun change
-    planificado. Se quedo fuera de los tres del nino, y mientras siga asi el `overflow-x-auto` del
-    marco no se podra retirar.
+    `redesign-child-tasks` cierra el area del nino salvo la tienda. Lo que deja construido:
+      - Las tareas del nino con sus TRES etapas distinguibles de un vistazo -pendiente, esperando
+        revision, pagada- y solo la pendiente ofreciendo marcarla, que es lo unico que la API
+        permite: la interfaz deja de poder pedir algo que acabaria en 409.
+      - «Mi perfil» del nino, que era la pantalla sin change asignado. Entro aqui porque compartia la
+        CAUSA del desbordamiento, no por hueco.
+      - `ImageUploadField` vestido, y con el la correccion de fondo: un `input[type=file]` pide unos
+        360px de ancho minimo intrinseco y en una rejilla arrastra a su columna. Dos pantallas
+        desbordaban por el SIN tenerlo en su codigo. Ahora va absoluto y a opacidad cero cubriendo su
+        etiqueta: fuera del flujo, y con su caja de foco encima de lo que se ve.
+      - Se RETIRA el `overflow-x-auto` de `ChildShell`, que llevaba desde `add-app-shell` esperando a
+        este change. Medidas las cinco pantallas antes y despues.
+      - TERCERA excepcion de estilos en linea, acotada a `ImageUploadField`: `react-easy-crop`
+        dimensiona su lienzo en tiempo de ejecucion. Cierra la pregunta que dejo abierta el design de
+        `add-design-system`. El color literal que habia se fue a un token.
 
         DECISION CERRADA: el SALDO no se ve en la rejilla. Se pidio y se descarto. No es una limitacion
     tecnica -`GET /auth/profiles` no lo devuelve porque `profile-selection` lo prohibe-. Dos precios:

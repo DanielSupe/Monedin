@@ -624,6 +624,14 @@ Desde `add-design-system`, el front tiene sistema de diseño y **ya no se escrib
   y en `tests/ui/style-rules.test.ts`—. Cada change de rediseño **borra su entrada**. Una entrada que
   siga ahí sin change que la reclame es que alguien se saltó el plan.
 
+**Un control nativo puede imponer su medida a lo que lo rodea.** Un `input[type=file]` pide unos
+360 px de ancho mínimo intrínseco y, en una rejilla —donde el mínimo por defecto es `auto`—, arrastra
+a su columna. Dos pantallas del niño desbordaban por él **sin tenerlo en su propio código**. Desde
+`redesign-child-tasks` el control va absoluto y a opacidad cero **cubriendo su etiqueta**: fuera del
+flujo, así que no aporta ancho, y con su caja de foco encima de lo que se ve, así que el
+`:focus-visible` del sistema sirve tal cual. Ocultarlo con `sr-only` NO vale: se llega tabulando y no
+se ve nada.
+
 **Un archivo de ruta monta el destino, no lo dibuja.** Desde `redesign-child-home`, elegir por rol
 sigue siendo legítimo —el destino es el mismo y quien lo abre no— pero lo elegido vive en
 `features/`. Una pantalla dentro de un archivo de ruta no se prueba sin router, no se reutiliza, y

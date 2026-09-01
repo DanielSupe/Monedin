@@ -1,14 +1,19 @@
 import { PIN_LENGTH, changeOwnChildPinSchema } from "@monedin/contracts";
-import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
 import { describeAuthError, useChangeOwnChildPin } from "../auth/use-session.js";
 import * as childrenApi from "../../api/children.js";
+import { Alert, Avatar, Button, Card, Coins, Field, Input, Skeleton } from "../../ui/index.js";
 import { AvatarPicker } from "./AvatarPicker.js";
 import { describeChildrenError, useOwnChild, useUpdateOwnChild } from "./use-children.js";
 
 /**
  * Lo que un niño ve y puede cambiar de lo suyo.
+ *
+ * SIN enlace de «volver», y las tareas tampoco lo llevan ya: el marco del niño
+ * tiene una barra abajo con sus cuatro destinos, así que un enlace dentro de
+ * cada pantalla repetía lo que el marco ya hace y ocupaba sitio al final de un
+ * desplazamiento. Ver la decisión 6 del design de `redesign-child-tasks`.
  *
  * Dos módulos en una pantalla, a propósito: el avatar es de `children` y el PIN
  * de `auth`, porque tocar una credencial es suyo. Para el niño es una sola cosa
@@ -19,27 +24,26 @@ export function ChildSettings(): React.ReactElement {
   const updateAvatar = useUpdateOwnChild();
 
   if (isPending) {
-    return <p>{messages.health.loading}</p>;
+    return <Skeleton lines={4} />;
   }
 
   if (error || data === undefined) {
-    return (
-      <p role="alert" style={{ color: "#b00020" }}>
-        {describeChildrenError(error)}
-      </p>
-    );
+    return <Alert tone="danger">{describeChildrenError(error)}</Alert>;
   }
 
   return (
-    <section style={{ maxWidth: "24rem" }}>
-      <h2>{messages.children.myProfileTitle}</h2>
+    <section className="mx-auto flex w-full max-w-dialog flex-col gap-4">
+      <h2 className="text-title font-bold">{messages.children.myProfileTitle}</h2>
 
-      <p style={{ fontSize: "1.25rem" }}>
-        <strong>{data.name}</strong>
-      </p>
-      <p>
-        {messages.children.myCoins}: <strong>{data.coins}</strong>
-      </p>
+      <Card>
+        <div className="flex items-center gap-4">
+          <Avatar value={data.avatar} size="large" alt={data.name} />
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-title font-bold">{data.name}</p>
+            <Coins amount={data.coins} />
+          </div>
+        </div>
+      </Card>
 
       <AvatarPicker
         value={data.avatar}
@@ -49,18 +53,12 @@ export function ChildSettings(): React.ReactElement {
         onUpload={(avatarUploadKey) => updateAvatar.mutate({ avatarUploadKey })}
       />
 
-      {updateAvatar.isSuccess && <p>{messages.children.avatarSaved}</p>}
+      {updateAvatar.isSuccess && <Alert tone="success">{messages.children.avatarSaved}</Alert>}
       {updateAvatar.error !== null && (
-        <p role="alert" style={{ color: "#b00020" }}>
-          {describeChildrenError(updateAvatar.error)}
-        </p>
+        <Alert tone="danger">{describeChildrenError(updateAvatar.error)}</Alert>
       )}
 
       <OwnPinForm />
-
-      <Link to="/" style={{ display: "inline-block", marginTop: "1rem" }}>
-        {messages.children.back}
-      </Link>
     </section>
   );
 }
@@ -93,43 +91,39 @@ function OwnPinForm(): React.ReactElement {
   const error = fieldError ?? (change.error ? describeAuthError(change.error) : undefined);
 
   return (
-    <form onSubmit={submit} style={{ display: "grid", gap: "0.5rem", marginTop: "1rem" }}>
-      <h3>{messages.children.changeMyPin}</h3>
+    <Card>
+      <form onSubmit={submit} className="flex flex-col gap-3">
+        <h3 className="text-body font-bold">{messages.children.changeMyPin}</h3>
 
-      <label>
-        {messages.auth.currentPin}
-        <input
-          type="text"
-          inputMode="numeric"
-          maxLength={PIN_LENGTH}
-          value={currentPin}
-          onChange={(event) => setCurrentPin(event.target.value)}
-          style={{ display: "block", width: "100%" }}
-        />
-      </label>
+        <Field label={messages.auth.currentPin}>
+          <Input
+            type="password"
+            inputMode="numeric"
+            maxLength={PIN_LENGTH}
+            value={currentPin}
+            onChange={(event) => setCurrentPin(event.target.value)}
+            autoComplete="off"
+          />
+        </Field>
 
-      <label>
-        {messages.auth.newPin}
-        <input
-          type="text"
-          inputMode="numeric"
-          maxLength={PIN_LENGTH}
-          value={newPin}
-          onChange={(event) => setNewPin(event.target.value)}
-          style={{ display: "block", width: "100%" }}
-        />
-      </label>
+        <Field label={messages.auth.newPin}>
+          <Input
+            type="password"
+            inputMode="numeric"
+            maxLength={PIN_LENGTH}
+            value={newPin}
+            onChange={(event) => setNewPin(event.target.value)}
+            autoComplete="off"
+          />
+        </Field>
 
-      <button type="submit" disabled={change.isPending}>
-        {change.isPending ? messages.children.working : messages.auth.changePinSubmit}
-      </button>
+        <Button type="submit" variant="primary" pending={change.isPending}>
+          {change.isPending ? messages.children.working : messages.auth.changePinSubmit}
+        </Button>
 
-      {change.isSuccess && <p>{messages.auth.pinChanged}</p>}
-      {error !== undefined && (
-        <p role="alert" style={{ color: "#b00020" }}>
-          {error}
-        </p>
-      )}
-    </form>
+        {change.isSuccess && <Alert tone="success">{messages.auth.pinChanged}</Alert>}
+        {error !== undefined && <Alert tone="danger">{error}</Alert>}
+      </form>
+    </Card>
   );
 }
