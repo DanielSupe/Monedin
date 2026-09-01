@@ -122,6 +122,18 @@ export const messages = {
     progressLabel: "Progreso",
     dismiss: "Cerrar",
     loading: "Cargando…",
+
+    /*
+     * La paginación es UNA pieza, así que su texto es uno.
+     *
+     * Estos dos estaban declarados CUATRO veces —uno por módulo— con el mismo
+     * valor, porque cuatro pantallas reescribían el mismo bloque. Desde
+     * `redesign-parent-inbox` el bloque es `ui/Pagination` y el texto vive donde
+     * viven los de las piezas.
+     */
+    previousPage: "Anterior",
+    nextPage: "Siguiente",
+    paginationLabel: "Páginas",
   },
 
   health: {
@@ -296,9 +308,6 @@ export const messages = {
     forbidden: "No puedes hacer esto desde este perfil.",
     invalidData: "Revisa los datos: algo no es válido.",
 
-    /** Paginación del listado. */
-    previousPage: "Anterior",
-    nextPage: "Siguiente",
   },
 
   tasks: {
@@ -330,6 +339,18 @@ export const messages = {
     filterPending: "Pendientes",
     filterCompleted: "Por aprobar",
     filterApproved: "Aprobadas",
+    filterLabel: "Filtrar por estado",
+
+    /*
+     * Por qué un reparto filtrado enseña tareas que no casan con el filtro.
+     *
+     * Es deliberado —el padre quiere ver el grupo completo aunque solo una esté
+     * para aprobar— y hasta `redesign-parent-inbox` solo estaba dicho en un
+     * comentario del código. En pantalla, filtrar por «Por aprobar» y ver
+     * pendientes se leía como un filtro roto: una decisión de producto que no se
+     * explica es indistinguible de un defecto.
+     */
+    wholeBatchNote: "Cada reparto se muestra completo, incluso las tareas que no casan con el filtro.",
 
     /** Estados, tal como los lee una persona. */
     statusPending: "Pendiente",
@@ -357,9 +378,6 @@ export const messages = {
     forbidden: "No puedes hacer esto desde este perfil.",
     invalidData: "Revisa los datos: algo no es válido.",
 
-    /** Paginación del listado. */
-    previousPage: "Anterior",
-    nextPage: "Siguiente",
   },
 
   rewards: {
@@ -419,9 +437,6 @@ export const messages = {
     forbidden: "No puedes hacer esto desde este perfil.",
     invalidData: "Revisa los datos: algo no es válido.",
 
-    /** Paginación del listado. */
-    previousPage: "Anterior",
-    nextPage: "Siguiente",
   },
 
   redemptions: {
@@ -438,6 +453,7 @@ export const messages = {
     filterPending: "Pendientes",
     filterApproved: "Aprobados",
     filterRejected: "Rechazados",
+    filterLabel: "Filtrar por estado",
 
     /** Estados, tal como los lee una persona. */
     statusPending: "Pendiente",
@@ -463,8 +479,6 @@ export const messages = {
     conflict: "Ese canje ya no se puede resolver así. Vuelve a cargar la lista para verlo actualizado.",
 
     /** Paginación de la bandeja. */
-    previousPage: "Anterior",
-    nextPage: "Siguiente",
   },
 
   uploads: {

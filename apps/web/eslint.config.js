@@ -79,10 +79,8 @@ export default [
     "src/features/children/ChildrenList.tsx",
     "src/features/children/CreateProfileScreen.tsx",
     "src/features/children/EditChildScreen.tsx",
-    "src/features/redemptions/RedemptionInbox.tsx",
     "src/features/rewards/RewardCatalog.tsx",
     "src/features/rewards/RewardForm.tsx",
-    "src/features/tasks/TaskBatchList.tsx",
     "src/features/tasks/TaskForm.tsx",
   ]),
 ];

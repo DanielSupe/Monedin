@@ -12,6 +12,7 @@ import {
   Field,
   Input,
   Logo,
+  Pagination,
   ProgressBar,
   Select,
   Skeleton,
@@ -214,6 +215,27 @@ function Piezas(): React.ReactElement {
           description={EJEMPLO.vacioDetalle}
           action={<Button variant="primary">Volver</Button>}
         />
+      </Seccion>
+
+      <Seccion titulo="Pagination">
+        {/*
+          Los dos casos que importan. La pieza NO construye sus enlaces —no puede
+          importar el router— así que aquí se le pasan anclas sueltas, que es
+          exactamente lo que la hace montable sin proveedores.
+        */}
+        <Pagination
+          page={1}
+          totalPages={4}
+          next={<a href="#siguiente">Siguiente</a>}
+        />
+        <Pagination
+          page={3}
+          totalPages={4}
+          previous={<a href="#anterior">Anterior</a>}
+          next={<a href="#siguiente">Siguiente</a>}
+        />
+        {/* Con una sola página no se dibuja: aquí debajo no hay nada. */}
+        <Pagination page={1} totalPages={1} />
       </Seccion>
 
       <Seccion titulo="Tabs">

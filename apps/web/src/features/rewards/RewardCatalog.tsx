@@ -82,7 +82,7 @@ export function RewardCatalog({
         <nav style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", alignItems: "center" }}>
           {page > 1 && (
             <Link to="/rewards" search={{ page: page - 1, status }}>
-              {messages.rewards.previousPage}
+              {messages.ui.previousPage}
             </Link>
           )}
           <span>
@@ -90,7 +90,7 @@ export function RewardCatalog({
           </span>
           {page < data.totalPages && (
             <Link to="/rewards" search={{ page: page + 1, status }}>
-              {messages.rewards.nextPage}
+              {messages.ui.nextPage}
             </Link>
           )}
         </nav>

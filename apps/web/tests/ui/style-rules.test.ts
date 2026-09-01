@@ -48,10 +48,8 @@ const SIN_VESTIR = [
   "features/children/ChildrenList.tsx",
   "features/children/CreateProfileScreen.tsx",
   "features/children/EditChildScreen.tsx",
-  "features/redemptions/RedemptionInbox.tsx",
   "features/rewards/RewardCatalog.tsx",
   "features/rewards/RewardForm.tsx",
-  "features/tasks/TaskBatchList.tsx",
   "features/tasks/TaskForm.tsx",
 ];
 
@@ -104,7 +102,11 @@ describe("el estilo no se escribe fuera de los tokens", () => {
     // dos pantallas de la cuenta del padre y, con `account.tsx`, la entrada
     // `routes` ENTERA. Es la primera vez que un directorio completo sale de la
     // lista por estar terminado y no por estrecharse.
-    expect(SIN_VESTIR).toHaveLength(10);
+    //
+    // Y 8: `redesign-parent-inbox` se llevó las DOS bandejas —`TaskBatchList` y
+    // `RedemptionInbox`—, que era el mismo andamio duplicado y las dos únicas
+    // pantallas del producto que producen un 409 de verdad.
+    expect(SIN_VESTIR).toHaveLength(8);
   });
 
   it("ningún color literal fuera de tokens.css", () => {

@@ -625,7 +625,8 @@ Desde `add-design-system`, el front tiene sistema de diseño y **ya no se escrib
   ahí sin change que la reclame es que alguien se saltó el plan. **`routes/` ya no está en esas
   listas** desde `redesign-parent-home`, que vistió `account.tsx`, la última con estilo en línea: un
   archivo de ruta monta el destino y no lo dibuja, así que ese directorio no debería volver a
-  aparecer ahí.
+  aparecer ahí. Desde `redesign-parent-inbox` quedan **ocho** entradas: las dos bandejas del padre
+  salieron juntas.
 
 **Un test que no falla ante la violación que persigue no prueba nada.** Comprobar que las etiquetas
 de tres estados están en pantalla no comprueba que se distingan: con el mismo tono en los tres, ese
@@ -647,6 +648,38 @@ esperando y uno sin hacer nada da `1` por `total`, `3` por filas y `2` de verdad
 con el estado buscado. `GET /redemptions` sí pagina por fila y su `total` sí es la cifra; que dos
 cuentas del mismo panel se obtengan de dos maneras **no es una incoherencia que unificar**, es que
 las dos listas tienen unidades distintas porque sus pantallas las tienen.
+
+**Un 409 se cuenta como ADVERTENCIA, no como error.** `Alert` lo declara desde `add-design-system`
+—«nadie hizo nada mal: el padre aprobó dos veces, o el hermano llegó antes»— y hasta
+`redesign-parent-inbox` esa distinción no llegaba a ninguna pantalla: las dos bandejas del padre, que
+son las **únicas** que producen un 409 de verdad, aplanaban todos sus errores en el mismo párrafo
+rojo. La API está construida entera alrededor de esa diferencia y la interfaz la tiraba. Lo decide
+`alertToneFor(error)`, en `lib/` y no en `ui/` porque mira el CÓDIGO de un error y una pieza no sabe
+de eso.
+
+**Un filtro que vive en la dirección es un conjunto de ENLACES, no de pestañas.** `Tabs` prometía en
+su cabecera que la estrenarían los filtros por estado del padre. Al ir a usarla no encajaba, y no por
+un detalle: `Tabs` posee su contenido y cambia por callback, mientras que el filtro es una sola lista
+que se vuelve a pedir con otro parámetro. Usarla habría creado cuatro paneles para una lista y
+convertido cuatro enlaces en botones, perdiendo abrirlos en otra pestaña. La salida es la que ya
+existía para `buttonClasses`: la pieza **exporta su aspecto** —`tabLinkClasses`— y el control sigue
+siendo un enlace. Y la cabecera se corrigió: **una afirmación falsa dentro de una pieza es peor que
+ninguna**, porque manda al siguiente que la lea a usarla donde no encaja.
+
+**Una pieza del sistema recibe sus enlaces, no los construye.** `ui/Pagination` toma `previous` y
+`next` como contenido. Es la misma frontera que le impide importar de `features/` o de `api/`: lo que
+la hace montable en un test sin proveedores y en `ui.html` sin aplicación. Una paginación que hiciera
+sus propios `<Link>` necesitaría saber a qué ruta pertenece, que es justo lo que la pieza no puede
+saber. Quien la usa pone los enlaces, porque es quien sabe a dónde van.
+
+**Una decisión de producto que no se explica en pantalla es indistinguible de un defecto.** Un
+reparto filtrado por estado se enseña ENTERO —a propósito—, y hasta `redesign-parent-inbox` eso solo
+estaba dicho en un comentario del código: filtrar por «Por aprobar» y ver tareas pendientes se leía
+como un filtro roto. Ahora lo dice la pantalla, y solo cuando hay filtro.
+
+**Al probar una pantalla que carga, se espera a la LISTA y no al título.** El título, el filtro y la
+nota se pintan antes de que llegue la respuesta, así que esperar a uno de ellos deja comprobando
+sobre un esqueleto. Dos tests de `redesign-parent-inbox` cayeron por esto, los dos por lo mismo.
 
 **Cerrar sesión y cambiar de perfil no son gemelas, y no van juntas.** Cambiar de perfil devuelve a
 la rejilla, ocurre varias veces al día y no pide credenciales para volver; cerrar sesión obliga a

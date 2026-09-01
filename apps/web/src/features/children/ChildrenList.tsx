@@ -47,7 +47,7 @@ export function ChildrenList({ page }: { page: number }): React.ReactElement {
         <nav style={{ display: "flex", gap: "0.5rem", marginTop: "1rem", alignItems: "center" }}>
           {page > 1 && (
             <Link to="/children" search={{ page: page - 1 }}>
-              {messages.children.previousPage}
+              {messages.ui.previousPage}
             </Link>
           )}
           <span>
@@ -55,7 +55,7 @@ export function ChildrenList({ page }: { page: number }): React.ReactElement {
           </span>
           {page < data.totalPages && (
             <Link to="/children" search={{ page: page + 1 }}>
-              {messages.children.nextPage}
+              {messages.ui.nextPage}
             </Link>
           )}
         </nav>

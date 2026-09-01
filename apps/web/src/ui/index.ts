@@ -22,10 +22,11 @@ export { EmptyState, type EmptyStateProps } from "./EmptyState.js";
 export { Field, type FieldProps, useField } from "./Field.js";
 export { Input, type InputProps, type InputShape } from "./Input.js";
 export { Logo, type LogoProps, type LogoSize } from "./Logo.js";
+export { Pagination, type PaginationProps } from "./Pagination.js";
 export { ProgressBar, type ProgressBarProps } from "./ProgressBar.js";
 export { Select, type SelectProps } from "./Select.js";
 export { Skeleton, type SkeletonProps } from "./Skeleton.js";
-export { Tabs, type TabItem, type TabsProps } from "./Tabs.js";
+export { Tabs, tabLinkClasses, type TabItem, type TabsProps } from "./Tabs.js";
 export { Toast, ToastProvider, type ToastProps, type ToastTone } from "./Toast.js";
 
 export { AVATAR_OPTIONS, avatarGlyph, isAvatarUrl } from "./avatars.js";
