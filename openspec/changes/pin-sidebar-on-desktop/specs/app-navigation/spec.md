@@ -21,6 +21,11 @@ La excepción es **una** y va nombrada aquí. Cualquier otro destino ofrecido do
 - **WHEN** se recorre el marco de un rol
 - **THEN** cada destino aparece exactamente una vez, salvo el perfil
 
+#### Scenario: Un destino que antes colgaba del avatar
+
+- **WHEN** el padre busca su cuenta, o el niño su perfil
+- **THEN** lo encuentra en la misma lista que el resto de sus destinos
+
 #### Scenario: El perfil, desde los dos sitios
 
 - **WHEN** se mira el marco con un perfil activo
