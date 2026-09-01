@@ -624,6 +624,11 @@ Desde `add-design-system`, el front tiene sistema de diseño y **ya no se escrib
   y en `tests/ui/style-rules.test.ts`—. Cada change de rediseño **borra su entrada**. Una entrada que
   siga ahí sin change que la reclame es que alguien se saltó el plan.
 
+**Un test que no falla ante la violación que persigue no prueba nada.** Comprobar que las etiquetas
+de tres estados están en pantalla no comprueba que se distingan: con el mismo tono en los tres, ese
+test sigue en verde. Por eso la tarea de **inyectar la violación** no es ceremonia — en
+`redesign-child-shop` cazó un test que habría entrado al repositorio dando una garantía que no daba.
+
 **Un control nativo puede imponer su medida a lo que lo rodea.** Un `input[type=file]` pide unos
 360 px de ancho mínimo intrínseco y, en una rejilla —donde el mínimo por defecto es `auto`—, arrastra
 a su columna. Dos pantallas del niño desbordaban por él **sin tenerlo en su propio código**. Desde

@@ -48,8 +48,9 @@ const SIN_VESTIR = [
   "features/children/ChildrenList.tsx",
   "features/children/CreateProfileScreen.tsx",
   "features/children/EditChildScreen.tsx",
-  "features/redemptions",
-  "features/rewards",
+  "features/redemptions/RedemptionInbox.tsx",
+  "features/rewards/RewardCatalog.tsx",
+  "features/rewards/RewardForm.tsx",
   "features/tasks/TaskBatchList.tsx",
   "features/tasks/TaskForm.tsx",
   "routes",
@@ -95,7 +96,11 @@ describe("el estilo no se escribe fuera de los tokens", () => {
     // `redesign-access` el acceso, 14 al estrechar `features/children`, y ahora
     // 12: `redesign-child-tasks` se llevó `AvatarPicker`, `ChildSettings`,
     // `MyTasks` y `features/uploads` ENTERO, y estrechó `features/tasks`.
-    expect(SIN_VESTIR).toHaveLength(12);
+    //
+    // Y 13 al estrechar `features/rewards` y `features/redemptions` a lo que
+    // queda, que es del PADRE: `redesign-child-shop` se llevó las dos pantallas
+    // del niño y con ellas su área entera.
+    expect(SIN_VESTIR).toHaveLength(13);
   });
 
   it("ningún color literal fuera de tokens.css", () => {

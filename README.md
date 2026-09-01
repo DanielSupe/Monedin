@@ -92,6 +92,12 @@ pagos y no hay interoperabilidad entre familias.
 > pide 360 px de ancho mínimo y arrastraba a su columna. Con eso **cae el parche del marco** que
 > llevaba desde `add-app-shell` esperando a este change.
 >
+> `redesign-child-shop` cierra **el área del niño entera**: su escaparate y sus canjes. Y estrena
+> `ProgressBar`, que se escribió en `add-design-system` para este caso exacto —lo dice su propia
+> cabecera, «la estrenará el "te faltan 30 monedas" del escaparate»— y hasta hoy solo la usaba el
+> catálogo. Ver cuánto falta para una meta es la mitad del ciclo que el producto enseña: un niño de
+> siete años no lee «te faltan 130 monedas» y entiende que está a un tercio; una barra sí lo dice.
+>
 > Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
 > reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
 > siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en

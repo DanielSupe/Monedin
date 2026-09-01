@@ -1,8 +1,21 @@
-import { Link } from "@tanstack/react-router";
 import type { OwnReward } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Coins,
+  EmptyState,
+  ProgressBar,
+  Skeleton,
+} from "../../ui/index.js";
 import { useSession } from "../auth/use-session.js";
-import { describeRedemptionsError, useCreateRedemption, useOwnRedemptions } from "../redemptions/use-redemptions.js";
+import {
+  describeRedemptionsError,
+  useCreateRedemption,
+  useOwnRedemptions,
+} from "../redemptions/use-redemptions.js";
 import { describeRewardsError, useOwnRewards } from "./use-rewards.js";
 
 /**
@@ -22,28 +35,24 @@ export function MyRewards(): React.ReactElement {
   const saldo = session?.actor?.familyRole === "CHILD" ? session.actor.coins : 0;
 
   if (isPending) {
-    return <p>{messages.health.loading}</p>;
+    return <Skeleton lines={4} />;
   }
 
   if (error) {
-    return (
-      <p role="alert" style={{ color: "#b00020" }}>
-        {describeRewardsError(error)}
-      </p>
-    );
+    return <Alert tone="danger">{describeRewardsError(error)}</Alert>;
   }
 
   const premios = data?.items ?? [];
   const premiosYaPedidos = new Set((pendientes.data?.items ?? []).map((canje) => canje.reward.id));
 
   return (
-    <section>
-      <h2>{messages.rewards.myRewardsTitle}</h2>
+    <section className="flex flex-col gap-4">
+      <h2 className="text-title font-bold">{messages.rewards.myRewardsTitle}</h2>
 
       {premios.length === 0 ? (
-        <p>{messages.rewards.myRewardsEmpty}</p>
+        <EmptyState glyph="🎁" title={messages.rewards.myRewardsEmpty} />
       ) : (
-        <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "0.75rem" }}>
+        <ul className="flex list-none flex-col gap-3 p-0">
           {premios.map((premio) => (
             <MyRewardRow
               key={premio.id}
@@ -54,10 +63,6 @@ export function MyRewards(): React.ReactElement {
           ))}
         </ul>
       )}
-
-      <Link to="/" style={{ display: "inline-block", marginTop: "1rem" }}>
-        {messages.rewards.back}
-      </Link>
     </section>
   );
 }
@@ -77,48 +82,76 @@ function MyRewardRow({
   // cada fila. Ver la decisión 5 del design de `add-rewards`.
   const faltan = Math.max(0, reward.coins - balance);
   const solicitar = useCreateRedemption();
+  const pedido = yaPedido || solicitar.isSuccess;
 
   return (
-    <li style={{ border: "1px solid #ccc", padding: "0.75rem" }}>
-      {reward.image !== null && (
-        <img
-          src={reward.image}
-          alt={reward.title}
-          style={{ maxWidth: "10rem", borderRadius: "0.25rem", display: "block" }}
-        />
-      )}
-      <strong>{reward.title}</strong>
-      {reward.description !== null && <p>{reward.description}</p>}
+    <li>
+      <Card>
+        <div className="flex min-w-0 flex-col gap-3">
+          {reward.image !== null && (
+            <img
+              src={reward.image}
+              alt={reward.title}
+              className="rounded-card max-h-40 w-full object-cover"
+            />
+          )}
 
-      <p>
-        {reward.coins} {messages.rewards.coins.toLowerCase()}
-      </p>
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div className="flex min-w-0 flex-col gap-1">
+              <p className="text-body font-bold">{reward.title}</p>
+              {reward.description !== null && (
+                <p className="text-small text-ink-muted">{reward.description}</p>
+              )}
+            </div>
+            {/* «Ya lo pediste» es un ESTADO, no un párrafo al final: lo que se
+                ve y lo que se puede hacer van juntos. */}
+            {pedido && <Badge tone="info">{messages.redemptions.alreadyRequested}</Badge>}
+          </div>
 
-      {reward.affordable ? (
-        <>
-          <p>{messages.rewards.affordable}</p>
-          {yaPedido || solicitar.isSuccess ? (
-            <p>{messages.redemptions.alreadyRequested}</p>
+          <Coins amount={reward.coins} />
+
+          {reward.affordable ? (
+            <>
+              <p className="text-small font-semibold text-success">{messages.rewards.affordable}</p>
+
+              {!pedido && (
+                <Button
+                  variant="primary"
+                  block
+                  pending={solicitar.isPending}
+                  onClick={() => solicitar.mutate({ rewardId: reward.id })}
+                >
+                  {solicitar.isPending
+                    ? messages.redemptions.requesting
+                    : messages.redemptions.request}
+                </Button>
+              )}
+
+              {solicitar.error !== null && (
+                <Alert tone="danger">{describeRedemptionsError(solicitar.error)}</Alert>
+              )}
+            </>
           ) : (
-            <button
-              type="button"
-              disabled={solicitar.isPending}
-              onClick={() => solicitar.mutate({ rewardId: reward.id })}
-            >
-              {solicitar.isPending ? messages.redemptions.requesting : messages.redemptions.request}
-            </button>
+            /*
+              Aquí se ESTRENA `ProgressBar`, que es lo que su propia cabecera
+              dice desde `add-design-system` y hasta hoy solo hacía el catálogo.
+              Es la mitad del ciclo que el producto enseña: ver cuánto falta
+              para una meta es lo que convierte un saldo en una decisión de
+              ahorro.
+
+              La cifra se queda junto a la barra. La barra dice «estás por
+              aquí» y el número dice cuánto exactamente; quitarlo sería cambiar
+              precisión por gráfico.
+            */
+            <div className="flex flex-col gap-1">
+              <ProgressBar value={balance} max={reward.coins} label={reward.title} />
+              <p className="text-small text-ink-muted">
+                {messages.rewards.missingPrefix} {faltan} {messages.rewards.coins.toLowerCase()}
+              </p>
+            </div>
           )}
-          {solicitar.error !== null && (
-            <p role="alert" style={{ color: "#b00020" }}>
-              {describeRedemptionsError(solicitar.error)}
-            </p>
-          )}
-        </>
-      ) : (
-        <p>
-          {messages.rewards.missingPrefix} {faltan} {messages.rewards.coins.toLowerCase()}
-        </p>
-      )}
+        </div>
+      </Card>
     </li>
   );
 }

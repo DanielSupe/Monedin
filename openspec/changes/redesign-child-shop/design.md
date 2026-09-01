@@ -82,6 +82,20 @@ cambia.
 
 Hoy lleva `maxWidth: "10rem"` y un radio a mano. Pasa a una medida del sistema dentro de la tarjeta.
 
+### 5. Un test que no cazaba lo que perseguía
+
+**Escrito al implementar, y es la corrección que más vale la pena.**
+
+El test de los tres estados comprobaba que las tres etiquetas estuvieran en pantalla. Al inyectar la
+violación —el mismo tono para los tres— **siguió en verde**: las etiquetas seguían ahí, solo que ya
+no se distinguían. Y eso mismo pasaba ya antes de vestir la pantalla.
+
+Un test que no falla ante la violación que persigue no está probando nada. Se cambió por uno que
+compara los tres tonos y exige que sean distintos, y esta vez la inyección sí cae.
+
+La tarea de comprobar que los tests fallan de verdad existe justo para esto: sin ella, este habría
+entrado al repositorio dando una garantía que no daba.
+
 ## Risks / Trade-offs
 
 - **Una barra por premio puede recargar una lista larga** → Solo aparece cuando NO alcanza; los que

@@ -362,6 +362,19 @@ context: |
         dimensiona su lienzo en tiempo de ejecucion. Cierra la pregunta que dejo abierta el design de
         `add-design-system`. El color literal que habia se fue a un token.
 
+        `redesign-child-shop` cierra EL AREA DEL NINO ENTERA: su escaparate y sus canjes.
+      - Estrena `ProgressBar`, escrita en `add-design-system` para este caso exacto -lo dice su
+        cabecera- y que hasta hoy solo usaba el catalogo. Es ademas la PRIMERA excepcion de estilos en
+        linea del proyecto, justificada por «el ancho depende del saldo de un nino y de lo que cuesta
+        un premio». La cifra se queda junto a la barra: la barra dice «estas por aqui» y el numero
+        dice cuanto exactamente.
+      - «Ya lo pediste» pasa de parrafo a ESTADO. Lo que se ve y lo que se puede hacer van juntos.
+      - Los tres estados de un canje se distinguen. RECHAZADO va en advertencia y no en peligro, por
+        la misma razon por la que `Alert` pinta un conflicto en ambar: nadie hizo nada mal. Que un
+        padre diga que no a un premio no es un error del nino.
+      - No devuelve monedas, porque el descuento solo ocurre al aprobar. La pantalla lo ensena, no lo
+        cambia.
+
         DECISION CERRADA: el SALDO no se ve en la rejilla. Se pidio y se descarto. No es una limitacion
     tecnica -`GET /auth/profiles` no lo devuelve porque `profile-selection` lo prohibe-. Dos precios:
     cualquiera con la tablet desbloqueada veria todos los saldos SIN teclear un PIN, y los hermanos se

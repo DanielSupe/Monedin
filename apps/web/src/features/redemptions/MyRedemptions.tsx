@@ -1,7 +1,12 @@
-import { Link } from "@tanstack/react-router";
 import type { OwnRedemption } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
-import { describeRedemptionStatus, describeRedemptionsError, useOwnRedemptions } from "./use-redemptions.js";
+import { Alert, Badge, Card, Coins, EmptyState, Skeleton } from "../../ui/index.js";
+import type { BadgeTone } from "../../ui/index.js";
+import {
+  describeRedemptionStatus,
+  describeRedemptionsError,
+  useOwnRedemptions,
+} from "./use-redemptions.js";
 
 /**
  * Los canjes de un niño: sus propias solicitudes, con su estado.
@@ -13,48 +18,63 @@ export function MyRedemptions(): React.ReactElement {
   const { data, isPending, error } = useOwnRedemptions();
 
   if (isPending) {
-    return <p>{messages.health.loading}</p>;
+    return <Skeleton lines={3} />;
   }
 
   if (error) {
-    return (
-      <p role="alert" style={{ color: "#b00020" }}>
-        {describeRedemptionsError(error)}
-      </p>
-    );
+    return <Alert tone="danger">{describeRedemptionsError(error)}</Alert>;
   }
 
   const canjes = data?.items ?? [];
 
   return (
-    <section>
-      <h2>{messages.redemptions.myRedemptionsTitle}</h2>
+    <section className="flex flex-col gap-4">
+      <h2 className="text-title font-bold">{messages.redemptions.myRedemptionsTitle}</h2>
 
       {canjes.length === 0 ? (
-        <p>{messages.redemptions.myRedemptionsEmpty}</p>
+        <EmptyState glyph="🎟️" title={messages.redemptions.myRedemptionsEmpty} />
       ) : (
-        <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "0.75rem" }}>
+        <ul className="flex list-none flex-col gap-3 p-0">
           {canjes.map((canje) => (
             <MyRedemptionRow key={canje.id} redemption={canje} />
           ))}
         </ul>
       )}
-
-      <Link to="/" style={{ display: "inline-block", marginTop: "1rem" }}>
-        {messages.redemptions.back}
-      </Link>
     </section>
   );
 }
 
+/**
+ * Cómo se lee cada estado de un canje.
+ *
+ * No son tres variantes de lo mismo: aprobar DESCUENTA y rechazar es terminal
+ * y no devuelve nada, porque el descuento solo ocurre al aprobar. Esa asimetría
+ * es justo lo que un niño tiene que poder ver.
+ *
+ * Rechazado va en ADVERTENCIA y no en peligro, por la misma razón por la que
+ * `Alert` pinta un conflicto en ámbar: nadie hizo nada mal. Que su padre diga
+ * que no a un premio no es un error del niño, y el rojo se lo diría.
+ */
+const TONO: Record<OwnRedemption["status"], BadgeTone> = {
+  PENDING: "neutral",
+  APPROVED: "success",
+  REJECTED: "warning",
+};
+
 function MyRedemptionRow({ redemption }: { redemption: OwnRedemption }): React.ReactElement {
   return (
-    <li style={{ border: "1px solid #ccc", padding: "0.75rem" }}>
-      <strong>{redemption.reward.title}</strong>
-      <p>
-        {redemption.coins} {messages.redemptions.coins.toLowerCase()} ·{" "}
-        {describeRedemptionStatus(redemption.status)}
-      </p>
+    <li>
+      <Card>
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-body font-bold">{redemption.reward.title}</p>
+            <Coins amount={redemption.coins} />
+          </div>
+          <Badge tone={TONO[redemption.status]}>
+            {describeRedemptionStatus(redemption.status)}
+          </Badge>
+        </div>
+      </Card>
     </li>
   );
 }
