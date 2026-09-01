@@ -20,11 +20,10 @@ export function CreateProfileScreen(): React.ReactElement {
 
   return (
     <section>
-      <ChildForm onSaved={volver} onCancel={volver} />
-
-      <p style={{ marginTop: "0.5rem" }}>
-        <Link to="/profiles">{messages.children.back}</Link>
-      </p>
+      <ChildForm
+        onSaved={volver}
+        cancel={<Link to="/profiles">{messages.children.cancel}</Link>}
+      />
     </section>
   );
 }

@@ -45,15 +45,57 @@ describe("la navegación no se cablea a mano", () => {
     expect(ARCHIVOS.length).toBeGreaterThan(10);
   });
 
+  /*
+   * DE NOMBRES PROHIBIDOS A NOMBRES PERMITIDOS, y no es un matiz.
+   *
+   * Esta prueba buscaba `onDone`. Al enumerar las props callback de `features/`
+   * en `redesign-parent-authoring` resultó que **no había ni un `onDone` en el
+   * proyecto** — y sí tres sinónimos suyos: `onCancel` (tres declaraciones y dos
+   * usos), `onSettled` y `onClose`. El test perseguía el único nombre que nadie
+   * usaba, y cualquier sinónimo lo sorteaba.
+   *
+   * Ampliar la lista de prohibidos sería repetir el error con más palabras. Se
+   * INVIERTE: una prop callback declarada sin argumentos solo puede llamarse
+   * como diga `EVENTOS_DE_DOMINIO`. Cualquier otra falla, exista hoy o se
+   * invente mañana.
+   *
+   * La distinción sale sola de la forma, sin lista de excepciones:
+   *
+   *   onSaved: () => void           «esto ocurrió», dominio      permitida
+   *   onUploaded: (key) => void     lleva un dato, dominio por   no aplica
+   *                                   construcción
+   *   onOpenChange: (open) => void  una revelación dice su       no aplica
+   *                                   estado
+   *   onCancel: () => void          «ciérrame»                   falla
+   *
+   * Y por dónde se sale de un formulario que se usa desde dos sitios distintos:
+   * un HUECO con un enlace dentro, como `Pagination` recibe los suyos. Navegar
+   * es trabajo de un enlace.
+   */
+  const EVENTOS_DE_DOMINIO = ["onSaved"];
+
   it("ninguna pantalla recibe una función para volver o cerrarse", () => {
-    const culpables = ARCHIVOS.filter((ruta) =>
-      /\bonDone\b/.test(sinComentarios(readFileSync(ruta, "utf8"))),
-    ).map(nombre);
+    const culpables: string[] = [];
+
+    for (const ruta of ARCHIVOS) {
+      const contenido = sinComentarios(readFileSync(ruta, "utf8"));
+
+      // Una prop declarada como callback que no recibe nada: `onAlgo: () => void`.
+      const props = contenido.matchAll(/\b(on[A-Z]\w*)\??\s*:\s*\(\)\s*=>\s*(?:void|Promise<void>)/g);
+
+      for (const [, prop] of props) {
+        if (prop !== undefined && !EVENTOS_DE_DOMINIO.includes(prop)) {
+          culpables.push(`${nombre(ruta)} → ${prop}`);
+        }
+      }
+    }
 
     expect(
       culpables,
       `una pantalla navega contra el router, no contra quien la abrió:\n${culpables.join("\n")}\n` +
-        "Un evento de dominio —`onSaved`, «esto ocurrió»— sí es legítimo; `onDone` —«ciérrame»— no.",
+        "Un evento de dominio —«esto ocurrió»— sí es legítimo y se declara en " +
+        "EVENTOS_DE_DOMINIO. Una función sin argumentos que significa «ciérrame», no: " +
+        "para salir, un hueco con un enlace dentro.",
     ).toEqual([]);
   });
 

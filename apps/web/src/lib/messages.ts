@@ -304,6 +304,15 @@ export const messages = {
       "Este perfil dejará de aparecer y no se puede recuperar. Su historial de monedas se conserva. ¿Seguro?",
     deactivateSubmit: "Sí, dar de baja",
 
+    /**
+     * Lo que falta cuando no se ha elegido ningún hijo.
+     *
+     * Vive en `children` y no en `tasks` ni en `rewards` porque lo dice la pieza
+     * compartida que elige hijos, y esa pieza es una desde
+     * `redesign-parent-authoring`.
+     */
+    pickAtLeastOne: "Elige al menos un hijo.",
+
     /** Lo que el niño ve y puede cambiar de lo suyo. */
     myProfileTitle: "Mi perfil",
 
@@ -439,6 +448,7 @@ export const messages = {
     retireSubmit: "Sí, retirar",
 
     /** Filtro del catálogo. */
+    filterLabel: "Filtrar por estado",
     filterActive: "Activos",
     filterRetired: "Retirados",
 

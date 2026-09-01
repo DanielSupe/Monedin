@@ -22,7 +22,7 @@ function EditChildRoute(): React.ReactElement {
   return (
     <EditChildScreen
       childId={childId}
-      onSettled={() => void navigate({ to: "/children", search: { page: 1 } })}
+      onSaved={() => void navigate({ to: "/children", search: { page: 1 } })}
     />
   );
 }

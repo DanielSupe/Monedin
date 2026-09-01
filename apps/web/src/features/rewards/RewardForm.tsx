@@ -1,70 +1,56 @@
-import {
-  COINS_MAX,
-  COINS_MIN,
-  MAX_CHILDREN_PER_FAMILY,
-  TITLE_MAX_LENGTH,
-  type CreateRewardInput,
-  createRewardSchema,
-} from "@monedin/contracts";
+import { TITLE_MAX_LENGTH, type CreateRewardInput, createRewardSchema } from "@monedin/contracts";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
-import { Avatar } from "../../ui/Avatar.js";
-import { useChildren } from "../children/use-children.js";
+import { Alert, Button, Card, EmptyState, Field, Input, buttonClasses } from "../../ui/index.js";
+import {
+  ChildrenPicker,
+  PICKER_MISSING,
+  useChildrenPicker,
+} from "../children/ChildrenPicker.js";
 import { describeRewardsError, useCreateReward } from "./use-rewards.js";
 
 /**
  * Alta de un premio para uno o varios hijos.
  *
- * Mismo patrón que `TaskForm`: las DOS formas del precio están aquí, con un
- * selector que decide cuál se envía, y el esquema compartido valida ANTES de
- * mandar nada al servidor.
+ * Mismo patrón que `TaskForm`, y desde `redesign-parent-authoring` mismo CÓDIGO
+ * en la parte que de verdad era idéntica: `ChildrenPicker`. Lo que no se funde
+ * es el resto —esta tiene foto y aquella fecha de vencimiento—, porque fundir
+ * dos pantallas legibles en una con banderas no arregla nada.
+ *
+ * La FOTO no está aquí: su clave de subida lleva dentro el identificador del
+ * premio, que no existe mientras se está creando. Se añade después, desde el
+ * catálogo. Es la misma deuda declarada que impide subir una foto al crear un
+ * perfil de hijo.
+ *
+ * NAVEGA ella misma al cancelar, como su gemela.
  */
-export function RewardForm({
-  onSaved,
-  onCancel,
-}: {
-  /** Quedó guardado. Evento de dominio, no una orden de cerrarse. */
-  onSaved: () => void;
-  onCancel: () => void;
-}): React.ReactElement {
+export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactElement {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [elegidos, setElegidos] = useState<string[]>([]);
-  const [mismoValor, setMismoValor] = useState(true);
-  const [coins, setCoins] = useState("100");
-  const [porHijo, setPorHijo] = useState<Record<string, string>>({});
   const [problema, setProblema] = useState<string | null>(null);
 
-  // Todos los hijos caben en una página: el tope por familia es el tamaño.
-  const { data, isPending } = useChildren(1, MAX_CHILDREN_PER_FAMILY);
+  const navigate = useNavigate();
+  const picker = useChildrenPicker({ defaultCoins: "100" });
   const create = useCreateReward();
 
-  const hijos = data?.items ?? [];
+  const alCatalogo = (): void =>
+    void navigate({ to: "/rewards", search: { page: 1, status: "ACTIVE" } });
 
-  function alternar(childId: string): void {
-    setElegidos((previos) =>
-      previos.includes(childId)
-        ? previos.filter((uno) => uno !== childId)
-        : [...previos, childId],
-    );
-  }
-
-  function enviar(): void {
+  function enviar(evento: React.FormEvent): void {
+    evento.preventDefault();
     setProblema(null);
 
-    const entrada: Record<string, unknown> = { title };
+    const seleccion = picker.build();
+
+    if (seleccion === null) {
+      setProblema(PICKER_MISSING);
+      return;
+    }
+
+    const entrada: Record<string, unknown> = { title, ...seleccion };
 
     if (description.trim() !== "") entrada.description = description;
-
-    if (mismoValor) {
-      entrada.childIds = elegidos;
-      entrada.coins = Number(coins);
-    } else {
-      entrada.assignments = elegidos.map((childId) => ({
-        childId,
-        coins: Number(porHijo[childId] ?? ""),
-      }));
-    }
 
     const validado = createRewardSchema.safeParse(entrada);
 
@@ -76,122 +62,69 @@ export function RewardForm({
     create.mutate(validado.data as CreateRewardInput, { onSuccess: onSaved });
   }
 
-  if (isPending) {
-    return <p>{messages.health.loading}</p>;
-  }
-
-  if (hijos.length === 0) {
+  if (!picker.isPending && picker.hijos.length === 0) {
     return (
-      <section>
-        <h2>{messages.rewards.newRewardTitle}</h2>
-        <p>{messages.rewards.noChildren}</p>
-        <button type="button" onClick={onCancel}>
-          {messages.rewards.back}
-        </button>
-      </section>
+      <EmptyState
+        glyph="🧒"
+        title={messages.rewards.noChildren}
+        action={
+          <Link to="/children" search={{ page: 1 }} className={buttonClasses("primary")}>
+            {messages.children.addChild}
+          </Link>
+        }
+      />
     );
   }
 
   return (
-    <section>
-      <h2>{messages.rewards.newRewardTitle}</h2>
+    <section className="flex flex-col gap-4">
+      <h2 className="text-title font-bold">{messages.rewards.newRewardTitle}</h2>
 
-      <label>
-        {messages.rewards.rewardTitle}
-        <input
-          type="text"
-          maxLength={TITLE_MAX_LENGTH}
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          style={{ display: "block", width: "100%" }}
-        />
-      </label>
+      <Card>
+        <form onSubmit={enviar} className="flex max-w-2xl flex-col gap-4">
+          <Field label={messages.rewards.rewardTitle}>
+            <Input
+              type="text"
+              maxLength={TITLE_MAX_LENGTH}
+              value={title}
+              onChange={(evento) => setTitle(evento.target.value)}
+            />
+          </Field>
 
-      <label>
-        {messages.rewards.description}
-        <textarea
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          style={{ display: "block", width: "100%" }}
-        />
-      </label>
+          <Field label={messages.rewards.description}>
+            <textarea
+              value={description}
+              onChange={(evento) => setDescription(evento.target.value)}
+              className="rounded-control text-body min-h-24 w-full border border-border-strong bg-surface-raised px-3 py-2 text-ink"
+            />
+          </Field>
 
-      <fieldset style={{ marginTop: "1rem" }}>
-        <legend>{messages.rewards.forWhom}</legend>
-
-        {hijos.map((hijo) => (
-          <div key={hijo.id} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <label style={{ flex: 1 }}>
-              <input
-                type="checkbox"
-                checked={elegidos.includes(hijo.id)}
-                onChange={() => alternar(hijo.id)}
-              />
-              <Avatar value={hijo.avatar} size="small" /> {hijo.name}
-            </label>
-
-            {!mismoValor && elegidos.includes(hijo.id) && (
-              <input
-                type="number"
-                min={COINS_MIN}
-                max={COINS_MAX}
-                value={porHijo[hijo.id] ?? ""}
-                onChange={(event) =>
-                  setPorHijo((previos) => ({ ...previos, [hijo.id]: event.target.value }))
-                }
-                style={{ width: "6rem" }}
-                aria-label={`${messages.rewards.coins} · ${hijo.name}`}
-              />
-            )}
-          </div>
-        ))}
-      </fieldset>
-
-      <div style={{ marginTop: "1rem" }}>
-        <label>
-          <input type="radio" checked={mismoValor} onChange={() => setMismoValor(true)} />
-          {messages.rewards.sameCoins}
-        </label>
-        <label style={{ marginLeft: "1rem" }}>
-          <input type="radio" checked={!mismoValor} onChange={() => setMismoValor(false)} />
-          {messages.rewards.coinsPerChild}
-        </label>
-      </div>
-
-      {mismoValor && (
-        <label>
-          {messages.rewards.coins}
-          <input
-            type="number"
-            min={COINS_MIN}
-            max={COINS_MAX}
-            value={coins}
-            onChange={(event) => setCoins(event.target.value)}
-            style={{ display: "block", width: "8rem" }}
+          <ChildrenPicker
+            picker={picker}
+            labels={{
+              legend: messages.rewards.forWhom,
+              sameCoins: messages.rewards.sameCoins,
+              coinsPerChild: messages.rewards.coinsPerChild,
+              coins: messages.rewards.coins,
+            }}
           />
-        </label>
-      )}
 
-      {problema !== null && (
-        <p role="alert" style={{ color: "#b00020" }}>
-          {problema}
-        </p>
-      )}
+          {problema !== null && <Alert tone="danger">{problema}</Alert>}
 
-      {create.error !== null && (
-        <p role="alert" style={{ color: "#b00020" }}>
-          {describeRewardsError(create.error)}
-        </p>
-      )}
+          {create.error !== null && (
+            <Alert tone="danger">{describeRewardsError(create.error)}</Alert>
+          )}
 
-      <div style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}>
-        <button type="button" onClick={enviar} disabled={create.isPending}>
-          {create.isPending ? messages.rewards.working : messages.rewards.create}
-        </button>
-        <button type="button" onClick={onCancel}>
-          {messages.rewards.cancel}
-        </button>
-      </div>
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" variant="primary" pending={create.isPending}>
+              {create.isPending ? messages.rewards.working : messages.rewards.create}
+            </Button>
+            <Button type="button" variant="secondary" onClick={alCatalogo}>
+              {messages.rewards.cancel}
+            </Button>
+          </div>
+        </form>
+      </Card>
     </section>
   );
 }

@@ -8,7 +8,7 @@ import {
   type ImageContentType,
   updateChildSchema,
 } from "@monedin/contracts";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import * as childrenApi from "../../api/children.js";
 import { messages } from "../../lib/messages.js";
 import { AvatarPicker } from "./AvatarPicker.js";
@@ -28,7 +28,7 @@ import { describeChildrenError, useCreateChild, useUpdateChild } from "./use-chi
 export function ChildForm({
   child,
   onSaved,
-  onCancel,
+  cancel,
 }: {
   /** Si viene, se edita; si no, se crea. */
   child?: Child;
@@ -41,7 +41,17 @@ export function ChildForm({
    * navegación a quien llamara.
    */
   onSaved: () => void;
-  onCancel: () => void;
+  /**
+   * Por dónde se sale sin guardar, como CONTENIDO y no como callback.
+   *
+   * Era `onCancel: () => void` —«ciérrame»—, que empuja la navegación a quien
+   * llama. Y no puede resolverlo el propio formulario, porque se usa desde dos
+   * sitios que salen a destinos distintos: la rejilla y la gestión del padre.
+   * Así que lo pone quien lo usa, que es quien sabe a dónde va, igual que
+   * `Pagination` recibe sus enlaces. Y de paso navegar vuelve a ser trabajo de
+   * un enlace.
+   */
+  cancel: ReactNode;
 }): React.ReactElement {
   const editing = child !== undefined;
 
@@ -173,9 +183,7 @@ export function ChildForm({
         </p>
       )}
 
-      <button type="button" onClick={onCancel} style={{ marginTop: "1rem" }}>
-        {messages.children.cancel}
-      </button>
+      <p style={{ marginTop: "1rem" }}>{cancel}</p>
     </section>
   );
 }

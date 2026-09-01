@@ -17,11 +17,17 @@ import { describeChildrenError, useChild } from "./use-children.js";
  */
 export function EditChildScreen({
   childId,
-  onSettled,
+  onSaved,
 }: {
   childId: string;
-  /** El perfil quedó guardado, o quien lo editaba se echó atrás. */
-  onSettled: () => void;
+  /**
+   * El perfil quedó guardado. Evento de dominio.
+   *
+   * Era `onSettled` —«guardó, o se echó atrás»—, que mezclaba un hecho con una
+   * orden de cerrarse y por eso obligaba a quien llamaba a navegar por las dos
+   * razones. Salir sin guardar es ahora un enlace, aquí abajo.
+   */
+  onSaved: () => void;
 }): React.ReactElement {
   const { data: child, isPending, error } = useChild(childId);
 
@@ -42,5 +48,15 @@ export function EditChildScreen({
     );
   }
 
-  return <ChildForm child={child} onSaved={onSettled} onCancel={onSettled} />;
+  return (
+    <ChildForm
+      child={child}
+      onSaved={onSaved}
+      cancel={
+        <Link to="/children" search={{ page: 1 }}>
+          {messages.children.cancel}
+        </Link>
+      }
+    />
+  );
 }

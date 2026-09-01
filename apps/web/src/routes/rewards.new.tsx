@@ -13,5 +13,5 @@ function NewRewardRoute(): React.ReactElement {
   const alCatalogo = (): void =>
     void navigate({ to: "/rewards", search: { page: 1, status: "ACTIVE" } });
 
-  return <RewardForm onSaved={alCatalogo} onCancel={alCatalogo} />;
+  return <RewardForm onSaved={alCatalogo} />;
 }

@@ -649,6 +649,29 @@ con el estado buscado. `GET /redemptions` sí pagina por fila y su `total` sí e
 cuentas del mismo panel se obtengan de dos maneras **no es una incoherencia que unificar**, es que
 las dos listas tienen unidades distintas porque sus pantallas las tienen.
 
+**Una regla que se comprueba por su NOMBRE está a un sinónimo de morirse.** `add-app-shell` prohibió
+que una pantalla reciba una función para cerrarse y dejó un test que buscaba `onDone`. Al enumerar
+las props de `features/` en `redesign-parent-authoring` no había **ni un** `onDone` en el proyecto —y
+sí `onCancel` en cinco archivos, `onSettled` y `onClose`—. El test perseguía el único nombre que nadie
+usaba. Ahora está **invertido**: una prop callback declarada sin argumentos solo puede llamarse como
+diga `EVENTOS_DE_DOMINIO` —hoy solo `onSaved`—, así que un sinónimo nuevo falla por defecto. Lo que
+lleva argumento no aplica: `onUploaded(key)` es dominio por construcción y `onOpenChange(open)` es la
+forma correcta de una revelación, la que ya usan `Dialog` y `Drawer`.
+
+**Para salir de un formulario, un HUECO con un enlace dentro.** `ChildForm` se usa desde dos sitios
+que cancelan a destinos distintos, así que no puede navegar solo ni recibir un callback: recibe
+`cancel: ReactNode`, igual que `Pagination` recibe sus enlaces. Navegar vuelve a ser trabajo de un
+enlace.
+
+**Elegir «a quién y por cuánto» es UNA pieza**, `ChildrenPicker`. Estaba escrito tres veces —entero en
+las dos altas y otra vez en el catálogo— y devuelve ya la forma que el contrato espera, o `null` si
+falta algo, que es lo que permite decir QUÉ falta antes de rechazar. Vive en `features/children/` y no
+en `ui/`: sabe qué es un hijo.
+
+**Una pantalla donde se escribe es un `<form>`.** `TaskForm` y `RewardForm` eran un `<section>` con un
+`type="button"`, así que escribir el título y pulsar Enter no hacía nada — y `ChildForm` sí lo hacía,
+o sea que la misma tecla respondía distinto según la pantalla.
+
 **Quién marca el destino activo es el `Link`, y solo él.** El router pone `aria-current="page"` y
 `data-status="active"` por su cuenta según `activeOptions`; escribirlos ADEMÁS a mano da dos fuentes
 para el mismo hecho, y la de fuera puede separarse de la del router sin que falle nada. El aspecto se

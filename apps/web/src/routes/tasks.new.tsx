@@ -13,5 +13,5 @@ function NewTaskRoute(): React.ReactElement {
   const alListado = (): void =>
     void navigate({ to: "/tasks", search: { page: 1, status: "ALL" } });
 
-  return <TaskForm onSaved={alListado} onCancel={alListado} />;
+  return <TaskForm onSaved={alListado} />;
 }

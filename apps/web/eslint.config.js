@@ -45,7 +45,23 @@ export default [
    * los que sí.
    */
   {
-    files: ["src/ui/**/*.{ts,tsx}", "src/ui-catalog.tsx"],
+    /*
+     * Se añaden dos archivos de fuera de `ui/` en `redesign-parent-authoring`, y
+     * es el MISMO patrón, no una excepción nueva: exportar el aspecto junto a la
+     * pieza que lo define —`sidebarItemClasses`, como `buttonClasses`— y exportar
+     * el hook junto al componente que lo consume —`useChildrenPicker`, como
+     * `useField` junto a `Field`—.
+     *
+     * Se nombran uno a uno en vez de tapar `app/` y `features/` enteros: ahí el
+     * aviso sigue diciendo algo, y uno que nunca hay que atender le quita
+     * credibilidad a los que sí.
+     */
+    files: [
+      "src/ui/**/*.{ts,tsx}",
+      "src/ui-catalog.tsx",
+      "src/app/Sidebar.tsx",
+      "src/features/children/ChildrenPicker.tsx",
+    ],
     rules: { "react-refresh/only-export-components": "off" },
   },
 
@@ -79,8 +95,5 @@ export default [
     "src/features/children/ChildrenList.tsx",
     "src/features/children/CreateProfileScreen.tsx",
     "src/features/children/EditChildScreen.tsx",
-    "src/features/rewards/RewardCatalog.tsx",
-    "src/features/rewards/RewardForm.tsx",
-    "src/features/tasks/TaskForm.tsx",
   ]),
 ];
