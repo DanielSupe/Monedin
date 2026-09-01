@@ -32,3 +32,38 @@ if (typeof Element !== "undefined") {
   Element.prototype.releasePointerCapture ??= () => undefined;
   Element.prototype.scrollIntoView ??= () => undefined;
 }
+
+/**
+ * `matchMedia`, que jsdom tampoco implementa.
+ *
+ * El marco lo usa para montar UNA de las dos formas del lateral —columna fija o
+ * cajón— en vez de las dos con una escondida por CSS. Sin este relleno, montar
+ * la aplicación revienta.
+ *
+ * Por defecto responde que NO hay ancho, que es el modo estrecho: es lo que
+ * suponen los tests que ya existían. Un test que quiera probar el modo ancho
+ * llama a `conPantallaAncha()` antes de montar.
+ */
+let pantallaAncha = false;
+
+export function conPantallaAncha(): void {
+  pantallaAncha = true;
+}
+
+afterEach(() => {
+  pantallaAncha = false;
+});
+
+if (typeof window !== "undefined") {
+  window.matchMedia = (query: string): MediaQueryList =>
+    ({
+      matches: pantallaAncha,
+      media: query,
+      onchange: null,
+      addEventListener: () => undefined,
+      removeEventListener: () => undefined,
+      addListener: () => undefined,
+      removeListener: () => undefined,
+      dispatchEvent: () => false,
+    }) as MediaQueryList;
+}

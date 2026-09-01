@@ -656,6 +656,27 @@ declara con `data-[status=active]:`, que es lo que ya hacían las dos barras que
 retiró. Lo destapó inyectar la violación: al quitar el `aria-current` escrito a mano **el test siguió
 en verde**, porque quien lo ponía de verdad era el enlace.
 
+**Cuando hay ancho, la navegación va delante; cuando no, detrás de su botón.** Desde
+`pin-sidebar-on-desktop` el lateral es una columna fija a partir de `lg`, contraíble a solo iconos, y
+un cajón por debajo. Se monta **UNA** de las dos formas y nunca las dos con una escondida por CSS:
+dos listas de destinos son dos para quien recorre el documento con teclado aunque una no se vea, y
+`display:none` dejaría la garantía dependiendo de una utilidad que ningún test puede comprobar —jsdom
+no aplica CSS—. Lo decide `useIsWide()` con `matchMedia`, leído de forma **síncrona** al inicializar
+el estado para que el primer pintado ya sea el correcto.
+
+**Al contraer, el texto se oculta a la vista y NO se borra.** Los iconos de navegación son
+decorativos a propósito —lo que nombra al destino es su texto—, así que borrarlo deja los cinco
+destinos sin nombre de golpe. Y un control que solo dibuja una flecha lleva su nombre en
+`aria-label`, que cambia con el estado porque lo que el botón hace cambia.
+
+**El perfil es la ÚNICA excepción declarada a «ningún destino dos veces»**: el avatar de la cabecera
+y la fila del pie del lateral llevan al mismo sitio. El avatar responde además a quién está usando el
+dispositivo —pregunta real en una tablet compartida— y la fila existe porque un destino que solo se
+alcanza pulsando una foto sin texto no se encuentra. El test la comprueba **por su nombre y con cifra
+exacta**, para que sea una y no una puerta abierta; y la comprueba en ANCHO, porque con el cajón
+abierto Radix marca el resto del documento como oculto y los dos caminos no coexisten en el árbol de
+accesibilidad.
+
 **La navegación de un perfil es UNA sola, y está entera.** Desde `add-sidebar-nav` los dos marcos
 comparten un cajón lateral con todos los destinos del rol. Antes había dos barras distintas —arriba
 el padre, abajo el niño— y, en las dos, un destino que NO estaba en ellas y colgaba del avatar de la

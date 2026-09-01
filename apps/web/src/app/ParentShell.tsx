@@ -1,8 +1,17 @@
 import { Link, Outlet } from "@tanstack/react-router";
+import { useState } from "react";
 import { messages } from "../lib/messages.js";
-import { Drawer, Logo } from "../ui/index.js";
-import { MenuButton, Sidebar, SidebarProfile, sidebarItemClasses } from "./Sidebar.js";
+import { Avatar, Drawer, Logo } from "../ui/index.js";
+import {
+  MenuButton,
+  Sidebar,
+  SidebarLabel,
+  SidebarProfile,
+  sidebarItemClasses,
+} from "./Sidebar.js";
+import { cx } from "../ui/cx.js";
 import { useDrawer } from "./use-drawer.js";
+import { useIsWide } from "./use-wide.js";
 import {
   IconAccount,
   IconChildren,
@@ -35,74 +44,99 @@ export function ParentShell({
   name: string;
 }): React.ReactElement {
   const { open, setOpen } = useDrawer();
+  const ancho = useIsWide();
+  // Sobrevive a la navegación porque el marco no se desmonta; se pierde al
+  // recargar, y eso se acepta: persistirlo pediría almacenamiento que el
+  // proyecto no usa hoy.
+  const [contraido, setContraido] = useState(false);
+
+  const lateral = (
+    <Sidebar
+      collapsed={ancho && contraido}
+      {...(ancho ? { onToggleCollapse: () => setContraido((v) => !v) } : {})}
+      profile={
+          <Link to="/account" className={sidebarItemClasses()}>
+            <SidebarProfile name={name} avatar={avatar}>
+              {messages.nav.parentAccount}
+            </SidebarProfile>
+            <IconAccount />
+          </Link>
+        }
+      >
+        {/* Texto a la izquierda, icono a la derecha. El icono es DECORATIVO:
+            lo que nombra al destino es su texto, así que repetirlo en el
+            icono se lo diría dos veces a un lector de pantalla. */}
+        <Link
+          to="/"
+          activeOptions={{ exact: true }}
+          className={sidebarItemClasses()}
+        >
+          <SidebarLabel>{messages.nav.parentHome}</SidebarLabel>
+          <IconHome />
+        </Link>
+        <Link
+          to="/tasks"
+          search={{ page: 1, status: "ALL" }}
+          className={sidebarItemClasses()}
+        >
+          <SidebarLabel>{messages.nav.parentTasks}</SidebarLabel>
+          <IconTasks />
+        </Link>
+        <Link
+          to="/rewards"
+          search={{ page: 1, status: "ACTIVE" }}
+          className={sidebarItemClasses()}
+        >
+          <SidebarLabel>{messages.nav.parentRewards}</SidebarLabel>
+          <IconRewards />
+        </Link>
+        <Link
+          to="/redemptions"
+          search={{ page: 1, status: "ALL" }}
+          className={sidebarItemClasses()}
+        >
+          <SidebarLabel>{messages.nav.parentRedemptions}</SidebarLabel>
+          <IconRedemptions />
+        </Link>
+        <Link
+          to="/children"
+          search={{ page: 1 }}
+          className={sidebarItemClasses()}
+        >
+          <SidebarLabel>{messages.nav.parentChildren}</SidebarLabel>
+          <IconChildren />
+        </Link>
+    </Sidebar>
+  );
 
   return (
     <div data-scale="parent" className="flex min-h-dvh flex-col bg-surface text-ink">
       <header className="flex items-center gap-3 border-b border-border bg-surface-raised px-4 py-2">
-        <Drawer
-          open={open}
-          onOpenChange={setOpen}
-          label={messages.nav.drawerLabel}
-          trigger={<MenuButton />}
-        >
-          <Sidebar
-            profile={
-              <Link to="/account" className={sidebarItemClasses()}>
-                <SidebarProfile name={name} avatar={avatar}>
-                  {messages.nav.parentAccount}
-                </SidebarProfile>
-                <IconAccount />
-              </Link>
-            }
+        {/* El botón solo en la forma ESTRECHA: con la columna delante no tiene
+            qué abrir. Van juntos porque son la misma decisión. */}
+        {!ancho && (
+          <Drawer
+            open={open}
+            onOpenChange={setOpen}
+            label={messages.nav.drawerLabel}
+            trigger={<MenuButton />}
           >
-            {/* Texto a la izquierda, icono a la derecha. El icono es DECORATIVO:
-                lo que nombra al destino es su texto, así que repetirlo en el
-                icono se lo diría dos veces a un lector de pantalla. */}
-            <Link
-              to="/"
-              activeOptions={{ exact: true }}
-              className={sidebarItemClasses()}
-            >
-              {messages.nav.parentHome}
-              <IconHome />
-            </Link>
-            <Link
-              to="/tasks"
-              search={{ page: 1, status: "ALL" }}
-              className={sidebarItemClasses()}
-            >
-              {messages.nav.parentTasks}
-              <IconTasks />
-            </Link>
-            <Link
-              to="/rewards"
-              search={{ page: 1, status: "ACTIVE" }}
-              className={sidebarItemClasses()}
-            >
-              {messages.nav.parentRewards}
-              <IconRewards />
-            </Link>
-            <Link
-              to="/redemptions"
-              search={{ page: 1, status: "ALL" }}
-              className={sidebarItemClasses()}
-            >
-              {messages.nav.parentRedemptions}
-              <IconRedemptions />
-            </Link>
-            <Link
-              to="/children"
-              search={{ page: 1 }}
-              className={sidebarItemClasses()}
-            >
-              {messages.nav.parentChildren}
-              <IconChildren />
-            </Link>
-          </Sidebar>
-        </Drawer>
+            {lateral}
+          </Drawer>
+        )}
 
-        <Link to="/" className="no-underline">
+        <Link to="/" className="flex-1 no-underline">
           <Logo size="medium" />
+        </Link>
+
+        {/*
+          El avatar vuelve a la cabecera en `pin-sidebar-on-desktop`. No es solo
+          un atajo: en una tablet que comparte toda la familia responde a QUIÉN
+          está usando esto, que la lista de destinos no responde. Es la única
+          excepción declarada a «ningún destino dos veces».
+        */}
+        <Link to="/account" aria-label={messages.nav.parentAccount}>
+          <Avatar value={avatar} size="small" />
         </Link>
       </header>
 
@@ -114,9 +148,27 @@ export function ParentShell({
         mientras tanto es que el documento entero se mueva de lado, y eso sí es
         cosa del marco.
       */}
-      <main className="min-w-0 flex-1 overflow-x-auto px-4 py-4">
-        <Outlet />
-      </main>
+      <div className="flex min-h-0 flex-1">
+        {/*
+          Se monta UNA de las dos formas, nunca las dos con una escondida por
+          CSS: dos listas de destinos son dos para quien recorre el documento
+          con teclado, aunque una no se vea.
+        */}
+        {ancho && (
+          <aside
+            className={cx(
+              "flex shrink-0 flex-col border-r border-border bg-surface-raised transition-all duration-normal",
+              contraido ? "w-sidebar-collapsed" : "w-sidebar",
+            )}
+          >
+            {lateral}
+          </aside>
+        )}
+
+        <main className="min-w-0 flex-1 overflow-x-auto px-4 py-4">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

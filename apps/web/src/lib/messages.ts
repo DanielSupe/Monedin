@@ -82,6 +82,16 @@ export const messages = {
     menu: "Menú",
     drawerLabel: "Navegación",
 
+    /*
+     * Contraer el lateral, desde `pin-sidebar-on-desktop`.
+     *
+     * Dos textos y no uno con el estado dentro: lo que el botón hace cambia, y
+     * un solo texto obligaría a leer su `aria-expanded` para saber qué va a
+     * pasar al pulsarlo.
+     */
+    collapseSidebar: "Contraer",
+    expandSidebar: "Expandir",
+
     /** Una dirección que no corresponde a ningún destino. */
     notFoundTitle: "Aquí no hay nada",
     notFoundBody: "Esa dirección no existe o dejó de existir.",

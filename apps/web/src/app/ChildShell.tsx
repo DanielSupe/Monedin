@@ -1,8 +1,17 @@
 import { Link, Outlet } from "@tanstack/react-router";
+import { useState } from "react";
 import { messages } from "../lib/messages.js";
-import { Drawer, Logo } from "../ui/index.js";
-import { MenuButton, Sidebar, SidebarProfile, sidebarItemClasses } from "./Sidebar.js";
+import { Avatar, Drawer, Logo } from "../ui/index.js";
+import {
+  MenuButton,
+  Sidebar,
+  SidebarLabel,
+  SidebarProfile,
+  sidebarItemClasses,
+} from "./Sidebar.js";
+import { cx } from "../ui/cx.js";
 import { useDrawer } from "./use-drawer.js";
+import { useIsWide } from "./use-wide.js";
 import {
   IconHome,
   IconProfile,
@@ -45,44 +54,69 @@ export function ChildShell({
   name: string;
 }): React.ReactElement {
   const { open, setOpen } = useDrawer();
+  const ancho = useIsWide();
+  // Sobrevive a la navegación porque el marco no se desmonta; se pierde al
+  // recargar, y eso se acepta: persistirlo pediría almacenamiento que el
+  // proyecto no usa hoy.
+  const [contraido, setContraido] = useState(false);
+
+  const lateral = (
+    <Sidebar
+      collapsed={ancho && contraido}
+      {...(ancho ? { onToggleCollapse: () => setContraido((v) => !v) } : {})}
+      profile={
+          <Link to="/me/settings" className={sidebarItemClasses()}>
+            <SidebarProfile name={name} avatar={avatar}>
+              {messages.children.myProfileTitle}
+            </SidebarProfile>
+            <IconProfile />
+          </Link>
+        }
+      >
+        {/* Texto a la izquierda, icono a la derecha. El icono es DECORATIVO:
+            lo que nombra al destino es su texto. */}
+        {DESTINOS.map(({ to, texto, Icono, exacto }) => (
+          <Link
+            key={to}
+            to={to}
+            activeOptions={{ exact: exacto }}
+            className={sidebarItemClasses()}
+          >
+            <SidebarLabel>{texto}</SidebarLabel>
+            <Icono />
+          </Link>
+        ))}
+    </Sidebar>
+  );
 
   return (
     <div data-scale="child" className="flex min-h-dvh flex-col bg-surface text-ink">
       <header className="flex items-center gap-3 border-b border-border px-4 py-2">
-        <Drawer
-          open={open}
-          onOpenChange={setOpen}
-          label={messages.nav.drawerLabel}
-          trigger={<MenuButton />}
-        >
-          <Sidebar
-            profile={
-              <Link to="/me/settings" className={sidebarItemClasses()}>
-                <SidebarProfile name={name} avatar={avatar}>
-                  {messages.children.myProfileTitle}
-                </SidebarProfile>
-                <IconProfile />
-              </Link>
-            }
+        {/* El botón solo en la forma ESTRECHA: con la columna delante no tiene
+            qué abrir. Van juntos porque son la misma decisión. */}
+        {!ancho && (
+          <Drawer
+            open={open}
+            onOpenChange={setOpen}
+            label={messages.nav.drawerLabel}
+            trigger={<MenuButton />}
           >
-            {/* Texto a la izquierda, icono a la derecha. El icono es DECORATIVO:
-                lo que nombra al destino es su texto. */}
-            {DESTINOS.map(({ to, texto, Icono, exacto }) => (
-              <Link
-                key={to}
-                to={to}
-                activeOptions={{ exact: exacto }}
-                className={sidebarItemClasses()}
-              >
-                {texto}
-                <Icono />
-              </Link>
-            ))}
-          </Sidebar>
-        </Drawer>
+            {lateral}
+          </Drawer>
+        )}
 
-        <Link to="/" className="no-underline">
+        <Link to="/" className="flex-1 no-underline">
           <Logo size="medium" />
+        </Link>
+
+        {/*
+          El avatar vuelve a la cabecera en `pin-sidebar-on-desktop`. No es solo
+          un atajo: en una tablet que comparte toda la familia responde a QUIÉN
+          está usando esto, que la lista de destinos no responde. Es la única
+          excepción declarada a «ningún destino dos veces».
+        */}
+        <Link to="/me/settings" aria-label={messages.children.myProfileTitle}>
+          <Avatar value={avatar} size="small" />
         </Link>
       </header>
 
@@ -100,9 +134,27 @@ export function ChildShell({
         estire la columna de un contenedor flex, y un marco tiene que sostener
         eso pase lo que pase.
       */}
-      <main className="min-w-0 flex-1 px-4 py-4">
-        <Outlet />
-      </main>
+      <div className="flex min-h-0 flex-1">
+        {/*
+          Se monta UNA de las dos formas, nunca las dos con una escondida por
+          CSS: dos listas de destinos son dos para quien recorre el documento
+          con teclado, aunque una no se vea.
+        */}
+        {ancho && (
+          <aside
+            className={cx(
+              "flex shrink-0 flex-col border-r border-border bg-surface-raised transition-all duration-normal",
+              contraido ? "w-sidebar-collapsed" : "w-sidebar",
+            )}
+          >
+            {lateral}
+          </aside>
+        )}
+
+        <main className="min-w-0 flex-1 px-4 py-4">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }
