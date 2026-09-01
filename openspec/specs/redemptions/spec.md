@@ -4,9 +4,7 @@ Permite que el niño solicite canjear un premio por sus monedas y que el padre r
 solicitud, aprobándola —lo que descuenta el precio congelado del saldo del niño— o rechazándola —lo
 que no mueve ninguna moneda—. Es la mitad que faltaba del ciclo esfuerzo → ingreso → decisión de
 gasto: sin esto, `affordable` en el escaparate del niño es una promesa sin forma de cumplirse.
-
 ## Requirements
-
 ### Requirement: El niño solicita el canje de un premio disponible para él
 
 El sistema SHALL permitir a un actor `CHILD` solicitar el canje de un premio que existe, está
@@ -188,3 +186,24 @@ canje que no pertenece a quien la pide —o que no existe— SHALL responder 404
 
 - **WHEN** un padre intenta aprobar o rechazar una solicitud que no es de ninguno de sus hijos
 - **THEN** la respuesta es 404, y el estado de esa solicitud no cambia
+
+### Requirement: El estado de un canje se distingue por su forma
+
+En la lista de canjes de un niño, un canje **pendiente**, uno **aprobado** y uno **rechazado** SHALL
+distinguirse entre sí sin leer el texto que los describe.
+
+No son tres variantes de lo mismo. Aprobar descuenta; rechazar es terminal y **no devuelve nada**,
+porque el descuento solo ocurre al aprobar. Esa asimetría es justo lo que un niño tiene que poder
+ver, y presentarla como tres párrafos iguales la esconde.
+
+#### Scenario: Tres canjes en estados distintos
+
+- **WHEN** un niño ve un canje pendiente, uno aprobado y uno rechazado
+- **THEN** los tres se distinguen a simple vista
+
+#### Scenario: Un premio ya pedido en el escaparate
+
+- **WHEN** un premio tiene una solicitud pendiente
+- **THEN** el escaparate lo presenta como pedido
+- **AND** no ofrece volver a pedirlo
+
