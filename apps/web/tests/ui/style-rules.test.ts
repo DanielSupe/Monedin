@@ -32,18 +32,18 @@ function archivosDe(directorio: string): string[] {
  */
 const SIN_VESTIR = [
   /*
-   * `features/auth` ya NO entra entero.
+   * `features/auth` ya NO entra entero, y `routes` YA NO ESTÁ.
    *
    * `redesign-profile-grid` vistió dos de sus archivos —la rejilla y el teclado
-   * de PIN—, y `redesign-access` se llevó el acceso. Los tres que quedan son
-   * pantallas de credenciales, pero ninguna está en el camino de entrar por
-   * primera vez. Se nombran una a una en vez de tapar el directorio entero: así
-   * la excepción no cubre lo que ya está vestido, y la lista sigue ENCOGIENDO,
-   * que es lo que la regla protege.
+   * de PIN—, `redesign-access` se llevó el acceso, y `redesign-parent-home` la
+   * foto y el PIN del padre. El único que queda es la vía de RESCATE, que se
+   * abre sin sesión: su sitio es con el resto de la puerta de entrada, no con
+   * la cuenta.
+   *
+   * `routes` se fue con `account.tsx`, que era la última de las veintidós rutas
+   * con color escrito a mano.
    */
   "features/auth/ResetPinScreen.tsx",
-  "features/auth/ChangePinScreen.tsx",
-  "features/auth/ParentAvatarScreen.tsx",
   "features/children/ChildForm.tsx",
   "features/children/ChildrenList.tsx",
   "features/children/CreateProfileScreen.tsx",
@@ -53,7 +53,6 @@ const SIN_VESTIR = [
   "features/rewards/RewardForm.tsx",
   "features/tasks/TaskBatchList.tsx",
   "features/tasks/TaskForm.tsx",
-  "routes",
 ];
 
 function estaSinVestir(ruta: string): boolean {
@@ -100,7 +99,12 @@ describe("el estilo no se escribe fuera de los tokens", () => {
     // Y 13 al estrechar `features/rewards` y `features/redemptions` a lo que
     // queda, que es del PADRE: `redesign-child-shop` se llevó las dos pantallas
     // del niño y con ellas su área entera.
-    expect(SIN_VESTIR).toHaveLength(13);
+    //
+    // Ahora 10, y esta vez baja de verdad: `redesign-parent-home` se llevó las
+    // dos pantallas de la cuenta del padre y, con `account.tsx`, la entrada
+    // `routes` ENTERA. Es la primera vez que un directorio completo sale de la
+    // lista por estar terminado y no por estrecharse.
+    expect(SIN_VESTIR).toHaveLength(10);
   });
 
   it("ningún color literal fuera de tokens.css", () => {

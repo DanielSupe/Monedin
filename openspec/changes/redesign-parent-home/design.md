@@ -72,10 +72,19 @@ un reparto: «Recoger la mesa» → Ana (COMPLETED), Luis (COMPLETED), Sara (PEN
   filas con status COMPLETED  → 2    ✓
 ```
 
-Se cuenta la tercera. Y se cubre con un test de **un reparto de estados mezclados**, que es el único
-que falla contra las otras dos: un test con un reparto de una sola tarea completada da `1` de las
-tres maneras y no prueba nada. Esa lección costó una vez en `redesign-child-shop` —un test que no
-falla ante la violación que persigue no prueba nada— y aquí se aplica de entrada.
+Se cuenta la tercera. Y se cubre con un test de un reparto de estados mezclados donde **las tres
+cuentas dan números distintos**, que es la condición que hace falta: un reparto con **dos**
+completadas y una pendiente da 1, 3 y 2.
+
+Esa precisión no estaba en la primera versión de este design, que decía «un reparto de estados
+mezclados» a secas. Se escribió el test con **una** sola completada —`PENDING`, `COMPLETED`,
+`APPROVED`— y al inyectar la cuenta por `total` el test **siguió en verde**: la respuesta correcta era
+1 y el `total` de repartos también. El caso solo distingue si el número correcto no coincide con
+ninguno de los otros dos.
+
+Es exactamente la trampa que costó una vez en `redesign-child-shop`, y volvió a colarse aquí pese a
+estar escrita en el design. Lo que la cazó no fue leer el test: fue **inyectar la violación**, que por
+eso es una tarea y no una ceremonia.
 
 ### 3. La cuenta de canjes SÍ es el `total`, y la asimetría se explica
 

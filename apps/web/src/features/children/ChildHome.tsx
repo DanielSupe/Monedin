@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { messages } from "../../lib/messages.js";
-import { Card, Coins, buttonClasses } from "../../ui/index.js";
+import { Card, Coins } from "../../ui/index.js";
 import { LeaveProfile } from "../auth/LeaveProfile.js";
 
 /**
@@ -71,7 +71,7 @@ export function ChildHome({
         ))}
       </ul>
 
-      <LeaveProfile className={buttonClasses("secondary")} />
+      <LeaveProfile />
     </section>
   );
 }

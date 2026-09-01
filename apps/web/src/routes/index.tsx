@@ -1,9 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { requireActor } from "../app/guards.js";
-import { ParentHome } from "../features/auth/ParentHome.js";
-import { LeaveProfile } from "../features/auth/LeaveProfile.js";
 import { useSession } from "../features/auth/use-session.js";
 import { ChildHome } from "../features/children/ChildHome.js";
+import { ParentConsole } from "../features/parents/ParentConsole.js";
 import { messages } from "../lib/messages.js";
 
 /**
@@ -34,18 +33,15 @@ function Home(): React.ReactElement {
 
   /*
    * El saludo y la salida los pone cada pantalla, no esta ruta. El del niño va
-   * dentro de su tarjeta de saldo y el del padre sigue como estaba hasta
-   * `redesign-parent-home`.
+   * dentro de su tarjeta de saldo; el del padre encabeza su panel.
+   *
+   * Hasta `redesign-parent-home` la rama del padre dibujaba aquí un `<h2>` con
+   * «Hola,» escrito a mano. Un texto visible incrustado en un módulo, contra la
+   * regla 1, que sobrevivió porque al vestir la rama del niño nadie miró esta.
    */
   if (actor.familyRole === "CHILD") {
     return <ChildHome name={actor.name} coins={actor.coins} />;
   }
 
-  return (
-    <section>
-      <h2>Hola, {actor.name}</h2>
-      <ParentHome />
-      <LeaveProfile />
-    </section>
-  );
+  return <ParentConsole name={actor.name} />;
 }

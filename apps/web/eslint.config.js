@@ -62,17 +62,19 @@ export default [
    * alguien se saltó el plan.
    */
   allowInlineStyles([
-    "src/routes/**/*.tsx",
     /*
-     * `features/auth` ya no entra entero: `redesign-profile-grid` vistió la
-     * rejilla y el teclado de PIN, y `redesign-access` el acceso y el registro.
-     * Los tres que quedan son pantallas de credenciales fuera del camino de
-     * entrar por primera vez. Se nombran uno a uno para que la excepción no
-     * tape lo que ya está hecho.
+     * `src/routes/**` YA NO ESTÁ: `redesign-parent-home` vistió `account.tsx`,
+     * que era la última de las veintidós rutas con estilo en línea. Un archivo
+     * de ruta monta el destino y no lo dibuja, así que este directorio no
+     * debería volver a aparecer aquí.
+     *
+     * `features/auth` tampoco entra entero: `redesign-profile-grid` vistió la
+     * rejilla y el teclado de PIN, `redesign-access` el acceso y el registro, y
+     * `redesign-parent-home` la foto y el PIN del padre. El único que queda es
+     * la vía de rescate, que se abre SIN sesión y por eso su sitio es con el
+     * resto de la puerta de entrada.
      */
     "src/features/auth/ResetPinScreen.tsx",
-    "src/features/auth/ChangePinScreen.tsx",
-    "src/features/auth/ParentAvatarScreen.tsx",
     "src/features/children/ChildForm.tsx",
     "src/features/children/ChildrenList.tsx",
     "src/features/children/CreateProfileScreen.tsx",

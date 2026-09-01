@@ -619,15 +619,41 @@ Desde `add-design-system`, el front tiene sistema de diseño y **ya no se escrib
   saldos alinee. Va en la pieza y **no** en `body`: alinear cifras es correcto en una columna de
   números e incorrecto en un texto corrido. Hoy no cambia nada de lo que se ve —Nunito ya trae cifras
   de ancho fijo—, y ese es justo el motivo de declararlo: deja de depender de qué familia gane.
-- **Deuda declarada con fecha de caducidad**: las pantallas de `features/` y `routes/` siguen con
-  estilos en línea y colores a mano, y están exceptuadas en dos listas —en `apps/web/eslint.config.js`
-  y en `tests/ui/style-rules.test.ts`—. Cada change de rediseño **borra su entrada**. Una entrada que
-  siga ahí sin change que la reclame es que alguien se saltó el plan.
+- **Deuda declarada con fecha de caducidad**: quedan pantallas de `features/` con estilos en línea y
+  colores a mano, exceptuadas en dos listas —en `apps/web/eslint.config.js` y en
+  `tests/ui/style-rules.test.ts`—. Cada change de rediseño **borra su entrada**. Una entrada que siga
+  ahí sin change que la reclame es que alguien se saltó el plan. **`routes/` ya no está en esas
+  listas** desde `redesign-parent-home`, que vistió `account.tsx`, la última con estilo en línea: un
+  archivo de ruta monta el destino y no lo dibuja, así que ese directorio no debería volver a
+  aparecer ahí.
 
 **Un test que no falla ante la violación que persigue no prueba nada.** Comprobar que las etiquetas
 de tres estados están en pantalla no comprueba que se distingan: con el mismo tono en los tres, ese
 test sigue en verde. Por eso la tarea de **inyectar la violación** no es ceremonia — en
 `redesign-child-shop` cazó un test que habría entrado al repositorio dando una garantía que no daba.
+
+Y volvió a cazar uno en `redesign-parent-home`, esta vez con la lección ya escrita aquí arriba: el
+caso de prueba no basta con que sea el escenario correcto, tiene que **dar un número distinto para
+cada respuesta equivocada**. El test contaba tareas por aprobar en un reparto de estados mezclados
+—una `PENDING`, una `COMPLETED`, una `APPROVED`—, que es el escenario que la spec pide; pero la
+respuesta correcta era `1` y la cuenta equivocada por repartos también daba `1`, así que pasaba con
+el defecto puesto. Con **dos** completadas las tres cuentas dan 1, 3 y 2, y ahí sí distingue. Elegir
+un caso donde lo correcto y lo incorrecto coinciden es la forma silenciosa de este error.
+
+**Una cuenta sobre un listado que pagina por GRUPO no se lee de su `total`.** `GET /tasks` pagina por
+reparto y, al filtrar por estado, devuelve el reparto **entero** —las dos cosas a propósito—. Así que
+`total` cuenta repartos y las filas recibidas vienen sin filtrar: un reparto con dos hermanos
+esperando y uno sin hacer nada da `1` por `total`, `3` por filas y `2` de verdad. Se cuentan las filas
+con el estado buscado. `GET /redemptions` sí pagina por fila y su `total` sí es la cifra; que dos
+cuentas del mismo panel se obtengan de dos maneras **no es una incoherencia que unificar**, es que
+las dos listas tienen unidades distintas porque sus pantallas las tienen.
+
+**Cerrar sesión y cambiar de perfil no son gemelas, y no van juntas.** Cambiar de perfil devuelve a
+la rejilla, ocurre varias veces al día y no pide credenciales para volver; cerrar sesión obliga a
+teclear correo y contraseña. Desde `redesign-parent-home` viven en pantallas distintas —salir del
+perfil en el inicio, cerrar sesión en `/account`—, porque ponerlas del mismo tamaño y una al lado de
+la otra es cómo un padre acaba tecleando su contraseña cuando solo quería pasarle la tablet a su
+hijo.
 
 **Un control nativo puede imponer su medida a lo que lo rodea.** Un `input[type=file]` pide unos
 360 px de ancho mínimo intrínseco y, en una rejilla —donde el mínimo por defecto es `auto`—, arrastra

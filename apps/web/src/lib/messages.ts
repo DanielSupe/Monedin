@@ -79,6 +79,37 @@ export const messages = {
   },
 
   /**
+   * El panel del padre: lo primero que ve al entrar a su perfil.
+   *
+   * `greeting` se compone con el nombre en el punto de uso, igual que el del
+   * niño. Estaba incrustado en `routes/index.tsx` —«Hola, {actor.name}» escrito
+   * a mano— y sobrevivió porque al vestir la rama del niño nadie miró la del
+   * padre.
+   *
+   * Las dos bandejas llevan singular y plural porque «1 tareas por aprobar» en
+   * la pantalla que un padre abre a diario se lee como un producto descuidado,
+   * y la mayoría de los días la cifra es 1.
+   */
+  parents: {
+    greeting: "Hola,",
+
+    pendingTitle: "Te esperan",
+    tasksToApprove: "tareas por aprobar",
+    taskToApprove: "tarea por aprobar",
+    redemptionsWaiting: "canjes esperando respuesta",
+    redemptionWaiting: "canje esperando respuesta",
+
+    /** Estar al día es lo normal, no un caso degenerado: se dice, no se cuenta. */
+    allClear: "Todo al día. No hay nada esperando por ti.",
+
+    childrenTitle: "Tus hijos",
+    childrenLink: "Gestionar perfiles",
+    childrenEmpty: "Todavía no has creado ningún perfil.",
+
+    consoleFailed: "No pudimos cargar tu panel.",
+  },
+
+  /**
    * Textos de las piezas del sistema de diseño.
    *
    * Una pieza no incrusta un texto visible, igual que una pantalla. Lo que la

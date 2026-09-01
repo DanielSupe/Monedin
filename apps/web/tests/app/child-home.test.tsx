@@ -27,7 +27,14 @@ describe("cada rol ve su propio inicio", () => {
   it("un padre ve el suyo, y no el del niño", async () => {
     await montarApp("/", comoPadre());
 
-    expect(await screen.findByRole("link", { name: messages.children.title })).toBeInTheDocument();
+    /*
+     * La marca del inicio del padre es su PANEL, no un enlace al listado de
+     * perfiles. Hasta `redesign-parent-home` esta línea buscaba
+     * `messages.children.title` porque el inicio del padre era exactamente la
+     * lista de destinos de su propia barra; ahora esa lista ya no está y lo que
+     * lo identifica es lo que le espera.
+     */
+    expect(await screen.findByText(messages.parents.pendingTitle)).toBeInTheDocument();
     expect(screen.queryByText(messages.children.homeBalanceLabel)).toBeNull();
   });
 });

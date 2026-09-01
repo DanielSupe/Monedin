@@ -1,7 +1,7 @@
 import { changeAdultPinSchema } from "@monedin/contracts";
-import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
+import { Alert, Button, Card, Field, Input } from "../../ui/index.js";
 import { describeAuthError, useChangeAdultPin } from "./use-session.js";
 
 /**
@@ -9,6 +9,11 @@ import { describeAuthError, useChangeAdultPin } from "./use-session.js";
  *
  * A diferencia de `ResetPinScreen`, exige perfil de padre activo: es la ruta
  * normal, no la de rescate. La monta `requireParent` en el servidor.
+ *
+ * Desde `redesign-parent-home` es una PARTE de `/account`. Por eso al terminar
+ * no sustituye la pantalla entera por un «listo» con un enlace de vuelta: eso
+ * se llevaba por delante la otra mitad de la cuenta. El éxito es un aviso, y el
+ * formulario se queda donde está.
  */
 export function ChangePinScreen(): React.ReactElement {
   const [currentPin, setCurrentPin] = useState("");
@@ -25,63 +30,58 @@ export function ChangePinScreen(): React.ReactElement {
       setFieldError(parsed.error.issues[0]?.message);
       return;
     }
-    change.mutate(parsed.data);
+    change.mutate(parsed.data, {
+      onSuccess: () => {
+        setCurrentPin("");
+        setNewPin("");
+      },
+    });
   }
 
   const error = fieldError ?? (change.error ? describeAuthError(change.error) : undefined);
 
-  if (change.isSuccess) {
-    return (
-      <section>
-        <p>{messages.auth.pinChanged}</p>
-        <Link to="/">{messages.auth.back}</Link>
-      </section>
-    );
-  }
-
   return (
-    <section style={{ maxWidth: "22rem" }}>
-      <h2>{messages.auth.changePinTitle}</h2>
+    <Card>
+      <div className="flex flex-col gap-4">
+        <h3 className="text-body font-bold">{messages.auth.changePinTitle}</h3>
 
-      <form onSubmit={submit} style={{ display: "grid", gap: "0.75rem" }}>
-        <label>
-          {messages.auth.currentPin}
-          <input
-            type="text"
-            inputMode="numeric"
-            maxLength={4}
-            value={currentPin}
-            onChange={(e) => setCurrentPin(e.target.value)}
-            style={{ display: "block", width: "100%" }}
-          />
-        </label>
+        <form onSubmit={submit} className="flex max-w-sm flex-col gap-4">
+          {/*
+            `type="text"` y no `password`, igual que en las otras dos pantallas
+            de PIN del proyecto. Enmascararlo aquí solo dejaría a esta distinta
+            de sus hermanas; si hay que hacerlo, es en las tres a la vez.
+          */}
+          <Field label={messages.auth.currentPin}>
+            <Input
+              type="text"
+              inputMode="numeric"
+              maxLength={4}
+              value={currentPin}
+              onChange={(evento) => setCurrentPin(evento.target.value)}
+            />
+          </Field>
 
-        <label>
-          {messages.auth.newPin}
-          <input
-            type="text"
-            inputMode="numeric"
-            maxLength={4}
-            value={newPin}
-            onChange={(e) => setNewPin(e.target.value)}
-            style={{ display: "block", width: "100%" }}
-          />
-        </label>
+          <Field label={messages.auth.newPin}>
+            <Input
+              type="text"
+              inputMode="numeric"
+              maxLength={4}
+              value={newPin}
+              onChange={(evento) => setNewPin(evento.target.value)}
+            />
+          </Field>
 
-        <button type="submit" disabled={change.isPending}>
-          {change.isPending ? messages.auth.working : messages.auth.changePinSubmit}
-        </button>
-      </form>
+          <Button type="submit" variant="primary" pending={change.isPending}>
+            {change.isPending ? messages.auth.working : messages.auth.changePinSubmit}
+          </Button>
+        </form>
 
-      {error !== undefined && (
-        <p role="alert" style={{ color: "#b00020" }}>
-          {error}
-        </p>
-      )}
+        {change.isSuccess && error === undefined && (
+          <Alert tone="success">{messages.auth.pinChanged}</Alert>
+        )}
 
-      <Link to="/" style={{ display: "inline-block", marginTop: "1rem" }}>
-        {messages.auth.cancel}
-      </Link>
-    </section>
+        {error !== undefined && <Alert tone="danger">{error}</Alert>}
+      </div>
+    </Card>
   );
 }
