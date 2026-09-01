@@ -649,6 +649,26 @@ con el estado buscado. `GET /redemptions` sí pagina por fila y su `total` sí e
 cuentas del mismo panel se obtengan de dos maneras **no es una incoherencia que unificar**, es que
 las dos listas tienen unidades distintas porque sus pantallas las tienen.
 
+**Quién marca el destino activo es el `Link`, y solo él.** El router pone `aria-current="page"` y
+`data-status="active"` por su cuenta según `activeOptions`; escribirlos ADEMÁS a mano da dos fuentes
+para el mismo hecho, y la de fuera puede separarse de la del router sin que falle nada. El aspecto se
+declara con `data-[status=active]:`, que es lo que ya hacían las dos barras que `add-sidebar-nav`
+retiró. Lo destapó inyectar la violación: al quitar el `aria-current` escrito a mano **el test siguió
+en verde**, porque quien lo ponía de verdad era el enlace.
+
+**La navegación de un perfil es UNA sola, y está entera.** Desde `add-sidebar-nav` los dos marcos
+comparten un cajón lateral con todos los destinos del rol. Antes había dos barras distintas —arriba
+el padre, abajo el niño— y, en las dos, un destino que NO estaba en ellas y colgaba del avatar de la
+cabecera. Un test enumera los destinos de cada rol y comprueba que ninguno aparece dos veces en el
+marco: es lo que impide que vuelvan las dos navegaciones.
+
+**Abrir un cajón es una revelación, no un destino, y va en `useState`.** No contradice «la navegación
+es del router»: esa regla habla de qué PANTALLA se enseña. La prueba está en compararlo con
+`?manage=true`, que sí fue a la dirección — aquel tenía que **sobrevivir** a una navegación y este
+tiene que **morir** con ella. Y se cierra al cambiar la DIRECCIÓN, no en el `onClick` de cada enlace:
+el botón atrás también cambia la dirección, y un panel abierto tapando la pantalla a la que se acaba
+de volver es peor que no tenerlo.
+
 **Un 409 se cuenta como ADVERTENCIA, no como error.** `Alert` lo declara desde `add-design-system`
 —«nadie hizo nada mal: el padre aprobó dos veces, o el hermano llegó antes»— y hasta
 `redesign-parent-inbox` esa distinción no llegaba a ninguna pantalla: las dos bandejas del padre, que

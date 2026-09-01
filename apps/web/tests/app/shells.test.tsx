@@ -12,27 +12,37 @@ function escala(): string | null {
   return document.querySelector("[data-scale]")?.getAttribute("data-scale") ?? null;
 }
 
+/*
+ * SONDEO CAMBIADO en `add-sidebar-nav`, y conviene saber por qué.
+ *
+ * Estos tests buscaban el `<nav>` de cada rol —la barra de la cabecera del padre
+ * y la inferior del niño—. Esas dos barras ya no existen: hay UNA navegación,
+ * dentro de un cajón, que no está en el DOM mientras está cerrado.
+ *
+ * Lo que estos tests protegen —que cada rol reciba SU marco, con SU escala— no
+ * cambia; lo que cambia es dónde se mide. Se mide en la escala y en el botón de
+ * menú, que es lo que ahora persiste. Que la navegación esté completa y sea una
+ * sola lo comprueba `sidebar.test.tsx`.
+ */
 describe("cada rol recibe su marco", () => {
-  it("el niño ve su barra de destinos, con la escala del niño", async () => {
+  it("el niño recibe la escala del niño, con su menú", async () => {
     await montarApp("/", comoNino());
 
-    expect(screen.getByRole("navigation", { name: messages.nav.childNavLabel })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: messages.nav.menu })).toBeInTheDocument();
     expect(escala()).toBe("child");
   });
 
-  it("el padre ve su cabecera, con la escala del padre", async () => {
+  it("el padre recibe la escala del padre, con su menú", async () => {
     await montarApp("/", comoPadre());
 
-    expect(
-      screen.getByRole("navigation", { name: messages.nav.parentNavLabel }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: messages.nav.menu })).toBeInTheDocument();
     expect(escala()).toBe("parent");
   });
 
   it("ninguno ve el marco del otro", async () => {
     await montarApp("/", comoNino());
 
-    expect(screen.queryByRole("navigation", { name: messages.nav.parentNavLabel })).toBeNull();
+    expect(escala()).not.toBe("parent");
   });
 
   /*
@@ -46,8 +56,7 @@ describe("cada rol recibe su marco", () => {
     await montarApp("/profiles", SOLO_CUENTA);
 
     expect(escala()).toBeNull();
-    expect(screen.queryByRole("navigation", { name: messages.nav.childNavLabel })).toBeNull();
-    expect(screen.queryByRole("navigation", { name: messages.nav.parentNavLabel })).toBeNull();
+    expect(screen.queryByRole("button", { name: messages.nav.menu })).toBeNull();
   });
 });
 
@@ -81,9 +90,7 @@ describe("las pantallas de entrada llevan la marca", () => {
   it("con actor manda el marco del rol, no el de entrada", async () => {
     await montarApp("/", comoPadre());
 
-    expect(
-      screen.getByRole("navigation", { name: messages.nav.parentNavLabel }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: messages.nav.menu })).toBeInTheDocument();
     expect(escala()).toBe("parent");
   });
 });
@@ -103,18 +110,26 @@ describe("la marca sale de la pieza, no de texto suelto", () => {
 });
 
 describe("el marco sobrevive a la navegación", () => {
-  it("la barra del niño sigue siendo el MISMO nodo tras cambiar de destino", async () => {
+  /*
+   * Antes se medía sobre la barra inferior del niño. Esa barra se fue en
+   * `add-sidebar-nav` y su navegación vive dentro de un cajón, que a propósito
+   * SÍ se desmonta —se cierra al llegar—. Así que el sondeo pasa al botón de
+   * menú, que es lo que ahora persiste en la cabecera.
+   *
+   * La intención es la misma y no se ha ablandado: lo que no puede pasar es que
+   * el marco se reconstruya en cada toque.
+   */
+  it("el menú del marco sigue siendo el MISMO nodo tras cambiar de destino", async () => {
     const app = await montarApp("/", comoNino());
 
-    const antes = screen.getByRole("navigation", { name: messages.nav.childNavLabel });
+    const antes = screen.getByRole("button", { name: messages.nav.menu });
 
     await app.router.navigate({ to: "/me/tasks" });
     await app.router.invalidate();
 
-    const despues = screen.getByRole("navigation", { name: messages.nav.childNavLabel });
+    const despues = screen.getByRole("button", { name: messages.nav.menu });
 
-    // Idéntico nodo, no uno equivalente: si el marco se remontara, la barra
-    // parpadearía en cada toque.
+    // Idéntico nodo, no uno equivalente.
     expect(despues).toBe(antes);
   });
 });

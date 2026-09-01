@@ -185,6 +185,8 @@
   --container-reading: 40rem;
   --container-orbit: 20rem;
   --container-wide: 72rem;
+  /* El cajón de navegación. `max-w-full` detrás, para que a 320px no desborde. */
+  --container-sidebar: 17rem;
 
   /*
    * El giro de las órbitas de la puerta pública. Los dos sentidos son tokens

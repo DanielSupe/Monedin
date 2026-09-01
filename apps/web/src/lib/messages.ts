@@ -72,6 +72,16 @@ export const messages = {
     childNavLabel: "Dónde ir",
     parentNavLabel: "Secciones",
 
+    /*
+     * El cajón lateral, desde `add-sidebar-nav`.
+     *
+     * `menu` nombra al BOTÓN que lo abre —un botón que solo dibuja tres rayas no
+     * dice nada sin él— y `drawerLabel` nombra al panel, que Radix exige y va
+     * oculto a la vista porque lo que se ve es la lista.
+     */
+    menu: "Menú",
+    drawerLabel: "Navegación",
+
     /** Una dirección que no corresponde a ningún destino. */
     notFoundTitle: "Aquí no hay nada",
     notFoundBody: "Esa dirección no existe o dejó de existir.",

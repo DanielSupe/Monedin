@@ -18,6 +18,7 @@ export { Button, buttonClasses, type ButtonProps, type ButtonVariant } from "./B
 export { Card, type CardProps } from "./Card.js";
 export { Coins, type CoinsProps } from "./Coins.js";
 export { Dialog, type DialogProps } from "./Dialog.js";
+export { Drawer, type DrawerProps } from "./Drawer.js";
 export { EmptyState, type EmptyStateProps } from "./EmptyState.js";
 export { Field, type FieldProps, useField } from "./Field.js";
 export { Input, type InputProps, type InputShape } from "./Input.js";

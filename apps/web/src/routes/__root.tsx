@@ -64,11 +64,11 @@ function AppFrame(): React.ReactElement {
   });
 
   if (actor?.familyRole === "CHILD") {
-    return <ChildShell avatar={actor.avatar} />;
+    return <ChildShell avatar={actor.avatar} name={actor.name} />;
   }
 
   if (actor?.familyRole === "PARENT") {
-    return <ParentShell avatar={actor.avatar} />;
+    return <ParentShell avatar={actor.avatar} name={actor.name} />;
   }
 
   return aSangre ? <Outlet /> : <EntryShell />;

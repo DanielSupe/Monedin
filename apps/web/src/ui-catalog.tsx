@@ -8,6 +8,7 @@ import {
   Card,
   Coins,
   Dialog,
+  Drawer,
   EmptyState,
   Field,
   Input,
@@ -81,6 +82,7 @@ function Piezas(): React.ReactElement {
   const [dialogoAbierto, setDialogoAbierto] = useState(false);
   const [avisoAbierto, setAvisoAbierto] = useState(false);
   const [pestana, setPestana] = useState("pendientes");
+  const [cajonAbierto, setCajonAbierto] = useState(false);
 
   return (
     <div className="flex flex-col gap-6">
@@ -215,6 +217,29 @@ function Piezas(): React.ReactElement {
           description={EJEMPLO.vacioDetalle}
           action={<Button variant="primary">Volver</Button>}
         />
+      </Seccion>
+
+      <Seccion titulo="Drawer">
+        {/*
+          Se monta sin router: los enlaces los pone quien la usa, así que aquí
+          van anclas sueltas. Es lo mismo que permite montarla en un test sin
+          proveedores.
+        */}
+        <Drawer
+          open={cajonAbierto}
+          onOpenChange={setCajonAbierto}
+          label="Navegación"
+          trigger={<Button variant="secondary">Abrir el cajón</Button>}
+        >
+          <nav className="flex flex-col gap-1 p-3">
+            <a href="#uno" className="rounded-control bg-primary-soft px-3 py-2 text-primary no-underline">
+              Inicio
+            </a>
+            <a href="#dos" className="rounded-control px-3 py-2 text-ink no-underline">
+              Tareas
+            </a>
+          </nav>
+        </Drawer>
       </Seccion>
 
       <Seccion titulo="Pagination">
