@@ -649,6 +649,12 @@ con el estado buscado. `GET /redemptions` sí pagina por fila y su `total` sí e
 cuentas del mismo panel se obtengan de dos maneras **no es una incoherencia que unificar**, es que
 las dos listas tienen unidades distintas porque sus pantallas las tienen.
 
+**Reescribir un requisito es ARRASTRAR sus escenarios, no volver a redactar los que el argumento
+nuevo necesita.** `openspec archive` rechaza un bloque `MODIFIED` que se deje fuera un escenario que
+la spec vigente sí tiene, y ya lo ha hecho dos veces —en `pin-sidebar-on-desktop` y en
+`redesign-parent-authoring`—. La herramienta impide que se pierdan en silencio; el hábito de mirar la
+spec actual antes de reescribir un requisito, no.
+
 **Una regla que se comprueba por su NOMBRE está a un sinónimo de morirse.** `add-app-shell` prohibió
 que una pantalla reciba una función para cerrarse y dejó un test que buscaba `onDone`. Al enumerar
 las props de `features/` en `redesign-parent-authoring` no había **ni un** `onDone` en el proyecto —y
