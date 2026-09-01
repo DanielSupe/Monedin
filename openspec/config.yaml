@@ -333,7 +333,24 @@ context: |
     Nada de esto sale de los selectores de superficie, asi que el resto de la aplicacion no cambia.
     Eso se comprueba ABRIENDO pantallas del padre y del nino, porque no lo cubre ningun test.
 
-    DECISION CERRADA: el SALDO no se ve en la rejilla. Se pidio y se descarto. No es una limitacion
+    `redesign-child-home` viste la primera pantalla de PRODUCTO. El inicio del nino tenia su saldo en
+    negrita dentro de una frase, al mismo tamano que los enlaces de al lado, aunque la escala del nino
+    lleva 4rem reservados para el desde `add-design-system`. Lo que deja construido:
+      - El saldo primero y lo mas grande, con la pieza `Coins`, que ademas lo anuncia como «120
+        monedas» y no como un numero suelto.
+      - Los cuatro destinos pasan de enlaces subrayados a tarjetas: un enlace de una linea es un
+        objetivo de la altura de una letra para una mano de seis anos en una tablet compartida.
+      - Las DOS pantallas de inicio salen del archivo de ruta a `features/`. Un archivo de ruta monta
+        el destino, no lo dibuja; elegir por rol sigue siendo legitimo, pero lo elegido vive fuera. La
+        del padre se muda TAL CUAL y espera a `redesign-parent-home`.
+      - Al estrechar `features/auth` por archivos, mudar codigo sin vestir alli lo deja fuera de su
+        excepcion. Sus estilos se tradujeron uno a uno a utilidades: traducir no es vestir.
+
+    PENDIENTE: `/me/settings` -«Mi perfil» del nino- desborda y NO lo reclama ningun change
+    planificado. Se quedo fuera de los tres del nino, y mientras siga asi el `overflow-x-auto` del
+    marco no se podra retirar.
+
+        DECISION CERRADA: el SALDO no se ve en la rejilla. Se pidio y se descarto. No es una limitacion
     tecnica -`GET /auth/profiles` no lo devuelve porque `profile-selection` lo prohibe-. Dos precios:
     cualquiera con la tablet desbloqueada veria todos los saldos SIN teclear un PIN, y los hermanos se
     compararian cada vez que se abre la aplicacion. No se reabre sin argumento nuevo sobre lo segundo.

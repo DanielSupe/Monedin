@@ -243,6 +243,17 @@ export const messages = {
 
     /** Lo que el niño ve y puede cambiar de lo suyo. */
     myProfileTitle: "Mi perfil",
+
+    /**
+     * El inicio del niño.
+     *
+     * `greeting` se compone con el nombre en el punto de uso, que es el patrón
+     * de la casa. `balanceLabel` acompaña al saldo: la cifra la dibuja `Coins`,
+     * que ya la anuncia como «120 monedas», así que esto es lo que explica de
+     * QUIÉN es ese número.
+     */
+    homeGreeting: "Hola,",
+    homeBalanceLabel: "Tus monedas",
     myCoins: "Mis monedas",
     chooseAvatar: "Elige tu animal",
     avatarSaved: "¡Listo!",

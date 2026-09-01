@@ -78,6 +78,13 @@ pagos y no hay interoperabilidad entre familias.
 > declara que lo es, y una utilidad de color resuelve el token donde se escribe. El resto de la
 > aplicación no cambia.
 >
+> `redesign-child-home` viste la primera pantalla de producto: el inicio del niño. Su **saldo** —el
+> número que el producto entero existe para enseñar— salía en negrita dentro de una frase, al mismo
+> tamaño que los enlaces de al lado, aunque la escala del niño lleva 4 rem reservados para él desde el
+> primer día. Ahora es lo primero y lo más grande, y sus cuatro destinos son tarjetas que un dedo de
+> seis años acierta. De paso, las **dos** pantallas de inicio salen del archivo de ruta: un archivo de
+> ruta monta el destino, no lo dibuja. La del padre se muda sin tocarla y espera a su change.
+>
 > Las pantallas de producto **todavía no están vestidas** y se ven más planas de lo que se veían: el
 > reinicio de estilos entra con el sistema, y vestirlas una a una es lo que hacen los nueve changes
 > siguientes. Para ver las piezas, `pnpm dev` y `http://localhost:5173/ui.html`, que existe solo en

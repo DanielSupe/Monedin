@@ -624,6 +624,17 @@ Desde `add-design-system`, el front tiene sistema de diseño y **ya no se escrib
   y en `tests/ui/style-rules.test.ts`—. Cada change de rediseño **borra su entrada**. Una entrada que
   siga ahí sin change que la reclame es que alguien se saltó el plan.
 
+**Un archivo de ruta monta el destino, no lo dibuja.** Desde `redesign-child-home`, elegir por rol
+sigue siendo legítimo —el destino es el mismo y quien lo abre no— pero lo elegido vive en
+`features/`. Una pantalla dentro de un archivo de ruta no se prueba sin router, no se reutiliza, y
+crece hasta que nadie recuerda que ese archivo era una ruta.
+
+**Mudar un archivo a una carpeta ESTRECHADA lo deja fuera de su excepción.** Las listas de deuda ya
+no tapan directorios enteros, sino archivos nombrados, así que al mover código sin vestir a
+`features/auth/` el lint lo caza. Cuando los estilos se traducen uno a uno a utilidades —`mt-4` por
+`marginTop: "1rem"`— **traducir no es vestir**: no hay color, radio ni decisión visual, y la deuda no
+engorda con código que solo cambió de sitio.
+
 **La navegación es del router, no del estado.** Desde `add-app-shell`, cada destino tiene su
 dirección y ningún componente de `features/` decide con `useState` qué pantalla enseñar. Dos tests lo
 impiden: uno falla ante un prop `onDone` —«ciérrame», que empuja la navegación a quien llama— y otro
