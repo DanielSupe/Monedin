@@ -40,3 +40,6 @@ apps/api/src/generated/
 
 # Caché del plugin de rutas de TanStack. Se regenera sola con `pnpm dev`.
 apps/web/.tanstack/
+
+# El brief de diseño, mientras se decide dónde vive.
+design-brief.md
