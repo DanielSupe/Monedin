@@ -11,7 +11,7 @@ import {
 import { type ReactNode, useState } from "react";
 import * as childrenApi from "../../api/children.js";
 import { alertToneFor } from "../../lib/alert-tone.js";
-import { messages } from "../../lib/messages.js";
+import { PIN_LABEL, messages } from "../../lib/messages.js";
 import { Alert, Button, Card, Field, Input } from "../../ui/index.js";
 import { AvatarPicker } from "./AvatarPicker.js";
 import { describeChildrenError, useCreateChild, useUpdateChild } from "./use-children.js";
@@ -128,7 +128,7 @@ export function ChildForm({
           </Field>
 
           {!editing && (
-            <Field label={messages.children.pin} help={messages.children.pinHelp}>
+            <Field label={PIN_LABEL} help={messages.children.pinHelp}>
               <Input
                 type="text"
                 inputMode="numeric"

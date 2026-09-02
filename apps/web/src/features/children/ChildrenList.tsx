@@ -2,7 +2,7 @@ import { PIN_LENGTH, type Child } from "@monedin/contracts";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { alertToneFor } from "../../lib/alert-tone.js";
-import { messages } from "../../lib/messages.js";
+import { PIN_LABEL, messages } from "../../lib/messages.js";
 import {
   Alert,
   Avatar,
@@ -189,7 +189,7 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
 
           {reponiendoPin && (
             <form onSubmit={reponer} className="flex flex-col gap-3 border-t border-border pt-3">
-              <Field label={messages.children.pin} help={messages.children.pinHelp}>
+              <Field label={PIN_LABEL} help={messages.children.pinHelp}>
                 <Input
                   type="text"
                   inputMode="numeric"

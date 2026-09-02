@@ -2,7 +2,7 @@ import { PASSWORD_MIN_LENGTH } from "@monedin/contracts";
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { messages } from "../../src/lib/messages.js";
+import { PIN_LABEL, messages } from "../../src/lib/messages.js";
 import { SIN_SESION, montarApp } from "../support/router.js";
 
 afterEach(() => {
@@ -51,14 +51,14 @@ describe("cada ruta enseña su formulario y ninguna alterna", () => {
     expect(screen.getByLabelText(messages.auth.email)).toBeInTheDocument();
     expect(screen.getByLabelText(messages.auth.password)).toBeInTheDocument();
     expect(screen.queryByLabelText(messages.auth.name)).toBeNull();
-    expect(screen.queryByLabelText(messages.auth.pin)).toBeNull();
+    expect(screen.queryByLabelText(PIN_LABEL)).toBeNull();
   });
 
   it("el registro pide además el nombre y el PIN", async () => {
     await montarApp("/sign-up", SIN_SESION);
 
     expect(screen.getByLabelText(messages.auth.name)).toBeInTheDocument();
-    expect(screen.getByLabelText(messages.auth.pin)).toBeInTheDocument();
+    expect(screen.getByLabelText(PIN_LABEL)).toBeInTheDocument();
   });
 
   /*

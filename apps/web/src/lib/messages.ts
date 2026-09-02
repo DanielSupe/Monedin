@@ -1,3 +1,5 @@
+import { PIN_LENGTH } from "@monedin/contracts";
+
 /**
  * Catálogo de textos visibles del front.
  *
@@ -7,7 +9,6 @@
 export const messages = {
   app: {
     title: "Monedín",
-    tagline: "Educación financiera para chicos de 6 a 11 años",
     /**
      * Con qué convenciones se formatea un número.
      *
@@ -189,7 +190,9 @@ export const messages = {
     /** Bloqueo. Distinto de una credencial incorrecta, y por eso otro mensaje. */
     tooManyAttempts: "Demasiados intentos. Espera unos minutos antes de volver a probar.",
 
-    pin: "PIN de 4 dígitos",
+    /* La cifra sale de `PIN_LENGTH` y se compone al usarla. */
+    pinLead: "PIN de",
+    pinTail: "dígitos",
     pinHelp: "Lo usarás cada vez que entres a tu perfil. La contraseña solo al vincular un dispositivo.",
 
     /**
@@ -269,6 +272,17 @@ export const messages = {
     forgotPin: "¿Olvidaste tu PIN?",
     resetPinTitle: "Restablecer PIN",
     resetPinSubmit: "Restablecer",
+    /*
+     * Las DOS credenciales de la vía de rescate, explicadas.
+     *
+     * Mismo caso que el registro, y misma regla: cuando se piden dos en la misma
+     * pantalla hay que decir para qué sirve cada una, o parece que te están
+     * pidiendo lo mismo dos veces. Y quien llega aquí está bloqueado fuera de su
+     * propio perfil, o sea nervioso.
+     */
+    resetPinLead: "Estás bloqueado fuera de tu perfil. Con tu contraseña puedes ponerte un PIN nuevo.",
+    resetPinPasswordHelp: "La de tu cuenta. Es lo que demuestra que eres tú.",
+    resetPinNewPinHelp: "Lo que teclearás para entrar a tu perfil a partir de ahora.",
     pinReset: "PIN restablecido. Ya puedes entrar con el nuevo.",
 
     cancel: "Cancelar",
@@ -285,7 +299,6 @@ export const messages = {
     age: "Edad",
     ageOptional: "Edad (opcional)",
     avatar: "Animal",
-    pin: "PIN de 4 dígitos",
     pinHelp: "Es el que usará para entrar a su perfil.",
     coins: "Monedas",
     save: "Guardar",
@@ -539,3 +552,13 @@ export const messages = {
     network: "No se pudo contactar con el servidor.",
   },
 } as const;
+
+/**
+ * «PIN de 4 dígitos», con el 4 saliendo de su constante.
+ *
+ * Se compone AQUÍ y no en cada pantalla porque lo necesitan tres, y tres
+ * composiciones idénticas son tres sitios donde se puede separar una. Es el
+ * mismo patrón que el mínimo de la contraseña, con la diferencia de que aquel
+ * tiene un solo punto de uso.
+ */
+export const PIN_LABEL = `${messages.auth.pinLead} ${PIN_LENGTH} ${messages.auth.pinTail}`;

@@ -1,4 +1,4 @@
-import { changeAdultPinSchema } from "@monedin/contracts";
+import { PIN_LENGTH, changeAdultPinSchema } from "@monedin/contracts";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
 import { Alert, Button, Card, Field, Input } from "../../ui/index.js";
@@ -55,7 +55,7 @@ export function ChangePinScreen(): React.ReactElement {
             <Input
               type="text"
               inputMode="numeric"
-              maxLength={4}
+              maxLength={PIN_LENGTH}
               value={currentPin}
               onChange={(evento) => setCurrentPin(evento.target.value)}
             />
@@ -65,7 +65,7 @@ export function ChangePinScreen(): React.ReactElement {
             <Input
               type="text"
               inputMode="numeric"
-              maxLength={4}
+              maxLength={PIN_LENGTH}
               value={newPin}
               onChange={(evento) => setNewPin(evento.target.value)}
             />

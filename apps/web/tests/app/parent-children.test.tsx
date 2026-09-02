@@ -5,7 +5,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { routeTree } from "../../src/routeTree.gen";
-import { messages } from "../../src/lib/messages.js";
+import { PIN_LABEL, messages } from "../../src/lib/messages.js";
 import { comoPadre } from "../support/router.js";
 
 afterEach(() => {
@@ -187,7 +187,7 @@ describe("reponer el PIN es un formulario", () => {
       within(fila).getByRole("button", { name: messages.children.resetPin }),
     );
 
-    await userEvent.type(await within(fila).findByLabelText(messages.children.pin), "1234");
+    await userEvent.type(await within(fila).findByLabelText(PIN_LABEL), "1234");
     await userEvent.keyboard("{Enter}");
 
     expect(mutaciones).toHaveLength(1);

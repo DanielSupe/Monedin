@@ -619,14 +619,19 @@ Desde `add-design-system`, el front tiene sistema de diseño y **ya no se escrib
   saldos alinee. Va en la pieza y **no** en `body`: alinear cifras es correcto en una columna de
   números e incorrecto en un texto corrido. Hoy no cambia nada de lo que se ve —Nunito ya trae cifras
   de ancho fijo—, y ese es justo el motivo de declararlo: deja de depender de qué familia gane.
-- **Deuda declarada con fecha de caducidad**: quedan pantallas de `features/` con estilos en línea y
-  colores a mano, exceptuadas en dos listas —en `apps/web/eslint.config.js` y en
-  `tests/ui/style-rules.test.ts`—. Cada change de rediseño **borra su entrada**. Una entrada que siga
-  ahí sin change que la reclame es que alguien se saltó el plan. **`routes/` ya no está en esas
-  listas** desde `redesign-parent-home`, que vistió `account.tsx`, la última con estilo en línea: un
-  archivo de ruta monta el destino y no lo dibuja, así que ese directorio no debería volver a
-  aparecer ahí. Desde `redesign-parent-inbox` quedan **ocho** entradas: las dos bandejas del padre
-  salieron juntas.
+- **La deuda de estilos SE ACABÓ, y su maquinaria ya no existe.** `add-design-system` creó dos listas
+  de pantallas exceptuadas con su condición de muerte escrita —cada change borra su entrada, y al
+  quedar vacías se borra el bloque—. Nueve changes después, `close-style-debt` vistió la última
+  (`ResetPinScreen`) y **borró el mecanismo**: el bloque de `allowInlineStyles` de la deuda en
+  `eslint.config.js`, la constante `SIN_VESTIR`, su filtro y el test que contaba su longitud.
+
+  No se dejó vacío «por si acaso», y esa es la parte que importa: **una lista vacía es una puerta
+  abierta**. El día que alguien tenga prisa, añadir una línea cuesta menos que vestir la pantalla, y
+  el mecanismo estaría ahí invitando. Ahora la regla cubre **todo `src`** sin lista que mantener.
+
+  **Sigue existiendo la excepción LEGÍTIMA**, que es otra cosa: hoy tres archivos —`ProgressBar`,
+  `Orbits`, `ImageUploadField`— donde una medida se calcula y ningún token puede expresarla. Se
+  declaran uno a uno y cada uno lleva escrito su porqué.
 
 **Un test que no falla ante la violación que persigue no prueba nada.** Comprobar que las etiquetas
 de tres estados están en pantalla no comprueba que se distingan: con el mismo tono en los tres, ese
@@ -648,6 +653,15 @@ esperando y uno sin hacer nada da `1` por `total`, `3` por filas y `2` de verdad
 con el estado buscado. `GET /redemptions` sí pagina por fila y su `total` sí es la cifra; que dos
 cuentas del mismo panel se obtengan de dos maneras **no es una incoherencia que unificar**, es que
 las dos listas tienen unidades distintas porque sus pantallas las tienen.
+
+**Un número de negocio no se escribe a mano, y DENTRO DE UN TEXTO es donde se escapa.** «PIN de 4
+dígitos» no parece un número de negocio, y lo es. Había seis —tres `maxLength={4}` y tres cifras
+dentro de cadenas del catálogo— con las constantes ya existiendo. Y son los del texto los que más se
+pudren: al código lo protege un esquema de Zod y al texto no lo protege nada, así que el día que el
+PIN pase a cinco dígitos el campo aceptaría cinco y la etiqueta seguiría diciendo cuatro. Desde
+`close-style-debt` lo comprueban dos tests: **ninguna cadena del catálogo lleva una cifra dentro** y
+**ningún `maxLength` lleva un literal**. La cifra se compone en el punto de uso, o una sola vez en el
+catálogo cuando la necesitan varios — `PIN_LABEL`.
 
 **Una acción irreversible se confirma con `Dialog`, y la ceremonia se mide contra lo que cuesta
 deshacerla.** Hasta `redesign-parent-children` estaba al revés: retirar un premio —que se revierte

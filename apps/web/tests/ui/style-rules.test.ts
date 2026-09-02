@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { messages } from "../../src/lib/messages.js";
 
 const SRC = resolve(process.cwd(), "src");
 const TOKENS = join(SRC, "styles", "tokens.css");
@@ -21,41 +22,16 @@ function archivosDe(directorio: string): string[] {
 }
 
 /*
- * DEUDA CON FECHA DE CADUCIDAD, la misma que la de `eslint.config.js`.
+ * Todo lo de `src`, menos el archivo de tokens y lo generado.
  *
- * Las pantallas del andamio llevan sus colores escritos a mano —`#b00020` para
- * un error, `#ccc` para un borde— y este change no las viste a propósito. Cada
- * uno de los nueve changes siguientes BORRA su entrada de esta lista al vestir
- * su pantalla. Cuando quede vacía, se borra la constante y la regla cubre todo
- * `src`. Una entrada que siga aquí sin change que la reclame es que alguien se
- * saltó el plan.
+ * Ya no hay lista de excepciones que restar. `add-design-system` la creó con su
+ * condición de muerte escrita —cada change borra su línea, y al quedar vacía se
+ * borra el bloque— y `close-style-debt` la cumplió. Dejarla vacía «por si acaso»
+ * habría sido una puerta abierta: añadir una línea cuesta menos que vestir una
+ * pantalla, y el mecanismo estaría ahí invitando.
  */
-const SIN_VESTIR = [
-  /*
-   * `features/auth` ya NO entra entero, y `routes` YA NO ESTÁ.
-   *
-   * `redesign-profile-grid` vistió dos de sus archivos —la rejilla y el teclado
-   * de PIN—, `redesign-access` se llevó el acceso, y `redesign-parent-home` la
-   * foto y el PIN del padre. El único que queda es la vía de RESCATE, que se
-   * abre sin sesión: su sitio es con el resto de la puerta de entrada, no con
-   * la cuenta.
-   *
-   * `routes` se fue con `account.tsx`, que era la última de las veintidós rutas
-   * con color escrito a mano.
-   */
-  "features/auth/ResetPinScreen.tsx",
-];
-
-function estaSinVestir(ruta: string): boolean {
-  // En Windows `relative` devuelve barras invertidas; se normaliza para que la
-  // lista de arriba se lea igual en los dos sistemas.
-  const relativa = relative(SRC, ruta).split("\\").join("/");
-  return SIN_VESTIR.some((parte) => relativa.startsWith(parte));
-}
-
-/** Todo lo de `src`, menos el archivo de tokens, lo generado y lo aún sin vestir. */
 const ARCHIVOS = archivosDe(SRC).filter(
-  (ruta) => ruta !== TOKENS && !ruta.endsWith("routeTree.gen.ts") && !estaSinVestir(ruta),
+  (ruta) => ruta !== TOKENS && !ruta.endsWith("routeTree.gen.ts"),
 );
 
 function sinComentarios(contenido: string): string {
@@ -74,41 +50,6 @@ function sinComentarios(contenido: string): string {
 describe("el estilo no se escribe fuera de los tokens", () => {
   it("encuentra archivos que revisar", () => {
     expect(ARCHIVOS.length).toBeGreaterThan(10);
-  });
-
-  it("la lista de pantallas sin vestir solo puede encoger", () => {
-    // Si alguien añade una entrada en vez de quitarla, este número no cuadra y
-    // hay que venir aquí a explicarse.
-    //
-    // El número sube al ESTRECHAR un directorio a sus archivos y baja al
-    // vestirlos: lo que encoge de verdad es lo TAPADO, no la longitud de la
-    // lista. Fue 7, luego 10 al estrechar `features/auth`, 9 al llevarse
-    // `redesign-access` el acceso, 14 al estrechar `features/children`, y ahora
-    // 12: `redesign-child-tasks` se llevó `AvatarPicker`, `ChildSettings`,
-    // `MyTasks` y `features/uploads` ENTERO, y estrechó `features/tasks`.
-    //
-    // Y 13 al estrechar `features/rewards` y `features/redemptions` a lo que
-    // queda, que es del PADRE: `redesign-child-shop` se llevó las dos pantallas
-    // del niño y con ellas su área entera.
-    //
-    // Ahora 10, y esta vez baja de verdad: `redesign-parent-home` se llevó las
-    // dos pantallas de la cuenta del padre y, con `account.tsx`, la entrada
-    // `routes` ENTERA. Es la primera vez que un directorio completo sale de la
-    // lista por estar terminado y no por estrecharse.
-    //
-    // Y 8: `redesign-parent-inbox` se llevó las DOS bandejas —`TaskBatchList` y
-    // `RedemptionInbox`—, que era el mismo andamio duplicado y las dos únicas
-    // pantallas del producto que producen un 409 de verdad.
-    //
-    // Y 5: `redesign-parent-authoring` se llevó las tres pantallas donde el
-    // padre ESCRIBE. Lo que queda es entero de `children/`, más la vía de
-    // rescate.
-    //
-    // Y 1: `redesign-parent-children` se llevó las cuatro de `children/`. Lo
-    // único que queda es la vía de rescate, que se abre SIN sesión y va con la
-    // puerta de entrada. Cuando se la lleve su change, se borra este bloque y la
-    // regla cubre todo `src`.
-    expect(SIN_VESTIR).toHaveLength(1);
   });
 
   it("ningún color literal fuera de tokens.css", () => {
@@ -290,5 +231,75 @@ describe("las cifras de una columna alinean", () => {
       sinComentarios(contenido),
       "Coins es la pieza que dibuja cantidades: sin cifras tabulares una lista de saldos no alinea",
     ).toContain("tabular-nums");
+  });
+});
+
+/**
+ * Lo que impide que un número de negocio se escriba a mano.
+ *
+ * `CLAUDE.md` lo prohíbe dos veces —«impórtalo» y «tenerlo en dos sitios acaba
+ * con uno de los dos mintiendo»— y hasta `close-style-debt` no lo comprobaba
+ * nada. Había SEIS: tres `maxLength={4}` y tres cifras metidas dentro de
+ * cadenas del catálogo.
+ */
+describe("un número de negocio no se escribe a mano", () => {
+  /** Cada cadena del catálogo, con la ruta por la que se llega a ella. */
+  function cadenasDe(objeto: unknown, camino: string[] = []): Array<[string, string]> {
+    if (typeof objeto === "string") {
+      return [[camino.join("."), objeto]];
+    }
+    if (objeto === null || typeof objeto !== "object") {
+      return [];
+    }
+    return Object.entries(objeto).flatMap(([clave, valor]) =>
+      cadenasDe(valor, [...camino, clave]),
+    );
+  }
+
+  it("hay cadenas que revisar", () => {
+    expect(cadenasDe(messages).length).toBeGreaterThan(100);
+  });
+
+  /*
+   * Dentro de un texto es donde se escapa: «PIN de 4 dígitos» no parece un
+   * número de negocio, y lo es. Y es el que más se pudre, porque al código lo
+   * protege un esquema de Zod y al texto no lo protege nada — el día que el PIN
+   * pase a cinco dígitos, el campo aceptaría cinco y la etiqueta seguiría
+   * diciendo cuatro.
+   *
+   * La regla es fuerte a propósito y hoy da CERO falsos positivos: las tres
+   * cadenas que llevaban cifras eran las tres constantes de dominio. Si algún
+   * día hace falta un número que NO sea de dominio, se verá al añadirlo y se
+   * decidirá entonces, que es mejor que no enterarse.
+   */
+  it("ninguna cadena del catálogo lleva una cifra dentro", () => {
+    const culpables = cadenasDe(messages)
+      .filter(([, texto]) => /[0-9]/.test(texto))
+      .map(([ruta, texto]) => `${ruta} → "${texto}"`);
+
+    expect(
+      culpables,
+      `una cifra dentro de un texto es un número de negocio disfrazado:\n${culpables.join("\n")}\n` +
+        "Compón la cifra en el punto de uso desde su constante, como `PIN_LABEL`.",
+    ).toEqual([]);
+  });
+
+  it("ningún `maxLength` con un literal numérico", () => {
+    const culpables: string[] = [];
+
+    for (const ruta of ARCHIVOS) {
+      if (!ruta.endsWith(".tsx")) continue;
+
+      const encontrados = sinComentarios(readFileSync(ruta, "utf8")).match(/maxLength=\{\d+\}/g);
+
+      if (encontrados !== null) {
+        culpables.push(`${relative(SRC, ruta)} → ${[...new Set(encontrados)].join(", ")}`);
+      }
+    }
+
+    expect(
+      culpables,
+      `una longitud máxima sale de su constante:\n${culpables.join("\n")}`,
+    ).toEqual([]);
   });
 });

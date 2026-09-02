@@ -1,7 +1,9 @@
-import { resetAdultPinSchema } from "@monedin/contracts";
+import { PIN_LENGTH, resetAdultPinSchema } from "@monedin/contracts";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { alertToneFor } from "../../lib/alert-tone.js";
 import { messages } from "../../lib/messages.js";
+import { Alert, Button, Card, Field, Input, buttonClasses } from "../../ui/index.js";
 import { describeAuthError, useResetAdultPin } from "./use-session.js";
 
 /**
@@ -10,7 +12,16 @@ import { describeAuthError, useResetAdultPin } from "./use-session.js";
  * Es la vía de rescate para un padre bloqueado fuera de su propio perfil: no
  * exige perfil activo, a propósito (decisión 3 del design de
  * `add-profile-selection`). Se abre desde el teclado de PIN del padre en la
- * rejilla.
+ * rejilla, y este change NO toca por dónde se llega ni a dónde se sale: es el
+ * único camino de vuelta que le queda.
+ *
+ * Pide DOS credenciales y ahora explica cada una. Antes iban juntas y sin una
+ * palabra, que es exactamente lo que `redesign-access` arregló en el registro:
+ * sin decir para qué sirve cada una, parece que te están pidiendo lo mismo dos
+ * veces — y quien llega aquí está nervioso.
+ *
+ * Fue la ÚLTIMA entrada de la lista de deuda de estilos. Al vestirla, esa lista
+ * quedó vacía y su maquinaria se borró: la regla cubre ya todo `src`.
  */
 export function ResetPinScreen(): React.ReactElement {
   const [password, setPassword] = useState("");
@@ -34,55 +45,56 @@ export function ResetPinScreen(): React.ReactElement {
 
   if (reset.isSuccess) {
     return (
-      <section>
-        <p>{messages.auth.pinReset}</p>
-        <Link to="/profiles">{messages.auth.back}</Link>
+      <section className="flex w-full max-w-sm flex-col gap-4">
+        <Alert tone="success">{messages.auth.pinReset}</Alert>
+        <Link to="/profiles" className={`${buttonClasses("primary")} self-start`}>
+          {messages.auth.back}
+        </Link>
       </section>
     );
   }
 
   return (
-    <section style={{ maxWidth: "22rem" }}>
-      <h2>{messages.auth.resetPinTitle}</h2>
+    <section className="flex w-full max-w-sm flex-col gap-4">
+      <h2 className="text-title font-bold">{messages.auth.resetPinTitle}</h2>
+      <p className="text-body text-ink-muted">{messages.auth.resetPinLead}</p>
 
-      <form onSubmit={submit} style={{ display: "grid", gap: "0.75rem" }}>
-        <label>
-          {messages.auth.password}
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            style={{ display: "block", width: "100%" }}
-          />
-        </label>
+      <Card>
+        <form onSubmit={submit} className="flex flex-col gap-4">
+          <Field label={messages.auth.password} help={messages.auth.resetPinPasswordHelp}>
+            <Input
+              type="password"
+              value={password}
+              onChange={(evento) => setPassword(evento.target.value)}
+              autoComplete="current-password"
+            />
+          </Field>
 
-        <label>
-          {messages.auth.newPin}
-          <input
-            type="text"
-            inputMode="numeric"
-            maxLength={4}
-            value={newPin}
-            onChange={(e) => setNewPin(e.target.value)}
-            style={{ display: "block", width: "100%" }}
-          />
-        </label>
+          <Field label={messages.auth.newPin} help={messages.auth.resetPinNewPinHelp}>
+            {/* La longitud sale de la constante del contrato: tenerla también
+                escrita a mano aquí acaba con una de las dos mintiendo. */}
+            <Input
+              type="text"
+              inputMode="numeric"
+              maxLength={PIN_LENGTH}
+              value={newPin}
+              onChange={(evento) => setNewPin(evento.target.value)}
+            />
+          </Field>
 
-        <button type="submit" disabled={reset.isPending}>
-          {reset.isPending ? messages.auth.working : messages.auth.resetPinSubmit}
-        </button>
-      </form>
+          {error !== undefined && (
+            <Alert tone={reset.error ? alertToneFor(reset.error) : "danger"}>{error}</Alert>
+          )}
 
-      {error !== undefined && (
-        <p role="alert" style={{ color: "#b00020" }}>
-          {error}
-        </p>
-      )}
+          <Button type="submit" variant="primary" pending={reset.isPending}>
+            {reset.isPending ? messages.auth.working : messages.auth.resetPinSubmit}
+          </Button>
+        </form>
+      </Card>
 
-      <p style={{ marginTop: "1rem" }}>
-        <Link to="/profiles">{messages.auth.back}</Link>
-      </p>
+      <Link to="/profiles" className="text-small self-start">
+        {messages.auth.back}
+      </Link>
     </section>
   );
 }

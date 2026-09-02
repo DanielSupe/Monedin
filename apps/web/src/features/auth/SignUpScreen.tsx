@@ -1,7 +1,7 @@
 import { PASSWORD_MIN_LENGTH, PIN_LENGTH, registerParentSchema } from "@monedin/contracts";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { messages } from "../../lib/messages.js";
+import { PIN_LABEL, messages } from "../../lib/messages.js";
 import { Alert, Button, Field, Input } from "../../ui/index.js";
 import { AccessLayout } from "./AccessLayout.js";
 import { PillField } from "./SignInScreen.js";
@@ -100,7 +100,7 @@ export function SignUpScreen(): React.ReactElement {
           </PillField>
         </Field>
 
-        <Field label={messages.auth.pin}>
+        <Field label={PIN_LABEL}>
           <PillField icon={<Keypad />}>
             <Input
               shape="pill"

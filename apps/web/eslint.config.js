@@ -65,31 +65,4 @@ export default [
     rules: { "react-refresh/only-export-components": "off" },
   },
 
-  /*
-   * DEUDA CON FECHA DE CADUCIDAD, no una excepción.
-   *
-   * Las pantallas de producto siguen con los estilos en línea del andamio.
-   * `add-design-system` no las viste a propósito —mezclarlo lo habría hecho
-   * irrevisable—, y vestirlas es lo que hacen los nueve changes siguientes.
-   *
-   * Cada uno de esos changes BORRA su línea de esta lista. Cuando la lista quede
-   * vacía, se borra este bloque entero y `features/` queda cubierto por la regla
-   * general. Si algún día una línea sigue aquí sin change que la reclame, es que
-   * alguien se saltó el plan.
-   */
-  allowInlineStyles([
-    /*
-     * `src/routes/**` YA NO ESTÁ: `redesign-parent-home` vistió `account.tsx`,
-     * que era la última de las veintidós rutas con estilo en línea. Un archivo
-     * de ruta monta el destino y no lo dibuja, así que este directorio no
-     * debería volver a aparecer aquí.
-     *
-     * `features/auth` tampoco entra entero: `redesign-profile-grid` vistió la
-     * rejilla y el teclado de PIN, `redesign-access` el acceso y el registro, y
-     * `redesign-parent-home` la foto y el PIN del padre. El único que queda es
-     * la vía de rescate, que se abre SIN sesión y por eso su sitio es con el
-     * resto de la puerta de entrada.
-     */
-    "src/features/auth/ResetPinScreen.tsx",
-  ]),
 ];
