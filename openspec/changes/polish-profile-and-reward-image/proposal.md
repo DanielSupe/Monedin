@@ -67,7 +67,9 @@ tienda cuyos productos no tienen imagen no es una tienda.
 - **La lista cerrada de rutas de solo cuenta NO cambia.** El alta de un premio es `requireParent`, o
   sea que hay actor: la vía de subida no necesita conformarse con la cuenta, y el test de las cinco
   sigue en cinco.
-- **Orden de rutas**: `/rewards/image/upload-url` va ANTES que `/rewards/:rewardId`, el mismo
-  tropiezo que ya documentan `/rewards/mine`, `/tasks/mine` y `/children/me`. Lleva test.
+- **Orden de rutas**: se creía que `/rewards/image/upload-url` tenía que ir ANTES que
+  `/rewards/:rewardId`, por el tropiezo que documentan `/rewards/mine`, `/tasks/mine` y
+  `/children/me`. **No es así** —distinto método y distinto número de segmentos— y se comprobó
+  moviéndola al final sin que cayera ningún test. Corregido en la decisión 4 del design.
 - `apps/web`: `ChildSettings`, `account.tsx`, `PinPad`, `RewardForm`, `RewardCatalog` y `MyRewards`.
 - Cero cambios en el esquema de base de datos.

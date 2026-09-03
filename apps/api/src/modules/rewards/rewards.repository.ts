@@ -101,6 +101,8 @@ export function createReward(data: {
   parentId: string;
   title: string;
   description?: string;
+  /** Clave YA confirmada por el servicio. El repositorio no comprueba nada. */
+  image?: string;
   assignments: Array<{ childId: string; coins: number }>;
 }): Promise<RewardRow> {
   return withTranslatedErrors(async () => {
@@ -110,6 +112,7 @@ export function createReward(data: {
         title: data.title,
         // `exactOptionalPropertyTypes` no admite pasar `undefined` explícito.
         ...(data.description === undefined ? {} : { description: data.description }),
+        ...(data.image === undefined ? {} : { image: data.image }),
         assignments: {
           create: data.assignments.map((assignment) => ({
             childId: assignment.childId,

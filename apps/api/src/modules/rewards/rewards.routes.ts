@@ -55,6 +55,31 @@ rewards.get(
   controller.handleOwnList,
 );
 
+// --- La foto de un premio que todavía no existe ------------------------------
+//
+// AQUÍ EL ORDEN NO IMPORTA, y conviene decirlo porque el reflejo es el
+// contrario. `/rewards/mine` sí tenía que ir antes que `/rewards/:rewardId`
+// porque son el MISMO método y el MISMO número de segmentos. Esta no: el
+// detalle es un `GET` y esto un `POST`, y la otra vía de subida
+// —`/rewards/:rewardId/image/upload-url`— tiene cuatro segmentos y esta tres,
+// así que ninguna puede taparla.
+//
+// Se comprobó moviéndola al final: los diecinueve tests siguieron pasando. El
+// comentario decía lo contrario y se corrigió — una afirmación falsa dentro de
+// una pieza es peor que ninguna. Va aquí por agrupación con el resto de la
+// gestión del padre, no por precedencia.
+//
+// Se conforma con `requireParent` y NO con la cuenta: publicar un premio ya
+// exige perfil de padre, así que la subida previa puede exigir lo mismo y la
+// lista cerrada de rutas de solo cuenta sigue en cinco.
+
+rewards.post(
+  "/rewards/image/upload-url",
+  requireParent,
+  validate({ body: createUploadUrlSchema }),
+  controller.handlePendingImageUploadUrl,
+);
+
 // --- Detalle, para los dos roles --------------------------------------------
 //
 // ÚNICA ruta del módulo sin filtro de rol, y a conciencia: cada rol ve su

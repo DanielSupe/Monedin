@@ -70,6 +70,13 @@ export const handleOwnList: RequestHandler = async (req, res) => {
   res.status(200).json(await service.listOwnRewards(actorOf(req), query));
 };
 
+/** La vía del ALTA: no lleva premio, porque todavía no existe. */
+export const handlePendingImageUploadUrl: RequestHandler = async (req, res) => {
+  const { contentType } = validatedPart(req, "body", createUploadUrlSchema);
+
+  res.status(200).json(await service.requestPendingRewardImageUploadUrl(actorOf(req), contentType));
+};
+
 export const handleImageUploadUrl: RequestHandler = async (req, res) => {
   const { rewardId } = validatedPart(req, "params", rewardParamsSchema);
   const { contentType } = validatedPart(req, "body", createUploadUrlSchema);

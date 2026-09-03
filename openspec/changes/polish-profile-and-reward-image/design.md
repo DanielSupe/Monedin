@@ -101,13 +101,33 @@ pero convierte «publicar un premio con su foto» en dos pantallas y un viaje, y
 **Alternativa descartada: subir el binario en el alta.** Contradice la regla de que el binario nunca
 pasa por la API.
 
-### 4. El orden de las rutas es parte del diseño, no un detalle
+### 4. El orden de las rutas AQUÍ no importa, y eso hubo que comprobarlo
 
-`/rewards/image/upload-url` tiene que registrarse **antes** que `/rewards/:rewardId`. Al revés,
-`image` entraría por `:rewardId`, el servicio buscaría un premio con ese identificador y la respuesta
-sería un 404 — **perfectamente plausible**, que es lo que hace el fallo silencioso. Es el mismo
-tropiezo que ya llevan comentado y con test `/rewards/mine`, `/tasks/mine` y `/children/me`, y lleva
-el suyo por la misma razón.
+Esta decisión decía lo contrario: que `/rewards/image/upload-url` tenía que registrarse **antes** que
+`/rewards/:rewardId`, por el mismo tropiezo que ya llevan comentado `/rewards/mine`, `/tasks/mine` y
+`/children/me`. **Es falso**, y se descubrió al implementarlo: con la ruta movida al final, los
+diecinueve tests del archivo siguieron pasando.
+
+La razón es que aquellos tres colisionan de verdad —mismo método y mismo número de segmentos que la
+ruta con parámetro— y este no colisiona con nada:
+
+```
+   /rewards/mine            GET,  2 segmentos  ─┐  MISMA forma: hay que ordenar
+   /rewards/:rewardId       GET,  2 segmentos  ─┘
+
+   /rewards/image/upload-url            POST, 3 segmentos   ─┐  ninguna coincide:
+   /rewards/:rewardId                   GET,  2 segmentos    │  distinto método
+   /rewards/:rewardId/image/upload-url  POST, 4 segmentos   ─┘  o distinta longitud
+```
+
+Se deja registrada junto al resto de la gestión del padre, por agrupación y no por precedencia, y el
+comentario del código lo dice así. **El test se queda**, pero por lo que sí comprueba: que pedir la
+vía devuelve la vía y que el detalle de un premio inexistente sigue dando 404 — que seguiría siendo
+cierto y valioso el día que alguien añada un `POST /rewards/<algo>` de dos segmentos.
+
+La lección, que es la de `CLAUDE.md` sobre `Tabs`: **una afirmación falsa dentro de una pieza es peor
+que ninguna**, porque manda al siguiente que la lea a copiar una precaución donde no hace falta — y a
+confiar en ella donde sí.
 
 ### 5. El teclado se escucha en el documento, no en un campo oculto
 

@@ -29,25 +29,26 @@
 
 ## 4. Contratos de la imagen en el alta
 
-- [ ] 4.1 `imageUploadKey` opcional en `createRewardSchema`, reutilizando `uploadKeySchema`. El
+- [x] 4.1 `imageUploadKey` opcional en `createRewardSchema`, reutilizando `uploadKeySchema`. El
       esquema sigue `.strict()`.
-- [ ] 4.2 Comprobar que el paquete compila solo y que `updateRewardSchema` no cambia.
+- [x] 4.2 Comprobar que el paquete compila solo y que `updateRewardSchema` no cambia.
 
 ## 5. La vía de subida y el alta con foto
 
-- [ ] 5.1 `POST /rewards/image/upload-url` con `requireParent`, registrada **ANTES** que
-      `/rewards/:rewardId`, con su comentario de por qué el orden importa.
-- [ ] 5.2 Servicio: el prefijo del padre —`rewards/pending/{userId}/`— como política del módulo, junto
+- [x] 5.1 `POST /rewards/image/upload-url` con `requireParent`. Se creía que tenía que ir ANTES que
+      `/rewards/:rewardId`; **no hace falta**, y el comentario dice por qué. Ver la decisión 4.
+- [x] 5.2 Servicio: el prefijo del padre —`rewards/pending/{userId}/`— como política del módulo, junto
       al que ya existe para un premio concreto.
-- [ ] 5.3 Confirmar la clave en el alta con `isConfirmableUpload` contra ese prefijo, y rechazar con
+- [x] 5.3 Confirmar la clave en el alta con `isConfirmableUpload` contra ese prefijo, y rechazar con
       el error de dominio que ya existe para una imagen inválida.
-- [ ] 5.4 Test del **orden de rutas**: pedir la vía de subida no se interpreta como el detalle de un
-      premio llamado `image`.
-- [ ] 5.5 Tests del alta con foto: camino feliz; clave de otro padre rechazada; clave con el prefijo
+- [x] 5.4 Test de que pedir la vía devuelve la vía y de que el detalle de un premio inexistente sigue
+      dando 404. Se queda aunque el orden resultara no importar: seguiría cazando un
+      `POST /rewards/<algo>` de dos segmentos añadido más tarde.
+- [x] 5.5 Tests del alta con foto: camino feliz; clave de otro padre rechazada; clave con el prefijo
       propio pero sin objeto detrás rechazada; y que en los dos rechazos **el premio no se crea**.
-- [ ] 5.6 Tests de autorización: un niño no obtiene la vía de subida, y sigue sin poder confirmar la
+- [x] 5.6 Tests de autorización: un niño no obtiene la vía de subida, y sigue sin poder confirmar la
       foto de un premio.
-- [ ] 5.7 Comprobar que `account-only-routes.test.ts` **pasa sin tocarlo**: la lista sigue en cinco.
+- [x] 5.7 Comprobar que `account-only-routes.test.ts` **pasa sin tocarlo**: la lista sigue en cinco.
 
 ## 6. El front de la imagen del premio
 

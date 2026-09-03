@@ -71,11 +71,19 @@ export async function createReward(actor: Actor, input: CreateRewardInput): Prom
     throw new ChildNotFoundError();
   }
 
+  // La foto se confirma ANTES de crear nada, como los hijos: si la clave no es
+  // suya o no hay objeto detrás, el premio no llega a existir.
+  const image =
+    input.imageUploadKey === undefined
+      ? undefined
+      : await confirmedPendingImageKey(actor.userId, input.imageUploadKey);
+
   const row = await repository.createReward({
     parentId: actor.userId,
     title: input.title,
     assignments,
     ...(input.description === undefined ? {} : { description: input.description }),
+    ...(image === undefined ? {} : { image }),
   });
 
   return toReward(row);
@@ -204,8 +212,59 @@ export async function requestRewardImageUploadUrl(
   return { uploadUrl, key, expiresAt: expiresAt.toISOString() };
 }
 
+/**
+ * Una URL para subir la foto de un premio que TODAVÍA NO EXISTE.
+ *
+ * Es la vía del alta. La clave no puede colgar del premio —no lo hay— así que
+ * cuelga de quien la pide, que sí existe: publicar un premio ya exige perfil de
+ * padre, así que hay a quién atribuirla.
+ *
+ * Por eso NO hace falta que se conforme con la sesión de cuenta, y la lista
+ * cerrada de rutas de solo cuenta sigue en cinco. Es lo que separa este caso del
+ * de la foto al CREAR un perfil de hijo, que sigue sin resolver: aquella alta
+ * ocurre sin perfil activo. Ver la decisión 3 del design de
+ * `polish-profile-and-reward-image`.
+ */
+export async function requestPendingRewardImageUploadUrl(
+  actor: Actor,
+  contentType: ImageContentType,
+): Promise<UploadUrl> {
+  if (actor.familyRole !== "PARENT") {
+    throw new ParentRoleRequiredError();
+  }
+
+  const key = `${pendingImagePrefix(actor.userId)}${randomUUID()}.${extensionForContentType(contentType)}`;
+
+  const { uploadUrl, expiresAt } = await getStorageProvider().createUploadUrl({ key, contentType });
+
+  return { uploadUrl, key, expiresAt: expiresAt.toISOString() };
+}
+
 function imagePrefix(rewardId: string): string {
   return `rewards/${rewardId}/`;
+}
+
+/**
+ * El prefijo de una foto subida antes de que su premio exista.
+ *
+ * Lleva el identificador del PADRE, que es la política de este módulo para
+ * «ser dueño de esto» mientras no hay premio. La clave se queda aquí para
+ * siempre: lo que se guarda es una clave y las URL de lectura se firman al
+ * serializar, así que dónde viva el objeto no cambia nada de lo que se ve.
+ *
+ * Consecuencia que hay que saber: el prefijo de una clave YA GUARDADA no
+ * identifica al premio dueño. Solo se usa al confirmar, contra quien sube.
+ */
+function pendingImagePrefix(userId: string): string {
+  return `rewards/pending/${userId}/`;
+}
+
+async function confirmedPendingImageKey(userId: string, key: string): Promise<string> {
+  if (!(await isConfirmableUpload(getStorageProvider(), key, pendingImagePrefix(userId)))) {
+    throw new InvalidImageUploadError();
+  }
+
+  return key;
 }
 
 async function confirmedImageKey(rewardId: string, key: string): Promise<string> {

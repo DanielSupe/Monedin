@@ -38,12 +38,20 @@ export const rewardStatusSchema = z.enum(REWARD_STATUSES);
  *
  * NO acepta `parentId` ni `isActive`: el padre dueño sale de la sesión y un
  * premio nace siempre activo. Al ser `.strict()`, mandarlos es 422.
+ *
+ * SÍ acepta foto, desde `polish-profile-and-reward-image`. Antes no podía: la
+ * clave de la imagen incluía el identificador del premio, que no existe
+ * mientras se crea. Lo que cambió es de qué cuelga una clave todavía sin
+ * dueño — al publicar, del PADRE que la sube, que sí existe, porque publicar un
+ * premio ya exige perfil de padre. Ver la decisión 3 de su design.
  */
 export const createRewardSchema = withCoinsPerChildRules(
   z
     .object({
       title: taskTitleSchema,
       description: taskDescriptionSchema.optional(),
+      /** La foto ya subida que se confirma al publicar. Opcional. */
+      imageUploadKey: uploadKeySchema.optional(),
       ...coinsPerChildFields,
     })
     .strict(),

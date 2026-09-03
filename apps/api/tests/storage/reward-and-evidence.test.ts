@@ -76,9 +76,45 @@ describe("la foto de un premio", () => {
     expect(escaparate.body.items.some((item: { coins: number }) => item.coins === 40)).toBe(false);
   }, 300_000);
 
-  it("el alta NO acepta foto: es 422", async () => {
-    const { cookies, hijos } = await familiaOperando(app, ["Ana"]);
+  /*
+   * Esto decía «el alta NO acepta foto: es 422» y ahora dice lo contrario.
+   *
+   * No es que la regla se relajara: lo que cambió es de qué cuelga una clave
+   * todavía sin dueño. Antes tenía que llevar el `rewardId`, que no existe
+   * mientras el premio se crea; ahora, al publicar, cuelga del PADRE. Lo que
+   * sigue igual son las dos comprobaciones, y de eso van los tests de abajo.
+   */
+  it("el alta SÍ acepta una foto subida por su prefijo de padre", async () => {
+    const { cookies, parentId, hijos } = await familiaOperando(app, ["Ana"]);
 
+    const url = await request(app)
+      .post(`${API_PREFIX}/rewards/image/upload-url`)
+      .set("Cookie", cookies)
+      .send({ contentType: "image/jpeg" })
+      .expect(200);
+
+    expect(url.body.key).toContain(`rewards/pending/${parentId}/`);
+    await subirConUrlFirmada(url.body.uploadUrl);
+
+    const creado = await request(app)
+      .post(`${API_PREFIX}/rewards`)
+      .set("Cookie", cookies)
+      .send({
+        title: "Ir al cine",
+        childIds: [hijos[0]!.id],
+        coins: 200,
+        imageUploadKey: url.body.key,
+      });
+
+    expect(creado.status).toBe(201);
+    expect(creado.body.image).toMatch(/^https?:\/\//);
+  }, 300_000);
+
+  it("una clave inventada en el alta es 422 y NO crea el premio", async () => {
+    const { cookies, parentId, hijos } = await familiaOperando(app, ["Ana"]);
+
+    // Prefijo correcto, pero detrás no hay ningún objeto: solo el prefijo
+    // dejaría guardar una referencia rota.
     const response = await request(app)
       .post(`${API_PREFIX}/rewards`)
       .set("Cookie", cookies)
@@ -86,10 +122,83 @@ describe("la foto de un premio", () => {
         title: "Ir al cine",
         childIds: [hijos[0]!.id],
         coins: 200,
-        imageUploadKey: "rewards/x/a.jpg",
+        imageUploadKey: `rewards/pending/${parentId}/${crypto.randomUUID()}.jpg`,
       });
 
     expect(response.status).toBe(422);
+
+    const catalogo = await request(app).get(`${API_PREFIX}/rewards`).set("Cookie", cookies);
+    expect(catalogo.body.total).toBe(0);
+  }, 180_000);
+
+  it("la clave de OTRO padre en el alta es 422 aunque exista, y NO crea el premio", async () => {
+    // Correo propio: `familiaOperando` usa uno fijo por defecto y dos familias
+    // en el mismo test chocarían con un 409 al registrar la segunda.
+    const ajena = await familiaOperando(app, ["Zoe"], { email: "otra@ejemplo.dev" });
+    const { cookies, hijos } = await familiaOperando(app, ["Ana"]);
+
+    // Existe de verdad, pero es de otra familia: solo la existencia dejaría
+    // publicar con la imagen de otro.
+    const suya = `rewards/pending/${ajena.parentId}/${crypto.randomUUID()}.jpg`;
+    await sembrarObjeto(suya);
+
+    const response = await request(app)
+      .post(`${API_PREFIX}/rewards`)
+      .set("Cookie", cookies)
+      .send({ title: "Ir al cine", childIds: [hijos[0]!.id], coins: 200, imageUploadKey: suya });
+
+    expect(response.status).toBe(422);
+
+    const catalogo = await request(app).get(`${API_PREFIX}/rewards`).set("Cookie", cookies);
+    expect(catalogo.body.total).toBe(0);
+  }, 300_000);
+
+  it("un niño no obtiene la vía de subida del alta", async () => {
+    const { hijos } = await familiaOperando(app, ["Ana"]);
+
+    const response = await request(app)
+      .post(`${API_PREFIX}/rewards/image/upload-url`)
+      .set("Cookie", hijos[0]!.cookies)
+      .send({ contentType: "image/jpeg" });
+
+    expect(response.status).toBe(403);
+  }, 120_000);
+
+  /*
+   * La vía sin premio no se puede confundir con el detalle de un premio que se
+   * llamara «image». Si `/rewards/:rewardId` la tapara, esto sería un 404 —
+   * perfectamente plausible, que es lo que hace el fallo silencioso.
+   */
+  it("pedir la vía del alta no se interpreta como un premio llamado «image»", async () => {
+    const { cookies } = await familiaOperando(app, ["Ana"]);
+
+    const via = await request(app)
+      .post(`${API_PREFIX}/rewards/image/upload-url`)
+      .set("Cookie", cookies)
+      .send({ contentType: "image/jpeg" });
+
+    expect(via.status).toBe(200);
+    expect(via.body.uploadUrl).toMatch(/^https?:\/\//);
+
+    // Y el detalle de un premio inexistente sigue respondiendo lo suyo.
+    const detalle = await request(app)
+      .get(`${API_PREFIX}/rewards/image`)
+      .set("Cookie", cookies);
+
+    expect(detalle.status).toBe(404);
+  }, 120_000);
+
+  it("pedir la vía y no publicar no crea ningún premio", async () => {
+    const { cookies } = await familiaOperando(app, ["Ana"]);
+
+    await request(app)
+      .post(`${API_PREFIX}/rewards/image/upload-url`)
+      .set("Cookie", cookies)
+      .send({ contentType: "image/jpeg" })
+      .expect(200);
+
+    const catalogo = await request(app).get(`${API_PREFIX}/rewards`).set("Cookie", cookies);
+    expect(catalogo.body.total).toBe(0);
   }, 120_000);
 
   it("null explícito la quita y el premio sigue siendo válido", async () => {
