@@ -3,7 +3,7 @@ import request from "supertest";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
 import { asParent, resetAuthData } from "../support/auth.js";
-import { fijarSaldo, sembrarPremio } from "../support/rewards.js";
+import { fijarSaldo, sembrarPremio, valoresNumericos } from "../support/rewards.js";
 import { familiaOperando, sembrarTarea } from "../support/tasks.js";
 
 const app = createApp();
@@ -49,9 +49,13 @@ describe("el niño ve su escaparate y solo el suyo", () => {
 
     expect(response.body.items).toHaveLength(1);
     expect(response.body.items[0].coins).toBe(200);
-    // El precio del hermano no está en el cuerpo, en absoluto: se comprueba
-    // sobre el JSON serializado, no sobre los campos que el test decide mirar.
-    expect(JSON.stringify(response.body)).not.toContain("999");
+
+    // El precio del hermano no está en el cuerpo, en absoluto. Se comprueba
+    // sobre TODOS los números de la respuesta y no sobre el JSON serializado:
+    // buscar "999" como texto tumbó la batería el día que `createdAt` acabó en
+    // «...12.999Z». Sigue cubriendo la respuesta entera, que era lo que la
+    // comprobación anterior buscaba, sin sus falsos positivos.
+    expect(valoresNumericos(response.body)).not.toContain(999);
   }, 180_000);
 
   it("un premio ofrecido solo a su hermano no aparece", async () => {

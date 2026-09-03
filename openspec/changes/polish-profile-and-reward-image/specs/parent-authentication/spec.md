@@ -37,3 +37,60 @@ En una tablet compartida eso importa más que en un dispositivo personal.
 - **WHEN** el cambio de PIN devuelve un error
 - **THEN** el error se anuncia con la pieza de aviso del sistema
 - **AND** su color sale de un token, no de un literal
+
+
+## ADDED Requirements
+
+### Requirement: El padre elige su avatar del catálogo o sube una foto
+
+El padre SHALL poder cambiar su avatar eligiendo una ilustración del catálogo o subiendo una foto
+propia. Las dos SHALL ser formas EXCLUYENTES del mismo campo: mandar las dos a la vez SHALL
+rechazarse como entrada inválida, y no mandar ninguna también.
+
+Ofrecía **solo** la foto. No era una decisión de producto: no existía la pantalla donde el padre
+eligiera ilustración, y el contrato dejó escrito que ganaría el campo del catálogo cuando existiera.
+Existe, y es el mismo selector que el niño ya usa en «Mi perfil» — la misma pieza y no una copia,
+porque elegir avatar es lo mismo lo elija quien lo elija.
+
+Una clave de ilustración fuera del catálogo SHALL rechazarse. Una foto SHALL seguir confirmándose
+como hasta ahora, con su prefijo y su existencia.
+
+La pantalla NO SHALL repetir el avatar del padre: la tarjeta que dice de quién es la cuenta ya lo
+muestra, y enseñarlo dos veces separadas por nada es lo que pasa al añadir una parte sin mirar la
+pantalla entera.
+
+#### Scenario: El padre elige una ilustración
+
+- **WHEN** el padre elige una ilustración del catálogo
+- **THEN** su avatar pasa a ser esa ilustración
+- **AND** viaja así en su sesión y en la rejilla
+
+#### Scenario: El padre elige otra ilustración distinta
+
+- **WHEN** el padre elige una ilustración distinta de la anterior
+- **THEN** su avatar es la que acaba de elegir y no la de antes
+
+#### Scenario: Una ilustración que no está en el catálogo
+
+- **WHEN** el padre indica una ilustración que no existe en el catálogo
+- **THEN** la operación se rechaza como entrada inválida
+
+#### Scenario: Las dos formas a la vez
+
+- **WHEN** el padre manda una ilustración y una foto en la misma operación
+- **THEN** la operación se rechaza como entrada inválida
+
+#### Scenario: Ninguna de las dos formas
+
+- **WHEN** el padre pide cambiar su avatar sin indicar ilustración ni foto
+- **THEN** la operación se rechaza como entrada inválida
+
+#### Scenario: Una foto que no se subió
+
+- **WHEN** el padre confirma una clave de foto que no tiene ningún objeto detrás
+- **THEN** la operación se rechaza como entrada inválida
+
+#### Scenario: El avatar no se enseña dos veces
+
+- **WHEN** el padre abre su cuenta
+- **THEN** su avatar aparece una sola vez en la pantalla

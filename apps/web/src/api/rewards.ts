@@ -72,6 +72,21 @@ export function replaceAssignments(
   });
 }
 
+/**
+ * La vía del ALTA: no lleva premio porque todavía no existe.
+ *
+ * La clave que devuelve cuelga del padre y no de ningún premio. Ver la decisión
+ * 3 del design de `polish-profile-and-reward-image`.
+ */
+export function requestPendingRewardImageUploadUrl(
+  contentType: ImageContentType,
+): Promise<UploadUrl> {
+  return apiFetch(`/rewards/image/upload-url`, uploadUrlSchema, {
+    method: "POST",
+    body: JSON.stringify({ contentType }),
+  });
+}
+
 export function requestRewardImageUploadUrl(
   rewardId: string,
   contentType: ImageContentType,

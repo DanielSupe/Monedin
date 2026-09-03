@@ -589,6 +589,15 @@ function parentAvatarPrefix(userId: string): string {
   return `avatars/parents/${userId}/`;
 }
 
+/** La foto que se confirma tiene que ser de ESTE padre y estar subida de verdad. */
+async function confirmedParentAvatarKey(userId: string, key: string): Promise<string> {
+  if (!(await isConfirmableUpload(getStorageProvider(), key, parentAvatarPrefix(userId)))) {
+    throw new InvalidAvatarUploadError();
+  }
+
+  return key;
+}
+
 export async function requestParentAvatarUploadUrl(
   actor: Actor,
   contentType: ImageContentType,
@@ -612,17 +621,17 @@ export async function updateParentAvatar(
     throw new ParentSessionRequiredError();
   }
 
-  const confirmable = await isConfirmableUpload(
-    getStorageProvider(),
-    input.avatarUploadKey,
-    parentAvatarPrefix(actor.userId),
-  );
+  /*
+   * Dos formas del mismo campo, excluyentes, y el esquema ya garantiza que
+   * llega exactamente una. La del catálogo no necesita comprobar nada contra el
+   * almacén: es un enum cerrado, así que validarla ES el esquema.
+   */
+  const image =
+    input.avatar !== undefined
+      ? input.avatar
+      : await confirmedParentAvatarKey(actor.userId, input.avatarUploadKey as string);
 
-  if (!confirmable) {
-    throw new InvalidAvatarUploadError();
-  }
-
-  await repository.updateParentImage(actor.userId, input.avatarUploadKey);
+  await repository.updateParentImage(actor.userId, image);
 
   const updated = await describeParent(actor.userId);
   if (updated === null) {

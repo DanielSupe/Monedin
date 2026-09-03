@@ -25,7 +25,11 @@ tienda cuyos productos no tienen imagen no es una tienda.
   responde a «esto es mío». Sigue estando en el inicio, porque es donde su gemela está en el inicio
   del padre.
 - **La cuenta del padre dice de quién es**: nombre, correo y avatar, con la misma forma de tarjeta
-  que el niño ya tiene en la suya. **Sin tocar la API**: `parentActorSchema` ya trae los tres.
+  que el niño ya tiene en la suya. `parentActorSchema` ya trae los tres.
+- **Y el padre elige su avatar con las mismas opciones que el niño**: el catálogo de animales además
+  de subir una foto, con **la misma pieza** y no una copia. Ofrecía solo la foto porque no existía la
+  pantalla donde eligiera ilustración; el contrato dejó escrito que ganaría ese campo cuando
+  existiera, y existe. El avatar deja además de enseñarse **dos veces** en esa pantalla.
 - **El PIN se teclea también con el teclado**: dígitos y retroceso, sin quitarle nada al teclado en
   pantalla, que sigue siendo la vía principal en una tablet.
 - **Un premio puede llevar foto desde el alta.** Una vía de subida bajo el prefijo del padre y una
@@ -37,7 +41,8 @@ tienda cuyos productos no tienen imagen no es una tienda.
 ### Modified Capabilities
 
 - `child-profiles`: la salida del perfil está en «Mi perfil», y no solo al final del inicio.
-- `parent-authentication`: la cuenta del padre dice de quién es antes de dejar cambiar nada.
+- `parent-authentication`: la cuenta del padre dice de quién es antes de dejar cambiar nada, y su
+  avatar se elige del catálogo o subiendo una foto, sin repetirse en pantalla.
 - `profile-selection`: el PIN se introduce con el teclado físico además de con el de pantalla.
 - `rewards`: la foto entra en el alta —el requisito vigente dice justo lo contrario—, y un premio sin
   foto se dibuja con un respaldo en vez de con un hueco.
@@ -60,7 +65,9 @@ tienda cuyos productos no tienen imagen no es una tienda.
 
 ## Impact
 
-- `packages/contracts`: `createRewardSchema` acepta `imageUploadKey` opcional.
+- `packages/contracts`: `createRewardSchema` acepta `imageUploadKey` opcional, y
+  `updateParentAvatarSchema` gana `avatar` con la regla de exclusión —que **deja de estar copiada**
+  en `children.ts` y pasa a `avatar.ts`, que ya decía que el padre la usaría—.
 - `apps/api/src/modules/rewards/`: una ruta de subida más —bajo el prefijo del padre, no del
   premio—, su política de prefijo y la confirmación en el alta. **Sin migración**: `Reward.image` ya
   existe desde `add-data-model`.
@@ -71,5 +78,8 @@ tienda cuyos productos no tienen imagen no es una tienda.
   `/rewards/:rewardId`, por el tropiezo que documentan `/rewards/mine`, `/tasks/mine` y
   `/children/me`. **No es así** —distinto método y distinto número de segmentos— y se comprobó
   moviéndola al final sin que cayera ningún test. Corregido en la decisión 4 del design.
-- `apps/web`: `ChildSettings`, `account.tsx`, `PinPad`, `RewardForm`, `RewardCatalog` y `MyRewards`.
+- `apps/api/src/modules/auth/`: el servicio del avatar del padre distingue las dos formas.
+- `apps/web`: `ChildSettings`, `account.tsx`, `PinPad`, `RewardForm`, `RewardCatalog` y `MyRewards`,
+  más `ParentAvatarScreen`. `AvatarPicker` se muda de `features/children/` a `features/profiles/`:
+  no sabe qué es un hijo, y bajo `children/` era una etiqueta falsa en cuanto lo montó el padre.
 - Cero cambios en el esquema de base de datos.

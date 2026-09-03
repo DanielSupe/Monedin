@@ -4,6 +4,7 @@ import { useState } from "react";
 import * as rewardsApi from "../../api/rewards.js";
 import { alertToneFor } from "../../lib/alert-tone.js";
 import { messages } from "../../lib/messages.js";
+import { RewardImage } from "./RewardImage.js";
 import {
   Alert,
   Avatar,
@@ -227,13 +228,7 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
             </form>
           ) : (
             <>
-              {reward.image !== null && (
-                <img
-                  src={reward.image}
-                  alt={reward.title}
-                  className="rounded-card max-h-40 w-full object-cover"
-                />
-              )}
+              <RewardImage image={reward.image} title={reward.title} />
 
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="flex min-w-0 flex-col gap-1">

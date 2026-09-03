@@ -218,6 +218,72 @@ describe("el avatar del padre", () => {
     expect(response.status).toBe(403);
   }, 120_000);
 
+  /*
+   * El padre gana el catálogo en `polish-profile-and-reward-image`, que es lo
+   * que el esquema dejó escrito que pasaría «cuando esa pantalla exista».
+   *
+   * Se comprueba con DOS animales distintos y no con uno: con uno solo, un
+   * servicio que ignorase el campo y escribiera siempre el mismo pasaría.
+   */
+  it.each(["koala", "pulpo"])("elige del catálogo el animal «%s»", async (animal) => {
+    const { cookies } = await familiaOperando(app, ["Ana"]);
+
+    await request(app)
+      .patch(`${API_PREFIX}/auth/avatar`)
+      .set("Cookie", cookies)
+      .send({ avatar: animal })
+      .expect(200);
+
+    const sesion = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
+    expect(sesion.body.actor.avatar).toBe(animal);
+  }, 120_000);
+
+  it("un animal que no está en el catálogo es entrada inválida", async () => {
+    const { cookies } = await familiaOperando(app, ["Ana"]);
+
+    const response = await request(app)
+      .patch(`${API_PREFIX}/auth/avatar`)
+      .set("Cookie", cookies)
+      .send({ avatar: "dragon" });
+
+    expect(response.status).toBe(422);
+  }, 120_000);
+
+  // Misma regla que ya tenían los hijos, y AHORA COMPARTIDA de verdad: la
+  // función vive en `avatar.ts` y no copiada en dos esquemas.
+  it("mandar catálogo y foto a la vez es entrada inválida", async () => {
+    const { cookies, parentId } = await familiaOperando(app, ["Ana"]);
+
+    const response = await request(app)
+      .patch(`${API_PREFIX}/auth/avatar`)
+      .set("Cookie", cookies)
+      .send({ avatar: "koala", avatarUploadKey: `avatars/parents/${parentId}/x.jpg` });
+
+    expect(response.status).toBe(422);
+  }, 120_000);
+
+  it("no mandar ninguna de las dos es entrada inválida", async () => {
+    const { cookies } = await familiaOperando(app, ["Ana"]);
+
+    const response = await request(app)
+      .patch(`${API_PREFIX}/auth/avatar`)
+      .set("Cookie", cookies)
+      .send({});
+
+    expect(response.status).toBe(422);
+  }, 120_000);
+
+  it("una clave de foto que nunca se subió sigue dando 422", async () => {
+    const { cookies, parentId } = await familiaOperando(app, ["Ana"]);
+
+    const response = await request(app)
+      .patch(`${API_PREFIX}/auth/avatar`)
+      .set("Cookie", cookies)
+      .send({ avatarUploadKey: `avatars/parents/${parentId}/${crypto.randomUUID()}.jpg` });
+
+    expect(response.status).toBe(422);
+  }, 120_000);
+
   it("el actor del padre lleva avatar aunque nunca haya subido ninguno", async () => {
     const { cookies } = await familiaOperando(app, ["Ana"]);
 

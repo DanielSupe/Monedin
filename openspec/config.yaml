@@ -174,8 +174,26 @@ context: |
                 Se guarda la CLAVE, nunca una URL: las de lectura se firman al serializar y caducan.
                 El avatar tiene DOS formas de entrada excluyentes -`avatar` del catalogo o
                 `avatarUploadKey`- y UNA de lectura -clave corta o URL firmada-.
-                El alta de un premio NO acepta foto: su clave lleva el `rewardId`, que no existe
-                mientras se crea. Se añade al editarlo.
+                El alta de un premio SI acepta foto desde `polish-profile-and-reward-image`, y
+                antes no. La regla no se relajo: lo que cambio es DE QUE CUELGA una clave todavia
+                sin dueño. Al editar cuelga del premio -`rewards/{rewardId}/`-; al publicar cuelga
+                del PADRE -`rewards/pending/{userId}/`-, que si existe, porque publicar un premio ya
+                exige perfil de padre.
+                Por eso hay DOS vias de subida y conviven: POST /rewards/image/upload-url para el
+                alta y POST /rewards/:rewardId/image/upload-url para la edicion. La primera se
+                conforma con `requireParent` y NO con la cuenta, asi que la lista cerrada de rutas de
+                solo cuenta sigue en CINCO y su test pasa sin tocarlo.
+                Las dos comprobaciones de siempre siguen juntas: prefijo y existencia. Y la clave se
+                queda bajo el prefijo del padre para siempre -no se copia al del premio-, con la
+                consecuencia escrita: el prefijo de una clave YA GUARDADA no identifica al premio
+                dueño, y solo se usa al confirmar, contra quien sube.
+                Esto NO desbloquea la foto al CREAR un perfil de hijo, que sigue aparcada: lo que a
+                aquella le falta no es como nombrar una clave sin dueño -eso queda resuelto aqui-
+                sino que su alta ocurre SIN perfil activo, y su via de subida seria una sexta ruta
+                de solo cuenta.
+                Un premio SIN foto se dibuja con un respaldo -un glifo- y no con un hueco, en el
+                catalogo del padre y en el escaparate del niño. El respaldo NO se resuelve en la API:
+                el servidor sigue diciendo que no hay imagen, que es la verdad.
                 La evidencia de una tarea es OPCIONAL y se valida ANTES de la transicion: si falla,
                 la tarea sigue PENDING.
                 Una sola migracion: `Task.evidenceKey`. `ChildProfile.avatar`, `User.image` y
@@ -399,10 +417,16 @@ context: |
     cualquiera con la tablet desbloqueada veria todos los saldos SIN teclear un PIN, y los hermanos se
     compararian cada vez que se abre la aplicacion. No se reabre sin argumento nuevo sobre lo segundo.
 
-    PENDIENTE Y SIN DECIDIR: no se puede subir una foto al CREAR un perfil, solo elegir un animal. La
-    clave de subida lleva dentro el identificador del hijo, que aun no existe. Dos caminos: en dos
-    momentos sin tocar la API, o en uno solo con una via de subida bajo el prefijo del padre,
-    `avatarUploadKey` en el alta y una politica para las fotos huerfanas. Merece su propio change.
+    APLAZADO HASTA NUEVO AVISO (2026-09-03): no se puede subir una foto al CREAR un perfil, solo
+    elegir un animal. Se plantearon los tres caminos y se decidio dejarlo parado. No proponerlo como
+    siguiente change sin que se pida.
+    Lo que SI quedo resuelto, en `polish-profile-and-reward-image` y para los premios: como se sube
+    una imagen para algo que todavia no existe CUANDO HAY ACTOR. La clave cuelga de quien la sube,
+    se confirma con prefijo y existencia, y los objetos huerfanos no se borran.
+    Lo que a esta le sigue faltando es justo lo otro: el alta de un perfil ocurre SIN perfil activo
+    -es la quinta ruta de solo cuenta-, asi que su via de subida seria la SEXTA, y esa lista esta
+    cerrada en un test cuyo comentario dice que la pregunta no es como arreglar el test sino por que
+    esa ruta no puede exigir actor. El otro camino, en dos momentos, no sirve desde la rejilla.
 
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.

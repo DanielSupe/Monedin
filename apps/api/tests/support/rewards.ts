@@ -85,3 +85,30 @@ export async function estaActivo(rewardId: string): Promise<boolean> {
 export async function fijarSaldo(childId: string, coins: number): Promise<void> {
   await testPrisma().childProfile.update({ where: { id: childId }, data: { coins } });
 }
+
+/**
+ * Todos los valores NUMÉRICOS de una respuesta, a cualquier profundidad.
+ *
+ * Existe porque las dos formas anteriores de comprobar «el precio del hermano no
+ * sale por ninguna parte» estaban mal, cada una a su manera:
+ *
+ *   - Buscar el número como TEXTO en el JSON serializado da falsos positivos.
+ *     Tumbó la batería un día que `createdAt` acabó en `...12.999Z` y el precio
+ *     buscado era 999; una URL firmada, con su hexadecimal, hace lo mismo.
+ *   - El intento de arreglarlo comparaba contra `": 40"`, con espacio, sobre una
+ *     cadena de `JSON.stringify`, que NO pone espacio tras los dos puntos. Esa
+ *     comprobación no podía fallar nunca.
+ *
+ * Un precio es un número, así que se miran los números y no el texto: ni los
+ * instantes ni las firmas pueden colarse, y la comprobación sigue cubriendo
+ * TODA la respuesta y no los campos que el test se acuerde de mirar.
+ */
+export function valoresNumericos(valor: unknown): number[] {
+  if (typeof valor === "number") return [valor];
+  if (Array.isArray(valor)) return valor.flatMap(valoresNumericos);
+  if (valor !== null && typeof valor === "object") {
+    return Object.values(valor).flatMap(valoresNumericos);
+  }
+
+  return [];
+}

@@ -476,6 +476,11 @@ export const messages = {
     edit: "Editar",
     editRewardTitle: "Editar premio",
     addImage: "Ponerle una foto",
+    /** En el alta la foto es opcional, y decirlo evita que parezca obligatoria. */
+    optionalImage: "Foto (opcional)",
+    imageReady: "Foto lista. Se guardará al publicar el premio.",
+    /** Decorativo: va con `aria-hidden`, así que nadie lo escucha. */
+    imageFallbackGlyph: "🎁",
     removeImage: "Quitar la foto",
     save: "Guardar",
 

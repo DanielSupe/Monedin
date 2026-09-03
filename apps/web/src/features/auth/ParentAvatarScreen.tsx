@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as api from "../../api/auth.js";
 import { messages } from "../../lib/messages.js";
-import { Alert, Avatar, Card } from "../../ui/index.js";
-import { ImageUploadField } from "../uploads/ImageUploadField.js";
+import { Alert } from "../../ui/index.js";
+import { AvatarPicker } from "../profiles/AvatarPicker.js";
 import { useSession } from "./use-session.js";
 
 /**
@@ -12,9 +12,11 @@ import { useSession } from "./use-session.js";
  * elegía su avatar al registrarse y no volvía a verlo, porque su actor tampoco
  * lo llevaba.
  *
- * Solo ofrece subir una foto, no elegir del catálogo: no hay ninguna interfaz
- * hoy donde el padre escoja ilustración, y el contrato de la API tampoco lo
- * admite todavía.
+ * Ofrece las DOS formas desde `polish-profile-and-reward-image`: el catálogo de
+ * animales y subir una foto, con el mismo selector que «Mi perfil» del niño.
+ * Solo daba la foto porque no había pantalla donde el padre eligiera ilustración
+ * y el contrato no lo admitía — y las dos cosas dejaron de ser ciertas a la vez,
+ * que es como estaba escrito que ocurriría.
  *
  * Desde `redesign-parent-home` es una PARTE de `/account` y no una pantalla
  * suelta: sin título de nivel superior, sin enlace de vuelta propio —el logo
@@ -38,27 +40,25 @@ export function ParentAvatarScreen(): React.ReactElement {
   const avatar = session?.actor?.avatar;
 
   return (
-    <Card>
-      <div className="flex flex-col gap-4">
-        <h3 className="text-body font-bold">{messages.auth.myAvatarTitle}</h3>
+    <div className="flex flex-col gap-4">
+      {/*
+        SIN repetir el avatar: la tarjeta de identidad de esta misma pantalla ya
+        lo enseña, justo encima. Salían dos veces la misma foto separadas por
+        nada, que es lo que pasa al añadir una parte sin mirar la pantalla
+        entera — el mismo defecto que `redesign-parent-home` arregló aquí con
+        los tres «Volver».
+      */}
+      <AvatarPicker
+        value={avatar}
+        label={messages.auth.myAvatarTitle}
+        onChange={(clave) => actualizar.mutate({ avatar: clave })}
+        requestUploadUrl={api.requestParentAvatarUploadUrl}
+        onUpload={(avatarUploadKey) => actualizar.mutate({ avatarUploadKey })}
+      />
 
-        <div className="flex flex-wrap items-center gap-4">
-          <Avatar value={avatar} size="large" alt={messages.auth.myAvatarTitle} />
+      {actualizar.isSuccess && <Alert tone="success">{messages.children.avatarSaved}</Alert>}
 
-          <div className="min-w-0 flex-1">
-            <ImageUploadField
-              requestUploadUrl={api.requestParentAvatarUploadUrl}
-              onUploaded={(key) => actualizar.mutate(key)}
-              aspect={1}
-              label={messages.uploads.choose}
-            />
-          </div>
-        </div>
-
-        {actualizar.isSuccess && <Alert tone="success">{messages.children.avatarSaved}</Alert>}
-
-        {actualizar.error !== null && <Alert tone="danger">{messages.uploads.failed}</Alert>}
-      </div>
-    </Card>
+      {actualizar.error !== null && <Alert tone="danger">{messages.uploads.failed}</Alert>}
+    </div>
   );
 }

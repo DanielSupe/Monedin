@@ -6,7 +6,12 @@ import {
   PASSWORD_MIN_LENGTH,
   PIN_LENGTH,
 } from "../constants/domain.js";
-import { avatarValueSchema } from "./avatar.js";
+import {
+  AVATAR_FORMS_MESSAGE,
+  avatarKeySchema,
+  avatarValueSchema,
+  hasAtMostOneAvatarForm,
+} from "./avatar.js";
 import { uploadKeySchema } from "./uploads.js";
 
 /**
@@ -130,19 +135,31 @@ export const setChildPinSchema = z.object({
 export type SetChildPinInput = z.infer<typeof setChildPinSchema>;
 
 /**
- * El padre confirma la foto que acaba de subir como su avatar.
+ * El padre cambia su avatar: una ilustración del catálogo o una foto suya.
  *
- * Solo acepta la foto, no una clave del catálogo: hoy no hay ninguna pantalla
- * donde el padre elija ilustración —la suya se la puso el registro—, y añadir
- * aquí un campo que ninguna interfaz manda sería inventar contrato. Cuando esa
- * pantalla exista, este esquema gana el `avatar` y su regla de exclusión, como
- * ya la tienen los de `children`.
+ * Aceptaba SOLO la foto, y el porqué estaba escrito aquí: no había ninguna
+ * pantalla donde el padre eligiera ilustración, y añadir un campo que ninguna
+ * interfaz manda es inventar contrato. También estaba escrito qué haría falta
+ * cuando esa pantalla existiera —«este esquema gana el `avatar` y su regla de
+ * exclusión, como ya la tienen los de `children`»—, y es exactamente esto.
+ *
+ * La pantalla llegó en `polish-profile-and-reward-image`: la cuenta del padre
+ * usa el mismo selector que «Mi perfil» del niño, así que las dos formas del
+ * campo tienen ya quien las mande.
+ *
+ * Las dos son EXCLUYENTES y hace falta una, con la misma regla compartida que
+ * usan los esquemas de `children` — la de verdad compartida, no una copia.
  */
 export const updateParentAvatarSchema = z
   .object({
-    avatarUploadKey: uploadKeySchema,
+    avatar: avatarKeySchema.optional(),
+    avatarUploadKey: uploadKeySchema.optional(),
   })
-  .strict();
+  .strict()
+  .refine((value) => value.avatar !== undefined || value.avatarUploadKey !== undefined, {
+    message: "No hay nada que cambiar.",
+  })
+  .refine(hasAtMostOneAvatarForm, { message: AVATAR_FORMS_MESSAGE });
 
 export type UpdateParentAvatarInput = z.infer<typeof updateParentAvatarSchema>;
 

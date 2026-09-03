@@ -1,6 +1,5 @@
 import type { AvatarKey, ImageContentType, UploadUrl } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
-import { Avatar } from "../../ui/Avatar.js";
 import { Card, cx } from "../../ui/index.js";
 import { AVATAR_OPTIONS } from "../../ui/avatars.js";
 import { ImageUploadField } from "../uploads/ImageUploadField.js";
@@ -8,6 +7,11 @@ import { ImageUploadField } from "../uploads/ImageUploadField.js";
 /**
  * Selector del avatar de un perfil: el catálogo de animales, y opcionalmente
  * subir una foto propia.
+ *
+ * Vive en `features/profiles/` y no en `features/children/` desde que la cuenta
+ * del padre lo usa también. No sabe qué es un hijo —recibe un valor y dos
+ * devoluciones—, así que tenerlo bajo `children/` era una etiqueta falsa en
+ * cuanto lo montó alguien que no lo es.
  *
  * Las dos formas CONVIVEN. Elegir un animal es inmediato y no necesita cámara
  * ni conexión, y sigue siendo una respuesta completa a «¿quién eres?»; la foto
@@ -69,17 +73,17 @@ export function AvatarPicker({
 
         {puedeSubir && (
           <div className="flex min-w-0 flex-col gap-3 border-t border-border pt-3">
+            {/*
+              Sin repetir la foto actual debajo: las dos pantallas que montan
+              esto tienen ya su tarjeta de identidad encima, con el avatar
+              puesto. Enseñarlo otra vez aquí lo sacaba dos veces.
+            */}
             <ImageUploadField
               requestUploadUrl={requestUploadUrl}
               onUploaded={onUpload}
               aspect={1}
               label={messages.uploads.choose}
             />
-
-            {/* La foto actual, para que se vea qué hay puesto ahora mismo. */}
-            {value !== undefined && value.startsWith("http") && (
-              <Avatar value={value} size="large" alt={label} className="self-start" />
-            )}
           </div>
         )}
       </fieldset>

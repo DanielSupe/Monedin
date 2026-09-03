@@ -13,7 +13,7 @@ import * as childrenApi from "../../api/children.js";
 import { alertToneFor } from "../../lib/alert-tone.js";
 import { PIN_LABEL, messages } from "../../lib/messages.js";
 import { Alert, Button, Card, Field, Input } from "../../ui/index.js";
-import { AvatarPicker } from "./AvatarPicker.js";
+import { AvatarPicker } from "../profiles/AvatarPicker.js";
 import { describeChildrenError, useCreateChild, useUpdateChild } from "./use-children.js";
 
 /**

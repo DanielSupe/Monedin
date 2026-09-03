@@ -40,3 +40,26 @@ export type AvatarKeyInput = z.infer<typeof avatarKeySchema>;
 export const avatarValueSchema = z.union([avatarKeySchema, z.string().url()]);
 
 export type AvatarValue = z.infer<typeof avatarValueSchema>;
+
+/**
+ * Elegir del catálogo y subir una foto son DOS formas del mismo campo, y hay
+ * que usar como mucho una.
+ *
+ * Mandar las dos no es una entrada que se pueda resolver eligiendo una: quien
+ * la manda cree que va a pasar algo concreto, y cualquiera de las dos cosas que
+ * el servidor decidiera sería la contraria de lo que la mitad de quienes
+ * llaman esperaban. Ver la decisión 4 del design de `add-file-storage`.
+ *
+ * Vive AQUÍ y no en `children.ts` desde que el padre también elige del catálogo:
+ * la regla es del avatar, no de los hijos, y tenerla dos veces es como una de
+ * las dos acaba diciendo algo distinto.
+ */
+export function hasAtMostOneAvatarForm(value: {
+  avatar?: string | undefined;
+  avatarUploadKey?: string | undefined;
+}): boolean {
+  return value.avatar === undefined || value.avatarUploadKey === undefined;
+}
+
+export const AVATAR_FORMS_MESSAGE =
+  "Elige un avatar del catálogo o sube una foto, pero no las dos cosas.";

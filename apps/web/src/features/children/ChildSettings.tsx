@@ -5,7 +5,7 @@ import { LeaveProfile } from "../auth/LeaveProfile.js";
 import { describeAuthError, useChangeOwnChildPin } from "../auth/use-session.js";
 import * as childrenApi from "../../api/children.js";
 import { Alert, Avatar, Button, Card, Coins, Field, Input, Skeleton } from "../../ui/index.js";
-import { AvatarPicker } from "./AvatarPicker.js";
+import { AvatarPicker } from "../profiles/AvatarPicker.js";
 import { describeChildrenError, useOwnChild, useUpdateOwnChild } from "./use-children.js";
 
 /**

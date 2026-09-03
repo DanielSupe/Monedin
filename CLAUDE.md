@@ -892,6 +892,46 @@ tocar su nombre ni un solo punto de uso.
 **Al tocar tokens hay que abrir pantallas del padre y del niño para confirmar que no se enteraron**,
 porque eso no lo cubre ningún test.
 
+**Una precaución copiada de otro sitio hay que COMPROBARLA, no heredarla.** `polish-profile-and-reward-image`
+escribió en su design, en su proposal, en sus tareas y en un comentario del código que
+`/rewards/image/upload-url` tenía que registrarse antes que `/rewards/:rewardId`, por el tropiezo que
+sí documentan `/rewards/mine`, `/tasks/mine` y `/children/me`. **Es falso**, y se descubrió moviéndola
+al final: los diecinueve tests siguieron pasando. Aquellas colisionan porque comparten método **y**
+número de segmentos con la ruta de parámetro; esta no coincide con ninguna en ninguna de las dos
+cosas —`POST` de tres segmentos frente a un `GET` de dos y un `POST` de cuatro—. La regla real no es
+«las rutas literales van primero» sino «van primero las que un patrón con parámetro PODRÍA casar», y
+eso hay que mirarlo caso a caso. Es la lección de `Tabs` otra vez: **una afirmación falsa dentro de
+una pieza es peor que ninguna**, porque manda al siguiente a copiar una precaución donde no hace
+falta — y a confiar en ella donde sí.
+
+**Una clave de subida para algo que todavía NO EXISTE cuelga de quien la sube, no de lo que se va a
+crear.** Es lo que desatascó la foto en el alta de un premio, que llevaba prohibida desde
+`add-file-storage` «porque la clave lleva el `rewardId`». La clave no tenía que llevarlo: al publicar
+cuelga del padre (`rewards/pending/{userId}/`) y al editar sigue colgando del premio. Las dos vías
+conviven y las dos confirman igual, con prefijo **y** existencia.
+
+**Y por eso mismo la foto al crear un perfil de HIJO sigue sin resolverse.** Lo que la bloqueaba no
+era nombrar la clave —eso ya está resuelto— sino que su alta ocurre **sin perfil activo**: es la
+quinta ruta de solo cuenta, y su vía de subida sería la sexta. Que un problema se parezca a otro ya
+resuelto no significa que le sirva la misma solución; lo que hay que comparar es **qué tiene cada uno
+disponible en el momento de actuar**, y aquí uno tiene actor y el otro no.
+
+**Guardar la clave donde se subió tiene una consecuencia que hay que escribir.** La imagen de un
+premio publicado con foto se queda bajo el prefijo del padre y no se copia a la del premio: lo que se
+persiste es una clave y las URL de lectura se firman al serializar, así que da igual dónde viva. Lo
+que deja de ser cierto es que **el prefijo de una clave ya guardada identifique a su dueño**, así que
+el prefijo solo se usa donde siempre se usó —al confirmar, contra quien sube— y nunca para deducir de
+quién es una imagen.
+
+**Un componente puede pasar todos los tests replicando la lógica en vez de reutilizarla, y el que lo
+caza es el del camino MENOS obvio.** Al darle teclado físico al PIN, una versión con su propio manejo
+—que guardaba el dígito y enviaba por su cuenta— pasaba **los nueve tests**: tecleaba, corregía,
+mezclaba pantalla y teclado, ignoraba letras. Lo que no replicaba era el `onError` que limpia el PIN,
+así que tras fallar se quedaba con cuatro dígitos puestos y no se podía reintentar tecleando. Ese
+escenario estaba escrito en la spec y no tenía test. Cuando dos caminos deben ser **el mismo**, el
+test que lo prueba no es el del camino feliz sino el del detalle que una copia razonable se dejaría
+fuera — casi siempre el manejo del error.
+
 **Una pieza declara sus variantes; no se le imponen con clases.** `cx` no es `twMerge` —lo dice su
 propio comentario— así que dos utilidades del mismo grupo las resuelve el orden del CSS generado, no
 el del código: un fallo que no se ve leyendo y que no tiene por qué ser estable entre compilaciones.
@@ -964,6 +1004,28 @@ Qué se espera de un módulo de dominio:
   concurrentes, y se comprueba que el saldo cuadra y que la segunda da 409.
 
 Herramientas: Vitest en todo el proyecto, Supertest para la API.
+
+**Para comprobar que un dato NO se filtra, se miran los valores, no el texto.** «El precio del
+hermano no aparece en ninguna parte» se escribió dos veces y las dos estaban mal, cada una a su
+manera, y las dos vivieron meses:
+
+- Buscar el número como TEXTO en el JSON serializado da **falsos positivos**. Tumbó la batería el día
+  que un `createdAt` acabó en `...12.999Z` y el precio buscado era 999. Una URL firmada, con su
+  hexadecimal dentro, hace lo mismo — y eso ya estaba escrito en el comentario del otro test, que
+  intentó arreglarlo.
+- Aquel arreglo comparaba contra `": 40"`, **con espacio**, sobre una cadena de `JSON.stringify`, que
+  no pone espacio tras los dos puntos. **No podía fallar nunca.** Y su expresión regular recogía
+  además el `:43` y el `:12` de un instante, o sea que ni siquiera huía bien de lo que huía.
+
+Un precio es un número, así que se recorren los números de la respuesta a cualquier profundidad
+(`valoresNumericos` en `tests/support/rewards.ts`): ni los instantes ni las firmas pueden colarse, y
+sigue cubriendo la respuesta ENTERA y no los campos que el test se acuerde de mirar.
+
+Las dos mitades de esto valen igual. **Un test que falla sin defecto** cuesta una batería de catorce
+minutos y enseña a desconfiar de la suite. **Un test que no puede fallar** cuesta mucho más, porque
+se cobra el día que de verdad haya una fuga. Y el segundo nació de arreglar el primero a ojo: al
+corregir una comprobación frágil hay que **inyectar la fuga** y ver el número, igual que con
+cualquier otra.
 
 **Sembrar saltándose la API es legítimo; inventarse un estado IMPOSIBLE, no.** Para probar que se
 *lee* un historial, escribir las filas directamente es lo correcto: llegar a un historial concreto

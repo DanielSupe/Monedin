@@ -1,6 +1,7 @@
 import { TITLE_MAX_LENGTH, type CreateRewardInput, createRewardSchema } from "@monedin/contracts";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
+import * as rewardsApi from "../../api/rewards.js";
 import { messages } from "../../lib/messages.js";
 import { Alert, Button, Card, EmptyState, Field, Input, buttonClasses } from "../../ui/index.js";
 import {
@@ -8,6 +9,7 @@ import {
   PICKER_MISSING,
   useChildrenPicker,
 } from "../children/ChildrenPicker.js";
+import { ImageUploadField } from "../uploads/ImageUploadField.js";
 import { describeRewardsError, useCreateReward } from "./use-rewards.js";
 
 /**
@@ -18,16 +20,24 @@ import { describeRewardsError, useCreateReward } from "./use-rewards.js";
  * es el resto —esta tiene foto y aquella fecha de vencimiento—, porque fundir
  * dos pantallas legibles en una con banderas no arregla nada.
  *
- * La FOTO no está aquí: su clave de subida lleva dentro el identificador del
- * premio, que no existe mientras se está creando. Se añade después, desde el
- * catálogo. Es la misma deuda declarada que impide subir una foto al crear un
- * perfil de hijo.
+ * La FOTO sí está aquí desde `polish-profile-and-reward-image`, y es opcional.
+ * Antes no podía: su clave llevaba dentro el identificador del premio, que no
+ * existe mientras se crea. Ahora la vía del alta pide una clave que cuelga del
+ * PADRE, que sí existe, porque publicar ya exige su perfil.
+ *
+ * La subida ocurre ANTES de publicar, así que quien elija una foto y luego
+ * cancele deja un objeto huérfano. Está aceptado por la decisión cerrada de no
+ * borrarlos: equivocarse borrando pesa más que guardar de más.
+ *
+ * Sigue SIN resolver la foto al crear un perfil de HIJO, y no de rebote: aquella
+ * alta ocurre sin perfil activo, que es justo lo que aquí no pasa.
  *
  * NAVEGA ella misma al cancelar, como su gemela.
  */
 export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactElement {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [imageUploadKey, setImageUploadKey] = useState<string | null>(null);
   const [problema, setProblema] = useState<string | null>(null);
 
   const navigate = useNavigate();
@@ -51,6 +61,7 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
     const entrada: Record<string, unknown> = { title, ...seleccion };
 
     if (description.trim() !== "") entrada.description = description;
+    if (imageUploadKey !== null) entrada.imageUploadKey = imageUploadKey;
 
     const validado = createRewardSchema.safeParse(entrada);
 
@@ -98,6 +109,24 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
               className="rounded-control text-body min-h-24 w-full border border-border-strong bg-surface-raised px-3 py-2 text-ink"
             />
           </Field>
+
+          {/*
+            Los tres estados de la subida —elegir, subiendo, error— los pone
+            `ImageUploadField`, que ya existía. Aquí solo se guarda la clave
+            hasta que se publica.
+
+            Sin `aspect`: recortar a cuadrado la foto de un premio quitaría justo
+            lo que hay que ver, que es el juguete entero.
+          */}
+          <ImageUploadField
+            label={messages.rewards.optionalImage}
+            requestUploadUrl={rewardsApi.requestPendingRewardImageUploadUrl}
+            onUploaded={setImageUploadKey}
+          />
+
+          {imageUploadKey !== null && (
+            <Alert tone="success">{messages.rewards.imageReady}</Alert>
+          )}
 
           <ChildrenPicker
             picker={picker}

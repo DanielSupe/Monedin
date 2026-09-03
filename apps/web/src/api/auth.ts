@@ -9,6 +9,7 @@ import {
   type SelectableProfiles,
   type SessionState,
   type SetChildPinInput,
+  type UpdateParentAvatarInput,
   selectableProfilesSchema,
   sessionStateSchema,
   type ImageContentType,
@@ -118,9 +119,13 @@ export function requestParentAvatarUploadUrl(contentType: ImageContentType): Pro
   });
 }
 
-export async function updateParentAvatar(avatarUploadKey: string): Promise<void> {
+/**
+ * Las dos formas del avatar del padre, excluyentes: una del catálogo o una foto
+ * ya subida. Se manda tal cual llega, sin componer nunca las dos.
+ */
+export async function updateParentAvatar(input: UpdateParentAvatarInput): Promise<void> {
   await apiFetch("/auth/avatar", z.unknown(), {
     method: "PATCH",
-    body: JSON.stringify({ avatarUploadKey }),
+    body: JSON.stringify(input),
   });
 }

@@ -3,7 +3,7 @@ import request from "supertest";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "../../src/app.js";
 import { resetAuthData } from "../support/auth.js";
-import { fijarSaldo, sembrarPremio } from "../support/rewards.js";
+import { fijarSaldo, sembrarPremio, valoresNumericos } from "../support/rewards.js";
 import { sembrarObjeto, subirConUrlFirmada } from "../support/storage.js";
 import { estadoDe, familiaOperando, sembrarTarea } from "../support/tasks.js";
 
@@ -67,13 +67,17 @@ describe("la foto de un premio", () => {
     expect(escaparate.body.items[0].image).toMatch(/^https?:\/\//);
     expect(escaparate.body.items[0].coins).toBe(60);
 
-    // El precio del hermano sigue sin aparecer. Se comprueba sobre los CAMPOS
-    // numéricos y no sobre el JSON en crudo: una URL firmada lleva hexadecimal
-    // dentro, así que buscar "40" como texto casa con la firma y no con nada
-    // que sea un precio.
-    const numeros = JSON.stringify(escaparate.body.items).match(/:\s*(\d+)/g) ?? [];
-    expect(numeros).not.toContain(": 40");
-    expect(escaparate.body.items.some((item: { coins: number }) => item.coins === 40)).toBe(false);
+    /*
+     * El precio del hermano sigue sin aparecer.
+     *
+     * Esto comparaba contra `": 40"`, con espacio, sobre una cadena de
+     * `JSON.stringify`, que NO pone espacio tras los dos puntos: la comprobación
+     * no podía fallar nunca. Y su expresión regular recogía además `:43` y `:12`
+     * de un instante, que es el falso positivo del que huía.
+     *
+     * Un precio es un número, así que se miran los números.
+     */
+    expect(valoresNumericos(escaparate.body.items)).not.toContain(40);
   }, 300_000);
 
   /*

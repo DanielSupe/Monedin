@@ -16,6 +16,20 @@
       actores distintos, o el test pasaría con un valor fijo escrito a mano.
 - [x] 2.4 Test de orden: la identidad aparece antes que el cambio de PIN en el documento.
 
+## 2b. El avatar del padre: sin repetirse, y con el catálogo
+
+- [x] 2b.1 Quitar el avatar duplicado de `ParentAvatarScreen`: la tarjeta de identidad ya lo enseña.
+- [x] 2b.2 Mover `hasAtMostOneAvatarForm` y su mensaje de `children.ts` a `avatar.ts`, que ya decía
+      que el padre los usaría. Compartida de verdad, no copiada.
+- [x] 2b.3 `updateParentAvatarSchema` gana `avatar`, con «al menos una» y «como mucho una».
+- [x] 2b.4 Servicio: el catálogo no se comprueba contra el almacén —es un enum cerrado—; la foto se
+      sigue confirmando con prefijo y existencia.
+- [x] 2b.5 Mudar `AvatarPicker` a `features/profiles/` y usarlo en la cuenta del padre.
+- [x] 2b.6 Tests de API: dos animales DISTINTOS —con uno solo, un servicio que escribiera siempre el
+      mismo pasaría—, animal fuera del catálogo, las dos formas a la vez, ninguna, y foto sin subir.
+- [x] 2b.7 Test de front: el avatar aparece UNA sola vez, contando los anunciados y no los que llevan
+      el nombre —el que sobraba se anunciaba «Mi foto»—, y la pantalla ofrece las dos formas.
+
 ## 3. El teclado físico en el PIN
 
 - [x] 3.1 Escuchar el teclado mientras `Keypad` está montado, reutilizando **la misma función** que
@@ -52,22 +66,23 @@
 
 ## 6. El front de la imagen del premio
 
-- [ ] 6.1 `RewardForm`: elegir foto en el alta, opcional, subiendo antes de publicar y mandando la
+- [x] 6.1 `RewardForm`: elegir foto en el alta, opcional, subiendo antes de publicar y mandando la
       clave. Cancelar deja la imagen huérfana y eso está aceptado.
-- [ ] 6.2 Los tres estados de la subida con las piezas del sistema, y sus textos al catálogo.
-- [ ] 6.3 Test de que se publica un premio con foto y de que se puede publicar sin ella.
+- [x] 6.2 Los tres estados de la subida con las piezas del sistema, y sus textos al catálogo.
+- [x] 6.3 Test de que se publica un premio con foto y de que se puede publicar sin ella.
 
 ## 7. El respaldo cuando no hay foto
 
-- [ ] 7.1 Dibujar el glifo de regalo en el sitio de la imagen, con las mismas medidas y con
+- [x] 7.1 Dibujar el glifo de regalo en el sitio de la imagen, con las mismas medidas y con
       `aria-hidden`, en `RewardCatalog` y en `MyRewards`.
-- [ ] 7.2 Test de que un premio sin foto enseña el respaldo y uno con foto enseña la foto **y no
+- [x] 7.2 Test de que un premio sin foto enseña el respaldo y uno con foto enseña la foto **y no
       además el respaldo** — comprobando las dos cosas, o un respaldo siempre presente pasaría.
-- [ ] 7.3 Test de que el respaldo no llega a quien escucha la pantalla.
+- [x] 7.3 Test de que el respaldo no llega a quien escucha la pantalla.
 
 ## 8. Hacer cumplir
 
-- [ ] 8.1 **Inyectar las violaciones**, y las cinco tienen que caer: salir solo en el inicio; la
+- [x] 8.1 **Inyectar las violaciones**, y las siete tienen que caer —las dos últimas: un servicio que
+      ignore el animal elegido, y el avatar del padre pintado dos veces—: salir solo en el inicio; la
       identidad del padre con un valor fijo; el teclado del PIN por un camino propio en vez del
       compartido; publicar sin comprobar el prefijo; y el respaldo pintado también cuando hay foto.
       Toda sustitución con `assert`.
@@ -77,6 +92,6 @@
 
 ## 9. Documentar
 
-- [ ] 9.1 `config.yaml`: la superficie de `/rewards` gana su vía de subida sin premio, con el porqué
+- [x] 9.1 `config.yaml`: la superficie de `/rewards` gana su vía de subida sin premio, con el porqué
       del prefijo del padre y con la frase de que **no** desbloquea la foto al crear un perfil.
-- [ ] 9.2 `CLAUDE.md`: lo que salga que valga para el siguiente.
+- [x] 9.2 `CLAUDE.md`: lo que salga que valga para el siguiente.
