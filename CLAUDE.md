@@ -965,6 +965,26 @@ Qué se espera de un módulo de dominio:
 
 Herramientas: Vitest en todo el proyecto, Supertest para la API.
 
+**Sembrar saltándose la API es legítimo; inventarse un estado IMPOSIBLE, no.** Para probar que se
+*lee* un historial, escribir las filas directamente es lo correcto: llegar a un historial concreto
+aprobando tareas y canjes de verdad haría el test ilegible, y que escribirlo funciona ya lo prueban
+`tasks` y `redemptions`. Pero la siembra entra por la misma puerta que todo lo demás, y **el motor no
+distingue entre un test y producción**: en `add-coin-history` una fila con `balanceAfter: -10` —un
+niño con 50 gastándose 60— la rechazó el `CHECK` de saldo no negativo, y la batería murió a los trece
+minutos en el `create`, no en un `expect`. Un dato sembrado a mano tiene que ser un estado que el
+producto pudiera haber alcanzado.
+
+Eso mismo es la señal de que las restricciones del motor están puestas donde deben: cazaron un
+historial que ningún camino del producto puede producir. Antes de dar por buena una siembra, pásale
+por encima los invariantes de la sección 7.
+
+**Y un caso legal puede seguir sin probar nada.** Aquella misma siembra tenía los importes 20, 30 y
+−60 con saldos 20, 50 y −10: acumular los importes da exactamente los saldos guardados, así que
+—arreglada o no— ese caso no distinguía «lo guardó la fila» de «lo sumó alguien». Es el error de la
+sección 8 otra vez, con otro disfraz. El caso que sí distingue está aparte, con importes 10 y 20 y
+saldos 500 y 777: acumular daría 30. Cuando un test comprueba que un valor viene GUARDADO, los
+números tienen que estar elegidos para que calcularlo dé otra cosa.
+
 ---
 
 ## 10. Cómo se trabaja

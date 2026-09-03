@@ -99,6 +99,22 @@ export const REDEMPTION_STATUSES = ["PENDING", "APPROVED", "REJECTED"] as const;
 export type RedemptionStatus = (typeof REDEMPTION_STATUSES)[number];
 
 /**
+ * De dónde vino un movimiento de monedas.
+ *
+ * Refleja el enum `CoinReason` del esquema, y el orden importa poco porque no
+ * hay máquina de estados: un movimiento ocurre y queda escrito para siempre.
+ *
+ * `MANUAL_ADJUSTMENT` existe desde `add-data-model` y **no lo escribe nadie
+ * todavía**. Es el mecanismo con el que se corrige una acreditación equivocada
+ * —registrando otro movimiento que la compense, porque el historial es
+ * inmutable— y sigue sin exponerse por ningún endpoint. Se declara aquí porque
+ * el contrato describe lo que la tabla puede contener, no solo lo que hoy se
+ * escribe.
+ */
+export const COIN_REASONS = ["TASK_APPROVED", "REDEMPTION_APPROVED", "MANUAL_ADJUSTMENT"] as const;
+export type CoinReason = (typeof COIN_REASONS)[number];
+
+/**
  * Hijos activos que caben en una familia.
  *
  * Es un limite de POLITICA, no un invariante de integridad: excederlo no

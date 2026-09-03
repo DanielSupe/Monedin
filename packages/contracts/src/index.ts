@@ -5,6 +5,7 @@ export * from "./schemas/auth.js";
 export * from "./schemas/avatar.js";
 export * from "./schemas/children.js";
 export * from "./schemas/coins-per-child.js";
+export * from "./schemas/coins.js";
 export * from "./schemas/error.js";
 export * from "./schemas/health.js";
 export * from "./schemas/pagination.js";

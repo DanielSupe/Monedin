@@ -85,6 +85,15 @@ export const messages = {
     invalidAvatarUpload: subidaInvalida,
   },
 
+  /**
+   * El historial de monedas. Solo lectura, así que solo hay dos errores: no es
+   * tuyo, o no eres quien puede pedirlo.
+   */
+  coins: {
+    notFound: "No encontramos ese perfil.",
+    forbidden: "No puedes ver este historial.",
+  },
+
   children: {
     /**
      * Hijo inexistente, de otra familia, o dado de baja.

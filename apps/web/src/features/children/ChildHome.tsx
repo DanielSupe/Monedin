@@ -50,6 +50,16 @@ export function ChildHome({
           </p>
           <Coins amount={coins} size="hero" />
           <p className="text-small text-ink-muted">{messages.children.homeBalanceLabel}</p>
+
+          {/*
+            Desde el SALDO y no desde un quinto destino en la barra: tocar el
+            número y preguntar de dónde viene es el gesto natural, y añadirle un
+            destino más a una navegación de cuatro le cuesta a alguien de seis
+            años. Ver la decisión 6 del design de `add-coin-history`.
+          */}
+          <Link to="/me/coins" search={{ page: 1 }} className="text-small">
+            {messages.coins.seeHistory}
+          </Link>
         </div>
       </Card>
 

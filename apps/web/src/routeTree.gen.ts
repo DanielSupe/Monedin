@@ -16,6 +16,7 @@ import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as ChildrenIndexRouteImport } from './routes/children.index'
 import { Route as ChildrenNewRouteImport } from './routes/children.new'
+import { Route as MeCoinsRouteImport } from './routes/me.coins'
 import { Route as MeRedemptionsRouteImport } from './routes/me.redemptions'
 import { Route as MeRewardsRouteImport } from './routes/me.rewards'
 import { Route as MeSettingsRouteImport } from './routes/me.settings'
@@ -28,6 +29,7 @@ import { Route as RewardsIndexRouteImport } from './routes/rewards.index'
 import { Route as RewardsNewRouteImport } from './routes/rewards.new'
 import { Route as TasksIndexRouteImport } from './routes/tasks.index'
 import { Route as TasksNewRouteImport } from './routes/tasks.new'
+import { Route as ChildrenChildIdCoinsRouteImport } from './routes/children.$childId.coins'
 import { Route as ChildrenChildIdEditRouteImport } from './routes/children.$childId.edit'
 import { Route as ProfilesProfileIdPinRouteImport } from './routes/profiles.$profileId.pin'
 
@@ -64,6 +66,11 @@ const ChildrenIndexRoute = ChildrenIndexRouteImport.update({
 const ChildrenNewRoute = ChildrenNewRouteImport.update({
   id: '/children/new',
   path: '/children/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeCoinsRoute = MeCoinsRouteImport.update({
+  id: '/me/coins',
+  path: '/me/coins',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeRedemptionsRoute = MeRedemptionsRouteImport.update({
@@ -126,6 +133,11 @@ const TasksNewRoute = TasksNewRouteImport.update({
   path: '/tasks/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChildrenChildIdCoinsRoute = ChildrenChildIdCoinsRouteImport.update({
+  id: '/children/$childId/coins',
+  path: '/children/$childId/coins',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChildrenChildIdEditRoute = ChildrenChildIdEditRouteImport.update({
   id: '/children/$childId/edit',
   path: '/children/$childId/edit',
@@ -144,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof SignUpRoute
   '/welcome': typeof WelcomeRoute
   '/children/new': typeof ChildrenNewRoute
+  '/me/coins': typeof MeCoinsRoute
   '/me/redemptions': typeof MeRedemptionsRoute
   '/me/rewards': typeof MeRewardsRoute
   '/me/settings': typeof MeSettingsRoute
@@ -157,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/redemptions/': typeof RedemptionsIndexRoute
   '/rewards/': typeof RewardsIndexRoute
   '/tasks/': typeof TasksIndexRoute
+  '/children/$childId/coins': typeof ChildrenChildIdCoinsRoute
   '/children/$childId/edit': typeof ChildrenChildIdEditRoute
   '/profiles/$profileId/pin': typeof ProfilesProfileIdPinRoute
 }
@@ -167,6 +181,7 @@ export interface FileRoutesByTo {
   '/sign-up': typeof SignUpRoute
   '/welcome': typeof WelcomeRoute
   '/children/new': typeof ChildrenNewRoute
+  '/me/coins': typeof MeCoinsRoute
   '/me/redemptions': typeof MeRedemptionsRoute
   '/me/rewards': typeof MeRewardsRoute
   '/me/settings': typeof MeSettingsRoute
@@ -180,6 +195,7 @@ export interface FileRoutesByTo {
   '/redemptions': typeof RedemptionsIndexRoute
   '/rewards': typeof RewardsIndexRoute
   '/tasks': typeof TasksIndexRoute
+  '/children/$childId/coins': typeof ChildrenChildIdCoinsRoute
   '/children/$childId/edit': typeof ChildrenChildIdEditRoute
   '/profiles/$profileId/pin': typeof ProfilesProfileIdPinRoute
 }
@@ -191,6 +207,7 @@ export interface FileRoutesById {
   '/sign-up': typeof SignUpRoute
   '/welcome': typeof WelcomeRoute
   '/children/new': typeof ChildrenNewRoute
+  '/me/coins': typeof MeCoinsRoute
   '/me/redemptions': typeof MeRedemptionsRoute
   '/me/rewards': typeof MeRewardsRoute
   '/me/settings': typeof MeSettingsRoute
@@ -204,6 +221,7 @@ export interface FileRoutesById {
   '/redemptions/': typeof RedemptionsIndexRoute
   '/rewards/': typeof RewardsIndexRoute
   '/tasks/': typeof TasksIndexRoute
+  '/children/$childId/coins': typeof ChildrenChildIdCoinsRoute
   '/children/$childId/edit': typeof ChildrenChildIdEditRoute
   '/profiles/$profileId/pin': typeof ProfilesProfileIdPinRoute
 }
@@ -216,6 +234,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/welcome'
     | '/children/new'
+    | '/me/coins'
     | '/me/redemptions'
     | '/me/rewards'
     | '/me/settings'
@@ -229,6 +248,7 @@ export interface FileRouteTypes {
     | '/redemptions/'
     | '/rewards/'
     | '/tasks/'
+    | '/children/$childId/coins'
     | '/children/$childId/edit'
     | '/profiles/$profileId/pin'
   fileRoutesByTo: FileRoutesByTo
@@ -239,6 +259,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/welcome'
     | '/children/new'
+    | '/me/coins'
     | '/me/redemptions'
     | '/me/rewards'
     | '/me/settings'
@@ -252,6 +273,7 @@ export interface FileRouteTypes {
     | '/redemptions'
     | '/rewards'
     | '/tasks'
+    | '/children/$childId/coins'
     | '/children/$childId/edit'
     | '/profiles/$profileId/pin'
   id:
@@ -262,6 +284,7 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/welcome'
     | '/children/new'
+    | '/me/coins'
     | '/me/redemptions'
     | '/me/rewards'
     | '/me/settings'
@@ -275,6 +298,7 @@ export interface FileRouteTypes {
     | '/redemptions/'
     | '/rewards/'
     | '/tasks/'
+    | '/children/$childId/coins'
     | '/children/$childId/edit'
     | '/profiles/$profileId/pin'
   fileRoutesById: FileRoutesById
@@ -286,6 +310,7 @@ export interface RootRouteChildren {
   SignUpRoute: typeof SignUpRoute
   WelcomeRoute: typeof WelcomeRoute
   ChildrenNewRoute: typeof ChildrenNewRoute
+  MeCoinsRoute: typeof MeCoinsRoute
   MeRedemptionsRoute: typeof MeRedemptionsRoute
   MeRewardsRoute: typeof MeRewardsRoute
   MeSettingsRoute: typeof MeSettingsRoute
@@ -299,6 +324,7 @@ export interface RootRouteChildren {
   RedemptionsIndexRoute: typeof RedemptionsIndexRoute
   RewardsIndexRoute: typeof RewardsIndexRoute
   TasksIndexRoute: typeof TasksIndexRoute
+  ChildrenChildIdCoinsRoute: typeof ChildrenChildIdCoinsRoute
   ChildrenChildIdEditRoute: typeof ChildrenChildIdEditRoute
   ProfilesProfileIdPinRoute: typeof ProfilesProfileIdPinRoute
 }
@@ -352,6 +378,13 @@ declare module '@tanstack/react-router' {
       path: '/children/new'
       fullPath: '/children/new'
       preLoaderRoute: typeof ChildrenNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/me/coins': {
+      id: '/me/coins'
+      path: '/me/coins'
+      fullPath: '/me/coins'
+      preLoaderRoute: typeof MeCoinsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/me/redemptions': {
@@ -438,6 +471,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TasksNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/children/$childId/coins': {
+      id: '/children/$childId/coins'
+      path: '/children/$childId/coins'
+      fullPath: '/children/$childId/coins'
+      preLoaderRoute: typeof ChildrenChildIdCoinsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/children/$childId/edit': {
       id: '/children/$childId/edit'
       path: '/children/$childId/edit'
@@ -462,6 +502,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignUpRoute: SignUpRoute,
   WelcomeRoute: WelcomeRoute,
   ChildrenNewRoute: ChildrenNewRoute,
+  MeCoinsRoute: MeCoinsRoute,
   MeRedemptionsRoute: MeRedemptionsRoute,
   MeRewardsRoute: MeRewardsRoute,
   MeSettingsRoute: MeSettingsRoute,
@@ -475,6 +516,7 @@ const rootRouteChildren: RootRouteChildren = {
   RedemptionsIndexRoute: RedemptionsIndexRoute,
   RewardsIndexRoute: RewardsIndexRoute,
   TasksIndexRoute: TasksIndexRoute,
+  ChildrenChildIdCoinsRoute: ChildrenChildIdCoinsRoute,
   ChildrenChildIdEditRoute: ChildrenChildIdEditRoute,
   ProfilesProfileIdPinRoute: ProfilesProfileIdPinRoute,
 }

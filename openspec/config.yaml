@@ -138,6 +138,25 @@ context: |
                 ni DELETE-. Sin cancelacion del niño en este alcance: solo el padre resuelve.
                 Sin migracion: `RewardRedemption`, `RedemptionStatus` y
                 `CoinReason.REDEMPTION_APPROVED` ya estaban desde `add-data-model`.
+    /coins      SOLO LECTURA del historial, y el primer cambio de API de la etapa de interfaz.
+                Modulo propio `coins` y no dentro de `children`: la anatomia ata un modulo a lo que
+                CONSULTA -aqui `coin_transactions`- y no a lo que dice su URL, igual que reponer el
+                PIN de un hijo vive en `auth`.
+                GET /children/me/coins (niño) NO admite ningun identificador, ni en ruta ni en query,
+                y su esquema es `.strict()`: la garantia de que no lee el de su hermano es que no
+                existe el parametro que apuntaria a otro, no una comprobacion. Importa mas que en
+                otros listados porque los hermanos comparten la tablet y un historial es el registro
+                mas detallado de lo que otro niño hizo y gasto.
+                GET /children/:childId/coins (padre): el SERVICIO comprueba la propiedad, y un hijo
+                ajeno responde 404 y no 403.
+                Cada fila devuelve su `balanceAfter` GUARDADO, que es para lo que la columna se
+                escribe redundante desde `add-data-model`. La pantalla no acumula: sumar en el
+                cliente ademas seria incorrecto en cuanto pagina, porque la pagina 2 no sabe con que
+                saldo empezo.
+                Pagina como todo, con desempate por identificador, que aqui no es teorico: aprobar un
+                reparto escribe varias filas en el mismo instante.
+                Se llega desde el SALDO en los dos roles, y no como destino nuevo en la navegacion.
+                Sin migracion: la tabla, su disparador y sus restricciones ya existian.
     IMAGENES    El binario NUNCA pasa por la API. Tres pasos: el cliente pide una URL firmada al
                 endpoint del modulo dueño, sube con un PUT directo al almacen, y confirma la MISMA
                 clave contra el endpoint de dominio que YA existia para guardar esa referencia.
@@ -405,7 +424,16 @@ context: |
     En COMPLETED tampoco se borra, y eso no es un limite tecnico sino de producto: el niño hizo
     el trabajo y merece una respuesta, sea aprobarla o rechazarla.
   - Corregir una acreditacion equivocada NO se hace editando el historial, que es inmutable, sino
-    registrando un movimiento que la compense. Ese mecanismo todavia no lo expone ningun endpoint.
+    registrando un movimiento que la compense. Ese mecanismo todavia no lo expone ningun endpoint,
+    y despues de `add-coin-history` sigue sin exponerlo: ese change solo LEE.
+    Lo que costaria, ya medido, para que la proxima vez se decida con el precio delante: crear un
+    movimiento MUEVE dinero, asi que es transaccion interactiva en el repositorio,
+    `applyCoinMovement`, comprobacion de fila afectada y tests de doble tap. Es un change entero y
+    no un endpoint mas. Y quedan tres decisiones de producto sin tomar: si el importe tiene limites,
+    si el motivo es obligatorio, y como se cuenta que un ajuste no puede dejar el saldo negativo
+    -el motor ya lo rechaza con un CHECK, asi que la interfaz tiene que explicarlo antes de pedirlo-.
+    La necesidad quedo mas visible, no menos: ahora el niño LEE el historial, asi que un error
+    acreditado es algo que el niño ve y que nadie puede arreglar desde dentro del producto.
   - Cambiar un PIN sabiendo el actual NO revoca sesiones, ni la propia ni la de otro dispositivo.
     Para echar a alguien de otro dispositivo esta cerrar la sesion de cuenta, que si revoca.
   - Los avatares y las imágenes se suben a S3 (bucket privado, URLs firmadas de corta vida). Ya

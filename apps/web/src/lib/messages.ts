@@ -157,6 +157,36 @@ export const messages = {
     paginationLabel: "Páginas",
   },
 
+  /**
+   * El historial de monedas.
+   *
+   * `earned` y `spent` son lo que hace que una fila se lea sin fijarse en el
+   * signo: un `-60` frente a un `60` deja la información más importante de la
+   * fila colgando de un solo carácter.
+   *
+   * Gastar NO es un error ni algo malo: es el niño usando sus monedas en algo
+   * que quería, que es justo lo que el producto enseña. Por eso no va en tono de
+   * peligro.
+   */
+  coins: {
+    title: "De dónde salieron tus monedas",
+    parentTitle: "Historial de monedas",
+    empty: "Todavía no hay movimientos.",
+    seeHistory: "Ver de dónde salieron",
+    seeChildHistory: "Ver su historial",
+
+    earned: "Ganó",
+    spent: "Gastó",
+    balanceAfter: "Quedó con",
+
+    reasonTaskApproved: "Por una tarea aprobada",
+    reasonRedemptionApproved: "Por un premio canjeado",
+    reasonManualAdjustment: "Ajuste de su padre",
+
+    notFound: "No encontramos ese perfil.",
+    forbidden: "No puedes ver este historial.",
+  },
+
   health: {
     heading: "Estado del servicio",
     loading: "Consultando la API…",

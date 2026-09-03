@@ -7,6 +7,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as authApi from "../../api/auth.js";
 import * as childrenApi from "../../api/children.js";
+import * as coinsApi from "../../api/coins.js";
 import * as api from "../../api/tasks.js";
 import { ApiRequestError } from "../../lib/http-client.js";
 import { messages } from "../../lib/messages.js";
@@ -38,6 +39,10 @@ function useRefreshTasksAndCoins(): () => Promise<void> {
     await queryClient.invalidateQueries({ queryKey: authApi.sessionQueryKey });
     await queryClient.invalidateQueries({ queryKey: childrenApi.ownChildQueryKey });
     await queryClient.invalidateQueries({ queryKey: childrenApi.childrenQueryKey });
+    // Y el HISTORIAL: este movimiento acaba de escribir una fila en él. Sin
+    // esto, el saldo sube y la pantalla que lo explica sigue sin la fila que lo
+    // explica.
+    await queryClient.invalidateQueries({ queryKey: coinsApi.coinHistoryQueryKey });
   };
 }
 

@@ -2,6 +2,7 @@ import { ERROR_CODES, type ListOwnRedemptionsQuery, type ListRedemptionsQuery } 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as authApi from "../../api/auth.js";
 import * as childrenApi from "../../api/children.js";
+import * as coinsApi from "../../api/coins.js";
 import * as api from "../../api/redemptions.js";
 import * as rewardsApi from "../../api/rewards.js";
 import { ApiRequestError } from "../../lib/http-client.js";
@@ -32,6 +33,10 @@ function useRefreshRedemptionsAndCoins(): () => Promise<void> {
     await queryClient.invalidateQueries({ queryKey: authApi.sessionQueryKey });
     await queryClient.invalidateQueries({ queryKey: childrenApi.ownChildQueryKey });
     await queryClient.invalidateQueries({ queryKey: childrenApi.childrenQueryKey });
+    // Y el HISTORIAL: este movimiento acaba de escribir una fila en él. Sin
+    // esto, el saldo sube y la pantalla que lo explica sigue sin la fila que lo
+    // explica.
+    await queryClient.invalidateQueries({ queryKey: coinsApi.coinHistoryQueryKey });
     await queryClient.invalidateQueries({ queryKey: rewardsApi.rewardsQueryKey });
   };
 }

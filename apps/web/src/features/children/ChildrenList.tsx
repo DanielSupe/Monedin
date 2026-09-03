@@ -157,6 +157,17 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
               {messages.children.edit}
             </Link>
 
+            {/* La respuesta a «este saldo no me cuadra», que hasta
+                `add-coin-history` no tenía dónde mirarse. */}
+            <Link
+              to="/children/$childId/coins"
+              params={{ childId: child.id }}
+              search={{ page: 1 }}
+              className={buttonClasses("secondary")}
+            >
+              {messages.coins.seeChildHistory}
+            </Link>
+
             <Button
               type="button"
               variant="secondary"

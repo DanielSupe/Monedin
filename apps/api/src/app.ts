@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import express, { type Express, Router, type Router as ExpressRouter } from "express";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { childrenRouter } from "./modules/children/children.routes.js";
+import { coinsRouter } from "./modules/coins/coins.routes.js";
 import { healthRouter } from "./modules/health/health.routes.js";
 import { redemptionsRouter } from "./modules/redemptions/redemptions.routes.js";
 import { rewardsRouter } from "./modules/rewards/rewards.routes.js";
@@ -36,6 +37,7 @@ export const apiRouters: ExpressRouter[] = [
   healthRouter,
   authRouter,
   childrenRouter,
+  coinsRouter,
   tasksRouter,
   rewardsRouter,
   redemptionsRouter,
