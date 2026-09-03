@@ -303,3 +303,44 @@ describe("un número de negocio no se escribe a mano", () => {
     ).toEqual([]);
   });
 });
+
+/**
+ * Lo que impide que el contenido se reparta por todo el monitor.
+ *
+ * Mientras la navegación estuvo detrás de un botón casi no se notaba. Desde
+ * `pin-sidebar-on-desktop` el lateral está fijo, y sin tope el contenido usaba
+ * lo que sobrara: cuatro teselas del inicio del niño acababan midiendo unos
+ * 560px cada una con un emoji de 28px flotando en medio.
+ *
+ * El efecto crece justo cuando la ventana crece, así que en el dispositivo del
+ * que se presume —una tablet— se veía bien y en un escritorio se veía roto. Por
+ * eso hace falta un test: mirarlo en el sitio equivocado no lo enseña.
+ */
+describe("el contenido no se reparte por todo el monitor", () => {
+  const MARCOS = ["ChildShell.tsx", "ParentShell.tsx"];
+
+  it.each(MARCOS)("el <main> de %s declara un ancho máximo", (marco) => {
+    const contenido = readFileSync(join(SRC, "app", marco), "utf8");
+    const main = contenido.match(/<main className="([^"]+)"/);
+
+    expect(main, `${marco} no tiene un <main> con clases`).not.toBeNull();
+    expect(main?.[1], `el <main> de ${marco} no se topa ni se centra`).toMatch(
+      /max-w-\S+/,
+    );
+    expect(main?.[1]).toContain("mx-auto");
+  });
+
+  it("y el tope sale de un token con nombre, no de una medida a mano", () => {
+    // `max-w-wide` sale de `--container-wide`. `max-w-[72rem]` sería la misma
+    // medida escrita en el punto de uso, y además la caza el test de valores
+    // arbitrarios: esto comprueba lo que aquel no puede, que sea un NOMBRE.
+    for (const marco of MARCOS) {
+      const contenido = readFileSync(join(SRC, "app", marco), "utf8");
+      const main = contenido.match(/<main className="([^"]+)"/);
+
+      expect(main?.[1], `el <main> de ${marco} usa una medida sin nombre`).toMatch(
+        /max-w-[a-z][\w-]*(\s|$)/,
+      );
+    }
+  });
+});

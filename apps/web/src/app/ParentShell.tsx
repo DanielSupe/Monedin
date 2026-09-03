@@ -165,7 +165,7 @@ export function ParentShell({
           </aside>
         )}
 
-        <main className="min-w-0 flex-1 overflow-x-auto px-4 py-4">
+        <main className="mx-auto w-full min-w-0 max-w-wide flex-1 overflow-x-auto px-4 py-4">
           <Outlet />
         </main>
       </div>

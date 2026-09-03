@@ -35,8 +35,14 @@ export function ChildHome({
   name: string;
   coins: number;
 }): React.ReactElement {
+  /*
+   * Ancho de LECTURA y no el del marco: esta pantalla es un número y cuatro
+   * destinos, no un listado. A 72rem sus teselas salían de 560px con un emoji
+   * flotando en medio; a 40rem son de unos 310px, que es donde el glifo se ve
+   * como un icono. Ver la decisión 2 del design de `polish-home-layout`.
+   */
   return (
-    <section className="flex flex-col gap-6">
+    <section className="mx-auto flex w-full max-w-reading flex-col gap-6">
       <Card>
         <div className="flex flex-col items-center gap-1 py-2">
           <p className="text-body text-ink-muted">
@@ -71,7 +77,9 @@ export function ChildHome({
         ))}
       </ul>
 
-      <LeaveProfile />
+      <div className="flex justify-center">
+        <LeaveProfile />
+      </div>
     </section>
   );
 }
