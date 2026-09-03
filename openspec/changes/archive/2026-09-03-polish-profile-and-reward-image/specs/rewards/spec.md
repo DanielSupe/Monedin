@@ -1,4 +1,22 @@
-## MODIFIED Requirements
+## REMOVED Requirements
+
+### Requirement: Un premio puede llevar una foto, que se añade al editarlo
+
+**Reason**: Su afirmación central se invierte. Decía que el sistema «NO SHALL aceptar una foto en el
+alta», y ahora la acepta, así que no es un requisito que se reescriba: es uno que deja de ser cierto.
+Se retira entero —con su escenario «El alta no acepta una foto», que pasaba a afirmar lo contrario de
+lo que ocurre— y lo sustituye el de abajo.
+
+La razón de aquel requisito no era de producto sino de orden: la clave de la imagen incluía el
+identificador del premio, que no existe mientras se crea. Lo que cambia no es la regla sino de qué
+cuelga una clave todavía sin dueño.
+
+**Migration**: Ninguna para los datos: `Reward.image` no cambia y los premios publicados sin foto
+siguen igual. Para quien llama, el alta pasa a aceptar `imageUploadKey` opcional, y lo que antes era
+un 422 por mandarla ahora es un alta válida. La vía de subida que cuelga de un premio ya creado sigue
+existiendo sin cambios, así que ningún cliente que solo editara se ve afectado.
+
+## ADDED Requirements
 
 ### Requirement: Un premio puede llevar una foto, desde el alta o editándolo
 
@@ -76,8 +94,6 @@ escaparate.
 - **WHEN** un padre pide una vía de subida y no llega a publicar el premio
 - **THEN** su catálogo sigue igual que antes
 - **AND** la imagen subida no aparece en ningún premio
-
-## ADDED Requirements
 
 ### Requirement: La vía de subida para publicar no pide un premio que aún no existe
 

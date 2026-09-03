@@ -86,8 +86,8 @@
       identidad del padre con un valor fijo; el teclado del PIN por un camino propio en vez del
       compartido; publicar sin comprobar el prefijo; y el respaldo pintado también cuando hay foto.
       Toda sustitución con `assert`.
-- [ ] 8.2 `pnpm lint` del web ANTES de la batería.
-- [ ] 8.3 La batería de la API **sola y una sola pasada** —son ~14 minutos y dos suites sobre la misma
+- [x] 8.2 `pnpm lint` del web ANTES de la batería.
+- [x] 8.3 La batería de la API **sola y una sola pasada** —son ~14 minutos y dos suites sobre la misma
       base se pisan—, y después el resto.
 
 ## 9. Documentar
