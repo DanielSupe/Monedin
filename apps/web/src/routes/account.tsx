@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { requireParent } from "../app/guards.js";
 import { ChangePinScreen } from "../features/auth/ChangePinScreen.js";
 import { ParentAvatarScreen } from "../features/auth/ParentAvatarScreen.js";
+import { ParentIdentity } from "../features/auth/ParentIdentity.js";
 import { SignOut } from "../features/auth/SignOut.js";
 import { messages } from "../lib/messages.js";
 
@@ -27,6 +28,14 @@ function AccountRoute(): React.ReactElement {
   return (
     <section className="flex flex-col gap-6">
       <h2 className="text-title font-bold">{messages.nav.parentAccount}</h2>
+
+      {/*
+        De quién es la cuenta, y ANTES que nada que cambie una credencial: la
+        pantalla tiene que responder «¿en qué cuenta estoy?» antes de dejar
+        tocar el PIN. Ver la decisión 2 del design de
+        `polish-profile-and-reward-image`.
+      */}
+      <ParentIdentity />
 
       <ParentAvatarScreen />
       <ChangePinScreen />

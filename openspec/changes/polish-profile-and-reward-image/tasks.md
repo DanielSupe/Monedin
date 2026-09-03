@@ -1,30 +1,30 @@
 ## 1. La salida del perfil del niño
 
-- [ ] 1.1 Poner `LeaveProfile` en `ChildSettings`, sin tocar la pieza: ya no navega y no tiene por qué
+- [x] 1.1 Poner `LeaveProfile` en `ChildSettings`, sin tocar la pieza: ya no navega y no tiene por qué
       enterarse de desde dónde la montan. Sigue en `ChildHome`.
-- [ ] 1.2 Test de que se sale desde «Mi perfil» y desde el inicio, y de que las dos hacen lo mismo.
-- [ ] 1.3 Test de que en ninguna de las dos pantallas del niño se ofrece cerrar la sesión de cuenta.
-- [ ] 1.4 Comprobar que el test de destinos del marco **sigue pasando sin editarlo**. Si hubiera que
+- [x] 1.2 Test de que se sale desde «Mi perfil» y desde el inicio, y de que las dos hacen lo mismo.
+- [x] 1.3 Test de que en ninguna de las dos pantallas del niño se ofrece cerrar la sesión de cuenta.
+- [x] 1.4 Comprobar que el test de destinos del marco **sigue pasando sin editarlo**. Si hubiera que
       tocarlo, es que salir se coló como destino y la decisión 1 está mal implementada.
 
 ## 2. La cuenta del padre dice de quién es
 
-- [ ] 2.1 Tarjeta de identidad en `/account` —avatar, nombre y correo— leyendo el actor de la sesión,
+- [x] 2.1 Tarjeta de identidad en `/account` —avatar, nombre y correo— leyendo el actor de la sesión,
       con las piezas del sistema y **antes** de los controles que cambian credenciales.
-- [ ] 2.2 Los textos al catálogo de `apps/web/src/lib/messages.ts`. Ni un string suelto.
-- [ ] 2.3 Test de que se ven nombre y correo, y de que son los de quien está dentro —con **dos**
+- [x] 2.2 Los textos al catálogo de `apps/web/src/lib/messages.ts`. Ni un string suelto.
+- [x] 2.3 Test de que se ven nombre y correo, y de que son los de quien está dentro —con **dos**
       actores distintos, o el test pasaría con un valor fijo escrito a mano.
-- [ ] 2.4 Test de orden: la identidad aparece antes que el cambio de PIN en el documento.
+- [x] 2.4 Test de orden: la identidad aparece antes que el cambio de PIN en el documento.
 
 ## 3. El teclado físico en el PIN
 
-- [ ] 3.1 Escuchar el teclado mientras `Keypad` está montado, reutilizando **la misma función** que
+- [x] 3.1 Escuchar el teclado mientras `Keypad` está montado, reutilizando **la misma función** que
       usan los botones. Dígitos y retroceso; el resto de teclas no altera nada.
-- [ ] 3.2 Ignorar el teclado mientras el envío está en curso, que es lo que en pantalla hace el
+- [x] 3.2 Ignorar el teclado mientras el envío está en curso, que es lo que en pantalla hace el
       `disabled`. Y limpiar el oyente al desmontar.
-- [ ] 3.3 Tests: se teclea el PIN entero y entra; se corrige con retroceso sin gastar intento; se
+- [x] 3.3 Tests: se teclea el PIN entero y entra; se corrige con retroceso sin gastar intento; se
       empieza en pantalla y se termina tecleando y vale igual; una letra no hace nada.
-- [ ] 3.4 Test de que un PIN completo **no se envía dos veces** si se sigue tecleando mientras se
+- [x] 3.4 Test de que un PIN completo **no se envía dos veces** si se sigue tecleando mientras se
       comprueba. El caso tiene que dar un número de envíos distinto si la guarda falta.
 
 ## 4. Contratos de la imagen en el alta

@@ -206,6 +206,8 @@ export const messages = {
     signIn: "Entrar",
     signUp: "Crear cuenta",
     signOut: "Cerrar sesión",
+    /** Solo para quien escucha la pantalla: el correo se lee tal cual. */
+    accountEmailLabel: "Correo de la cuenta:",
     toSignUp: "¿Todavía no tienes cuenta? Créala",
     toSignIn: "¿Ya tienes cuenta? Entra",
     working: "Un momento…",

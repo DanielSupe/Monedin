@@ -1,6 +1,6 @@
 import { ERROR_CODES, PIN_LENGTH, type SelectableProfile } from "@monedin/contracts";
 import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ApiRequestError } from "../../lib/http-client.js";
 import { messages } from "../../lib/messages.js";
 import { Alert, Avatar, Button, cx } from "../../ui/index.js";
@@ -89,6 +89,53 @@ function Keypad({
       );
     }
   }
+
+  /*
+   * El teclado FÍSICO entra por la MISMA función que los botones.
+   *
+   * No por simetría: si fueran dos caminos, el día que cambie la longitud del
+   * PIN o el envío automático uno se quedaría atrás en silencio. Y no se añade
+   * ningún `<input>` — uno invisible tendría que llevar el foco para recibir
+   * teclas, y robárselo a los botones rompe recorrerlos con el tabulador;
+   * `sr-only` además se alcanza tabulando y no se ve, que es el error que
+   * `redesign-child-tasks` ya documentó con el `input[type=file]`.
+   *
+   * Se escucha en el documento porque esta pantalla no tiene ningún otro sitio
+   * donde escribir, así que no hay a quién robarle una tecla. Ver la decisión 5
+   * del design de `polish-profile-and-reward-image`.
+   *
+   * `press` y `backspace` leen `pin` de su cierre, así que el oyente se guarda
+   * en una referencia y se vuelve a apuntar en cada pintado: registrar el
+   * oyente una sola vez lo dejaría viendo para siempre el PIN vacío del primero.
+   */
+  const alTeclear = useRef<(evento: KeyboardEvent) => void>(() => {});
+
+  alTeclear.current = (evento: KeyboardEvent): void => {
+    // Mientras se comprueba, el teclado queda inerte igual que los botones con
+    // su `disabled`. Es lo único que la vía física tiene que añadir.
+    if (enter.isPending) return;
+
+    if (evento.key === "Backspace") {
+      evento.preventDefault();
+      backspace();
+      return;
+    }
+
+    if (DIGITS.includes(evento.key)) {
+      evento.preventDefault();
+      press(evento.key);
+    }
+
+    // Cualquier otra tecla no toca el PIN, y se deja pasar: aquí siguen viviendo
+    // el tabulador y el Enter que activan los botones de la pantalla.
+  };
+
+  useEffect(() => {
+    const oyente = (evento: KeyboardEvent): void => alTeclear.current(evento);
+
+    document.addEventListener("keydown", oyente);
+    return () => document.removeEventListener("keydown", oyente);
+  }, []);
 
   /*
    * Corregir NO cuesta un intento.

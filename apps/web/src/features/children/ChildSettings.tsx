@@ -1,6 +1,7 @@
 import { PIN_LENGTH, changeOwnChildPinSchema } from "@monedin/contracts";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
+import { LeaveProfile } from "../auth/LeaveProfile.js";
 import { describeAuthError, useChangeOwnChildPin } from "../auth/use-session.js";
 import * as childrenApi from "../../api/children.js";
 import { Alert, Avatar, Button, Card, Coins, Field, Input, Skeleton } from "../../ui/index.js";
@@ -59,6 +60,23 @@ export function ChildSettings(): React.ReactElement {
       )}
 
       <OwnPinForm />
+
+      {/*
+        Salir del perfil vive TAMBIÉN aquí, y no solo al final del inicio.
+
+        «Mi perfil» es la pantalla que responde a «esto es mío», así que es
+        donde se busca dejar de ser quien se es — y es la que el marco alcanza a
+        cualquier hora sin volver al inicio. Que esté en dos sitios es la misma
+        forma que ya tiene el padre, con `LeaveProfile` en su inicio y `SignOut`
+        en su cuenta.
+
+        No cuenta como un destino repetido: salir es una acción sobre la sesión,
+        sin dirección propia, y ni siquiera navega. Ver la decisión 1 del design
+        de `polish-profile-and-reward-image`.
+      */}
+      <div className="flex justify-center">
+        <LeaveProfile />
+      </div>
     </section>
   );
 }
