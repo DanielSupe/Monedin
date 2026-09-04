@@ -892,6 +892,42 @@ tocar su nombre ni un solo punto de uso.
 **Al tocar tokens hay que abrir pantallas del padre y del niño para confirmar que no se enteraron**,
 porque eso no lo cubre ningún test.
 
+**Nunca leer, componer en memoria y escribir — y eso vale también en el front.** La regla estaba
+escrita para el saldo, con `increment` y `decrement`, y resulta que el PIN la necesitaba igual.
+`press()` hacía `pin + digit` leyendo `pin` de su cierre: con los botones no se notaba —un toque por
+pintado— pero el teclado físico manda las teclas más rápido de lo que React repinta, así que dos
+seguidas veían el MISMO valor y la segunda pisaba a la primera. La batería lo cazó tecleando `1234` y
+enviando `1223`. El precio no es cosmético: un dígito perdido es un PIN equivocado, y **los intentos
+fallidos bloquean el perfil de un niño** — justo lo que el borrado que no cuesta un intento existe
+para evitar. La forma correcta es una transición sobre el valor actual, y quien conoce el resultado
+es el pintado siguiente, no quien la pidió.
+
+**`userEvent` no reproduce una carrera contra el pintado, ni con `delay: null`.** Envuelve cada tecla
+en su propio `act()`, así que React repinta entre una y otra y el cierre siempre llega fresco: el
+test pasaba con el defecto puesto. Se reproduce disparando los eventos a mano y **todos dentro del
+mismo `act`**, que es lo que hace que React no repinte hasta el final — exactamente lo que pasa cuando
+alguien teclea más rápido de lo que el navegador pinta.
+
+**Un test que analiza CÓDIGO tiene que mirar el bloque, no el renglón.** Van dos: el del catálogo
+vivo buscaba `export { … }` con la llave de cierre en la misma línea, y el del ancho del contenido
+buscaba `<main className="…">` con las clases entre comillas. El primero dejaba pasar cualquier
+exportación multilínea; el segundo se rompió en cuanto el `className` pasó a un `cx()`. La diferencia
+importa: uno callaba y el otro gritó, pero los dos dependían de la FORMA del código y no de lo que
+comprueban.
+
+**Cinco segundos exactos es contención, no un defecto.** La batería del front tiene 46 archivos que
+montan la aplicación entera, y en una máquina cargada algunos pasan del `testTimeout` por defecto. Se
+distingue en que **falla un test distinto en cada pasada** y en que cada uno pasa solo. Es lo mismo
+que ya está escrito de `pnpm verify`, y la salida es la misma: `pnpm vitest run --no-file-parallelism`.
+
+**Una columna «fija» hay que atarla a algo, o se ata a la página.** El marco era `min-h-dvh` —altura
+MÍNIMA— y quien desplazaba era el documento, así que el lateral, sin altura propia, se estiraba hasta
+la altura de la fila: la de la página entera. Su pie acababa al final del DOCUMENTO en vez de al de la
+pantalla. La pista de que el defecto no estaba en la pieza: su `overflow-y-auto` llevaba puesto desde
+`pin-sidebar-on-desktop` y **nunca había llegado a usarse**, porque sin un contenedor acotado por
+encima no hay altura que desbordar. Y `sticky top-0` no lo arregla: la columna empieza por debajo de
+la cabecera, así que su borde inferior cae fuera de pantalla justo lo que la cabecera mide.
+
 **Una prop que decide dos cosas se lleva bien hasta que aparece el caso que las separa.** `aspect`
 decidía si una imagen se recortaba **y** —vía una bandera `forAvatar`— si se guardaba a 512 o a
 1280 px. Convivieron porque coincidían: lo único que se recortaba era lo único que se guardaba

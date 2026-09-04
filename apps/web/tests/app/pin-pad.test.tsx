@@ -1,5 +1,5 @@
 import { API_PREFIX, PIN_LENGTH, type SelectableProfile } from "@monedin/contracts";
-import { screen } from "@testing-library/react";
+import { act, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { messages } from "../../src/lib/messages.js";
@@ -120,6 +120,44 @@ describe("el PIN también se escribe con el teclado", () => {
     await escribir(esperado);
 
     expect(intentos()).toBe(1);
+    expect(pinesEnviados()).toEqual([esperado]);
+  });
+
+  /*
+   * El caso que destapó la batería: teclas MÁS RÁPIDAS que el pintado.
+   *
+   * `press` leía `pin` de su cierre y componía `pin + digit`. Con los botones no
+   * se notaba —un toque por pintado— pero tecleando, dos seguidas veían el mismo
+   * valor y la segunda pisaba a la primera: se escribió `1234` y se envió
+   * `1223`.
+   *
+   * Se manda TODO de una vez, sin ceder el turno entre teclas, que es lo que
+   * reproduce la carrera. Y se comprueba el PIN enviado y no el número de
+   * intentos: con un dígito perdido el intento existe igual — lo que falla es
+   * que es un PIN equivocado, y los intentos fallidos BLOQUEAN el perfil.
+   */
+  it("sin ceder el turno entre teclas, no se pierde ningún dígito", async () => {
+    await montarApp("/profiles/hijo-1/pin", SOLO_CUENTA, PERFILES);
+    await screen.findByRole("button", { name: "1" });
+
+    const esperado = "1234".slice(0, PIN_LENGTH);
+
+    /*
+     * Los eventos se disparan A MANO y todos dentro del MISMO `act`.
+     *
+     * `userEvent.keyboard` no sirve para esto ni con `delay: null`: envuelve
+     * cada tecla en su propio `act`, así que React repinta entre una y otra y el
+     * cierre siempre llega fresco. Se probó, y pasaba con el defecto puesto.
+     *
+     * En un solo `act` React no repinta hasta el final, que es exactamente lo
+     * que pasa cuando alguien teclea más rápido de lo que el navegador pinta.
+     */
+    await act(async () => {
+      for (const tecla of esperado) {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: tecla, bubbles: true }));
+      }
+    });
+
     expect(pinesEnviados()).toEqual([esperado]);
   });
 

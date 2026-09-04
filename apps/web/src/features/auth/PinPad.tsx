@@ -70,25 +70,52 @@ function Keypad({
   const enter = useEnterProfile();
   const isParent = profile.familyRole === "PARENT";
 
+  /*
+   * Añadir un dígito es una TRANSICIÓN sobre el valor actual, no una lectura
+   * seguida de una escritura.
+   *
+   * Leía `pin` de su cierre y componía `pin + digit`. Con los botones no se
+   * notaba —un toque por pintado— pero el teclado físico manda las teclas mucho
+   * más rápido que React vuelve a pintar, así que dos seguidas veían el MISMO
+   * valor y la segunda pisaba a la primera. La batería lo cazó tecleando `1234`
+   * y enviando `1223`.
+   *
+   * Y el precio no es cosmético: un dígito perdido es un PIN equivocado, y los
+   * intentos fallidos BLOQUEAN el perfil. Es exactamente lo que el borrado que
+   * no cuesta un intento existe para evitar.
+   *
+   * Es la misma regla que el saldo, escrita en `CLAUDE.md` para la base de
+   * datos y que vale igual aquí: nunca leer, componer en memoria y escribir.
+   */
   function press(digit: string): void {
-    if (pin.length >= PIN_LENGTH) return;
-
-    const next = pin + digit;
-    setPin(next);
-
-    if (next.length === PIN_LENGTH) {
-      enter.mutate(
-        { profileId: profile.id, pin: next },
-        {
-          // Al entrar, el actor existe y la guarda de esta ruta reevaluada manda
-          // sola al destino. Aquí solo se limpia el teclado si falla.
-          onError: () => {
-            setPin("");
-          },
-        },
-      );
-    }
+    setPin((actual) => (actual.length >= PIN_LENGTH ? actual : actual + digit));
   }
+
+  /*
+   * Y el envío mira el pin YA asentado, no el que press creyó dejar.
+   *
+   * Va en un efecto y no dentro de `press` porque ahora `press` no sabe con qué
+   * valor acabó: es una transición, y quien conoce el resultado es el pintado
+   * siguiente. Dispara una sola vez por PIN completo porque `pin` no vuelve a
+   * cambiar hasta que se limpia.
+   */
+  useEffect(() => {
+    if (pin.length !== PIN_LENGTH || enter.isPending) return;
+
+    enter.mutate(
+      { profileId: profile.id, pin },
+      {
+        // Al entrar, el actor existe y la guarda de esta ruta reevaluada manda
+        // sola al destino. Aquí solo se limpia el teclado si falla.
+        onError: () => {
+          setPin("");
+        },
+      },
+    );
+    // `enter` cambia de identidad en cada pintado; lo que dispara esto es el
+    // PIN, y el resto se lee en el momento.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pin]);
 
   /*
    * El teclado FÍSICO entra por la MISMA función que los botones.

@@ -319,15 +319,32 @@ describe("un número de negocio no se escribe a mano", () => {
 describe("el contenido no se reparte por todo el monitor", () => {
   const MARCOS = ["ChildShell.tsx", "ParentShell.tsx"];
 
-  it.each(MARCOS)("el <main> de %s declara un ancho máximo", (marco) => {
+  /**
+   * Las clases del `<main>`, vengan como vengan.
+   *
+   * Buscaba `<main className="…">` con la lista entre comillas, así que en
+   * cuanto `pin-sidebar-footer` la metió en un `cx()` de varias líneas dejó de
+   * encontrar nada — y el test falló por la FORMA del código y no por lo que
+   * comprueba. Es el mismo tropiezo que el catálogo vivo tuvo con una
+   * exportación multilínea: una regla que analiza código tiene que mirar el
+   * bloque, no el renglón.
+   *
+   * Ahora toma la etiqueta de apertura entera y junta todas sus cadenas: da
+   * igual que las clases estén en un literal o repartidas en un `cx()`.
+   */
+  function clasesDelMain(marco: string): string {
     const contenido = readFileSync(join(SRC, "app", marco), "utf8");
-    const main = contenido.match(/<main className="([^"]+)"/);
+    const apertura = contenido.match(/<main[\s\S]*?>/);
 
-    expect(main, `${marco} no tiene un <main> con clases`).not.toBeNull();
-    expect(main?.[1], `el <main> de ${marco} no se topa ni se centra`).toMatch(
-      /max-w-\S+/,
-    );
-    expect(main?.[1]).toContain("mx-auto");
+    return (apertura?.[0].match(/"([^"]*)"/g) ?? []).join(" ");
+  }
+
+  it.each(MARCOS)("el <main> de %s declara un ancho máximo", (marco) => {
+    const clases = clasesDelMain(marco);
+
+    expect(clases, `${marco} no tiene un <main> con clases`).not.toBe("");
+    expect(clases, `el <main> de ${marco} no se topa ni se centra`).toMatch(/max-w-\S+/);
+    expect(clases).toContain("mx-auto");
   });
 
   it("y el tope sale de un token con nombre, no de una medida a mano", () => {
@@ -335,12 +352,10 @@ describe("el contenido no se reparte por todo el monitor", () => {
     // medida escrita en el punto de uso, y además la caza el test de valores
     // arbitrarios: esto comprueba lo que aquel no puede, que sea un NOMBRE.
     for (const marco of MARCOS) {
-      const contenido = readFileSync(join(SRC, "app", marco), "utf8");
-      const main = contenido.match(/<main className="([^"]+)"/);
-
-      expect(main?.[1], `el <main> de ${marco} usa una medida sin nombre`).toMatch(
-        /max-w-[a-z][\w-]*(\s|$)/,
-      );
+      expect(
+        clasesDelMain(marco),
+        `el <main> de ${marco} usa una medida sin nombre`,
+      ).toMatch(/max-w-[a-z][\w-]*(\s|$)/);
     }
   });
 });

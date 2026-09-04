@@ -90,7 +90,32 @@ export function ChildShell({
   );
 
   return (
-    <div data-scale="child" className="flex min-h-dvh flex-col bg-surface text-ink">
+    /*
+      La altura se ATA a la ventana cuando la columna está delante, y solo
+      entonces.
+
+      Era `min-h-dvh` —altura MÍNIMA— y quien desplazaba era el documento, así
+      que el `<aside>`, sin altura propia, se estiraba hasta la altura de la
+      fila: la de la página entera. Su pie —el perfil y el control de contraer—
+      acababa al final del DOCUMENTO en vez de al final de la pantalla, y
+      desaparecía al leer cualquier listado largo.
+
+      En ESTRECHO no se toca: `100dvh` con desplazamiento interior pelea con la
+      barra del navegador de un móvil, que aparece y desaparece al desplazar y
+      cambia la altura de la ventana mientras se lee. Y allí la navegación es un
+      cajón, que se abre encima y no tiene este problema.
+
+      Lo decide `useIsWide()`, el MISMO valor que elige qué forma se monta: una
+      segunda fuente podría separarse de la primera. Ver las decisiones 1 y 2 del
+      design de `pin-sidebar-footer`.
+    */
+    <div
+      data-scale="child"
+      className={cx(
+        "flex flex-col bg-surface text-ink",
+        ancho ? "h-dvh overflow-hidden" : "min-h-dvh",
+      )}
+    >
       <header className="flex items-center gap-3 border-b border-border px-4 py-2">
         {/* El botón solo en la forma ESTRECHA: con la columna delante no tiene
             qué abrir. Van juntos porque son la misma decisión. */}
@@ -151,7 +176,17 @@ export function ChildShell({
           </aside>
         )}
 
-        <main className="mx-auto w-full min-w-0 max-w-wide flex-1 px-4 py-4">
+        {/*
+          Con el marco atado a la ventana, lo que se desplaza es el CONTENIDO y
+          no el documento: es lo que deja la columna —y su pie— quieta. En
+          estrecho sigue desplazando el documento, así que aquí no se acota nada.
+        */}
+        <main
+          className={cx(
+            "mx-auto w-full min-w-0 max-w-wide flex-1 px-4 py-4",
+            ancho && "overflow-y-auto",
+          )}
+        >
           <Outlet />
         </main>
       </div>
