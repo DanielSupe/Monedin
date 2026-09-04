@@ -10,6 +10,7 @@ import {
   type SessionState,
   type SetChildPinInput,
   type UpdateParentAvatarInput,
+  type UpdateTutorialInput,
   selectableProfilesSchema,
   sessionStateSchema,
   type ImageContentType,
@@ -125,6 +126,20 @@ export function requestParentAvatarUploadUrl(contentType: ImageContentType): Pro
  */
 export async function updateParentAvatar(input: UpdateParentAvatarInput): Promise<void> {
   await apiFetch("/auth/avatar", z.unknown(), {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+/**
+ * Marca el recorrido de bienvenida como visto, o lo pide otra vez.
+ *
+ * UNA ruta para los dos roles: a quién se le explicó sale del actor, así que no
+ * hay identificador que mandar — y por eso un niño no puede marcar el de su
+ * hermano ni queriendo.
+ */
+export async function updateTutorial(input: UpdateTutorialInput): Promise<void> {
+  await apiFetch("/auth/tutorial", z.unknown(), {
     method: "PATCH",
     body: JSON.stringify(input),
   });

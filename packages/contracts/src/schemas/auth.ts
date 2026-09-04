@@ -163,6 +163,18 @@ export const updateParentAvatarSchema = z
 
 export type UpdateParentAvatarInput = z.infer<typeof updateParentAvatarSchema>;
 
+/**
+ * Marcar el recorrido de bienvenida como visto, o pedirlo otra vez.
+ *
+ * UN campo y no dos rutas: «verlo otra vez» es el mismo dato con el valor
+ * contrario. Y una sola ruta para los dos roles, por lo mismo que entrar a un
+ * perfil tiene una: tener dos invitaría a proteger una y olvidarse de la otra.
+ * La rama por rol vive en el servicio.
+ */
+export const updateTutorialSchema = z.object({ seen: z.boolean() }).strict();
+
+export type UpdateTutorialInput = z.infer<typeof updateTutorialSchema>;
+
 // ---------------------------------------------------------------------------
 // Respuestas
 // ---------------------------------------------------------------------------
@@ -181,6 +193,17 @@ export const parentActorSchema = z.object({
    * `add-file-storage`.
    */
   avatar: avatarValueSchema,
+  /**
+   * Si a este perfil ya se le mostró el recorrido de bienvenida.
+   *
+   * Viaja CON el actor y no por un camino aparte, por lo mismo que el avatar:
+   * era el mismo dato en dos sitios comportándose distinto hasta que se metió
+   * dentro. Un segundo camino trae su propia caché, y una caché puede separarse
+   * de la del actor.
+   *
+   * Un booleano y no la fecha: quien pregunta decide con un sí o un no.
+   */
+  tutorialSeen: z.boolean(),
 });
 
 export const childActorSchema = z.object({
@@ -192,6 +215,17 @@ export const childActorSchema = z.object({
   // rompe a nadie, porque el front ya trataba el caso vacío.
   avatar: avatarValueSchema,
   coins: z.number().int(),
+  /**
+   * Si a este perfil ya se le mostró el recorrido de bienvenida.
+   *
+   * Viaja CON el actor y no por un camino aparte, por lo mismo que el avatar:
+   * era el mismo dato en dos sitios comportándose distinto hasta que se metió
+   * dentro. Un segundo camino trae su propia caché, y una caché puede separarse
+   * de la del actor.
+   *
+   * Un booleano y no la fecha: quien pregunta decide con un sí o un no.
+   */
+  tutorialSeen: z.boolean(),
 });
 
 /** Un perfil tal como se ofrece en la rejilla, antes de entrar. */

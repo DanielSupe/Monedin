@@ -1,5 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { messages } from "../../lib/messages.js";
+import { useSession } from "../auth/use-session.js";
+import { Tutorial } from "../tutorial/Tutorial.js";
+import { CHILD_STEPS } from "../tutorial/steps.js";
 import { Card, Coins } from "../../ui/index.js";
 import { LeaveProfile } from "../auth/LeaveProfile.js";
 
@@ -22,10 +25,20 @@ import { LeaveProfile } from "../auth/LeaveProfile.js";
 
 /** Los cuatro destinos, con su glifo. Los mismos que la barra de abajo. */
 const DESTINOS = [
-  { to: "/me/tasks", glifo: "🧹", texto: messages.tasks.myTasksTitle },
-  { to: "/me/rewards", glifo: "🎁", texto: messages.rewards.myRewardsTitle },
-  { to: "/me/redemptions", glifo: "🎟️", texto: messages.redemptions.myRedemptionsTitle },
-  { to: "/me/settings", glifo: "🙂", texto: messages.children.myProfileTitle },
+  { to: "/me/tasks", glifo: "🧹", texto: messages.tasks.myTasksTitle, ancla: "child-tasks" },
+  { to: "/me/rewards", glifo: "🎁", texto: messages.rewards.myRewardsTitle, ancla: "child-rewards" },
+  {
+    to: "/me/redemptions",
+    glifo: "🎟️",
+    texto: messages.redemptions.myRedemptionsTitle,
+    ancla: undefined,
+  },
+  {
+    to: "/me/settings",
+    glifo: "🙂",
+    texto: messages.children.myProfileTitle,
+    ancla: undefined,
+  },
 ] as const;
 
 export function ChildHome({
@@ -35,6 +48,8 @@ export function ChildHome({
   name: string;
   coins: number;
 }): React.ReactElement {
+  const actor = useSession().session?.actor;
+
   /*
    * Ancho de LECTURA y no el del marco: esta pantalla es un número y cuatro
    * destinos, no un listado. A 72rem sus teselas salían de 560px con un emoji
@@ -43,6 +58,11 @@ export function ChildHome({
    */
   return (
     <section className="mx-auto flex w-full max-w-reading flex-col gap-6">
+      {/* Igual que en el panel del padre: decide la pantalla, no el recorrido. */}
+      {actor?.tutorialSeen === false && <Tutorial steps={CHILD_STEPS} />}
+
+      {/* `data-tutorial`: lo que ilumina el recorrido de bienvenida. */}
+      <div data-tutorial="child-balance">
       <Card>
         <div className="flex flex-col items-center gap-1 py-2">
           <p className="text-body text-ink-muted">
@@ -71,9 +91,11 @@ export function ChildHome({
         Cada tarjeta es UN solo elemento interactivo, como las teselas de la
         rejilla de perfiles.
       */}
+      </div>
+
       <ul className="grid list-none grid-cols-2 gap-3 p-0">
         {DESTINOS.map((destino) => (
-          <li key={destino.to}>
+          <li key={destino.to} data-tutorial={destino.ancla}>
             <Link
               to={destino.to}
               className="rounded-card flex h-full flex-col items-center justify-center gap-2 border border-border bg-surface-raised p-4 text-center text-body font-semibold text-ink no-underline shadow-card transition duration-normal hover:bg-surface-sunken motion-safe:hover:scale-105"

@@ -22,7 +22,15 @@ import { routeTree } from "../../src/routeTree.gen";
 export const SIN_SESION: SessionState = { actor: null, hasAccount: false };
 export const SOLO_CUENTA: SessionState = { actor: null, hasAccount: true };
 
-export function comoPadre(name = "Lucía"): SessionState {
+/**
+ * Un padre dentro de su perfil.
+ *
+ * `tutorialSeen` va en CIERTO por defecto, y no es un detalle: con falso, cada
+ * test que monta el inicio se encontraría el recorrido de bienvenida encima de
+ * lo que iba a comprobar. El caso común de un test es alguien establecido; los
+ * del recorrido piden el contrario a propósito.
+ */
+export function comoPadre(name = "Lucía", tutorialSeen = true): SessionState {
   return {
     hasAccount: true,
     actor: {
@@ -32,14 +40,23 @@ export function comoPadre(name = "Lucía"): SessionState {
       email: "familia@ejemplo.dev",
       // Nunca nulo: la API lo resuelve al del catálogo por defecto.
       avatar: DEFAULT_AVATAR_KEY,
+      tutorialSeen,
     },
   };
 }
 
-export function comoNino(name = "Mateo"): SessionState {
+/** Un niño dentro de su perfil. `tutorialSeen` en cierto por lo mismo. */
+export function comoNino(name = "Mateo", tutorialSeen = true): SessionState {
   return {
     hasAccount: true,
-    actor: { familyRole: "CHILD", id: "hijo-1", name, avatar: "zorro", coins: 120 },
+    actor: {
+      familyRole: "CHILD",
+      id: "hijo-1",
+      name,
+      avatar: "zorro",
+      coins: 120,
+      tutorialSeen,
+    },
   };
 }
 

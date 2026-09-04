@@ -11,6 +11,7 @@ import {
   resolveAvatarKey,
   setChildPinSchema,
   updateParentAvatarSchema,
+  updateTutorialSchema,
 } from "@monedin/contracts";
 import type { Request, RequestHandler } from "express";
 import {
@@ -147,6 +148,7 @@ export const handleEnterProfile: RequestHandler = async (req, res) => {
             name: profile.name,
             avatar: profile.avatar,
             coins: profile.coins ?? 0,
+            tutorialSeen: profile.tutorialSeen,
           }
         : {
             familyRole: "PARENT" as const,
@@ -154,6 +156,7 @@ export const handleEnterProfile: RequestHandler = async (req, res) => {
             name: profile.name,
             email: profile.email ?? "",
             avatar: profile.avatar,
+            tutorialSeen: profile.tutorialSeen,
           },
     hasAccount: true,
   } satisfies SessionState);
@@ -234,6 +237,7 @@ async function buildSessionState(req: Request): Promise<SessionState> {
             // formas del mismo dato y el front tenía que tratar el hueco.
             avatar: resolveAvatarKey(child.avatar),
             coins: child.coins,
+            tutorialSeen: child.tutorialSeen,
           },
           hasAccount: true,
         };
@@ -250,6 +254,7 @@ async function buildSessionState(req: Request): Promise<SessionState> {
           name: parent.name,
           email: parent.email,
           avatar: parent.avatar,
+          tutorialSeen: parent.tutorialSeen,
         },
         hasAccount: true,
       };
@@ -263,6 +268,19 @@ function accountWithoutProfile(): SessionState {
 // ---------------------------------------------------------------------------
 // Avatar propio del padre
 // ---------------------------------------------------------------------------
+
+/**
+ * Marcar el recorrido como visto, o pedirlo otra vez.
+ *
+ * El controlador parsea y ya: qué tabla se toca lo decide el servicio a partir
+ * del actor, que es donde vive la rama por rol.
+ */
+export const handleUpdateTutorial: RequestHandler = async (req, res) => {
+  const input = validatedPart(req, "body", updateTutorialSchema);
+
+  await service.updateTutorialSeen(actorOf(req), input);
+  res.status(204).send();
+};
 
 export const handleAvatarUploadUrl: RequestHandler = async (req, res) => {
   const { contentType } = validatedPart(req, "body", createUploadUrlSchema);

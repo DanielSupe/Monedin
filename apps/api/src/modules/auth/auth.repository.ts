@@ -71,11 +71,17 @@ export function findParentCredentialsById(id: string): Promise<ParentCredentials
 
 export function findParentById(
   id: string,
-): Promise<{ id: string; name: string; email: string; image: string | null } | null> {
+): Promise<{
+  id: string;
+  name: string;
+  email: string;
+  image: string | null;
+  tutorialSeenAt: Date | null;
+} | null> {
   return withTranslatedErrors(() =>
     getPrisma().user.findUnique({
       where: { id },
-      select: { id: true, name: true, email: true, image: true },
+      select: { id: true, name: true, email: true, image: true, tutorialSeenAt: true },
     }),
   );
 }
@@ -222,13 +228,46 @@ export function findChildCredentials(id: string): Promise<ChildCredentials | nul
 
 export function findChildForSession(
   id: string,
-): Promise<{ id: string; name: string; avatar: string | null; coins: number; parentId: string } | null> {
+): Promise<{
+  id: string;
+  name: string;
+  avatar: string | null;
+  coins: number;
+  parentId: string;
+  tutorialSeenAt: Date | null;
+} | null> {
   return withTranslatedErrors(() =>
     getPrisma().childProfile.findUnique({
       where: { id },
-      select: { id: true, name: true, avatar: true, coins: true, parentId: true },
+      select: {
+        id: true,
+        name: true,
+        avatar: true,
+        coins: true,
+        parentId: true,
+        tutorialSeenAt: true,
+      },
     }),
   );
+}
+
+/**
+ * Marca —o desmarca— el recorrido de bienvenida de un perfil.
+ *
+ * Dos funciones y no una con una bandera de tabla: son dos tablas distintas y
+ * el repositorio no adivina cuál toca. Quién es quién lo decide el servicio, que
+ * es donde vive la rama por rol.
+ */
+export function setParentTutorialSeen(id: string, seenAt: Date | null): Promise<void> {
+  return withTranslatedErrors(async () => {
+    await getPrisma().user.update({ where: { id }, data: { tutorialSeenAt: seenAt } });
+  });
+}
+
+export function setChildTutorialSeen(id: string, seenAt: Date | null): Promise<void> {
+  return withTranslatedErrors(async () => {
+    await getPrisma().childProfile.update({ where: { id }, data: { tutorialSeenAt: seenAt } });
+  });
 }
 
 export function updateChildPinHash(id: string, pinHash: string): Promise<void> {

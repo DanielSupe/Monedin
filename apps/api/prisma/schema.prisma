@@ -79,6 +79,13 @@ model User {
   failedPinAttempts Int       @default(0)
   pinLockedUntil    DateTime?
 
+  /// Cuando se le mostro el recorrido de bienvenida. Nulo: todavia no.
+  ///
+  /// FECHA y no booleano: no cuesta mas y responde una pregunta que un booleano
+  /// no puede —cuando—, util el dia que el recorrido cambie y haya que saber
+  /// quien vio cual. Lo que sale por la API es solo si lo vio, no cuando.
+  tutorialSeenAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -111,6 +118,12 @@ model ChildProfile {
   failedPinAttempts Int       @default(0)
   lockedUntil       DateTime?
 
+  /// Cuando se le mostro el recorrido de bienvenida. Nulo: todavia no.
+  ///
+  /// FECHA y no booleano: no cuesta mas y responde una pregunta que un booleano
+  /// no puede —cuando—, util el dia que el recorrido cambie y haya que saber
+  /// quien vio cual. Lo que sale por la API es solo si lo vio, no cuando.
+  tutorialSeenAt DateTime?
   /// Baja logica: oculta de los listados sin destruir historial.
   deletedAt DateTime?
   createdAt DateTime  @default(now())

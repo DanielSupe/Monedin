@@ -892,6 +892,37 @@ tocar su nombre ni un solo punto de uso.
 **Al tocar tokens hay que abrir pantallas del padre y del niño para confirmar que no se enteraron**,
 porque eso no lo cubre ningún test.
 
+**Un dato del perfil viaja DENTRO del actor, no por un camino aparte.** El avatar del padre lo
+aprendió por las malas —estaba fuera y `add-file-storage` lo metió dentro porque era «el mismo dato
+en dos sitios comportándose distinto»— y `add-onboarding-tour` lo aplicó de entrada con «ya vio el
+recorrido». Un segundo camino trae su propia caché, y una caché puede separarse de la del actor. La
+señal de que un dato pertenece al actor: el front lo necesita para decidir qué pintar nada más
+cargar.
+
+**Añadir un campo obligatorio al actor rompe todos los actores de prueba, y ESO es lo que hay que
+mirar.** Al meter `tutorialSeen` cayeron seis fixtures repartidos por la batería del front — el
+esquema de Zod los rechazó. Lo importante es el valor por defecto que se elige en el ayudante
+compartido: `comoPadre()` y `comoNino()` lo traen en CIERTO, porque si no, cada test que monta el
+inicio se encuentra el recorrido encima de lo que iba a comprobar. El caso común de un test es
+alguien establecido; los del recorrido piden el contrario a propósito.
+
+**El velo con agujero es una SOMBRA proyectada, no un recorte.** Una caja sobre lo que se destaca con
+`box-shadow: 0 0 0 100vmax` tiñe todo lo de fuera y deja limpio lo de dentro: sin máscaras, sin SVG y
+sin recalcular una silueta — mover la caja mueve el agujero. La alternativa eran cuatro rectángulos
+alrededor del hueco, que hay que mantener sincronizados en cada medida y dejan costura en las
+esquinas.
+
+**Que Radix deje el resto del documento INERTE puede ser justo lo que hace falta.** En el recorrido de
+bienvenida parecía un obstáculo —¿cómo se ilumina algo que no se puede tocar?— y resultó ser el
+requisito: lo que se pulsa es «seguir», nunca el elemento iluminado. El foco señala, no invita a
+interactuar. Antes de pelearse con lo que una librería impone, conviene comprobar si lo que impone es
+lo correcto.
+
+**Terminar y saltar tienen que hacer LO MISMO.** Un recorrido que solo contara como visto al llegar
+al final volvería a salirle cada vez a quien lo saltó — que es justo a quien ya dijo que no. Y las
+salidas laterales cuentan igual: Escape y pulsar fuera son salidas, y una salida que no se recuerda
+devuelve el recorrido en la siguiente visita.
+
 **Una sección que dice lo mismo que otra la SUSTITUYE, no se suma a ella.** El encargo de la puerta
 pública pedía un «cómo funciona: tarea → monedas → premio» **además** de las tres tarjetas de
 promesa, y son las mismas tres ideas —«Haz tus tareas», «Elige tu premio», «Tú apruebas»—: hacer las

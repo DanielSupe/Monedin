@@ -252,6 +252,54 @@ export const messages = {
     forbidden: "No puedes ver este historial.",
   },
 
+  /**
+   * El recorrido de bienvenida, uno por rol.
+   *
+   * SON DOS GUIONES y no uno con ramas: a un adulto que gestiona hay que
+   * decirle dónde aprueba, dónde crea y dónde ve a sus hijos; a un niño de seis
+   * a once años, qué son esas monedas y cómo consigue más. Uno que sirviera a
+   * los dos no serviría a ninguno.
+   */
+  tutorial: {
+    /** Los controles, compartidos por los dos guiones. */
+    next: "Seguir",
+    finish: "Empezar",
+    skip: "Saltar",
+    replay: "Ver el recorrido otra vez",
+    replayAction: "Verlo",
+    replayFailed: "No pudimos volver a abrir el recorrido.",
+    /** Se compone con el paso y el total en el punto de uso, nunca aquí. */
+    stepOf: "de",
+
+    /** El del padre, sobre su panel. */
+    parentWelcomeTitle: "Bienvenido a Monedín",
+    parentWelcomeBody:
+      "Soy Monedín. En un momento te enseño dónde está cada cosa de tu panel.",
+    parentPendingTitle: "Lo que te espera",
+    parentPendingBody:
+      "Aquí aparece lo que tus hijos han marcado y todavía no has aprobado. Nada se acredita ni se gasta sin que pases por aquí.",
+    parentChildrenTitle: "Tus hijos",
+    parentChildrenBody:
+      "Cada uno con su perfil, su PIN y su saldo. Desde aquí los creas y los gestionas.",
+    parentCreateTitle: "Tareas y premios",
+    parentCreateBody:
+      "Tú pones las tareas y decides lo que vale cada una, y publicas los premios con su precio.",
+    parentDoneTitle: "Ya está",
+    parentDoneBody: "Empieza creando a tu primer hijo y ponle una tarea. Lo demás sale solo.",
+
+    /** El del niño, sobre su inicio. Frases cortas: tiene entre seis y once años. */
+    childWelcomeTitle: "¡Hola! Soy Monedín",
+    childWelcomeBody: "Te enseño esto en un momento.",
+    childBalanceTitle: "Tus monedas",
+    childBalanceBody: "Aquí ves cuántas tienes. Suben cuando tu padre aprueba una tarea tuya.",
+    childTasksTitle: "Tus tareas",
+    childTasksBody: "Haz una y márcala. Cuando tu padre la apruebe, ganas sus monedas.",
+    childRewardsTitle: "Tus premios",
+    childRewardsBody: "Para esto sirven las monedas: eliges un premio y lo pides.",
+    childDoneTitle: "¡A por ello!",
+    childDoneBody: "Empieza por una tarea. Yo te espero aquí.",
+  },
+
   health: {
     heading: "Estado del servicio",
     loading: "Consultando la API…",

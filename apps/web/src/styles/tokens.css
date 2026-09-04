@@ -147,6 +147,13 @@
   /** Y el apagado, para lo que solo tiene que insinuarse: la traza de una órbita. */
   --color-brand-soft: var(--mnd-indigo-300);
 
+  /*
+   * El velo del recorrido de bienvenida: lo que atenúa la pantalla alrededor de
+   * lo que se está explicando. Va aquí y no en el punto de uso porque es un
+   * color, y ningún componente escribe un color.
+   */
+  --color-spotlight-veil: oklch(25% 0.024 265 / 0.72);
+
   --color-coin: var(--mnd-amber-400);
   --color-coin-soft: var(--mnd-amber-100);
   --color-coin-ink: var(--mnd-amber-800);

@@ -39,6 +39,11 @@ export { Pagination, type PaginationProps } from "./Pagination.js";
 export { ProgressBar, type ProgressBarProps } from "./ProgressBar.js";
 export { Select, type SelectProps } from "./Select.js";
 export { Skeleton, type SkeletonProps } from "./Skeleton.js";
+export {
+  Spotlight,
+  type SpotlightProps,
+  type SpotlightRect,
+} from "./Spotlight.js";
 export { Tabs, tabLinkClasses, type TabItem, type TabsProps } from "./Tabs.js";
 export { Toast, ToastProvider, type ToastProps, type ToastTone } from "./Toast.js";
 

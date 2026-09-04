@@ -6,6 +6,7 @@ import { describeAuthError, useChangeOwnChildPin } from "../auth/use-session.js"
 import * as childrenApi from "../../api/children.js";
 import { Alert, Avatar, Button, Card, Coins, Field, Input, Skeleton } from "../../ui/index.js";
 import { AvatarPicker } from "../profiles/AvatarPicker.js";
+import { ReplayTour } from "../tutorial/ReplayTour.js";
 import { describeChildrenError, useOwnChild, useUpdateOwnChild } from "./use-children.js";
 
 /**
@@ -60,6 +61,8 @@ export function ChildSettings(): React.ReactElement {
       )}
 
       <OwnPinForm />
+
+      <ReplayTour />
 
       {/*
         Salir del perfil vive TAMBIÉN aquí, y no solo al final del inicio.

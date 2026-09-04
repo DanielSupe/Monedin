@@ -9,6 +9,7 @@ import {
   resetAdultPinSchema,
   setChildPinSchema,
   updateParentAvatarSchema,
+  updateTutorialSchema,
 } from "@monedin/contracts";
 import type { Router as ExpressRouter } from "express";
 import { moduleRouter } from "../../shared/http/module-router.js";
@@ -108,6 +109,21 @@ auth.post(
   "/auth/child-profiles/:childProfileId/unlock",
   requireParent,
   controller.handleUnlockChildProfile,
+);
+
+// --- El recorrido de bienvenida ----------------------------------------------
+//
+// UNA ruta para los dos roles, por lo mismo que `/auth/profiles/enter`: tener
+// dos invitaría a proteger una y olvidarse de la otra. Exige ACTOR y no solo
+// cuenta —hay que saber a QUIÉN se le explicó—, así que la lista cerrada de
+// rutas de solo cuenta sigue en cinco.
+//
+// `PATCH` y no `POST`: es un campo de estado del perfil, como el avatar.
+
+auth.patch(
+  "/auth/tutorial",
+  validate({ body: updateTutorialSchema }),
+  controller.handleUpdateTutorial,
 );
 
 // --- Avatar propio del padre -------------------------------------------------

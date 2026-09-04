@@ -4,6 +4,7 @@ import { ChangePinScreen } from "../features/auth/ChangePinScreen.js";
 import { ParentAvatarScreen } from "../features/auth/ParentAvatarScreen.js";
 import { ParentIdentity } from "../features/auth/ParentIdentity.js";
 import { SignOut } from "../features/auth/SignOut.js";
+import { ReplayTour } from "../features/tutorial/ReplayTour.js";
 import { messages } from "../lib/messages.js";
 
 /**
@@ -48,6 +49,8 @@ function AccountRoute(): React.ReactElement {
         padre acaba tecleando su contraseña porque quería pasarle la tablet a su
         hijo.
       */}
+      <ReplayTour />
+
       <SignOut />
     </section>
   );

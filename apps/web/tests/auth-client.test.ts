@@ -52,6 +52,7 @@ describe("cliente de sesión", () => {
         jsonResponse(200, {
           actor: {
             familyRole: "CHILD",
+            tutorialSeen: false,
             id: "c1",
             name: "Mateo",
             avatar: DEFAULT_AVATAR_KEY,
@@ -76,7 +77,14 @@ describe("cliente de sesión", () => {
       "fetch",
       vi.fn().mockResolvedValue(
         jsonResponse(200, {
-          actor: { familyRole: "CHILD", id: "c1", name: "Mateo", avatar: null, coins: 0 },
+          actor: {
+            familyRole: "CHILD",
+            id: "c1",
+            name: "Mateo",
+            avatar: null,
+            coins: 0,
+            tutorialSeen: false,
+          },
           hasAccount: true,
         }),
       ),
@@ -127,6 +135,7 @@ describe("cliente de la rejilla", () => {
         jsonResponse(200, {
           actor: {
             familyRole: "PARENT",
+            tutorialSeen: false,
             id: "u1",
             name: "Lucía",
             email: "l@x.test",
@@ -226,6 +235,7 @@ describe("la guarda tiene tres estados, no dos", () => {
           name: "Lucía",
           email: "l@x.test",
           avatar: "nutria",
+          tutorialSeen: true,
         },
         hasAccount: true,
       }),

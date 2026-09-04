@@ -106,6 +106,22 @@ export function useLeaveProfile() {
   });
 }
 
+/**
+ * Marca el recorrido como visto, o lo pide otra vez.
+ *
+ * Refresca la sesión al terminar, y por eso pasa por `useRefreshSession()`: el
+ * booleano vive DENTRO del actor, así que sin invalidarlo el recorrido seguiría
+ * saliendo hasta la siguiente recarga.
+ */
+export function useUpdateTutorial() {
+  const refresh = useRefreshSession();
+
+  return useMutation({
+    mutationFn: api.updateTutorial,
+    onSuccess: refresh,
+  });
+}
+
 /** Cambia el PIN de adulto indicando el actual. Exige perfil de padre activo. */
 export function useChangeAdultPin() {
   return useMutation({ mutationFn: api.changeAdultPin });

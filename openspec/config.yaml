@@ -481,6 +481,26 @@ context: |
     a cero, animando cada paso. Con movimiento reducido NO cicla: un numero que cambia solo es
     movimiento, y del que peor sienta.
 
+    EL RECORRIDO DE BIENVENIDA, desde `add-onboarding-tour`. Quien entraba por primera vez a su
+    perfil aterrizaba en una pantalla que no le explicaba nada: el padre en un panel vacio, el nino
+    en un saldo en cero con cuatro teselas.
+      - DOS recorridos y no uno con ramas, uno por rol, cinco pasos cada uno. Lo que hay que
+        explicarle a un adulto que gestiona no se parece a lo que hay que explicarle a un nino.
+      - «Ya lo vio» vive en el SERVIDOR —`tutorialSeenAt` en `User` y en `ChildProfile`— y viaja
+        DENTRO del actor, como el avatar. Sobrevive a cambiar de dispositivo y a limpiar el
+        navegador. La columna es fecha y lo que sale por la API es un booleano.
+      - UNA ruta para los dos roles, `PATCH /auth/tutorial` con `{ seen }`, que exige actor. La rama
+        por rol vive en el SERVICIO. Es idempotente: no mueve dinero ni cambia de estado.
+      - `{ seen: false }` es el «verlo otra vez» de los ajustes. Un campo en vez de dos rutas.
+      - Terminar y saltar hacen lo mismo: los dos marcan visto. Un recorrido que solo contara al
+        llegar al final volveria a salirle a quien lo salto.
+      - Las anclas viven SOLO en la pantalla de inicio; ninguna apunta a la navegacion, que en
+        estrecho esta detras de un boton. Un ancla que no aparece no rompe el paso: se muestra
+        centrado y sin destacar, que es lo que hace que funcione en una cuenta recien creada.
+      - `ui/Spotlight` atenua con una SOMBRA proyectada desde la caja del hueco, no con un recorte.
+        Es la CUARTA excepcion de estilo en linea del proyecto —la posicion se mide en ejecucion—,
+        declarada y acotada a ese archivo.
+
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
   - El niño NO es un User: vive entero como ChildProfile dentro de la cuenta de su padre, y

@@ -18,6 +18,7 @@ import {
   ProgressBar,
   Select,
   Skeleton,
+  Spotlight,
   Tabs,
   Toast,
   ToastProvider,
@@ -80,6 +81,8 @@ function Fila({ children }: { children: React.ReactNode }): React.ReactElement {
 
 /** Todas las piezas, una vez. Se monta dos veces, una por escala. */
 function Piezas(): React.ReactElement {
+  const [focoAbierto, setFocoAbierto] = useState(false);
+  const [focoCentrado, setFocoCentrado] = useState(false);
   const [dialogoAbierto, setDialogoAbierto] = useState(false);
   const [avisoAbierto, setAvisoAbierto] = useState(false);
   const [pestana, setPestana] = useState("pendientes");
@@ -336,6 +339,51 @@ function Piezas(): React.ReactElement {
             { value: "completadas", label: "Completadas", content: <p>Una esperando.</p> },
             { value: "aprobadas", label: "Aprobadas", content: <p>Dos aprobadas.</p> },
           ]}
+        />
+      </Seccion>
+
+      <Seccion titulo="Spotlight">
+        {/*
+          Las DOS formas, porque la diferencia es lo único que hay que ver: con
+          algo destacado y sin nada. Sin la segunda, nadie sabría que la pieza
+          también sirve para un paso que no señala a ninguna parte.
+
+          Recibe dónde destacar y qué decir: no sabe de perfiles ni de roles, y
+          por eso se monta aquí sin proveedores.
+        */}
+        <Fila>
+          <Button onClick={() => setFocoAbierto(true)}>Con algo destacado</Button>
+          <Button onClick={() => setFocoCentrado(true)}>Sin nada destacado</Button>
+        </Fila>
+
+        <Spotlight
+          open={focoAbierto}
+          onOpenChange={setFocoAbierto}
+          title="Aquí ves lo que te espera"
+          description="Lo que tus hijos han marcado y todavía no has aprobado."
+          rect={{ top: 120, left: 120, width: 280, height: 120 }}
+          footer={
+            <>
+              <Button variant="ghost" onClick={() => setFocoAbierto(false)}>
+                Saltar
+              </Button>
+              <Button variant="primary" onClick={() => setFocoAbierto(false)}>
+                Seguir
+              </Button>
+            </>
+          }
+        />
+
+        <Spotlight
+          open={focoCentrado}
+          onOpenChange={setFocoCentrado}
+          title="Hola, soy Monedín"
+          description="Te enseño en un momento cómo funciona esto."
+          footer={
+            <Button variant="primary" onClick={() => setFocoCentrado(false)}>
+              Seguir
+            </Button>
+          }
         />
       </Seccion>
 

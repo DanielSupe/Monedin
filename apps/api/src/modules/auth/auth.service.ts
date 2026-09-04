@@ -12,6 +12,7 @@ import {
   type AvatarValue,
   type ImageContentType,
   type UpdateParentAvatarInput,
+  type UpdateTutorialInput,
   type UploadUrl,
 } from "@monedin/contracts";
 import { randomUUID } from "node:crypto";
@@ -93,6 +94,8 @@ export interface ParentSummary {
 /** Lo mismo, más el avatar YA resuelto: lo que hace falta para armar el actor. */
 export interface ParentProfileSummary extends ParentSummary {
   avatar: AvatarValue;
+  /** Si a este perfil ya se le mostró el recorrido. El CUÁNDO no sale de aquí. */
+  tutorialSeen: boolean;
 }
 
 export interface IssuedSession {
@@ -321,6 +324,8 @@ export interface ActiveProfile {
   coins?: number;
   /** Solo en el perfil del padre. */
   email?: string;
+  /** Si a este perfil ya se le mostró el recorrido de bienvenida. */
+  tutorialSeen: boolean;
 }
 
 /**
@@ -385,6 +390,7 @@ async function enterParentProfile(
       name: found.name,
       email: found.email,
       avatar: await resolveAvatarForResponse(getStorageProvider(), profile?.image ?? null),
+      tutorialSeen: profile?.tutorialSeenAt != null,
     },
     session,
   };
@@ -442,6 +448,7 @@ async function enterChildProfile(
       name: child.name,
       avatar: resolveAvatarKey(child.avatar),
       coins: child.coins,
+      tutorialSeen: child.tutorialSeenAt !== null,
     },
     session,
   };
@@ -573,7 +580,34 @@ export async function describeParent(userId: string): Promise<ParentProfileSumma
     name: parent.name,
     email: parent.email,
     avatar: await resolveAvatarForResponse(getStorageProvider(), parent.image),
+    tutorialSeen: parent.tutorialSeenAt !== null,
   };
+}
+
+/**
+ * Marca el recorrido de bienvenida como visto, o lo pide otra vez.
+ *
+ * UNA operación para los dos roles, y la rama por rol AQUÍ y no en el
+ * controlador: un `if` sobre el rol en la capa de HTTP está en la capa
+ * equivocada. Es el mismo reparto que el detalle de un premio.
+ *
+ * Es IDEMPOTENTE, y conviene decirlo: no mueve dinero ni cambia de estado, así
+ * que dos toques dejan lo mismo. No hay transición condicional que proteger
+ * aquí — copiar el patrón de aprobar una tarea sería añadir ceremonia a algo
+ * que no la necesita.
+ *
+ * Qué perfil se toca sale del ACTOR y nunca de la petición: es lo que hace
+ * imposible por construcción que un niño marque el de su hermano.
+ */
+export async function updateTutorialSeen(actor: Actor, input: UpdateTutorialInput): Promise<void> {
+  const cuando = input.seen ? new Date() : null;
+
+  if (actor.familyRole === "CHILD") {
+    await repository.setChildTutorialSeen(actor.childProfileId, cuando);
+    return;
+  }
+
+  await repository.setParentTutorialSeen(actor.userId, cuando);
 }
 
 // ---------------------------------------------------------------------------
@@ -647,13 +681,21 @@ export interface ChildSummary {
   name: string;
   avatar: string | null;
   coins: number;
+  /** Si a este perfil ya se le mostró el recorrido. El CUÁNDO no sale de aquí. */
+  tutorialSeen: boolean;
 }
 
 export async function describeChild(childProfileId: string): Promise<ChildSummary | null> {
   const child = await repository.findChildForSession(childProfileId);
   if (child === null) return null;
 
-  return { id: child.id, name: child.name, avatar: child.avatar, coins: child.coins };
+  return {
+    id: child.id,
+    name: child.name,
+    avatar: child.avatar,
+    coins: child.coins,
+    tutorialSeen: child.tutorialSeenAt !== null,
+  };
 }
 
 // ---------------------------------------------------------------------------

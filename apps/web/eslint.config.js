@@ -30,6 +30,13 @@ export default [
     // —un `#333` literal— se fue a un token y solo quedan la altura y la
     // posición.
     "src/features/uploads/ImageUploadField.tsx",
+    // La CUARTA, y la última que debería hacer falta: la posición y el tamaño
+    // del hueco del recorrido de bienvenida salen de medir un elemento en
+    // ejecución, y no hay token que exprese «donde está esa tarjeta ahora
+    // mismo». Es la misma clase que el ancho de `ProgressBar` y el radio de una
+    // órbita. Toda la geometría está concentrada en ese archivo para que la
+    // excepción cubra lo mínimo.
+    "src/ui/Spotlight.tsx",
   ]),
 
   /*

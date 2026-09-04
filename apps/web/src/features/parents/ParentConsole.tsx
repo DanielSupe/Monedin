@@ -1,6 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import type { Child } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
+import { useSession } from "../auth/use-session.js";
+import { Tutorial } from "../tutorial/Tutorial.js";
+import { PARENT_STEPS } from "../tutorial/steps.js";
 import { Alert, Avatar, Card, Coins, Skeleton, buttonClasses } from "../../ui/index.js";
 import { LeaveProfile } from "../auth/LeaveProfile.js";
 import { useParentConsole, type Recuento } from "./use-parent-console.js";
@@ -22,6 +25,7 @@ import { useParentConsole, type Recuento } from "./use-parent-console.js";
  * cada aviso lleva a la suya con el filtro ya puesto.
  */
 export function ParentConsole({ name }: { name: string }): React.ReactElement {
+  const actor = useSession().session?.actor;
   const { tasksToApprove, redemptionsWaiting, children, isPending, error } = useParentConsole();
 
   if (isPending) {
@@ -36,11 +40,21 @@ export function ParentConsole({ name }: { name: string }): React.ReactElement {
 
   return (
     <section className="flex flex-col gap-6">
+      {/*
+        QUIÉN decide si se ve: esta pantalla, mirando el actor. El recorrido no
+        consulta la sesión — recibe su guion y avisa al terminar—, y por eso se
+        prueba montándolo con un guion cualquiera y sin servidor.
+      */}
+      {actor?.tutorialSeen === false && <Tutorial steps={PARENT_STEPS} />}
+
       <h2 className="text-title font-bold">
         {messages.parents.greeting} {name}
       </h2>
 
-      <section className="flex flex-col gap-3">
+      {/* `data-tutorial`: el recorrido de bienvenida ilumina esta sección. Es un
+          ancla y no una referencia encadenada — quien monta el recorrido no es
+          quien dibuja cada trozo. */}
+      <section data-tutorial="parent-pending" className="flex flex-col gap-3">
         <h3 className="text-body font-bold text-ink-muted">{messages.parents.pendingTitle}</h3>
 
         {/*
@@ -84,7 +98,7 @@ export function ParentConsole({ name }: { name: string }): React.ReactElement {
         )}
       </section>
 
-      <section className="flex flex-col gap-3">
+      <section data-tutorial="parent-children" className="flex flex-col gap-3">
         <h3 className="text-body font-bold text-ink-muted">{messages.parents.childrenTitle}</h3>
 
         <Card>
