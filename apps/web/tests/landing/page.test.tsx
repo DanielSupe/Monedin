@@ -41,6 +41,43 @@ describe("la puerta pública", () => {
     expect(screen.getByText(messages.landing.promiseApproveTitle)).toBeInTheDocument();
   });
 
+  it("despeja que la moneda no es dinero real, y qué aprende el niño", async () => {
+    await montarApp("/welcome", SIN_SESION);
+
+    expect(screen.getByText(messages.landing.aboutTitle)).toBeInTheDocument();
+    expect(screen.getByText(messages.landing.aboutBody)).toBeInTheDocument();
+    expect(screen.getByText(messages.landing.aboutLearns)).toBeInTheDocument();
+  });
+
+  /*
+   * El orden importa: la franja contesta una duda ANTES de que las tarjetas
+   * resuman el ciclo. Comprobar solo que existe dejaría pasar ponerla al final,
+   * que es lo contrario de lo que hace falta.
+   */
+  it("y lo despeja ANTES de las tres promesas", async () => {
+    await montarApp("/welcome", SIN_SESION);
+
+    const franja = screen.getByText(messages.landing.aboutTitle);
+    const promesas = screen.getByText(messages.landing.promiseEarnTitle);
+
+    expect(franja.compareDocumentPosition(promesas)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  /*
+   * La ilustración de la franja NO se anuncia: acompaña a un texto que ya lo
+   * dice todo, y oírla sería la misma frase dos veces.
+   *
+   * Se CUENTAN las imágenes con nombre y no se mira su atributo: comprobar que
+   * «la ilustración no tiene nombre» pasaría igual si la ilustración no
+   * estuviera. Dos, el logo y las órbitas, y tienen que seguir siendo dos.
+   */
+  it("lo que solo ilustra no se anuncia", async () => {
+    await montarApp("/welcome", SIN_SESION);
+
+    await screen.findByText(messages.landing.aboutTitle);
+    expect(screen.getAllByRole("img")).toHaveLength(2);
+  });
+
   it("la visualización se anuncia como una imagen con significado", async () => {
     await montarApp("/welcome", SIN_SESION);
 

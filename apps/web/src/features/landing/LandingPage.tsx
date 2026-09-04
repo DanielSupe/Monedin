@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { messages } from "../../lib/messages.js";
 import { Card, Logo, buttonClasses } from "../../ui/index.js";
+import ilustracion from "../../assets/tutorial/explica.png";
 import { Orbits } from "./Orbits.js";
 import { useTypewriter } from "./use-typewriter.js";
 
@@ -37,8 +38,50 @@ export function LandingPage(): React.ReactElement {
         </div>
       </main>
 
+      <About />
+
       <Promises />
     </div>
+  );
+}
+
+/**
+ * Lo que la página no decía y decide un registro.
+ *
+ * El héroe dice qué hace el producto y las tarjetas resumen el ciclo en tres
+ * golpes. Ninguno contesta lo primero que piensa un adulto al leer «monedas» y
+ * «premios» en una aplicación para su hijo: si esto mueve dinero de verdad.
+ *
+ * En ESPEJO del héroe —visual a la izquierda, texto a la derecha— y no por
+ * simetría: dos franjas seguidas con el visual del mismo lado se leen como un
+ * bloque repetido.
+ *
+ * Sin `Card`, aunque debajo vengan tres: una tarjeta justo encima de las tres
+ * promesas competiría con ellas, y quien lee no sabría si la primera es una
+ * promesa más.
+ */
+function About(): React.ReactElement {
+  return (
+    <section className="mx-auto flex w-full max-w-(--container-wide) flex-col items-center gap-6 px-4 py-6 lg:flex-row lg:gap-12">
+      {/*
+        DECORATIVA, y es lo contrario de `Orbits`.
+        
+        Aquella lleva nombre porque comunica el ciclo: sin él, quien no la ve
+        pierde algo que no está en ningún otro sitio. Esta acompaña a un texto
+        que ya lo dice todo, así que anunciarla sería la misma frase dos veces.
+      */}
+      <img src={ilustracion} alt="" className="w-full max-w-tile shrink-0" />
+
+      <div className="flex min-w-0 flex-col gap-3">
+        <h2 className="text-title font-bold">{messages.landing.aboutTitle}</h2>
+        <p className="text-body max-w-(--container-reading) text-ink-muted">
+          {messages.landing.aboutBody}
+        </p>
+        <p className="text-body max-w-(--container-reading) text-ink-muted">
+          {messages.landing.aboutLearns}
+        </p>
+      </div>
+    </section>
   );
 }
 

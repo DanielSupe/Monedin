@@ -41,6 +41,22 @@ export const messages = {
     balanceLabel: "sus monedas",
     orbitLabel: "El ciclo de Monedín: tareas, premios y los perfiles de la familia",
 
+    /**
+     * La franja de confianza, entre el héroe y las tarjetas.
+     *
+     * Contesta lo primero que piensa un adulto al leer «monedas» y «premios» en
+     * una aplicación para su hijo, y que la página no decía en ninguna parte.
+     * Todo lo que afirma es cierto de lo construido: no hay pagos, el saldo es
+     * cerrado a la familia, y el historial existe desde `add-coin-history`.
+     */
+    aboutTitle: "Dinero de mentira, decisiones de verdad",
+    aboutBody:
+      "Las monedas de Monedín no salen de tu cuenta ni llegan a ninguna. No hay pagos, no hay " +
+      "tarjetas y no se comparte nada con otras familias: el saldo de tu hijo vive dentro de tu casa.",
+    aboutLearns:
+      "Lo que sí es real es lo que aprende. Ve cuánto tiene, cuánto le falta para lo que quiere, y " +
+      "qué pasó con cada moneda que gastó.",
+
     /** Las tres promesas. Sustituyen a los logos de socios que no tenemos. */
     promiseEarnTitle: "Haz tus tareas",
     promiseEarnBody: "Cada tarea vale las monedas que tú decidas.",
