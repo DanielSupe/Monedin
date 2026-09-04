@@ -428,6 +428,24 @@ context: |
     cerrada en un test cuyo comentario dice que la pregunta no es como arreglar el test sino por que
     esa ruta no puede exigir actor. El otro camino, en dos momentos, no sirve desde la rejilla.
 
+    LOS TRES DESTINOS DEL NINO SE DISTINGUEN POR SU FORMA, desde
+    `redesign-child-surfaces`. Eran los tres `<ul flex flex-col gap-3>` con un li/Card dentro,
+    identicos hasta en la clase, porque cada uno se vistio por separado y resolvio bien SU contenido
+    dentro de la unica forma que habia. Son los tres tiempos del ciclo:
+      - Escaparate: REJILLA de dos columnas. Comparar dos precios sin desplazar es lo que se hace
+        ahi, y es la mitad del ciclo que el producto ensena. Sigue siendo una lista: una rejilla es
+        una colocacion, no otra estructura para quien no ve la pantalla.
+      - Tareas: columna ancha de tarjetas. Es el UNICO de los tres con una accion que cambia el
+        mundo —marcarla— y una foto opcional que adjuntar, asi que es el que necesita sitio.
+      - Canjes: TABLA. Cuatro datos por fila, siempre los mismos, sin nada que hacer con ellos.
+    Las tres dicen cuantas cosas hay, y cada una cuenta lo suyo: premios de las filas recibidas,
+    tareas PENDIENTES —no el total, que una lista de ocho con siete aprobadas no es ocho cosas por
+    hacer— y canjes del `total` del listado, que aqui SI es la cifra porque pagina por fila.
+    `ui/DataTable` es la primera pieza nueva del sistema desde `add-design-system`. Recibe
+    encabezados y celdas ya compuestas, como `Pagination` recibe sus enlaces, y sin filas no dibuja
+    nada: una tabla vacia con encabezados dice «esto esta roto» donde el estado vacio dice «todavia
+    no hay nada».
+
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
   - El niño NO es un User: vive entero como ChildProfile dentro de la cuenta de su padre, y

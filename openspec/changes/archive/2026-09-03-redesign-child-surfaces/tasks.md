@@ -50,14 +50,14 @@
 
 ## 6. Lo que ningún test cubre
 
-- [ ] 6.1 **Abrir la aplicación** en el ancho más estrecho que el producto admite y confirmar que la
+- [x] 6.1 **Abrir la aplicación** en el ancho más estrecho que el producto admite y confirmar que la
       tabla no desborda y que la rejilla no parte una tesela. jsdom no aplica CSS: esto no lo prueba
       nadie por nosotros.
-- [ ] 6.2 Mirar las tres pantallas seguidas, como las ve un niño, y confirmar que se distinguen.
+- [x] 6.2 Mirar las tres pantallas seguidas, como las ve un niño, y confirmar que se distinguen.
 
 ## 7. Cerrar
 
 - [x] 7.1 `pnpm lint` del web ANTES de la batería.
-- [ ] 7.2 Batería del web, y la de la API **sola y una sola pasada** si algo la tocara —no debería:
+- [x] 7.2 Batería del web, y la de la API **sola y una sola pasada** si algo la tocara —no debería:
       este change no toca la API—.
-- [ ] 7.3 `config.yaml` y `CLAUDE.md` con lo que salga que valga para el siguiente.
+- [x] 7.3 `config.yaml` y `CLAUDE.md` con lo que salga que valga para el siguiente.

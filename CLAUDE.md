@@ -892,6 +892,43 @@ tocar su nombre ni un solo punto de uso.
 **Al tocar tokens hay que abrir pantallas del padre y del niño para confirmar que no se enteraron**,
 porque eso no lo cubre ningún test.
 
+**Tres pantallas con la misma forma no es un estilo: es que nadie decidió en qué se diferencian.**
+Los tres destinos del niño eran `<ul className="flex list-none flex-col gap-3 p-0">`, idénticos hasta
+en la clase, y cada uno se había vestido por separado resolviendo bien SU contenido dentro de la
+única forma que había. Lo que ninguno pudo decidir solo es el contraste con los otros dos. Desde
+`redesign-child-surfaces` el escaparate es una rejilla —comparar dos precios sin desplazar es lo que
+se hace ahí—, las tareas son la columna ancha —es el único con una acción que cambia el mundo— y los
+canjes son una tabla. **El test monta las tres y las compara**: mirar una sola habría pasado con las
+tres iguales otra vez.
+
+**Una tabla no es «cosa de adultos»: eso confunde la forma con la densidad.** Cuatro datos por fila,
+siempre los mismos y sin nada que hacer con ellos, es tabular por definición, y lo que decide no es
+lo visual sino **quien no ve la pantalla**: con encabezados se salta de celda en celda sabiendo en
+qué columna se está, y sin ellos hay que oír la etiqueta repetida en cada fila. Se descartó el patrón
+habitual de tabla-que-se-vuelve-tarjetas por debajo de un ancho, por la razón que
+`pin-sidebar-on-desktop` ya pagó: montar las dos formas y esconder una con CSS deja **dos**
+estructuras en el árbol aunque solo se vea una.
+
+**Una regla que se comprueba leyendo el código línea a línea se rompe con un salto de línea.** El
+test del catálogo vivo buscaba `export { ... }` **por línea**, exigiendo la llave de cierre en la
+misma, así que cualquier exportación repartida en varias —lo que hace el formateador en cuanto la
+lista es larga— se saltaba el catálogo **entera**. No había ninguna multilínea hasta `DataTable`, así
+que el agujero llevaba abierto desde `add-design-system` sin que se notara. Es pariente de «una regla
+que se comprueba por su NOMBRE está a un sinónimo de morirse»: un test que analiza código tiene que
+mirar el archivo, no sus renglones.
+
+**Antes de escribir un test de orden, mira quién ordena.** El del historial de canjes alimentaba un
+orden que el servidor **nunca devuelve** —`GET /redemptions/mine` ya ordena `createdAt desc` con
+desempate— y esperaba que el cliente ordenara. Lo que hay que garantizar cuando el servidor ya ordena
+es que la pantalla **no reordene**, y para que eso pruebe algo los datos tienen que estar elegidos de
+modo que un `sort` accidental por cualquier columna dé una lista distinta.
+
+**Hay cosas que ningún test puede cubrir, y se escriben como TAREA en vez de fingir que sí.** Que las
+cuatro columnas de una tabla quepan en la escala del niño a 390 px no lo prueba jsdom, que no aplica
+CSS. Se comprueba abriendo la aplicación, igual que el efecto de tocar un token. Lo que sí se puede
+fijar es la **elección** —que el escaparate es una rejilla de más de una columna— y su test dice en
+su comentario, con todas las letras, qué no está probando.
+
 **Una precaución copiada de otro sitio hay que COMPROBARLA, no heredarla.** `polish-profile-and-reward-image`
 escribió en su design, en su proposal, en sus tareas y en un comentario del código que
 `/rewards/image/upload-url` tenía que registrarse antes que `/rewards/:rewardId`, por el tropiezo que
