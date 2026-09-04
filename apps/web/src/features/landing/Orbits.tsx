@@ -1,6 +1,6 @@
 import { messages } from "../../lib/messages.js";
 import { Coins } from "../../ui/index.js";
-import { useCountUp } from "./use-count-up.js";
+import { useCoinCycle } from "./use-coin-cycle.js";
 import { usePrefersReducedMotion } from "./use-reduced-motion.js";
 
 /**
@@ -67,12 +67,11 @@ const ORBITAS: Orbita[] = [
   },
 ];
 
-/** El saldo del centro. Es un ejemplo, no el dato de nadie. */
-const SALDO_DE_EJEMPLO = 340;
-
 export function Orbits(): React.ReactElement {
   const sinMovimiento = usePrefersReducedMotion();
-  const saldo = useCountUp(SALDO_DE_EJEMPLO, { duration: 1800, delay: 400 });
+  // Sube por pasos y vuelve a empezar: el ciclo del producto contado con la
+  // única cifra de la página. Es un ejemplo, no el dato de nadie.
+  const saldo = useCoinCycle();
 
   return (
     <div
@@ -84,8 +83,14 @@ export function Orbits(): React.ReactElement {
         decidía el flex de fuera, y cuando el titular acaparaba el espacio los
         anillos no cabían y dejaban de centrarse. Se agranda con `scale` donde
         sobra sitio, que no toca la disposición.
+
+        El ESCENARIO crece en ancho desde `redesign-public-entry` —de
+        `--container-orbit` a `--container-orbit-hero`— y los RADIOS de los
+        anillos no se tocan. Es lo que permite que sean protagonistas sin
+        ampliar la excepción de estilo en línea, que cubre exactamente nueve
+        transformaciones y ninguna más.
       */
-      className="relative grid size-(--container-orbit) max-w-full place-items-center lg:scale-110"
+      className="relative grid size-(--container-orbit) max-w-full place-items-center lg:size-(--container-orbit-hero) lg:scale-110"
     >
       {ORBITAS.map((orbita) => (
         <div
@@ -120,7 +125,17 @@ export function Orbits(): React.ReactElement {
               style={{
                 transform: `rotate(${pieza.angulo}deg) translate(${orbita.radio}px) rotate(-${pieza.angulo}deg)`,
               }}
-              className="rounded-card text-title absolute left-1/2 top-1/2 -ml-5 -mt-5 grid size-10 place-items-center bg-surface-raised shadow-card"
+              /*
+              La placa se AJUSTA al glifo en vez de envolverlo: era `size-10`
+              para un glifo de `text-title`, así que se veía más placa que icono.
+              A `size-8` el icono manda, que es lo que hay que ver.
+
+              El desplazamiento es la MITAD del lado —`-ml-4 -mt-4` para
+              `size-8`— y por eso la talla no se elige libremente: centrar con
+              `translate` no se puede, porque `transform` lo ocupa la geometría
+              de la órbita.
+            */
+            className="rounded-control text-title absolute left-1/2 top-1/2 -ml-4 -mt-4 grid size-8 place-items-center bg-surface-raised shadow-card"
             >
               {pieza.glifo}
             </span>
@@ -128,7 +143,12 @@ export function Orbits(): React.ReactElement {
         </div>
       ))}
 
-      <div className="rounded-card z-10 flex flex-col items-center gap-1 bg-surface-raised px-5 py-4 shadow-raised">
+      {/*
+        El centro se ciñe: ocupaba tanto que se comía el anillo interior y los
+        iconos de dentro parecían pegados a él. La cifra sigue en `hero` —es lo
+        que la página existe para enseñar— y lo que se recorta es el aire.
+      */}
+      <div className="rounded-card z-10 flex flex-col items-center bg-surface-raised px-4 py-2 shadow-raised">
         <Coins amount={saldo} size="hero" />
         <span className="text-small text-ink-muted">{messages.landing.balanceLabel}</span>
       </div>

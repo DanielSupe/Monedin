@@ -184,6 +184,13 @@
   --container-dialog: 28rem;
   --container-reading: 40rem;
   --container-orbit: 20rem;
+  /*
+   * El escenario de las órbitas en la puerta pública, donde son protagonistas y
+   * no un adorno lateral. Es solo el ESCENARIO: los radios de los anillos siguen
+   * siendo los que son, para no ampliar la excepción de estilo en línea que los
+   * cubre.
+   */
+  --container-orbit-hero: 26rem;
   /* La tesela de un premio. Con dos columnas y sin tope, a 1150px cada una
      pasaba de 450px: una foto de producto del tamaño de media pantalla. */
   --container-tile: 18.75rem;
@@ -349,6 +356,12 @@
 
   /* 40px: un padre usa el pulgar sobre una lista densa. */
   --tap-min: 2.5rem;
+  /*
+   * 56px: la acción de una página que CONVENCE, no la de un formulario que ya
+   * se está rellenando. En el segundo la acción ya se está mirando; en el
+   * primero hay que encontrarla.
+   */
+  --tap-large: 3.5rem;
 
   --duration-quick: 120ms;
   --duration-normal: 200ms;
@@ -424,6 +437,12 @@
 @utility tap-target {
   min-block-size: var(--tap-min);
   min-inline-size: var(--tap-min);
+}
+
+/* La talla mayor de una acción. La declara la pieza, nunca el punto de uso. */
+@utility tap-target-large {
+  min-block-size: var(--tap-large);
+  min-inline-size: var(--tap-large);
 }
 
 @utility duration-quick {

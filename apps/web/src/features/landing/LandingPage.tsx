@@ -1,7 +1,10 @@
 import { Link } from "@tanstack/react-router";
-import { messages } from "../../lib/messages.js";
-import { Card, Logo, buttonClasses } from "../../ui/index.js";
 import ilustracion from "../../assets/tutorial/explica.png";
+import { messages } from "../../lib/messages.js";
+import { Logo, buttonClasses } from "../../ui/index.js";
+import { AppPreview } from "./AppPreview.js";
+import { FinalCta } from "./FinalCta.js";
+import { HowItWorks } from "./HowItWorks.js";
 import { Orbits } from "./Orbits.js";
 import { useTypewriter } from "./use-typewriter.js";
 
@@ -14,6 +17,16 @@ import { useTypewriter } from "./use-typewriter.js";
  * tiempo, y un diseño que optimiza solo para la conversión inicial envejece mal.
  *
  * No hace ni una petición: se muestra completa sin sesión y sin datos de nadie.
+ *
+ * Desde `redesign-public-entry` este archivo MONTA las secciones y ya no las
+ * dibuja todas. Se había construido por partes y nunca se compuso como página:
+ * cinco bloques seguidos sobre el mismo fondo, sin nada que marcara dónde
+ * acababa uno.
+ *
+ * El RITMO sale de alternar las superficies que el sistema ya tiene, y no de
+ * inventar fondos: `surface` y `surface-sunken` se turnan, y el cierre va en la
+ * de marca — el mismo índigo del acceso, que es la otra pantalla que mira un
+ * adulto, así que la página termina con el color al que lleva.
  */
 export function LandingPage(): React.ReactElement {
   return (
@@ -31,57 +44,34 @@ export function LandingPage(): React.ReactElement {
         </nav>
       </header>
 
-      <main className="mx-auto flex w-full max-w-(--container-wide) flex-1 flex-col items-center gap-8 px-4 py-6 lg:flex-row lg:gap-12">
+      <main className="mx-auto flex w-full max-w-(--container-wide) flex-col items-center gap-10 px-4 py-10 lg:flex-row lg:gap-12 lg:py-16">
         <Hero />
-        <div className="flex w-full shrink-0 justify-center lg:w-auto">
+
+        {/*
+          Las órbitas dejan de ser un adorno lateral. Son lo mejor que hay en
+          esta página —dibujan el ciclo que el producto entero existe para
+          enseñar— y estaban tratadas como una ilustración de relleno.
+
+          El halo las apoya en la composición en vez de dejarlas flotando: es un
+          degradado de la marca en su tono más suave, no un color nuevo.
+        */}
+        <div className="relative flex w-full shrink-0 justify-center lg:w-auto">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 m-auto size-(--container-orbit) rounded-full bg-primary-soft opacity-60 blur-3xl"
+          />
           <Orbits />
         </div>
       </main>
 
+      <HowItWorks />
+
       <About />
 
-      <Promises />
+      <AppPreview />
+
+      <FinalCta />
     </div>
-  );
-}
-
-/**
- * Lo que la página no decía y decide un registro.
- *
- * El héroe dice qué hace el producto y las tarjetas resumen el ciclo en tres
- * golpes. Ninguno contesta lo primero que piensa un adulto al leer «monedas» y
- * «premios» en una aplicación para su hijo: si esto mueve dinero de verdad.
- *
- * En ESPEJO del héroe —visual a la izquierda, texto a la derecha— y no por
- * simetría: dos franjas seguidas con el visual del mismo lado se leen como un
- * bloque repetido.
- *
- * Sin `Card`, aunque debajo vengan tres: una tarjeta justo encima de las tres
- * promesas competiría con ellas, y quien lee no sabría si la primera es una
- * promesa más.
- */
-function About(): React.ReactElement {
-  return (
-    <section className="mx-auto flex w-full max-w-(--container-wide) flex-col items-center gap-6 px-4 py-6 lg:flex-row lg:gap-12">
-      {/*
-        DECORATIVA, y es lo contrario de `Orbits`.
-        
-        Aquella lleva nombre porque comunica el ciclo: sin él, quien no la ve
-        pierde algo que no está en ningún otro sitio. Esta acompaña a un texto
-        que ya lo dice todo, así que anunciarla sería la misma frase dos veces.
-      */}
-      <img src={ilustracion} alt="" className="w-full max-w-tile shrink-0" />
-
-      <div className="flex min-w-0 flex-col gap-3">
-        <h2 className="text-title font-bold">{messages.landing.aboutTitle}</h2>
-        <p className="text-body max-w-(--container-reading) text-ink-muted">
-          {messages.landing.aboutBody}
-        </p>
-        <p className="text-body max-w-(--container-reading) text-ink-muted">
-          {messages.landing.aboutLearns}
-        </p>
-      </div>
-    </section>
   );
 }
 
@@ -92,7 +82,7 @@ function Hero(): React.ReactElement {
   // come el sitio de la visualización. Es el `min-width: auto` del flex, el
   // mismo defecto que ya apareció en los marcos de `add-app-shell`.
   return (
-    <section className="flex min-w-0 flex-1 flex-col items-start gap-4">
+    <section className="flex min-w-0 flex-1 flex-col items-start gap-5">
       {/*
         El texto COMPLETO está siempre en el DOM y se anuncia entero; lo que se
         escribe letra a letra es una capa oculta a los lectores. Nadie debería
@@ -110,14 +100,20 @@ function Hero(): React.ReactElement {
         {messages.landing.subhead}
       </p>
 
-      <div className="flex flex-wrap items-center gap-3">
-        {/*
-          «Empezar» lleva al REGISTRO, no al acceso. Apuntaba a `/sign-in`, que
-          abría el formulario de entrar, así que quien venía a registrarse
-          aterrizaba en una pantalla que no podía usar. Ver el «Why» de
-          `redesign-access`.
-        */}
-        <Link to="/sign-up" className={buttonClasses("primary")}>
+      {/*
+        La acción principal en su TALLA MAYOR, y con aire alrededor.
+
+        Pesaba lo mismo que el botón de un formulario, y no es lo mismo: en un
+        formulario que ya se está rellenando la acción se está mirando; en una
+        página que convence hay que encontrarla.
+
+        «Empezar» lleva al REGISTRO, no al acceso. Apuntaba a `/sign-in`, que
+        abría el formulario de entrar, así que quien venía a registrarse
+        aterrizaba en una pantalla que no podía usar. Ver el «Why» de
+        `redesign-access`.
+      */}
+      <div className="flex flex-wrap items-center gap-4 pt-1">
+        <Link to="/sign-up" className={buttonClasses("primary", false, "large")}>
           {messages.landing.start}
         </Link>
         <span className="text-small text-ink-muted">
@@ -130,46 +126,42 @@ function Hero(): React.ReactElement {
 }
 
 /**
- * Las tres promesas, en el sitio donde la referencia ponía logos de socios.
+ * Lo que la página no decía y decide un registro.
  *
- * Monedín no tiene socios, y una franja de logos existe para prestar
- * credibilidad de terceros: sin terceros, o se inventan —y eso es poner
- * respaldos falsos en una página pública— o se rellena con adorno.
+ * El héroe dice qué hace el producto y el flujo cuenta el ciclo. Ninguno
+ * contesta lo primero que piensa un adulto al leer «monedas» y «premios» en una
+ * aplicación para su hijo: si esto mueve dinero de verdad.
+ *
+ * En ESPEJO del héroe —visual a la izquierda, texto a la derecha— y no por
+ * simetría: dos franjas seguidas con el visual del mismo lado se leen como un
+ * bloque repetido.
+ *
+ * Sobre `surface`, entre dos secciones hundidas: es el turno que le toca en la
+ * alternancia que da ritmo a la página.
  */
-function Promises(): React.ReactElement {
-  const promesas = [
-    {
-      glifo: "🧹",
-      titulo: messages.landing.promiseEarnTitle,
-      cuerpo: messages.landing.promiseEarnBody,
-    },
-    {
-      glifo: "🎁",
-      titulo: messages.landing.promiseSpendTitle,
-      cuerpo: messages.landing.promiseSpendBody,
-    },
-    {
-      glifo: "✓",
-      titulo: messages.landing.promiseApproveTitle,
-      cuerpo: messages.landing.promiseApproveBody,
-    },
-  ];
-
+function About(): React.ReactElement {
   return (
-    <section className="mx-auto grid w-full max-w-(--container-wide) gap-3 px-4 py-6 md:grid-cols-3">
-      {promesas.map((promesa) => (
-        <Card key={promesa.titulo}>
-          <div className="flex items-start gap-3">
-            <span aria-hidden="true" className="text-title">
-              {promesa.glifo}
-            </span>
-            <div className="flex flex-col gap-1">
-              <p className="text-body font-bold">{promesa.titulo}</p>
-              <p className="text-small text-ink-muted">{promesa.cuerpo}</p>
-            </div>
-          </div>
-        </Card>
-      ))}
+    <section className="bg-surface">
+      <div className="mx-auto flex w-full max-w-(--container-wide) flex-col items-center gap-8 px-4 py-12 lg:flex-row lg:gap-12">
+        {/*
+          DECORATIVA, y es lo contrario de `Orbits`.
+
+          Aquella lleva nombre porque comunica el ciclo: sin él, quien no la ve
+          pierde algo que no está en ningún otro sitio. Esta acompaña a un texto
+          que ya lo dice todo, así que anunciarla sería la misma frase dos veces.
+        */}
+        <img src={ilustracion} alt="" className="w-full max-w-tile shrink-0" />
+
+        <div className="flex min-w-0 flex-col gap-4">
+          <h2 className="text-title font-extrabold">{messages.landing.aboutTitle}</h2>
+          <p className="text-body max-w-(--container-reading) text-ink-muted">
+            {messages.landing.aboutBody}
+          </p>
+          <p className="text-body max-w-(--container-reading) text-ink-muted">
+            {messages.landing.aboutLearns}
+          </p>
+        </div>
+      </div>
     </section>
   );
 }

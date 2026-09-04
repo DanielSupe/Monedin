@@ -57,13 +57,62 @@ export const messages = {
       "Lo que sí es real es lo que aprende. Ve cuánto tiene, cuánto le falta para lo que quiere, y " +
       "qué pasó con cada moneda que gastó.",
 
-    /** Las tres promesas. Sustituyen a los logos de socios que no tenemos. */
-    promiseEarnTitle: "Haz tus tareas",
-    promiseEarnBody: "Cada tarea vale las monedas que tú decidas.",
-    promiseSpendTitle: "Elige tu premio",
-    promiseSpendBody: "Del cine a una hora más de consola, con el precio que le pongas.",
-    promiseApproveTitle: "Tú apruebas",
-    promiseApproveBody: "Nada se acredita ni se gasta sin que lo revises.",
+    /**
+     * El ciclo, contado como FLUJO y no como una lista de tres.
+     *
+     * Sustituye a las tres tarjetas de promesa, que decían estas mismas ideas:
+     * tenerlas las dos era decirlo dos veces. Al fundirlas aparece lo que a la
+     * lista le faltaba —el ORDEN—, y con él el paso que se caía: aprobar no es
+     * el tercero de tres cosas, va ENTRE la tarea y las monedas, porque aprobar
+     * es lo que acredita.
+     */
+    howTitle: "Así funciona, de principio a fin",
+    howStepTaskTitle: "Hace una tarea",
+    howStepTaskBody: "Recoger la mesa, la cama, los deberes. Vale lo que tú decidas.",
+    howStepApproveTitle: "Tú apruebas",
+    howStepApproveBody: "Nada se acredita sin que lo mires. Es el paso que sostiene el resto.",
+    howStepCoinsTitle: "Gana sus monedas",
+    howStepCoinsBody: "Se le acreditan al aprobar, y ve de dónde salió cada una.",
+    howStepRewardTitle: "Elige su premio",
+    howStepRewardBody: "Del cine a una hora más de consola, con el precio que le pongas.",
+    /** El ciclo vuelve a empezar, y aprobar aparece otra vez al canjear. */
+    howLoop: "Y vuelta a empezar. Canjear también pasa por ti.",
+
+    /**
+     * La sección que enseña la aplicación.
+     *
+     * Las maquetas se anuncian como EJEMPLOS: sin eso, quien recorre la página
+     * sin verla oye un saldo y dos nombres de niño y no tiene forma de saber
+     * que no son de nadie.
+     */
+    previewTitle: "Las dos caras de Monedín",
+    previewBody:
+      "Tú gestionas y apruebas; tu hijo ve lo suyo, en grande. Es la misma aplicación con dos " +
+      "medidas distintas, porque un niño de seis años y tú no leéis una pantalla igual.",
+    previewParentLabel: "Ejemplo del panel del padre",
+    previewChildLabel: "Ejemplo del inicio del niño",
+    previewParentTag: "Lo que ves tú",
+    previewChildTag: "Lo que ve tu hijo",
+
+    /** Contenido de las maquetas. Son ejemplos, y así se anuncian. */
+    previewPending: "Te esperan",
+    previewPendingTasks: "tareas por aprobar",
+    previewChildren: "Tus hijos",
+    previewChildOne: "Mateo",
+    previewChildTwo: "Emma",
+    previewChildGreeting: "Hola, Mateo",
+    previewChildBalance: "tus monedas",
+    previewChildTasks: "Mis tareas",
+    previewChildRewards: "Mis premios",
+
+    /**
+     * El cierre. Sin argumentar y sin formulario.
+     *
+     * Quien llega hasta aquí ya leyó los argumentos, y un formulario en una
+     * página que no puede validar nada es una pantalla de acceso disfrazada.
+     */
+    closingTitle: "Empieza esta semana",
+    closingBody: "Crea tu cuenta, añade a tus hijos y pon la primera tarea. Se tarda menos que leer esto.",
   },
 
   /**

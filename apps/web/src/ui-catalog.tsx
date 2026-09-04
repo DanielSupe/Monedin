@@ -94,6 +94,14 @@ function Piezas(): React.ReactElement {
           <Button variant="ghost">Ver más</Button>
           <Button variant="danger">Dar de baja</Button>
         </Fila>
+        {/* Las dos TALLAS, juntas y para comparar: enseñar la mayor sola no
+            enseña la diferencia, que es lo único que hay que ver. */}
+        <Fila>
+          <Button variant="primary" size="large">
+            Empezar
+          </Button>
+          <Button variant="primary">Empezar</Button>
+        </Fila>
         {/* `contrast` se enseña SOBRE la superficie de marca, que es donde vive:
             fuera de ella no se entiende para qué existe. */}
         <div data-surface="brand" className="rounded-card flex gap-3 bg-brand p-4">

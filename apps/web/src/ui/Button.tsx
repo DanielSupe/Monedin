@@ -4,6 +4,26 @@ import { cx } from "./cx.js";
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "contrast";
 
 /**
+ * La talla de una acción, y por qué es una OPCIÓN de la pieza.
+ *
+ * Una llamada a la acción de una página que convence no puede pesar lo mismo
+ * que el botón de un formulario que ya se está rellenando: en la primera hay
+ * que encontrarla, en el segundo ya se está mirando.
+ *
+ * Se declara aquí y no desde fuera con utilidades sueltas por lo mismo que la
+ * forma del `Avatar`: `cx` no fusiona utilidades de Tailwind, así que un
+ * `px-6 text-title` pasado desde la pantalla junto a los de la pieza lo
+ * resolvería el orden del CSS generado y no el del código — un fallo que no se
+ * ve leyendo y que no tiene por qué ser estable entre compilaciones.
+ */
+export type ButtonSize = "default" | "large";
+
+const SIZES: Record<ButtonSize, string> = {
+  default: "tap-target text-body px-4",
+  large: "tap-target-large text-title px-6",
+};
+
+/**
  * El tono no se elige por color sino por lo que la acción SIGNIFICA. Por eso
  * son nombres y no una paleta: quien usa la pieza no decide un color.
  *
@@ -36,10 +56,15 @@ const VARIANTS: Record<ButtonVariant, string> = {
  * — y uno en el que ya se cayó dos veces. Con esto, un enlace se ve igual que un
  * botón sin dejar de ser un enlace.
  */
-export function buttonClasses(variant: ButtonVariant = "secondary", block = false): string {
+export function buttonClasses(
+  variant: ButtonVariant = "secondary",
+  block = false,
+  size: ButtonSize = "default",
+): string {
   return cx(
-    "tap-target rounded-control text-body inline-flex items-center justify-center gap-2 border px-4 font-semibold no-underline transition-colors duration-normal",
+    "rounded-control inline-flex items-center justify-center gap-2 border font-semibold no-underline transition-colors duration-normal",
     "disabled:cursor-not-allowed disabled:opacity-55",
+    SIZES[size],
     VARIANTS[variant],
     block && "w-full",
   );
@@ -60,6 +85,7 @@ const ICON_ONLY = "size-14 shrink-0 rounded-full px-0";
 
 interface ButtonBaseProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
+  size?: ButtonSize;
   /**
    * La operación está en curso. Deshabilita ademas de anunciar: la spec exige
    * que no admita una segunda activación, y ese es justo el doble tap que la
@@ -82,7 +108,7 @@ export type ButtonProps = ButtonBaseProps &
   ({ iconOnly: true; "aria-label": string } | { iconOnly?: false | undefined });
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = "secondary", pending = false, block = false, iconOnly, className, disabled, type, ...rest },
+  { variant = "secondary", size = "default", pending = false, block = false, iconOnly, className, disabled, type, ...rest },
   ref,
 ) {
   return (
@@ -94,7 +120,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       type={type ?? "button"}
       disabled={disabled === true || pending}
       aria-busy={pending || undefined}
-      className={cx(buttonClasses(variant, block), iconOnly === true && ICON_ONLY, className)}
+      className={cx(buttonClasses(variant, block, size), iconOnly === true && ICON_ONLY, className)}
     />
   );
 });
