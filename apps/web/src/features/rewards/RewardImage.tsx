@@ -41,7 +41,9 @@ import { messages } from "../../lib/messages.js";
  * defecto solo asomó en el otro sitio. Con el tope dentro, la pieza no puede
  * reventar en el siguiente sitio donde alguien la use.
  */
-const CAJA = "rounded-card aspect-square w-full max-w-tile";
+// `mx-auto`: la caja está topada, así que en una tarjeta más ancha que ella
+// —la del catálogo del padre— se quedaba pegada a la izquierda.
+const CAJA = "rounded-card mx-auto aspect-square w-full max-w-tile";
 export function RewardImage({
   image,
   title,

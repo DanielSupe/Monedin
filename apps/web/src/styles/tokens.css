@@ -187,6 +187,9 @@
   /* La tesela de un premio. Con dos columnas y sin tope, a 1150px cada una
      pasaba de 450px: una foto de producto del tamaño de media pantalla. */
   --container-tile: 18.75rem;
+  /* La tarjeta del catálogo del padre: la misma idea que la tesela del niño,
+     más ancha porque lleva tres controles y la lista de a quién se le ofrece. */
+  --container-card: 24rem;
   --container-wide: 72rem;
   /* El lateral de navegación. `max-w-full` detrás, para que a 320px no desborde. */
   --container-sidebar: 17rem;

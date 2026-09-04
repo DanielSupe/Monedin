@@ -101,16 +101,16 @@ export function RewardCatalog({
         <EmptyState glyph="🎁" title={messages.rewards.empty} />
       ) : (
         /*
-          Cada premio ocupa lo que necesita, no la fila entera.
+          REJILLA, como el escaparate del niño, y por lo mismo: a ancho completo
+          la tarjeta se estiraba a los 72rem para enseñar un título, a quién se
+          le ofrece y tres botones, con el nombre de un hijo a un palmo de su
+          precio y nada en medio.
 
-          A ancho completo la tarjeta se estiraba a los 72rem del contenido para
-          enseñar un título, una lista de a quién se le ofrece y tres botones: el
-          nombre de un hijo quedaba a un palmo de su precio, con nada en medio.
-          El tope es el de LECTURA y no el de la tesela del escaparate: aquí hay
-          texto y tres controles, y 300px no da para «Cambiar quién puede
-          pedirlo».
+          Su tope es MÁS ANCHO que el de la tesela del niño y tiene token propio:
+          el padre ve lo mismo más los controles de gestión, y 300px no dan para
+          «Cambiar quién puede pedirlo».
         */
-        <ul className="flex max-w-reading list-none flex-col gap-4 p-0">
+        <ul className="grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-2 xl:grid-cols-3">
           {premios.map((premio) => (
             <RewardCard key={premio.id} reward={premio} />
           ))}
@@ -172,15 +172,18 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
   function guardarTitulo(evento: React.FormEvent): void {
     evento.preventDefault();
     update.mutate(
-      { rewardId: reward.id, input: { title, description: description || null } },
+      {
+        rewardId: reward.id,
+        input: { title, description: description || null },
+      },
       { onSuccess: () => setEditandoTitulo(false) },
     );
   }
 
   return (
-    <li>
-      <Card>
-        <div className="flex min-w-0 flex-col gap-3">
+    <li className="h-full w-full max-w-card">
+      <Card className="h-full">
+        <div className="flex h-full min-w-0 flex-col gap-3">
           {editandoTitulo ? (
             <form onSubmit={guardarTitulo} className="flex flex-col gap-3">
               <Field label={messages.rewards.rewardTitle}>
@@ -215,15 +218,24 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
                   rewardsApi.requestRewardImageUploadUrl(reward.id, contentType)
                 }
                 onUploaded={(key) =>
-                  update.mutate({ rewardId: reward.id, input: { imageUploadKey: key } })
+                  update.mutate({
+                    rewardId: reward.id,
+                    input: { imageUploadKey: key },
+                  })
                 }
                 aspect={1}
                 maxDimension={PHOTO_MAX_DIMENSION}
                 label={messages.rewards.addImage}
               />
 
-              <div className="flex flex-wrap gap-2">
-                <Button type="submit" variant="primary" pending={update.isPending}>
+              {/* Los tres al PIE y en una fila: `mt-auto` los alinea entre tarjetas
+              aunque una tenga descripción y otra no. */}
+          <div className="mt-auto flex flex-nowrap gap-2">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  pending={update.isPending}
+                >
                   {messages.rewards.save}
                 </Button>
                 <Button
@@ -239,7 +251,10 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
                     variant="danger"
                     disabled={update.isPending}
                     onClick={() =>
-                      update.mutate({ rewardId: reward.id, input: { imageUploadKey: null } })
+                      update.mutate({
+                        rewardId: reward.id,
+                        input: { imageUploadKey: null },
+                      })
                     }
                   >
                     {messages.rewards.removeImage}
@@ -255,7 +270,9 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
                 <div className="flex min-w-0 flex-col gap-1">
                   <p className="text-body font-bold">{reward.title}</p>
                   {reward.description !== null && (
-                    <p className="text-small text-ink-muted">{reward.description}</p>
+                    <p className="text-small text-ink-muted">
+                      {reward.description}
+                    </p>
                   )}
                 </div>
                 {reward.status === "RETIRED" && (
@@ -266,7 +283,9 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
           )}
 
           {update.error !== null && (
-            <Alert tone={alertToneFor(update.error)}>{describeRewardsError(update.error)}</Alert>
+            <Alert tone={alertToneFor(update.error)}>
+              {describeRewardsError(update.error)}
+            </Alert>
           )}
 
           <div className="flex flex-col gap-2">
@@ -275,13 +294,20 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
             </p>
 
             {reward.offers.length === 0 ? (
-              <p className="text-small text-ink-muted">{messages.rewards.noOffers}</p>
+              <p className="text-small text-ink-muted">
+                {messages.rewards.noOffers}
+              </p>
             ) : (
               <ul className="flex list-none flex-col gap-2 p-0">
                 {reward.offers.map((offer) => (
-                  <li key={offer.child.id} className="flex min-w-0 items-center gap-3">
+                  <li
+                    key={offer.child.id}
+                    className="flex min-w-0 items-center gap-3"
+                  >
                     <Avatar value={offer.child.avatar} size="small" />
-                    <span className="min-w-0 flex-1 truncate text-body">{offer.child.name}</span>
+                    <span className="min-w-0 flex-1 truncate text-body">
+                      {offer.child.name}
+                    </span>
                     <Coins amount={offer.coins} />
                   </li>
                 ))}
@@ -295,7 +321,11 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
 
           <div className="flex flex-wrap gap-2">
             {!editandoTitulo && (
-              <Button type="button" variant="secondary" onClick={() => setEditandoTitulo(true)}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setEditandoTitulo(true)}
+              >
                 {messages.rewards.edit}
               </Button>
             )}
@@ -307,7 +337,11 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
               {messages.rewards.editOffers}
             </Button>
             {reward.status === "ACTIVE" && (
-              <Button type="button" variant="danger" onClick={() => setConfirmando(true)}>
+              <Button
+                type="button"
+                variant="danger"
+                onClick={() => setConfirmando(true)}
+              >
                 {messages.rewards.retire}
               </Button>
             )}
@@ -321,7 +355,11 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
             description={messages.rewards.retireConfirm}
             footer={
               <>
-                <Button type="button" variant="secondary" onClick={() => setConfirmando(false)}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => setConfirmando(false)}
+                >
                   {messages.rewards.cancel}
                 </Button>
                 <Button
@@ -329,7 +367,9 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
                   variant="danger"
                   pending={retire.isPending}
                   onClick={() =>
-                    retire.mutate(reward.id, { onSuccess: () => setConfirmando(false) })
+                    retire.mutate(reward.id, {
+                      onSuccess: () => setConfirmando(false),
+                    })
                   }
                 >
                   {messages.rewards.retireSubmit}
@@ -338,7 +378,9 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
             }
           >
             {retire.error !== null && (
-              <Alert tone={alertToneFor(retire.error)}>{describeRewardsError(retire.error)}</Alert>
+              <Alert tone={alertToneFor(retire.error)}>
+                {describeRewardsError(retire.error)}
+              </Alert>
             )}
           </Dialog>
         </div>
@@ -396,7 +438,10 @@ function OffersEditor({
   }
 
   return (
-    <form onSubmit={enviar} className="flex flex-col gap-3 border-t border-border pt-3">
+    <form
+      onSubmit={enviar}
+      className="flex flex-col gap-3 border-t border-border pt-3"
+    >
       <ChildrenPicker
         picker={picker}
         labels={{
@@ -410,14 +455,20 @@ function OffersEditor({
       {problema !== null && <Alert tone="danger">{problema}</Alert>}
 
       {replace.error !== null && (
-        <Alert tone={alertToneFor(replace.error)}>{describeRewardsError(replace.error)}</Alert>
+        <Alert tone={alertToneFor(replace.error)}>
+          {describeRewardsError(replace.error)}
+        </Alert>
       )}
 
       <div className="flex flex-wrap gap-2">
         <Button type="submit" variant="primary" pending={replace.isPending}>
           {messages.rewards.saveOffers}
         </Button>
-        <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => onOpenChange(false)}
+        >
           {messages.rewards.cancel}
         </Button>
       </div>

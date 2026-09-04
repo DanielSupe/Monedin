@@ -34,7 +34,8 @@ export function MyRewards(): React.ReactElement {
   const { data, isPending, error } = useOwnRewards();
   const pendientes = useOwnRedemptions({ status: "PENDING" });
   const { session } = useSession();
-  const saldo = session?.actor?.familyRole === "CHILD" ? session.actor.coins : 0;
+  const saldo =
+    session?.actor?.familyRole === "CHILD" ? session.actor.coins : 0;
 
   if (isPending) {
     return <Skeleton lines={4} />;
@@ -45,12 +46,16 @@ export function MyRewards(): React.ReactElement {
   }
 
   const premios = data?.items ?? [];
-  const premiosYaPedidos = new Set((pendientes.data?.items ?? []).map((canje) => canje.reward.id));
+  const premiosYaPedidos = new Set(
+    (pendientes.data?.items ?? []).map((canje) => canje.reward.id),
+  );
 
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-baseline gap-3">
-        <h2 className="text-title font-bold">{messages.rewards.myRewardsTitle}</h2>
+        <h2 className="text-title font-bold">
+          {messages.rewards.myRewardsTitle}
+        </h2>
 
         {/*
           En una rejilla, «cuántos hay» deja de leerse solo: una columna se
@@ -59,7 +64,11 @@ export function MyRewards(): React.ReactElement {
         */}
         {premios.length > 0 && (
           <p className="text-small text-ink-muted">
-            {contar(premios.length, messages.rewards.countOne, messages.rewards.countMany)}
+            {contar(
+              premios.length,
+              messages.rewards.countOne,
+              messages.rewards.countMany,
+            )}
           </p>
         )}
       </div>
@@ -121,48 +130,66 @@ function MyRewardRow({
       es lo que mide UNA tesela, y sale de un token —ninguna pantalla escribe
       píxeles—.
     */
-    <li className="w-full max-w-tile">
-      <Card>
-        <div className="flex min-w-0 flex-col gap-3">
+    <li className="h-full w-full max-w-tile">
+      {/*
+        `h-full` en cadena hasta el contenido: en una rejilla la fila se estira
+        hasta la tesela más alta, pero las demás no la rellenaban, así que un
+        premio con descripción dejaba a sus vecinos más bajos. La altura la
+        marca la fila y todas la ocupan.
+      */}
+      <Card className="h-full">
+        <div className="flex h-full min-w-0 flex-col gap-3">
           <RewardImage image={reward.image} title={reward.title} />
 
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="flex min-w-0 flex-col gap-1">
               <p className="text-body font-bold">{reward.title}</p>
               {reward.description !== null && (
-                <p className="text-small text-ink-muted">{reward.description}</p>
+                <p className="text-small text-ink-muted">
+                  {reward.description}
+                </p>
               )}
             </div>
             {/* «Ya lo pediste» es un ESTADO, no un párrafo al final: lo que se
                 ve y lo que se puede hacer van juntos. */}
-            {pedido && <Badge tone="info">{messages.redemptions.alreadyRequested}</Badge>}
+            {pedido && (
+              <Badge tone="info">{messages.redemptions.alreadyRequested}</Badge>
+            )}
           </div>
 
-          <Coins amount={reward.coins} />
+          {/* Empuja lo de abajo al pie: con alturas iguales, los precios y las
+              acciones se alinean entre teselas en vez de flotar donde acabe el
+              texto de cada una. */}
+          <div className="mt-auto flex flex-col gap-3">
+            <Coins amount={reward.coins} />
 
-          {reward.affordable ? (
-            <>
-              <p className="text-small font-semibold text-success">{messages.rewards.affordable}</p>
+            {reward.affordable ? (
+              <>
+                <p className="text-small font-semibold text-success">
+                  {messages.rewards.affordable}
+                </p>
 
-              {!pedido && (
-                <Button
-                  variant="primary"
-                  block
-                  pending={solicitar.isPending}
-                  onClick={() => solicitar.mutate({ rewardId: reward.id })}
-                >
-                  {solicitar.isPending
-                    ? messages.redemptions.requesting
-                    : messages.redemptions.request}
-                </Button>
-              )}
+                {!pedido && (
+                  <Button
+                    variant="primary"
+                    block
+                    pending={solicitar.isPending}
+                    onClick={() => solicitar.mutate({ rewardId: reward.id })}
+                  >
+                    {solicitar.isPending
+                      ? messages.redemptions.requesting
+                      : messages.redemptions.request}
+                  </Button>
+                )}
 
-              {solicitar.error !== null && (
-                <Alert tone="danger">{describeRedemptionsError(solicitar.error)}</Alert>
-              )}
-            </>
-          ) : (
-            /*
+                {solicitar.error !== null && (
+                  <Alert tone="danger">
+                    {describeRedemptionsError(solicitar.error)}
+                  </Alert>
+                )}
+              </>
+            ) : (
+              /*
               Aquí se ESTRENA `ProgressBar`, que es lo que su propia cabecera
               dice desde `add-design-system` y hasta hoy solo hacía el catálogo.
               Es la mitad del ciclo que el producto enseña: ver cuánto falta
@@ -173,13 +200,19 @@ function MyRewardRow({
               aquí» y el número dice cuánto exactamente; quitarlo sería cambiar
               precisión por gráfico.
             */
-            <div className="flex flex-col gap-1">
-              <ProgressBar value={balance} max={reward.coins} label={reward.title} />
-              <p className="text-small text-ink-muted">
-                {messages.rewards.missingPrefix} {faltan} {messages.rewards.coins.toLowerCase()}
-              </p>
-            </div>
-          )}
+              <div className="flex flex-col gap-1">
+                <ProgressBar
+                  value={balance}
+                  max={reward.coins}
+                  label={reward.title}
+                />
+                <p className="text-small text-ink-muted">
+                  {messages.rewards.missingPrefix} {faltan}{" "}
+                  {messages.rewards.coins.toLowerCase()}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </Card>
     </li>

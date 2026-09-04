@@ -490,7 +490,7 @@ export const messages = {
     save: "Guardar",
 
     /** Reemplazo del conjunto de ofertas. */
-    editOffers: "Cambiar quién puede pedirlo",
+    editOffers: "Cambiar ofertas",
     offeredTo: "Ofrecido a",
     noOffers: "Sin ofertas todavía.",
     saveOffers: "Guardar ofertas",
