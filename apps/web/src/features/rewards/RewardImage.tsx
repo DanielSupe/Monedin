@@ -33,8 +33,15 @@ import { messages } from "../../lib/messages.js";
  * y eran distintas: la de la foto era un MÁXIMO, así que su altura real dependía
  * de la proporción. Con dos declaraciones, una fila con foto y otra sin ella
  * medían cosas distintas.
+ *
+ * El TOPE de ancho vive aquí y no en quien la coloca, y eso se aprendió por las
+ * malas: siendo cuadrada y a ancho completo, en el catálogo del padre —donde la
+ * tarjeta ocupa la fila entera— salía un cuadrado del tamaño de la columna. El
+ * escaparate del niño no lo sufría porque su tesela ya venía topada, así que el
+ * defecto solo asomó en el otro sitio. Con el tope dentro, la pieza no puede
+ * reventar en el siguiente sitio donde alguien la use.
  */
-const CAJA = "rounded-card aspect-square w-full";
+const CAJA = "rounded-card aspect-square w-full max-w-tile";
 export function RewardImage({
   image,
   title,

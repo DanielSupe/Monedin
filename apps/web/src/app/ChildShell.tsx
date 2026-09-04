@@ -181,14 +181,21 @@ export function ChildShell({
           no el documento: es lo que deja la columna —y su pie— quieta. En
           estrecho sigue desplazando el documento, así que aquí no se acota nada.
         */}
-        <main
-          className={cx(
-            "mx-auto w-full min-w-0 max-w-wide flex-1 px-4 py-4",
-            ancho && "overflow-y-auto",
-          )}
-        >
-          <Outlet />
-        </main>
+        {/*
+          Quien desplaza es este ENVOLTORIO y no el `<main>`.
+
+          Estaba en el `<main>`, que lleva `mx-auto max-w-wide`: la barra salía
+          en el borde del ancho máximo —a 72rem— y no en el de la ventana, con
+          un palmo de página muerta a su derecha. El envoltorio ocupa el ancho
+          entero, así que la barra cae donde se espera; el `<main>` conserva su
+          tope y su centrado, que es lo que impide que el contenido se reparta
+          por todo el monitor.
+        */}
+        <div className={cx("flex min-w-0 flex-1 flex-col", ancho && "overflow-y-auto")}>
+          <main className="mx-auto w-full min-w-0 max-w-wide flex-1 px-4 py-4">
+            <Outlet />
+          </main>
+        </div>
       </div>
     </div>
   );

@@ -17,8 +17,15 @@ function marco(): HTMLElement {
   return document.querySelector("[data-scale]") as HTMLElement;
 }
 
-function contenido(): HTMLElement {
-  return screen.getByRole("main");
+/**
+ * El envoltorio que desplaza, que es el PADRE del `<main>`.
+ *
+ * No es el `<main>`: aquello lleva `mx-auto max-w-wide`, así que su barra salía
+ * en el borde del ancho máximo y no en el de la ventana. El envoltorio ocupa el
+ * ancho entero y el `<main>` conserva su tope dentro.
+ */
+function envoltorio(): HTMLElement {
+  return screen.getByRole("main").parentElement as HTMLElement;
 }
 
 /**
@@ -43,7 +50,11 @@ describe("con la columna delante, lo que se desplaza es el contenido", () => {
 
     expect(marco().className).toContain("h-dvh");
     expect(marco().className).toContain("overflow-hidden");
-    expect(contenido().className).toContain("overflow-y-auto");
+    expect(envoltorio().className).toContain("overflow-y-auto");
+
+    // Y el tope del contenido NO se pierde por mover la barra de sitio: son dos
+    // cosas distintas y las dos tienen que seguir siendo ciertas.
+    expect(screen.getByRole("main").className).toContain("max-w-wide");
   });
 });
 
@@ -63,7 +74,7 @@ describe("en estrecho no cambia nada", () => {
 
     expect(marco().className).toContain("min-h-dvh");
     expect(marco().className).not.toContain("overflow-hidden");
-    expect(contenido().className).not.toContain("overflow-y-auto");
+    expect(envoltorio().className).not.toContain("overflow-y-auto");
   });
 });
 

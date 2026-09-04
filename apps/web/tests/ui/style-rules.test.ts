@@ -334,7 +334,9 @@ describe("el contenido no se reparte por todo el monitor", () => {
    */
   function clasesDelMain(marco: string): string {
     const contenido = readFileSync(join(SRC, "app", marco), "utf8");
-    const apertura = contenido.match(/<main[\s\S]*?>/);
+    // `<main\s`, con espacio: sin él encuentra el `<main>` que un comentario
+    // menciona de pasada —pasó— y se queda con un trozo sin atributos.
+    const apertura = contenido.match(/<main\s[\s\S]*?>/);
 
     return (apertura?.[0].match(/"([^"]*)"/g) ?? []).join(" ");
   }
