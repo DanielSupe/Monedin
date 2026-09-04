@@ -446,6 +446,21 @@ context: |
     nada: una tabla vacia con encabezados dice «esto esta roto» donde el estado vacio dice «todavia
     no hay nada».
 
+    RECORTAR Y REDIMENSIONAR SON DOS DECISIONES, desde `crop-reward-images`. Eran una sola prop
+    —`aspect` decidia si se recortaba Y, via una bandera `forAvatar`, si el resultado bajaba a 512 o
+    a 1280 px—, y coincidian mientras lo unico que se recortaba era lo unico que se guardaba pequeno.
+    La foto de un premio rompe la coincidencia: recorta y necesita detalle.
+      - Avatar: recorta cuadrado, guarda a AVATAR_MAX_DIMENSION.
+      - Premio: recorta cuadrado, guarda a PHOTO_MAX_DIMENSION. Las DOS vias de entrada —el alta y la
+        edicion— recortan, o el catalogo acaba con fotos de dos clases segun por donde entraron.
+      - Evidencia: NO recorta, guarda a PHOTO_MAX_DIMENSION. Se mira de una en una en la bandeja del
+        padre, no junto a otras del mismo tamano, y lo que hay que ver es el conjunto.
+    El premio comparte FORMA con el avatar y TAMANO con la evidencia: con las dos decisiones atadas,
+    uno de esos dos pares era imposible de expresar.
+    La imagen de un premio se dibuja ademas en una CAJA de proporcion fija, la misma para la foto y
+    para el respaldo, con un tope de ancho por tesela. El recorte endereza las fotos NUEVAS; la caja
+    arregla tambien las viejas, que conservan su proporcion, sin reprocesar nada en el almacen.
+
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
   - El niño NO es un User: vive entero como ChildProfile dentro de la cuenta de su padre, y

@@ -30,6 +30,15 @@
 - [x] 3.3 Test de que las dos ramas —con foto y sin ella— producen la misma caja. Comparar las dos
       entre sí, no comprobar que cada una existe.
 
+## 3b. El tamaño de la tesela
+
+- [x] 3b.1 Tope de ancho por tesela, desde un token: con dos columnas y sin tope, en el ancho máximo
+      del contenido cada una pasaba de 450px y la foto ocupaba media pantalla.
+- [x] 3b.2 Más columnas cuando hay sitio, para que el tope no deje huecos. La decisión de
+      `redesign-child-surfaces` era «dos y no tantas como quepan» porque cada columna de más encogía
+      la foto; con un tope por tesela la foto tiene ahora también un suelo, así que crecer en ancho
+      deja de encogerla.
+
 ## 4. Hacer cumplir
 
 - [x] 4.1 **Inyectar las violaciones**, y las tres tienen que caer: el premio subiendo sin recorte; el
@@ -41,11 +50,11 @@
 
 ## 5. Lo que ningún test cubre
 
-- [ ] 5.1 **Abrir la aplicación**: publicar un premio con una foto apaisada, recortarla, y ver la
+- [x] 5.1 **Abrir la aplicación**: publicar un premio con una foto apaisada, recortarla, y ver la
       rejilla del niño con ese premio junto a otro sin foto y a otro con foto vieja. Que las tres
       teselas midan lo mismo no lo prueba jsdom.
 
 ## 6. Documentar
 
-- [ ] 6.1 `config.yaml`: qué se recorta y qué no, y por qué son dos decisiones y no una.
-- [ ] 6.2 `CLAUDE.md`: lo que salga que valga para el siguiente.
+- [x] 6.1 `config.yaml`: qué se recorta y qué no, y por qué son dos decisiones y no una.
+- [x] 6.2 `CLAUDE.md`: lo que salga que valga para el siguiente.

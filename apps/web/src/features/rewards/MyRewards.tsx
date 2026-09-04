@@ -79,7 +79,7 @@ export function MyRewards(): React.ReactElement {
           colocación, no otra estructura. Ver la decisión 1 del design de
           `redesign-child-surfaces`.
         */
-        <ul className="grid list-none grid-cols-2 gap-3 p-0">
+        <ul className="grid list-none grid-cols-2 gap-3 p-0 md:grid-cols-3">
           {premios.map((premio) => (
             <MyRewardRow
               key={premio.id}
@@ -112,7 +112,16 @@ function MyRewardRow({
   const pedido = yaPedido || solicitar.isSuccess;
 
   return (
-    <li>
+    /*
+      TOPE de ancho por tesela, además de las columnas.
+      
+      Sin él, la tesela vale lo que valga su columna: con dos columnas en el
+      ancho máximo del contenido, cada una pasaba de 450px y la foto de un
+      producto ocupaba media pantalla. El tope va aquí y no en la rejilla porque
+      es lo que mide UNA tesela, y sale de un token —ninguna pantalla escribe
+      píxeles—.
+    */
+    <li className="w-full max-w-tile">
       <Card>
         <div className="flex min-w-0 flex-col gap-3">
           <RewardImage image={reward.image} title={reward.title} />

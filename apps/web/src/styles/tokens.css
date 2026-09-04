@@ -184,6 +184,9 @@
   --container-dialog: 28rem;
   --container-reading: 40rem;
   --container-orbit: 20rem;
+  /* La tesela de un premio. Con dos columnas y sin tope, a 1150px cada una
+     pasaba de 450px: una foto de producto del tamaño de media pantalla. */
+  --container-tile: 18.75rem;
   --container-wide: 72rem;
   /* El lateral de navegación. `max-w-full` detrás, para que a 320px no desborde. */
   --container-sidebar: 17rem;

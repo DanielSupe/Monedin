@@ -107,32 +107,6 @@ El almacén SHALL ser privado: una dirección sin firma NO SHALL dar acceso a ni
 - **WHEN** se intenta acceder a una imagen sin una firma válida
 - **THEN** el almacén deniega el acceso
 
-### Requirement: Las imágenes se reducen antes de salir del dispositivo
-
-El cliente SHALL comprimir y redimensionar una imagen antes de subirla, para que lo que viaja y lo
-que se guarda sea proporcionado a cómo se va a mostrar. Cuando la imagen sea un avatar, el cliente
-SHALL además ofrecer recortarla en cuadrado antes de subir, porque un avatar se pinta pequeño y su
-encuadre importa.
-
-Las imágenes que no son avatares —la foto de un premio, la evidencia de una tarea— NO SHALL recortarse
-a la fuerza: lo que hay que ver en ellas es el conjunto.
-
-#### Scenario: Una foto grande se sube reducida
-
-- **WHEN** alguien elige una foto tomada con la cámara del dispositivo
-- **THEN** lo que se sube pesa sensiblemente menos que el archivo original
-- **AND** sigue siendo suficiente para mostrarse donde se va a mostrar
-
-#### Scenario: Encuadrar un avatar
-
-- **WHEN** alguien elige una foto para usarla como avatar
-- **THEN** puede ajustar el encuadre cuadrado antes de subirla
-
-#### Scenario: Una foto de premio no se recorta a la fuerza
-
-- **WHEN** alguien elige una foto para un premio o como evidencia de una tarea
-- **THEN** se sube completa, sin obligar a recortarla en cuadrado
-
 ### Requirement: Pedir una subida exige ser dueño de aquello que se va a ilustrar
 
 Pedir una URL de subida SHALL exigir las mismas condiciones de rol y de propiedad que operar sobre el
@@ -191,4 +165,75 @@ arrastre a los tests.
 - **WHEN** ambos nombres son iguales
 - **THEN** la batería se niega a ejecutarse
 - **AND** el mensaje explica que habría borrado los archivos con los que se está trabajando
+
+### Requirement: Recortar y redimensionar son dos decisiones distintas
+
+El cliente SHALL comprimir y redimensionar una imagen antes de subirla, para que lo que viaja y lo
+que se guarda sea proporcionado a cómo se va a mostrar.
+
+Ofrecer recorte y elegir cuánto detalle se guarda SHALL decidirse **por separado**. Una imagen SHALL
+poder recortarse y conservar aun así la resolución de una foto: son preguntas independientes —qué
+forma tiene y cuánto detalle guarda— y atarlas hace que pedir una arrastre la otra sin quererlo.
+
+Un avatar SHALL guardarse a la medida de un avatar y una foto a la de una foto, aunque las dos se
+recorten.
+
+#### Scenario: Una foto grande se sube reducida
+
+- **WHEN** alguien elige una foto tomada con la cámara del dispositivo
+- **THEN** lo que se sube pesa sensiblemente menos que el archivo original
+- **AND** sigue siendo suficiente para mostrarse donde se va a mostrar
+
+#### Scenario: Recortar no encoge a tamaño de avatar
+
+- **WHEN** se elige una imagen que se recorta pero no es un avatar
+- **THEN** se guarda con el detalle de una foto y no con el de un avatar
+
+#### Scenario: Un avatar sigue guardándose como avatar
+
+- **WHEN** alguien elige una foto para usarla como avatar
+- **THEN** se guarda a la medida de un avatar
+
+### Requirement: Se recorta lo que se va a presentar en rejilla
+
+El cliente SHALL ofrecer recortar en cuadrado, antes de subir, las imágenes que se presentan **junto
+a otras y del mismo tamaño**: los avatares y la foto de un premio.
+
+Un encuadre elegido por quien sube es lo que hace que una rejilla sea una rejilla. Sin él, cada
+casilla se estira o se encoge según la foto que le tocó y la fila queda dentada — y quien sube no
+tiene forma de arreglarlo, porque el problema no está en su foto sino en que ninguna coincide con
+las demás.
+
+El recorte SHALL ser **interactivo**: quien sube ajusta el encuadre y el acercamiento antes de
+confirmar. NO SHALL recortarse por el centro sin intervención, que es lo que dejaría fuera la mitad
+del juguete.
+
+La evidencia de una tarea NO SHALL recortarse: lo que hay que ver en ella es el conjunto —la cama
+hecha, la mesa recogida— y no se presenta junto a otras del mismo tamaño, sino de una en una.
+
+#### Scenario: Encuadrar un avatar
+
+- **WHEN** alguien elige una foto para usarla como avatar
+- **THEN** puede ajustar el encuadre cuadrado antes de subirla
+
+#### Scenario: Encuadrar la foto de un premio
+
+- **WHEN** un padre elige una foto para un premio, al publicarlo o al editarlo
+- **THEN** puede ajustar el encuadre cuadrado antes de subirla
+
+#### Scenario: El encuadre lo elige quien sube
+
+- **WHEN** alguien recorta una imagen apaisada
+- **THEN** puede desplazar y acercar hasta encuadrar lo que quiere conservar
+- **AND** no se recorta por el centro sin que intervenga
+
+#### Scenario: Una evidencia no se recorta
+
+- **WHEN** un niño elige una foto como evidencia de una tarea
+- **THEN** se sube completa, sin obligar a recortarla en cuadrado
+
+#### Scenario: Se puede desistir del recorte
+
+- **WHEN** alguien abre el recortador y cambia de idea
+- **THEN** puede cancelar sin que se suba nada
 

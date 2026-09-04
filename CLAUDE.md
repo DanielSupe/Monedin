@@ -892,6 +892,30 @@ tocar su nombre ni un solo punto de uso.
 **Al tocar tokens hay que abrir pantallas del padre y del niño para confirmar que no se enteraron**,
 porque eso no lo cubre ningún test.
 
+**Una prop que decide dos cosas se lleva bien hasta que aparece el caso que las separa.** `aspect`
+decidía si una imagen se recortaba **y** —vía una bandera `forAvatar`— si se guardaba a 512 o a
+1280 px. Convivieron porque coincidían: lo único que se recortaba era lo único que se guardaba
+pequeño. En cuanto la foto de un premio necesitó recortarse **y** conservar detalle, pedir una
+arrastraba la otra. La señal de que estaban atadas fue tener que escribir `forAvatar: true` para algo
+que no es un avatar — **nombrar una opción por su primer caso de uso** es cómo se llega ahí.
+
+**Revertir una decisión escrita se hace por la parte que cambió, no entera.** La cabecera de
+`ImageUploadField` decía que ni el premio ni la evidencia se recortan, «donde recortar a cuadrado
+quitaría justo lo que hay que ver». Para el premio dejó de valer —van en rejilla desde
+`redesign-child-surfaces`, y el recortador es interactivo, así que quien sube encuadra hasta que el
+juguete cabe—; para la evidencia sigue valiendo entera. Que una sola frase cubriera los dos casos era
+el problema. Dejar la mitad viva es lo que evita que la reversión se lea como que la regla no valía.
+
+**Cuando una regresión puede volver por dos sitios, el test que la caza mira los dos.** El premio
+comparte forma con el avatar y tamaño con la evidencia, así que el caso que prueba que las dos
+decisiones están separadas monta **dos pantallas** y compara los pares. Mirar solo el premio pasaría
+con las dos decisiones atadas otra vez.
+
+**Un test que no puede llegar al final lo dice y prueba lo que sí puede.** El recorte no se prueba de
+punta a punta: `react-easy-crop` mide su lienzo para calcular el área, jsdom no hace layout y su
+`onCropComplete` nunca dispara. En vez de fingirlo, se comprueba **qué par pide cada punto de uso**
+—que es donde está el riesgo real— y el recorte de verdad se mira abriendo la aplicación.
+
 **Tres pantallas con la misma forma no es un estilo: es que nadie decidió en qué se diferencian.**
 Los tres destinos del niño eran `<ul className="flex list-none flex-col gap-3 p-0">`, idénticos hasta
 en la clase, y cada uno se había vestido por separado resolviendo bien SU contenido dentro de la
