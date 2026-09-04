@@ -1,8 +1,6 @@
 import {
   ALLOWED_IMAGE_CONTENT_TYPES,
-  AVATAR_MAX_DIMENSION,
   MAX_IMAGE_SIZE_MB,
-  PHOTO_MAX_DIMENSION,
   type ImageContentType,
 } from "@monedin/contracts";
 import imageCompression from "browser-image-compression";
@@ -25,12 +23,20 @@ export function isAllowedImage(file: File): file is File & { type: ImageContentT
   return (ALLOWED_IMAGE_CONTENT_TYPES as readonly string[]).includes(file.type);
 }
 
-export async function prepareImage(
-  source: Blob,
-  options: { forAvatar?: boolean } = {},
-): Promise<Blob> {
-  const maxWidthOrHeight = options.forAvatar === true ? AVATAR_MAX_DIMENSION : PHOTO_MAX_DIMENSION;
-
+/**
+ * RECIBE la medida, no la deduce.
+ *
+ * Tenía una bandera `forAvatar` que elegía entre las dos constantes, y eso ató
+ * dos preguntas independientes: qué FORMA tiene una imagen y cuánto DETALLE
+ * guarda. Coincidían mientras lo único que se recortaba era lo único que se
+ * guardaba pequeño; en cuanto apareció un caso que recorta y necesita detalle
+ * —la foto de un premio, que va en rejilla— la coincidencia se rompió.
+ *
+ * La bandera no sobrevive, y no por estética: nombrar una opción por su primer
+ * caso de uso es cómo se acaba pasando `forAvatar: true` para algo que no lo
+ * es. Ver la decisión 2 del design de `crop-reward-images`.
+ */
+export async function prepareImage(source: Blob, maxWidthOrHeight: number): Promise<Blob> {
   // `useWebWorker` mantiene la interfaz respondiendo mientras comprime, que en
   // un móvil con una foto grande son varios segundos.
   return imageCompression(source as File, {

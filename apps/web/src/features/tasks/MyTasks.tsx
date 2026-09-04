@@ -1,4 +1,4 @@
-import type { OwnTask } from "@monedin/contracts";
+import { PHOTO_MAX_DIMENSION, type OwnTask } from "@monedin/contracts";
 import { useState } from "react";
 import * as api from "../../api/tasks.js";
 import { messages } from "../../lib/messages.js";
@@ -133,6 +133,14 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
                   api.requestEvidenceUploadUrl(task.id, contentType)
                 }
                 onUploaded={setEvidencia}
+                /*
+                  SIN `aspect`: una evidencia no se recorta. Se mira de una en
+                  una en la bandeja del padre, no junto a otras del mismo
+                  tamaño, y lo que hay que ver es el conjunto — la cama hecha,
+                  la mesa recogida. Es la mitad de la decisión original que
+                  `crop-reward-images` conserva.
+                */
+                maxDimension={PHOTO_MAX_DIMENSION}
                 label={messages.tasks.addEvidence}
               />
               {evidencia !== undefined && (

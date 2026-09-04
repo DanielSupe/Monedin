@@ -1,4 +1,9 @@
-import { TITLE_MAX_LENGTH, type CreateRewardInput, createRewardSchema } from "@monedin/contracts";
+import {
+  PHOTO_MAX_DIMENSION,
+  TITLE_MAX_LENGTH,
+  type CreateRewardInput,
+  createRewardSchema,
+} from "@monedin/contracts";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import * as rewardsApi from "../../api/rewards.js";
@@ -120,6 +125,14 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
           */}
           <ImageUploadField
             label={messages.rewards.optionalImage}
+            /*
+              RECORTA en cuadrado y guarda con detalle de FOTO, no de avatar.
+              Las dos cosas por separado: atadas, pedir recorte le habría
+              encogido la imagen a 512 px para una tesela que ocupa media
+              tablet. Ver la decisión 2 del design de `crop-reward-images`.
+            */
+            aspect={1}
+            maxDimension={PHOTO_MAX_DIMENSION}
             requestUploadUrl={rewardsApi.requestPendingRewardImageUploadUrl}
             onUploaded={setImageUploadKey}
           />

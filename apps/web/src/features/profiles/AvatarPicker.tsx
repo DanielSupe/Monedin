@@ -1,4 +1,4 @@
-import type { AvatarKey, ImageContentType, UploadUrl } from "@monedin/contracts";
+import { AVATAR_MAX_DIMENSION, type AvatarKey, type ImageContentType, type UploadUrl } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
 import { Card, cx } from "../../ui/index.js";
 import { AVATAR_OPTIONS } from "../../ui/avatars.js";
@@ -82,6 +82,8 @@ export function AvatarPicker({
               requestUploadUrl={requestUploadUrl}
               onUploaded={onUpload}
               aspect={1}
+              // Recorta Y guarda pequeño: un avatar se pinta en 24 o 36 px.
+              maxDimension={AVATAR_MAX_DIMENSION}
               label={messages.uploads.choose}
             />
           </div>

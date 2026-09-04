@@ -1,4 +1,4 @@
-import type { Reward } from "@monedin/contracts";
+import { PHOTO_MAX_DIMENSION, type Reward } from "@monedin/contracts";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import * as rewardsApi from "../../api/rewards.js";
@@ -189,8 +189,17 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
                 />
               </Field>
 
-              {/* La foto se añade AQUÍ y no al publicar: su clave lleva dentro el
-                  identificador del premio, que no existe mientras se está creando. */}
+              {/*
+                La otra vía de entrada de una foto de premio: esta cuelga del
+                premio y la del alta del padre. Desde
+                `polish-profile-and-reward-image` conviven — este comentario
+                decía que la foto «se añade AQUÍ y no al publicar», y dejó de ser
+                cierto ese día.
+
+                Recorta igual que el alta, y no por simetría: si una vía
+                recortara y la otra no, el catálogo acabaría con fotos de dos
+                clases según por dónde entraron.
+              */}
               <ImageUploadField
                 requestUploadUrl={(contentType) =>
                   rewardsApi.requestRewardImageUploadUrl(reward.id, contentType)
@@ -198,6 +207,8 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
                 onUploaded={(key) =>
                   update.mutate({ rewardId: reward.id, input: { imageUploadKey: key } })
                 }
+                aspect={1}
+                maxDimension={PHOTO_MAX_DIMENSION}
                 label={messages.rewards.addImage}
               />
 

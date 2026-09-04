@@ -10,13 +10,30 @@ import { cropToBlob, isAllowedImage, prepareImage } from "./prepare-image.js";
  * Elegir una foto, prepararla y subirla.
  *
  * UNA sola pieza para los tres casos —avatar, premio, evidencia—, no tres
- * copias. Lo que cambia entre ellos es una prop:
+ * copias. Lo que cambia entre ellos son DOS props, y son dos a propósito:
  *
- *   - Con `aspect`, monta el recortador. Es para los avatares, que se pintan
- *     pequeños y en rejilla, donde el encuadre importa.
- *   - Sin `aspect`, solo comprime. Es para la foto de un premio o la evidencia
- *     de una tarea, donde recortar a cuadrado quitaría justo lo que hay que ver:
- *     el juguete entero, la cama hecha.
+ *   - `aspect` decide si monta el recortador y con qué proporción.
+ *   - `maxDimension` decide cuánto detalle se guarda.
+ *
+ * Eran una sola, y esta cabecera decía que sin `aspect` no se recortaba «la foto
+ * de un premio o la evidencia de una tarea, donde recortar a cuadrado quitaría
+ * justo lo que hay que ver: el juguete entero, la cama hecha».
+ *
+ * Eso se revierte PARA EL PREMIO, con dos razones que no existían entonces.
+ * Desde `redesign-child-surfaces` los premios van en REJILLA, y ahí las
+ * proporciones dispares descuadran la fila. Y el recorte NO es automático: el
+ * recortador es interactivo, así que quien sube desplaza y acerca hasta que el
+ * juguete cabe — la frase describía un peligro que esta herramienta no tiene.
+ *
+ * Para la EVIDENCIA la decisión original se queda, con su razón intacta: se mira
+ * de una en una en la bandeja del padre, no junto a otras del mismo tamaño, y lo
+ * que hay que ver es el conjunto. Que una sola frase cubriera los dos casos era
+ * el problema: uno cambió y el otro no.
+ *
+ * Y por eso las props son dos. Atadas, pedir recorte para un premio le habría
+ * encogido la foto a `AVATAR_MAX_DIMENSION` —512 px para una tesela que ocupa
+ * media tablet—, que es justo el obstáculo que este change existe para quitar.
+ * Ver las decisiones 1 y 2 del design de `crop-reward-images`.
  *
  * NO sabe de hijos, premios ni tareas: recibe cómo pedir la URL y qué hacer con
  * la clave confirmada. Ver la decisión 10 del design de `add-file-storage`.
@@ -28,6 +45,14 @@ interface ImageUploadFieldProps {
   onUploaded: (key: string) => void;
   /** Con valor, recorta a esa proporción. Sin él, solo comprime. */
   aspect?: number;
+  /**
+   * Cuánto detalle guardar, en píxeles del lado mayor.
+   *
+   * Independiente de `aspect`: una imagen puede recortarse y conservar aun así
+   * la resolución de una foto. Quien usa la pieza elige entre las constantes del
+   * contrato, y no escribe un número.
+   */
+  maxDimension: number;
   label?: string;
 }
 
@@ -49,6 +74,7 @@ export function ImageUploadField({
   requestUploadUrl,
   onUploaded,
   aspect,
+  maxDimension,
   label,
 }: ImageUploadFieldProps): React.ReactElement {
   const [estado, setEstado] = useState<Estado>({ name: "idle" });
@@ -62,9 +88,7 @@ export function ImageUploadField({
     setError(null);
 
     try {
-      const preparada = await prepareImage(blob, {
-        forAvatar: aspect !== undefined,
-      });
+      const preparada = await prepareImage(blob, maxDimension);
       const { uploadUrl, key } = await requestUploadUrl(contentType);
 
       await putToUploadUrl(uploadUrl, preparada, contentType);

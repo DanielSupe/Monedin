@@ -16,7 +16,25 @@ import { messages } from "../../lib/messages.js";
  * El respaldo NO se resuelve en la API. El servidor sigue diciendo que no hay
  * imagen, que es la verdad; qué dibujar entonces es de la interfaz. Ver la
  * decisión 6 del design de `polish-profile-and-reward-image`.
+ *
+ * Las dos ramas comparten UNA CAJA de proporción fija, y esa es la mitad del
+ * arreglo de la rejilla que el recorte no cubre. Recortar al subir endereza las
+ * fotos NUEVAS; las que ya están subidas conservan la proporción con la que
+ * entraron, y sin caja fija una apaisada seguiría descuadrando su fila.
+ *
+ * `object-cover` las encuadra al mostrarlas, sin deformarlas y sin reprocesar
+ * nada en el almacén. Ver la decisión 3 del design de `crop-reward-images`.
  */
+
+/**
+ * La caja, en un solo sitio.
+ *
+ * Estaba escrita dos veces —`max-h-40` para la foto y `h-40` para el respaldo—,
+ * y eran distintas: la de la foto era un MÁXIMO, así que su altura real dependía
+ * de la proporción. Con dos declaraciones, una fila con foto y otra sin ella
+ * medían cosas distintas.
+ */
+const CAJA = "rounded-card aspect-square w-full";
 export function RewardImage({
   image,
   title,
@@ -25,7 +43,7 @@ export function RewardImage({
   title: string;
 }): React.ReactElement {
   if (image !== null) {
-    return <img src={image} alt={title} className="rounded-card max-h-40 w-full object-cover" />;
+    return <img src={image} alt={title} className={`${CAJA} object-cover`} />;
   }
 
   /*
@@ -35,7 +53,7 @@ export function RewardImage({
    */
   return (
     <div
-      className="rounded-card flex h-40 w-full items-center justify-center bg-surface-sunken"
+      className={`${CAJA} flex items-center justify-center bg-surface-sunken`}
       data-testid="reward-image-fallback"
     >
       <span aria-hidden="true" className="text-hero leading-none">
