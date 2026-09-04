@@ -21,10 +21,10 @@
 
 ## 3. Lo que ningún test cubre
 
-- [ ] 3.1 **Abrir la aplicación** en ancho, con una pantalla larga —la cuenta del padre, el escaparate
+- [x] 3.1 **Abrir la aplicación** en ancho, con una pantalla larga —la cuenta del padre, el escaparate
       del niño— y confirmar que el perfil del pie no se mueve al desplazar.
-- [ ] 3.2 Comprobar que al navegar a otro destino el contenido aparece arriba y no a medio desplazar.
-- [ ] 3.3 Estrechar la ventana hasta el cajón y confirmar que ahí todo sigue igual que antes.
+- [x] 3.2 Comprobar que al navegar a otro destino el contenido aparece arriba y no a medio desplazar.
+- [x] 3.3 Estrechar la ventana hasta el cajón y confirmar que ahí todo sigue igual que antes.
 
 ## 4. Cerrar
 
