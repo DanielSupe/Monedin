@@ -100,7 +100,17 @@ export function RewardCatalog({
       ) : premios.length === 0 ? (
         <EmptyState glyph="🎁" title={messages.rewards.empty} />
       ) : (
-        <ul className="flex list-none flex-col gap-4 p-0">
+        /*
+          Cada premio ocupa lo que necesita, no la fila entera.
+
+          A ancho completo la tarjeta se estiraba a los 72rem del contenido para
+          enseñar un título, una lista de a quién se le ofrece y tres botones: el
+          nombre de un hijo quedaba a un palmo de su precio, con nada en medio.
+          El tope es el de LECTURA y no el de la tesela del escaparate: aquí hay
+          texto y tres controles, y 300px no da para «Cambiar quién puede
+          pedirlo».
+        */
+        <ul className="flex max-w-reading list-none flex-col gap-4 p-0">
           {premios.map((premio) => (
             <RewardCard key={premio.id} reward={premio} />
           ))}

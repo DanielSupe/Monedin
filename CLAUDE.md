@@ -920,6 +920,21 @@ montan la aplicación entera, y en una máquina cargada algunos pasan del `testT
 distingue en que **falla un test distinto en cada pasada** y en que cada uno pasa solo. Es lo mismo
 que ya está escrito de `pnpm verify`, y la salida es la misma: `pnpm vitest run --no-file-parallelism`.
 
+**Los dos ejes de `overflow` viven en el mismo elemento, o el otro se apunta solo.** Cuando un eje es
+`auto` y el otro `visible`, CSS obliga a que `visible` compute a `auto`: un `overflow-x-auto` suelto
+convierte a ese elemento en contenedor de scroll **también en vertical**. Costó dos intentos y dos
+capturas de pantalla. El `<main>` llevaba `overflow-x-auto` y lleva además `mx-auto max-w-wide`, así
+que la barra vertical salía en el borde del ancho máximo —a 72rem— y no en el de la ventana; mover
+solo el `overflow-y` a un envoltorio no cambió absolutamente nada, porque quien seguía desplazando
+era el `<main>`. jsdom no calcula estilos, así que esto no se comprueba mirando el resultado: se
+comprueba que **los dos ejes están declarados en el mismo sitio**.
+
+**Un tope de ancho va DENTRO de la pieza, no en quien la coloca.** `RewardImage` pasó a ser cuadrada
+—para que una rejilla no se dentee— y en el catálogo del padre, donde la tarjeta ocupa la fila
+entera, eso da un cuadrado del tamaño de la columna. El escaparate del niño no lo sufría porque su
+tesela ya venía topada, así que **el defecto solo asomó donde nadie lo tapaba** — y poner el tope en
+los dos sitios de hoy lo habría dejado esperando al tercero.
+
 **Una columna «fija» hay que atarla a algo, o se ata a la página.** El marco era `min-h-dvh` —altura
 MÍNIMA— y quien desplazaba era el documento, así que el lateral, sin altura propia, se estiraba hasta
 la altura de la fila: la de la página entera. Su pie acababa al final del DOCUMENTO en vez de al de la

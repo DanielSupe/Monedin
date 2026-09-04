@@ -78,6 +78,35 @@ describe("en estrecho no cambia nada", () => {
   });
 });
 
+/**
+ * Los dos ejes del desbordamiento viven en el MISMO sitio.
+ *
+ * Es lo que costó dos intentos y una captura de pantalla. El `<main>` llevaba
+ * `overflow-x-auto` y se movió solo el `overflow-y` al envoltorio: no cambió
+ * nada, porque cuando un eje es `auto` y el otro `visible`, CSS obliga a que
+ * `visible` compute a `auto`. El `<main>` seguía siendo contenedor de scroll
+ * vertical y pintaba la barra en SU borde — el del ancho máximo, no el de la
+ * ventana.
+ *
+ * jsdom no calcula estilos, así que esto no se puede comprobar mirando el
+ * resultado: se comprueba que los dos ejes están declarados en el mismo
+ * elemento, que es la condición que hay que mantener.
+ */
+describe("los dos ejes del desbordamiento van juntos", () => {
+  it.each([
+    ["el padre", comoPadre()],
+    ["el niño", comoNino()],
+  ])("%s: el <main> no declara ningún desbordamiento", async (_quien, sesion) => {
+    conPantallaAncha();
+    await montarApp("/", sesion);
+
+    // Basta un `overflow-x` aquí para que el `<main>` vuelva a quedarse la barra
+    // vertical, aunque nadie haya escrito `overflow-y`.
+    expect(screen.getByRole("main").className).not.toMatch(/overflow-/);
+    expect(envoltorio().className).toMatch(/overflow-x-auto/);
+  });
+});
+
 /*
  * NO hace falta un tercer test que compare los dos casos en el mismo cuerpo.
  *

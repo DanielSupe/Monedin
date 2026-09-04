@@ -204,9 +204,18 @@ export function ParentShell({
           entero, así que la barra cae donde se espera; el `<main>` conserva su
           tope y su centrado, que es lo que impide que el contenido se reparta
           por todo el monitor.
+
+          Y el `overflow-x-auto` SE MUDA AQUÍ, que es lo que costó dos intentos.
+          Estando en el `<main>`, aquello seguía siendo contenedor de scroll
+          también en VERTICAL: cuando un eje es `auto` y el otro `visible`, CSS
+          obliga a que `visible` compute a `auto`. Así que mover solo el
+          `overflow-y` no cambió nada — la barra la seguía pintando el `<main>`,
+          en su borde. Los dos ejes tienen que estar en el mismo sitio.
         */}
-        <div className={cx("flex min-w-0 flex-1 flex-col", ancho && "overflow-y-auto")}>
-          <main className="mx-auto w-full min-w-0 max-w-wide flex-1 overflow-x-auto px-4 py-4">
+        <div
+          className={cx("flex min-w-0 flex-1 flex-col overflow-x-auto", ancho && "overflow-y-auto")}
+        >
+          <main className="mx-auto w-full min-w-0 max-w-wide flex-1 px-4 py-4">
             <Outlet />
           </main>
         </div>
