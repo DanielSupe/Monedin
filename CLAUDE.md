@@ -892,6 +892,35 @@ tocar su nombre ni un solo punto de uso.
 **Al tocar tokens hay que abrir pantallas del padre y del niño para confirmar que no se enteraron**,
 porque eso no lo cubre ningún test.
 
+**Una sección que dice lo mismo que otra la SUSTITUYE, no se suma a ella.** El encargo de la puerta
+pública pedía un «cómo funciona: tarea → monedas → premio» **además** de las tres tarjetas de
+promesa, y son las mismas tres ideas —«Haz tus tareas», «Elige tu premio», «Tú apruebas»—: hacer las
+dos cosas era decirlo dos veces seguidas. Al fundirlas apareció además lo que a la lista le faltaba,
+que es el **orden**: aprobar no es el tercero de tres cosas sueltas, va **entre** la tarea y las
+monedas, porque aprobar es lo que acredita. Cuando una petición añade algo que se parece a lo que ya
+hay, la pregunta no es dónde ponerlo sino qué sustituye.
+
+**Una maqueta de la propia aplicación se CONSTRUYE con sus piezas, no se captura.** La puerta pública
+enseña el panel del padre y el inicio del niño montados con `Card`, `Coins`, `Badge` y `Avatar`. Una
+captura envejece **en silencio**: un token nuevo repinta lo construido y no repinta un PNG, y nadie
+se entera hasta que alguien mira la landing. Y de regalo, cada maqueta lleva su `data-scale` de
+verdad, así que la diferencia entre las dos audiencias que la página enseña **es** la del producto y
+no una imitación hecha a ojo.
+
+**Un test que dice «esto no aparece en la página» envejece cuando la página crece.** Aquel afirmaba
+que la puerta pública no lleva ningún `[data-scale]`, «porque todavía no se sabe de quién sería». La
+intención seguía siendo buena —la PÁGINA no adopta el marco de un rol— pero una maqueta que enseña
+las dos escalas lo contradice al pie de la letra. Se estrechó a **la raíz**, que es lo que el
+requisito quería decir, y el porqué quedó en el design en vez de colado en un `expect`. Ante un test
+que estorba, la salida no es borrarlo ni ablandarlo: es escribir qué afirmaba de más.
+
+**Un ayudante de test que adelanta el reloj NO puede acumular holgura.** El del ciclo del saldo
+avanzaba un intervalo y después mil milisegundos «para que la animación asiente». Cada llamada dejaba
+esos mil de más, así que a las diez vueltas se habían colado dos intervalos enteros y la cuenta salía
+pasada — con toda la pinta de un fallo del código. Se adelanta el tiempo **exacto** de los N pasos de
+una vez, y solo después lo que dura la última transición, que al ser menor que un intervalo no
+dispara ninguno más.
+
 **Nunca leer, componer en memoria y escribir — y eso vale también en el front.** La regla estaba
 escrita para el saldo, con `increment` y `decrement`, y resulta que el PIN la necesitaba igual.
 `press()` hacía `pin + digit` leyendo `pin` de su cierre: con los botones no se notaba —un toque por

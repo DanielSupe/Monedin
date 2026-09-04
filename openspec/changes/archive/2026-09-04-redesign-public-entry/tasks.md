@@ -48,11 +48,11 @@
 
 ## 8. Lo que ningún test cubre
 
-- [ ] 8.1 **Abrir `/welcome`** a ancho de escritorio, de tablet y de móvil: que las órbitas no
+- [x] 8.1 **Abrir `/welcome`** a ancho de escritorio, de tablet y de móvil: que las órbitas no
       desborden ni se coman el titular, que los cuatro pasos se apilen bien y que las maquetas no
       obliguen a desplazar de lado.
-- [ ] 8.2 Con **movimiento reducido**: órbitas paradas y titular completo desde el primer pintado.
+- [x] 8.2 Con **movimiento reducido**: órbitas paradas y titular completo desde el primer pintado.
 
 ## 9. Documentar
 
-- [ ] 9.1 `config.yaml` y `CLAUDE.md` con lo que salga que valga para el siguiente.
+- [x] 9.1 `config.yaml` y `CLAUDE.md` con lo que salga que valga para el siguiente.

@@ -461,6 +461,26 @@ context: |
     para el respaldo, con un tope de ancho por tesela. El recorte endereza las fotos NUEVAS; la caja
     arregla tambien las viejas, que conservan su proporcion, sin reprocesar nada en el almacen.
 
+    LA PUERTA PUBLICA, compuesta como pagina desde `redesign-public-entry`. Se habia construido por
+    partes y nunca se miro entera: cinco bloques seguidos sobre el mismo fondo.
+      - Heroe con las orbitas de PROTAGONISTAS —crece su escenario, no sus radios, para no ampliar
+        la excepcion de estilo en linea— y la accion principal en una talla nueva del sistema.
+      - El CICLO se cuenta como un flujo de cuatro pasos: tarea, TU APRUEBAS, monedas, premio.
+        Sustituye a las tres tarjetas de promesa, que decian lo mismo, y al fundirlas aparece el
+        orden que a la lista le faltaba: aprobar va ENTRE la tarea y las monedas porque aprobar es
+        lo que acredita.
+      - La franja de confianza: que la moneda no es dinero real y que lo real es lo que el niño
+        aprende. Sin cifras, testimonios ni logos, que habria que inventar.
+      - LAS DOS CARAS de la aplicacion, construidas con las piezas y los tokens reales y no
+        capturadas —una captura envejece en silencio cuando cambia un token—, cada una con su
+        `data-scale` de verdad.
+      - Cierre con la accion principal, para quien leyo hasta el final.
+      - El RITMO sale de alternar superficies que ya existian; el cierre usa la de marca, que es el
+        indigo del acceso. Ni un color nuevo.
+    El saldo del centro CICLA: arranca en 300, sube 20 cada cinco segundos y al llegar a 500 vuelve
+    a cero, animando cada paso. Con movimiento reducido NO cicla: un numero que cambia solo es
+    movimiento, y del que peor sienta.
+
   DECISIONES YA TOMADAS (no reabrir sin motivo nuevo)
   - Sin entidad Family: parentId apunta directo a User. Un niño, un padre.
   - El niño NO es un User: vive entero como ChildProfile dentro de la cuenta de su padre, y

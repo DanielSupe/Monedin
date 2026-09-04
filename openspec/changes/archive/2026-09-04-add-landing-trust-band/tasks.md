@@ -28,5 +28,5 @@
 
 ## 5. Lo que ningún test cubre
 
-- [ ] 5.1 **Abrir `/welcome`** a ancho de escritorio y de móvil: que la ilustración no se coma la
+- [x] 5.1 **Abrir `/welcome`** a ancho de escritorio y de móvil: que la ilustración no se coma la
       columna del texto ni quede minúscula.
