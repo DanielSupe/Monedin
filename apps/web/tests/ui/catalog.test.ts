@@ -17,14 +17,22 @@ const CATALOGO_SIN_COMENTARIOS = CATALOGO.replace(/\/\*[\s\S]*?\*\//g, "").repla
   "",
 );
 
-/** Los componentes exportados por `ui/index.ts`: los que empiezan por mayúscula. */
+/**
+ * Los componentes exportados por `ui/index.ts`: los que empiezan por mayúscula.
+ *
+ * Se lee el ARCHIVO ENTERO y no línea a línea, que es como estaba y por eso no
+ * servía: la expresión exigía la llave de cierre en la misma línea, así que una
+ * exportación repartida en varias —lo que hace el formateador en cuanto la lista
+ * de nombres es larga— no la veía ninguna, y esa pieza se saltaba el catálogo
+ * sin que nada fallara.
+ *
+ * Lo destapó `DataTable`, la primera pieza con una exportación multilínea: el
+ * agujero llevaba abierto desde `add-design-system` sin que se notara.
+ */
 function piezasExportadas(): string[] {
   const nombres = new Set<string>();
 
-  for (const linea of INDEX.split("\n")) {
-    const exportacion = /^export \{([^}]*)\}/.exec(linea);
-    if (exportacion === null) continue;
-
+  for (const exportacion of INDEX.matchAll(/export \{([^}]*)\}/g)) {
     for (const parte of (exportacion[1] ?? "").split(",")) {
       const nombre = parte.trim();
       // Los tipos se exportan como `type Algo` y no son piezas que enseñar.

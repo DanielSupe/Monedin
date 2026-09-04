@@ -433,6 +433,11 @@ export const messages = {
 
     /** Lo que ve el niño. */
     myTasksTitle: "Mis tareas",
+    /** Las dos formas, SIN cifra. Cuenta PENDIENTES, no tareas. */
+    pendingCountOne: "pendiente",
+    pendingCountMany: "pendientes",
+    /** Cuando no queda ninguna: una cuenta en cero se lee como si fuera trabajo. */
+    nothingPending: "Nada pendiente",
     myTasksEmpty: "No tienes tareas ahora mismo. ¡Disfruta!",
     markDone: "¡Ya la hice!",
     addEvidence: "Súbele una foto (opcional)",
@@ -504,6 +509,9 @@ export const messages = {
 
     /** Lo que ve el niño. */
     myRewardsTitle: "Mis premios",
+    /** Las dos formas, SIN cifra: la compone `contar()` donde se usa. */
+    countOne: "premio",
+    countMany: "premios",
     myRewardsEmpty: "Todavía no hay premios para ti.",
     myRewards: "Ver mis premios",
     affordable: "¡Ya te alcanza!",
@@ -542,6 +550,19 @@ export const messages = {
 
     /** Lo que ve el niño: sus propias solicitudes y el botón de pedir. */
     myRedemptionsTitle: "Mis canjes",
+    /** Nombre de la tabla del historial: se anuncia, no se ve. */
+    historyCaption: "Lo que he pedido",
+    columnReward: "Premio",
+    columnCoins: "Monedas",
+    columnStatus: "Estado",
+    columnWhen: "Cuándo",
+    /**
+     * Las dos formas de la palabra, SIN la cifra: la compone `contar()` en el
+     * punto de uso. Una cadena con el número dentro se salta la regla que
+     * `close-style-debt` puso, y un test la caza.
+     */
+    countOne: "canje",
+    countMany: "canjes",
     myRedemptionsEmpty: "No has pedido ningún premio todavía.",
     myRedemptions: "Ver mis canjes",
     request: "Pedirlo",

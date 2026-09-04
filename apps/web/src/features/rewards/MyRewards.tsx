@@ -1,5 +1,6 @@
 import type { OwnReward } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
+import { contar } from "../../lib/plural.js";
 import { RewardImage } from "./RewardImage.js";
 import {
   Alert,
@@ -48,12 +49,37 @@ export function MyRewards(): React.ReactElement {
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-title font-bold">{messages.rewards.myRewardsTitle}</h2>
+      <div className="flex flex-wrap items-baseline gap-3">
+        <h2 className="text-title font-bold">{messages.rewards.myRewardsTitle}</h2>
+
+        {/*
+          En una rejilla, «cuántos hay» deja de leerse solo: una columna se
+          recorre hasta el final y una rejilla se abarca de un vistazo sin
+          llegar a contarla.
+        */}
+        {premios.length > 0 && (
+          <p className="text-small text-ink-muted">
+            {contar(premios.length, messages.rewards.countOne, messages.rewards.countMany)}
+          </p>
+        )}
+      </div>
 
       {premios.length === 0 ? (
         <EmptyState glyph="🎁" title={messages.rewards.myRewardsEmpty} />
       ) : (
-        <ul className="flex list-none flex-col gap-3 p-0">
+        /*
+          REJILLA de dos columnas, y sigue siendo una lista.
+
+          Dos y no «tantas como quepan»: dos es lo que hace falta para comparar
+          dos precios sin desplazar, y cada columna de más encoge la foto, que
+          es lo que hace que un premio se reconozca sin leer.
+
+          Que sea `<ul>`/`<li>` no cambia: quien recorre la pantalla sin verla
+          oye «lista de seis elementos», que es lo que hay. Una rejilla es una
+          colocación, no otra estructura. Ver la decisión 1 del design de
+          `redesign-child-surfaces`.
+        */
+        <ul className="grid list-none grid-cols-2 gap-3 p-0">
           {premios.map((premio) => (
             <MyRewardRow
               key={premio.id}

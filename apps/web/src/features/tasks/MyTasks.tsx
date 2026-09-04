@@ -2,6 +2,7 @@ import type { OwnTask } from "@monedin/contracts";
 import { useState } from "react";
 import * as api from "../../api/tasks.js";
 import { messages } from "../../lib/messages.js";
+import { contar } from "../../lib/plural.js";
 import { Alert, Badge, Button, Card, Coins, EmptyState, Skeleton } from "../../ui/index.js";
 import type { BadgeTone } from "../../ui/index.js";
 import { ImageUploadField } from "../uploads/ImageUploadField.js";
@@ -26,10 +27,32 @@ export function MyTasks(): React.ReactElement {
   }
 
   const tareas = data?.items ?? [];
+  const pendientes = tareas.filter((tarea) => tarea.status === "PENDING").length;
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-title font-bold">{messages.tasks.myTasksTitle}</h2>
+      <div className="flex flex-wrap items-baseline gap-3">
+        <h2 className="text-title font-bold">{messages.tasks.myTasksTitle}</h2>
+
+        {/*
+          Se cuentan las PENDIENTES, no las tareas.
+
+          Una lista con ocho tareas de las que siete están aprobadas no es una
+          lista de ocho cosas por hacer, y esta pantalla responde a «¿qué hago
+          ahora?». Se cuentan las filas con ese estado y NUNCA el total.
+        */}
+        {tareas.length > 0 && (
+          <p className="text-small text-ink-muted">
+            {pendientes === 0
+              ? messages.tasks.nothingPending
+              : contar(
+                  pendientes,
+                  messages.tasks.pendingCountOne,
+                  messages.tasks.pendingCountMany,
+                )}
+          </p>
+        )}
+      </div>
 
       {tareas.length === 0 ? (
         <EmptyState glyph="🧹" title={messages.tasks.myTasksEmpty} />

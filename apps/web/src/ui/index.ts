@@ -20,6 +20,12 @@ export { Coins, type CoinsProps } from "./Coins.js";
 export { Dialog, type DialogProps } from "./Dialog.js";
 export { Drawer, type DrawerProps } from "./Drawer.js";
 export { EmptyState, type EmptyStateProps } from "./EmptyState.js";
+export {
+  DataTable,
+  type DataColumn,
+  type DataRow,
+  type DataTableProps,
+} from "./DataTable.js";
 export { Field, type FieldProps, useField } from "./Field.js";
 export { Input, type InputProps, type InputShape } from "./Input.js";
 export { Logo, type LogoProps, type LogoSize } from "./Logo.js";

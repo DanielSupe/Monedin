@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   Coins,
+  DataTable,
   Dialog,
   Drawer,
   EmptyState,
@@ -261,6 +262,60 @@ function Piezas(): React.ReactElement {
         />
         {/* Con una sola página no se dibuja: aquí debajo no hay nada. */}
         <Pagination page={1} totalPages={1} />
+      </Seccion>
+
+      <Seccion titulo="DataTable">
+        {/*
+          Recibe encabezados y celdas ya compuestas, igual que `Pagination`
+          recibe sus enlaces: aquí se le pasa un `Badge` en una celda, y la pieza
+          no sabe ni qué es un canje ni por qué ese tono.
+
+          La columna de cantidades va a la derecha y con las cifras de ancho
+          fijo, que es donde una columna de números se lee comparando.
+        */}
+        <DataTable
+          caption="Ejemplo de historial"
+          columns={[
+            { key: "que", header: "Premio" },
+            { key: "cuanto", header: "Monedas", align: "end" },
+            { key: "estado", header: "Estado" },
+            { key: "cuando", header: "Cuándo", align: "end" },
+          ]}
+          rows={[
+            {
+              key: "1",
+              cells: {
+                que: "Helado",
+                cuanto: <Coins amount={60} />,
+                estado: <Badge tone="success">Aprobado</Badge>,
+                cuando: "3 sep",
+              },
+            },
+            {
+              key: "2",
+              cells: {
+                que: "Ir al cine",
+                cuanto: <Coins amount={200} />,
+                estado: <Badge tone="neutral">Esperando</Badge>,
+                cuando: "2 sep",
+              },
+            },
+            {
+              key: "3",
+              cells: {
+                que: "Patines",
+                cuanto: <Coins amount={350} />,
+                // Advertencia y NO peligro: que un padre diga que no a un premio
+                // no es un error del niño.
+                estado: <Badge tone="warning">No esta vez</Badge>,
+                cuando: "1 sep",
+              },
+            },
+          ]}
+        />
+
+        {/* Sin filas no dibuja nada: aquí debajo no hay tabla. */}
+        <DataTable caption="Historial vacío" columns={[{ key: "a", header: "A" }]} rows={[]} />
       </Seccion>
 
       <Seccion titulo="Tabs">
