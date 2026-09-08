@@ -5,9 +5,7 @@
 Define la forma única que tiene toda respuesta de error de la API y las reglas que traducen un fallo
 de dominio, de validación o inesperado a un estado HTTP, para que el front pueda tratar los errores
 de forma uniforme y para que ningún módulo de dominio tenga que inventar su propio formato.
-
 ## Requirements
-
 ### Requirement: Forma única de respuesta de error
 
 Toda respuesta de la API con estado HTTP 4xx o 5xx SHALL tener un cuerpo JSON con la misma forma: un
@@ -33,12 +31,22 @@ que el cliente nunca tenga que comparar textos.
 La capa de negocio SHALL señalar los fallos mediante errores de dominio con significado propio, y la
 capa HTTP SHALL traducirlos a estados. La correspondencia SHALL definirse una sola vez y aplicarse a
 toda la API: recurso inexistente a 404, acceso no permitido a 403, falta de sesión a 401, conflicto
-con el estado actual a 409, entrada que no cumple las reglas a 422, y **demasiados intentos en poco
-tiempo a 429**.
+con el estado actual a 409, entrada que no cumple las reglas a 422, **demasiados intentos en poco
+tiempo a 429**, y **un servicio del que la API depende que no puede responder ahora a 503**.
 
 El caso de los intentos merece un estado propio y no encaja en ninguno de los anteriores. No es un
 conflicto con el estado del recurso ni una entrada inválida, y responder 401 sería peor que
 inexacto: le diría a quien está probando combinaciones que siga probando.
+
+El del servicio no disponible merece uno por la razón simétrica, y es el primer fallo del sistema
+que **no es culpa de nadie de los dos lados**. Un 500 afirma dos cosas falsas: que el problema es
+nuestro —así que emite un identificador de incidente que no lleva a ninguna parte— y, para el
+cliente, que lo único que puede decirle a quien mira es «algo salió mal», cuando lo cierto es
+«vuelve a intentarlo en un rato». La API SHALL distinguirlos, y NO SHALL emitir identificador de
+incidente en el 503: no hay incidencia que correlacionar.
+
+Un 503 NO SHALL usarse para reportar que el usuario se pasó de intentos: eso ya tiene su 429, lleva
+`retryAt`, y confundirlos le echaría la culpa a quien no hizo nada.
 
 #### Scenario: Se solicita un recurso que no existe
 
@@ -71,6 +79,24 @@ inexacto: le diría a quien está probando combinaciones que siga probando.
 - **WHEN** el cliente recibe un rechazo de acceso
 - **THEN** puede saber por el código si debe pedir la credencial de nuevo o decir que hay que esperar
 - **AND** no necesita leer el texto del mensaje para decidirlo
+
+#### Scenario: Un servicio del que la API depende no puede responder
+
+- **WHEN** la capa de negocio señala que un servicio externo no pudo atender la petición
+- **THEN** la API responde 503 con el cuerpo de error estándar y un código propio
+- **AND** la respuesta NO incluye identificador de incidente, porque no hay incidencia nuestra que investigar
+
+#### Scenario: El fallo ajeno se distingue del fallo propio
+
+- **WHEN** el cliente recibe un error de servidor
+- **THEN** puede saber por el código si debe ofrecer reintentar o decir que algo salió mal de nuestro lado
+- **AND** no necesita leer el texto del mensaje para decidirlo
+
+#### Scenario: Un fallo ajeno no se disfraza de exceso de intentos
+
+- **WHEN** el servicio externo rechaza la petición por haber agotado la cuota contratada
+- **THEN** la API responde 503 y no 429
+- **AND** no se le dice al usuario que agotó sus intentos, porque no los agotó él
 
 #### Scenario: Un módulo nuevo no necesita definir su propio mapeo
 
@@ -136,3 +162,4 @@ escribirse textos visibles al usuario incrustados en los módulos.
 - **WHEN** se cambia el texto de un mensaje de error en el catálogo
 - **THEN** el cambio se refleja en todos los endpoints que lo usan
 - **AND** no hay que editar ningún módulo de dominio
+
