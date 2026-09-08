@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { comoNino, comoPadre, montarApp } from "../support/router.js";
+import { SOLO_CUENTA, comoNino, comoPadre, montarApp } from "../support/router.js";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -58,4 +58,31 @@ describe("el rol equivocado no se queda parado donde no le toca", () => {
       expect(app.direccion()).toBe("/");
     },
   );
+});
+
+/**
+ * `/assistant` es el PRIMER destino compartido por los dos roles.
+ *
+ * Hasta `add-family-assistant`, las dos listas de arriba eran excluyentes: todo
+ * destino pertenecía a uno de los dos y el otro rebotaba a su inicio. Este no
+ * pertenece a ninguno, y por eso no cabía en ninguna de las dos.
+ *
+ * Y el caso NEGATIVO importa tanto como el positivo: si la ruta se hubiera
+ * guardado con `requireParent`, el niño acabaría en `/` y esa mitad lo caza.
+ */
+describe("hay destinos que son de los dos roles", () => {
+  it.each([
+    ["un niño", comoNino],
+    ["un padre", comoPadre],
+  ])("%s llega a /assistant y se queda ahí", async (_quien, sesion) => {
+    const app = await montarApp("/assistant", sesion());
+
+    expect(app.direccion()).toBe("/assistant");
+  });
+
+  it("sin perfil elegido NO se llega: se pide antes ser alguien", async () => {
+    const app = await montarApp("/assistant", SOLO_CUENTA);
+
+    expect(app.direccion()).toBe("/profiles");
+  });
 });

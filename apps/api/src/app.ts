@@ -1,6 +1,7 @@
 import { API_PREFIX } from "@monedin/contracts";
 import cookieParser from "cookie-parser";
 import express, { type Express, Router, type Router as ExpressRouter } from "express";
+import { assistantRouter } from "./modules/assistant/assistant.routes.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { childrenRouter } from "./modules/children/children.routes.js";
 import { coinsRouter } from "./modules/coins/coins.routes.js";
@@ -41,6 +42,7 @@ export const apiRouters: ExpressRouter[] = [
   tasksRouter,
   rewardsRouter,
   redemptionsRouter,
+  assistantRouter,
 ];
 
 export function createApp(routers: ExpressRouter[] = apiRouters): Express {

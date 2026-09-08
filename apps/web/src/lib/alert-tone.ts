@@ -20,11 +20,22 @@ import { ApiRequestError } from "./http-client.js";
  * pieza del sistema no sabe de códigos de error. Y no dentro de cada
  * `describe*Error` porque el mapeo es del contrato de errores, que es uno solo.
  *
- * Solo dos ramas a propósito: inventar tratamiento para códigos que ninguna
+ * `SERVICE_UNAVAILABLE` entra por la MISMA puerta desde `add-family-assistant`,
+ * y por el mismo argumento llevado un paso más lejos: si un 409 no es culpa de
+ * quien mira, un fallo de un tercero lo es todavía menos. Google está saturado,
+ * o agotó su cuota; lo único que hay que hacer es esperar. Pintarlo de rojo
+ * dice «algo se rompió» donde lo cierto es «vuelve en un rato», y a un niño de
+ * seis años un rojo le dice que hizo algo mal.
+ *
+ * Solo tres ramas a propósito: inventar tratamiento para códigos que ninguna
  * pantalla distingue sería adivinar.
  */
 export function alertToneFor(error: unknown): AlertTone {
-  if (error instanceof ApiRequestError && error.code === ERROR_CODES.CONFLICT) {
+  if (!(error instanceof ApiRequestError)) {
+    return "danger";
+  }
+
+  if (error.code === ERROR_CODES.CONFLICT || error.code === ERROR_CODES.SERVICE_UNAVAILABLE) {
     return "warning";
   }
 

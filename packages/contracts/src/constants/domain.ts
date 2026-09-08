@@ -201,3 +201,44 @@ export const PROFILE_SESSION_COOKIE = "monedin_profile";
 /** Paginacion por defecto de los listados de la API. */
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 100;
+
+/**
+ * Limites del asistente.
+ *
+ * REGLA DE REPARTO, escrita para que nadie tenga que adivinarla: aqui viven los
+ * limites que el FRONT tambien necesita —el maximo del campo, el recorte del
+ * hilo antes de enviarlo—. Los que solo necesita el proveedor —el modelo, el
+ * tiempo de espera, los tokens de salida— viven en `shared/ai/provider.ts`,
+ * igual que los TTL viven en `shared/storage/provider.ts`. Y los que solo
+ * necesita el servicio —cuantas tareas caben en un prompt— se quedan locales en
+ * el servicio.
+ *
+ * Pasarse de cualquiera de los tres es 422 y NO un recorte silencioso, por el
+ * mismo argumento que `MAX_PAGE_SIZE`: recortar esconde el error de quien llama.
+ * Y aqui pesa mas, porque recortar el hilo dejaria a quien pregunta creyendo que
+ * Monedin recuerda algo que nunca le llego.
+ */
+
+/** Cuanto puede escribir alguien de una vez. */
+export const ASSISTANT_QUESTION_MAX_LENGTH = 500;
+
+/**
+ * Turnos previos que el cliente reenvia.
+ *
+ * Un turno es UN mensaje, no una pareja de pregunta y respuesta: doce son seis
+ * intercambios.
+ */
+export const ASSISTANT_MAX_HISTORY_TURNS = 12;
+
+/** Tope de cada turno reenviado. Acota lo que cuesta una conversacion larga. */
+export const ASSISTANT_TURN_MAX_LENGTH = 2000;
+
+/**
+ * Quien hablo en un turno, en el vocabulario del PRODUCTO.
+ *
+ * `assistant` y no `model`, que es como lo llama el proveedor en
+ * `shared/ai/provider.ts`. Son dos vocabularios distintos a proposito: este es
+ * el que ve el front, y quien traduce es el servicio, en un solo sitio.
+ */
+export const ASSISTANT_ROLES = ["user", "assistant"] as const;
+export type AssistantRole = (typeof ASSISTANT_ROLES)[number];

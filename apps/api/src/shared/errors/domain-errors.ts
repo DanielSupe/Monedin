@@ -83,6 +83,28 @@ export class TooManyAttemptsError extends DomainError {
   }
 }
 
+/**
+ * Un servicio del que la API depende no pudo atender la petición.
+ *
+ * NO es un `INTERNAL_ERROR`, y la diferencia no es cosmética. Un 500 afirma dos
+ * cosas falsas: que el problema es nuestro —así que emite un identificador de
+ * incidente que no lleva a ninguna parte, porque no hay nada que investigar— y,
+ * para el cliente, que lo único que puede decir es «algo salió mal», cuando lo
+ * cierto es «vuelve a intentarlo en un rato». Es el mismo argumento por el que
+ * un 409 se pinta en ámbar: nadie hizo nada mal.
+ *
+ * Tampoco es `TooManyAttemptsError`. Aquel significa que QUIEN LLAMA agotó sus
+ * intentos y está bloqueado, lleva `retryAt` y existe para el bloqueo de un
+ * PIN. Una cuota agotada es nuestra, no de quien pregunta.
+ */
+export class ServiceUnavailableError extends DomainError {
+  readonly code = ERROR_CODES.SERVICE_UNAVAILABLE;
+
+  constructor(message: string = messages.errors.serviceUnavailable) {
+    super(message);
+  }
+}
+
 /** La ruta pedida no está registrada en la API. */
 export class RouteNotFoundError extends DomainError {
   readonly code = ERROR_CODES.ROUTE_NOT_FOUND;

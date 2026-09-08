@@ -19,6 +19,7 @@ function validEnv(): Record<string, string | undefined> {
     AWS_SECRET_ACCESS_KEY: "un-secreto",
     TEST_AWS_ACCESS_KEY_ID: "una-clave-de-test",
     TEST_AWS_SECRET_ACCESS_KEY: "un-secreto-de-test",
+    GEMINI_API_KEY: "una-clave-de-gemini",
   };
 }
 

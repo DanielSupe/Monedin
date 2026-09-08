@@ -28,6 +28,19 @@ export const ERROR_CODES = {
    * 401 le diría a quien está probando combinaciones que siga probando.
    */
   TOO_MANY_ATTEMPTS: "TOO_MANY_ATTEMPTS",
+  /**
+   * Un servicio del que la API depende no pudo responder ahora. 503.
+   *
+   * Tiene codigo propio y no se confunde con `INTERNAL_ERROR` a proposito: es
+   * el primer fallo del sistema que no es culpa de ninguno de los dos lados. El
+   * cliente necesita distinguir "vuelve a intentarlo en un rato" de "algo salio
+   * mal de nuestro lado", y con un 500 solo puede decir lo segundo.
+   *
+   * Tampoco es `TOO_MANY_ATTEMPTS`: aquel significa que TU agotaste tus
+   * intentos y estas bloqueado, y decirselo a quien solo hizo una peticion
+   * seria falso.
+   */
+  SERVICE_UNAVAILABLE: "SERVICE_UNAVAILABLE",
   /** Fallo no previsto. 500, con identificador de incidente. */
   INTERNAL_ERROR: "INTERNAL_ERROR",
 } as const;

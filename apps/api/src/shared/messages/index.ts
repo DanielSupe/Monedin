@@ -54,6 +54,15 @@ export const messages = {
     /** 429 — demasiados intentos, hay un bloqueo activo. */
     tooManyAttempts:
       "Demasiados intentos fallidos. Espera unos minutos antes de volver a intentarlo.",
+    /**
+     * 503 — un servicio del que dependemos no pudo responder.
+     *
+     * No pide reportar nada ni menciona ningún identificador, a diferencia del
+     * 500: no hay incidencia nuestra que investigar. Lo único que quien lee
+     * puede hacer es esperar, así que eso es lo único que dice.
+     */
+    serviceUnavailable:
+      "Este servicio no está disponible ahora mismo. Vuelve a intentarlo en un rato.",
     /** 500 — fallo no previsto. Genérico a propósito. */
     internal:
       "Ocurrió un error inesperado. Vuelve a intentarlo en unos minutos. " +
@@ -193,6 +202,18 @@ export const messages = {
     parentRoleRequired: rolRequerido.adulto,
     /** Solicitar un canje lo hace el niño sobre su propio perfil. */
     childRoleRequired: rolRequerido.nino,
+  },
+
+  assistant: {
+    /**
+     * El proveedor de IA no pudo responder.
+     *
+     * Habla en nombre de la MASCOTA y no del sistema, porque quien lee esto
+     * puede tener seis años: «Monedín está descansando» es verdad suficiente y
+     * no le dice a un niño que algo se rompió. Y no pide reportar nada ni
+     * menciona ningún identificador: no hay incidencia nuestra que investigar.
+     */
+    unavailable: "Monedín está descansando ahora mismo. Vuelve a preguntarle en un rato.",
   },
 
   health: {

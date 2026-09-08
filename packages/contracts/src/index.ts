@@ -1,6 +1,7 @@
 export * from "./constants/avatars.js";
 export * from "./constants/domain.js";
 export * from "./constants/uploads.js";
+export * from "./schemas/assistant.js";
 export * from "./schemas/auth.js";
 export * from "./schemas/avatar.js";
 export * from "./schemas/children.js";

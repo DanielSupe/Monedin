@@ -714,6 +714,49 @@ export const messages = {
     wrongType: "Solo se admiten imágenes JPG, PNG o WEBP.",
   },
 
+  /**
+   * El chat con Monedín.
+   *
+   * Un solo juego de textos para los dos roles, igual que la pantalla: el marco
+   * ya declara la escala, y dos catálogos cuya única diferencia fuera la
+   * audiencia serían el defecto que la doble escala existe para evitar.
+   *
+   * Lo que NO está aquí es el guion de sistema del modelo. Vive en la API, en
+   * `assistant.prompts.ts`, y es la única excepción declarada a «ni un string
+   * visible fuera del catálogo»: un guion no se traduce, se reescribe, y
+   * reescribirlo cambia el comportamiento del producto. Ver CLAUDE.md §1.
+   */
+  assistant: {
+    title: "Pregúntale a Monedín",
+    lead: "Monedín conoce tus tareas, tus premios y tus monedas. Pregúntale lo que quieras.",
+
+    /** Marca de quién habla en cada turno. No basta con distinguirlos por color. */
+    you: "Tú",
+    monedin: "Monedín",
+
+    inputLabel: "Tu pregunta",
+    placeholder: "Escribe tu pregunta…",
+    send: "Preguntar",
+    thinking: "Monedín está pensando…",
+    retry: "Volver a intentarlo",
+
+    /** Arranques sugeridos, para que la pantalla vacía no sea un folio en blanco. */
+    ideasTitle: "No sabes qué preguntar?",
+    ideaBalance: "¿Cómo consigo más monedas?",
+    ideaTasks: "¿Qué me falta por hacer?",
+    ideaRewards: "¿Para qué premio me alcanza?",
+
+    /**
+     * El proveedor no pudo responder. Se cuenta como ADVERTENCIA y no como
+     * error: nadie hizo nada mal, y lo único que hay que hacer es esperar.
+     */
+    unavailable: "Monedín está descansando ahora mismo. Vuelve a preguntarle en un rato.",
+    /** 422: la pregunta no cumple los límites. */
+    invalidQuestion: "Esa pregunta no se pudo enviar. Prueba a escribirla más corta.",
+    /** 401: la sesión caducó mientras se conversaba. */
+    signedOut: "Se cerró tu sesión. Vuelve a entrar para seguir preguntando.",
+  },
+
   errors: {
     /** La respuesta no se pudo interpretar como el cuerpo de error estándar. */
     unreadableResponse: "La respuesta del servidor no se pudo interpretar.",

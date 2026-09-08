@@ -11,6 +11,7 @@ const valido = {
   S3_ENDPOINT: "http://localhost:9000",
   AWS_ACCESS_KEY_ID: "una-clave", AWS_SECRET_ACCESS_KEY: "un-secreto",
   TEST_AWS_ACCESS_KEY_ID: "clave-test", TEST_AWS_SECRET_ACCESS_KEY: "secreto-test",
+  GEMINI_API_KEY: "clave-de-gemini",
 };
 
 /**

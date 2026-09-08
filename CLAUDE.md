@@ -78,6 +78,15 @@ Dos catálogos, uno por app:
 Ni un string visible incrustado en un módulo o en un componente. Cuando llegue un segundo idioma,
 migrar un catálogo es mecánico; extraer textos repartidos por sesenta archivos no lo es.
 
+**Hay UNA excepción declarada, y es la instrucción de sistema del asistente**, en
+`apps/api/src/modules/assistant/assistant.prompts.ts`. Dos razones, y las dos hacen falta: el
+catálogo existe para que traducir sea mecánico, y un guion de sistema **no se traduce, se
+reescribe** —reescribirlo cambia el comportamiento del producto, así que se revisa como código,
+junto al código que lo compone—; y la regla habla de strings que un usuario **lee**, y nadie lee la
+instrucción de sistema. Lo que el usuario lee es la respuesta, que no la escribimos nosotros. Los
+**mensajes de error** del módulo sí están en el catálogo, como todos. Si aparece una segunda
+excepción, la pregunta es si sigue siendo una excepción.
+
 ---
 
 ## 2. Anatomía de módulo
@@ -159,6 +168,8 @@ nada de HTTP.** Un único traductor al final de la cadena los convierte en respu
 | `RouteNotFoundError` | 404  | `ROUTE_NOT_FOUND`  |
 | `ConflictError`      | 409  | `CONFLICT`         |
 | `ValidationError`    | 422  | `VALIDATION_ERROR` |
+| `TooManyAttemptsError` | 429 | `TOO_MANY_ATTEMPTS` |
+| `ServiceUnavailableError` | 503 | `SERVICE_UNAVAILABLE` |
 | cualquier otro       | 500  | `INTERNAL_ERROR`   |
 
 Toda respuesta de error, sin excepción, tiene esta forma:
@@ -174,6 +185,13 @@ Toda respuesta de error, sin excepción, tiene esta forma:
 
 - **El código es el contrato. El mensaje no.** El front decide qué hacer mirando `code`, nunca
   comparando texto.
+- **El 503 es el único fallo que no es culpa de nadie de los dos lados**, y por eso NO lleva
+  `incidentId`. Un 500 afirma dos cosas falsas cuando lo que se cayó es un tercero: que el problema
+  es nuestro —así que emite un identificador que no lleva a ninguna parte— y, para el cliente, que
+  lo único que puede decir es «algo salió mal», cuando lo cierto es «vuelve a intentarlo en un
+  rato». Es el mismo argumento por el que un 409 se pinta en ámbar. Y **no se confunde con el 429**:
+  aquel significa que QUIEN LLAMA agotó sus intentos y está bloqueado; una cuota agotada del
+  proveedor es nuestra, no suya.
 - **El 500 no filtra nada**: ni trazas, ni SQL, ni rutas de archivos. El detalle completo va al log
   bajo el mismo `incidentId` que ve el usuario.
 - **La validación va antes que la lógica**, con el middleware `validate()`, y reporta *todos* los

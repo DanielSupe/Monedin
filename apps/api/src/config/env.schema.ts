@@ -24,6 +24,7 @@ export const SECRET_ENV_KEYS = [
   "AWS_SECRET_ACCESS_KEY",
   "TEST_AWS_ACCESS_KEY_ID",
   "TEST_AWS_SECRET_ACCESS_KEY",
+  "GEMINI_API_KEY",
 ] as const;
 
 export type SecretEnvKey = (typeof SECRET_ENV_KEYS)[number];
@@ -161,6 +162,21 @@ export const envSchema = z.object({
   TEST_AWS_ACCESS_KEY_ID: z.string({ required_error: "obligatoria" }).min(1, "obligatoria"),
 
   TEST_AWS_SECRET_ACCESS_KEY: z.string({ required_error: "obligatoria" }).min(1, "obligatoria"),
+
+  /**
+   * Clave de la API de Google Gemini. Secreta.
+   *
+   * Obligatoria y SIN valor por defecto: la API muere al arrancar si falta. Es
+   * la misma regla que el resto —un defecto silencioso tapa una variable
+   * ausente— y aquí se cobraría con el primer niño preguntando.
+   *
+   * NO tiene hermana `TEST_GEMINI_API_KEY`, y esa ausencia es una decisión, no
+   * un olvido. El almacén necesita sus tres separaciones porque sus tests van
+   * contra MinIO real; aquí la batería sustituye el proveedor entero en su
+   * `beforeAll` global, así que ningún test puede llegar a Google ni con esta
+   * clave puesta. Ver la decisión 4 del design de `add-family-assistant`.
+   */
+  GEMINI_API_KEY: z.string({ required_error: "obligatoria" }).min(1, "obligatoria"),
 });
 
 /** Configuración validada de la API. */

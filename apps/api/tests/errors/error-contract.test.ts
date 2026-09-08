@@ -8,6 +8,7 @@ import {
   ConflictError,
   ForbiddenError,
   NotFoundError,
+  ServiceUnavailableError,
   UnauthorizedError,
 } from "../../src/shared/errors/domain-errors.js";
 import { validate } from "../../src/shared/http/validate.js";
@@ -34,6 +35,9 @@ function probeRouter(): Router {
   });
   router.get("/probe/conflict", () => {
     throw new ConflictError();
+  });
+  router.get("/probe/service-unavailable", () => {
+    throw new ServiceUnavailableError();
   });
   router.get("/probe/unexpected", () => {
     throw new Error("fallo de la base de datos en /var/lib/postgresql/data");
@@ -72,6 +76,11 @@ describe("forma única del cuerpo de error", () => {
     { ruta: "forbidden", estado: 403, codigo: ERROR_CODES.FORBIDDEN },
     { ruta: "unauthorized", estado: 401, codigo: ERROR_CODES.UNAUTHORIZED },
     { ruta: "conflict", estado: 409, codigo: ERROR_CODES.CONFLICT },
+    {
+      ruta: "service-unavailable",
+      estado: 503,
+      codigo: ERROR_CODES.SERVICE_UNAVAILABLE,
+    },
   ];
 
   for (const caso of casos) {
@@ -141,6 +150,46 @@ describe("errores de validación", () => {
 
     expect(response.status).toBe(201);
     expect(businessLogicRuns).toBe(1);
+  });
+});
+
+describe("un servicio del que dependemos no puede responder", () => {
+  /*
+   * El 503 se distingue del 500 en las DOS direcciones, y las dos importan.
+   *
+   * Lo que SÍ tiene: código propio, para que el cliente pueda ofrecer
+   * «reintentar» en vez de «algo salió mal».
+   *
+   * Lo que NO tiene: identificador de incidente. Un identificador promete que
+   * hay algo registrado que investigar, y aquí no lo hay — el fallo es de otro.
+   * Emitirlo enseña a ignorarlos.
+   */
+  it("responde 503 con su código y SIN identificador de incidente", async () => {
+    const response = await request(app).get(`${API_PREFIX}/probe/service-unavailable`);
+
+    expect(response.status).toBe(503);
+    expect(response.body.code).toBe(ERROR_CODES.SERVICE_UNAVAILABLE);
+    expect(response.body.incidentId).toBeUndefined();
+  });
+
+  it("no filtra detalles internos", async () => {
+    const response = await request(app).get(`${API_PREFIX}/probe/service-unavailable`);
+    const cuerpo = JSON.stringify(response.body);
+
+    expect(cuerpo).not.toContain("at ");
+    expect(cuerpo).not.toContain(".ts:");
+    expect(cuerpo).not.toContain("Error:");
+    expect(cuerpo).not.toContain("stack");
+  });
+
+  it("no se registra como incidencia nuestra", async () => {
+    const registrado = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    await request(app).get(`${API_PREFIX}/probe/service-unavailable`);
+
+    expect(registrado).not.toHaveBeenCalled();
+
+    registrado.mockRestore();
   });
 });
 

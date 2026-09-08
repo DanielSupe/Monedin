@@ -205,6 +205,53 @@ context: |
                 propias -TEST_AWS_*-. La tercera llego en `split-test-storage-credentials`, y su
                 ausencia se noto en cuanto alguien apunto desarrollo al S3 real: los tests seguian
                 hablando con MinIO pero con una llave de AWS, y morian con InvalidAccessKeyId.
+    /assistant  POST /assistant/ask (ambos roles): recibe una pregunta en lenguaje natural y
+                devuelve una respuesta redactada por Google Gemini con el contexto de la familia de
+                quien pregunta. Es el PRIMER servicio externo del proyecto: hasta `add-family-assistant`
+                no habia ni una llamada HTTP saliente en produccion fuera del SDK de S3.
+                UNA ruta para los dos roles, sin requireParent ni requireChild: la rama por rol vive
+                en el SERVICIO, como en PATCH /auth/tutorial. Sigue exigiendo actor, asi que la lista
+                cerrada de rutas de solo cuenta sigue en CINCO.
+                NO admite ningun identificador y su esquema es `.strict()`: ahi esta la garantia de
+                que un niño no recibe datos de su hermano —no existe el parametro que apuntaria a
+                otro perfil—, igual que en GET /children/me/coins. El contexto de un niño lleva su
+                saldo, sus tareas, su escaparate con SU precio, sus canjes y sus movimientos; el de
+                un padre, sus hijos, su bandeja de aprobacion, sus premios y sus canjes pendientes.
+                Todo se lee desde el REPOSITORIO PROPIO y en una sola transaccion: delegar en los
+                servicios ajenos haria N presign contra S3 para componer un prompt de texto, y
+                devuelven Page<T>.
+                El asistente SOLO RESPONDE. Sin herramientas ni function calling, y la respuesta se
+                pinta como texto plano: no existe camino de codigo desde una respuesta hacia una
+                mutacion, que es lo que hace inofensiva una inyeccion de prompt lograda. Lo que NO
+                hay, y esta escrito: el historial que manda el cliente es entrada no confiable y no
+                se puede contrastar —no se persiste nada—, no hay garantia de que el modelo obedezca
+                su guion, y no hay filtro de salida.
+                NO SE PERSISTE NADA: sin tabla, sin migracion. El hilo viaja completo en cada
+                peticion, acotado por ASSISTANT_MAX_HISTORY_TURNS, y pasarse es 422 y no un recorte
+                silencioso —el precedente de MAX_PAGE_SIZE, y aqui pesa mas porque recortar dejaria
+                a quien pregunta creyendo que Monedin recuerda algo que nunca le llego-.
+                DOS guiones de sistema, uno por rol, en `assistant.prompts.ts` y NO en el catalogo de
+                mensajes: es la unica excepcion declarada a CLAUDE.md §1, porque un guion no se
+                traduce sino que se reescribe, y nadie lo lee. Los errores del modulo si van al
+                catalogo.
+                CODIGO DE ERROR NUEVO: SERVICE_UNAVAILABLE -> 503, el primer fallo del sistema que no
+                es culpa de nadie de los dos lados. NO lleva incidentId —no hay incidencia nuestra que
+                investigar— y NO se confunde con el 429, que significa que QUIEN LLAMA agoto sus
+                intentos. Los cuatro motivos —timeout, cuota, 5xx y cuerpo ilegible— dan el mismo 503
+                porque el remedio es identico. El front lo pinta como ADVERTENCIA, no como error.
+                `fetch` crudo y NO el SDK de Google, con tres razones y una que decide: el logger no
+                enmascara nada en ejecucion, asi que lo unico que protege la clave es que el error que
+                sube lo construyamos nosotros. Cero dependencias nuevas.
+                SIN TEST_GEMINI_*, y es lo CONTRARIO del almacen a proposito: alli hay que probar
+                propiedades del proveedor y un doble diria que si a todo; aqui hay que probar que
+                mandamos y que hacemos con lo que vuelve, y la respuesta de un modelo no es
+                determinista. El doble se instala en el beforeAll GLOBAL, asi que ningun test puede
+                llamar a Google por descuido.
+                Sin limite propio de preguntas, sin streaming, sin persistencia y sin acciones: todo
+                declarado en su "No incluye".
+                Los ACCESOS al chat —el widget flotante de Monedin y el icono de ayuda de la
+                cabecera— son el change siguiente, `add-assistant-access`. Hasta entonces /assistant
+                se alcanza escribiendo la direccion.
 
   FRONT (etapa de interfaz y diseno, en curso)
     El front era un andamio funcional sin una sola linea de CSS: clientes de API validados con Zod,
