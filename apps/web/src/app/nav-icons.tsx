@@ -62,3 +62,13 @@ export function IconAccount(): React.ReactElement {
 export function IconProfile(): React.ReactElement {
   return <Trazo d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18Zm-3 7h.01M15 10h.01M8.5 14.5a4.5 4.5 0 0 0 7 0" />;
 }
+
+/**
+ * Ayuda: un interrogante en un círculo.
+ *
+ * Un INTERROGANTE y no una «i». «Información» es ambiguo —¿sobre qué?— y este
+ * control lleva a preguntas y respuestas: el signo dice qué se va a encontrar.
+ */
+export function IconHelp(): React.ReactElement {
+  return <Trazo d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18Zm0 13.5v.01M9.8 9.4a2.2 2.2 0 1 1 2.7 2.2c-.3.1-.5.4-.5.8v.6" />;
+}

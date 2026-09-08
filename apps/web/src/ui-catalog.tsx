@@ -1,6 +1,7 @@
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
+  Accordion,
   Alert,
   Avatar,
   Badge,
@@ -327,6 +328,28 @@ function Piezas(): React.ReactElement {
 
         {/* Sin filas no dibuja nada: aquí debajo no hay tabla. */}
         <DataTable caption="Historial vacío" columns={[{ key: "a", header: "A" }]} rows={[]} />
+      </Seccion>
+
+      <Seccion titulo="Accordion">
+        <Accordion
+          items={[
+            {
+              value: "monedas",
+              label: "¿Qué son las monedas?",
+              content: <p>Las gana haciendo tareas y las gasta pidiendo premios.</p>,
+            },
+            {
+              value: "aprobar",
+              label: "¿Cuándo se pagan?",
+              content: <p>Al aprobar la tarea. Aprobar es lo que acredita.</p>,
+            },
+            {
+              value: "pin",
+              label: "¿Y si se olvida el PIN?",
+              content: <p>Un adulto lo repone desde el perfil del hijo.</p>,
+            },
+          ]}
+        />
       </Seccion>
 
       <Seccion titulo="Tabs">

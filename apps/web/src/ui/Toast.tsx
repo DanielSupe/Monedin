@@ -22,7 +22,7 @@ export function ToastProvider({ children }: { children: ReactNode }): React.Reac
   return (
     <RadixToast.Provider swipeDirection="right">
       {children}
-      <RadixToast.Viewport className="fixed bottom-0 right-0 z-50 flex w-full max-w-dialog flex-col gap-2 p-4" />
+      <RadixToast.Viewport className="fixed bottom-0 right-0 z-toast flex w-full max-w-dialog flex-col gap-2 p-4" />
     </RadixToast.Provider>
   );
 }

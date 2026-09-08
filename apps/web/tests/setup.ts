@@ -37,27 +37,39 @@ if (typeof Element !== "undefined") {
  * `matchMedia`, que jsdom tampoco implementa.
  *
  * El marco lo usa para montar UNA de las dos formas del lateral —columna fija o
- * cajón— en vez de las dos con una escondida por CSS. Sin este relleno, montar
- * la aplicación revienta.
+ * cajón— en vez de las dos con una escondida por CSS, y el widget de la mascota
+ * para dejar de turnar su frase cuando alguien pidió menos movimiento. Sin este
+ * relleno, montar la aplicación revienta.
  *
- * Por defecto responde que NO hay ancho, que es el modo estrecho: es lo que
- * suponen los tests que ya existían. Un test que quiera probar el modo ancho
- * llama a `conPantallaAncha()` antes de montar.
+ * RESPONDE POR CONSULTA y no lo mismo a todas. Devolvía un único valor mientras
+ * hubo una sola pregunta; con dos, un `conPantallaAncha()` haría además creer al
+ * widget que hay que parar el temporizador, y un test de navegación acabaría
+ * comprobando de paso algo que no pretende.
+ *
+ * Por defecto: pantalla ESTRECHA y SIN preferencia de movimiento reducido, que
+ * es lo que suponen los tests que ya existían. Quien quiera el contrario llama a
+ * `conPantallaAncha()` o a `conMovimientoReducido()` antes de montar.
  */
 let pantallaAncha = false;
+let movimientoReducido = false;
 
 export function conPantallaAncha(): void {
   pantallaAncha = true;
 }
 
+export function conMovimientoReducido(): void {
+  movimientoReducido = true;
+}
+
 afterEach(() => {
   pantallaAncha = false;
+  movimientoReducido = false;
 });
 
 if (typeof window !== "undefined") {
   window.matchMedia = (query: string): MediaQueryList =>
     ({
-      matches: pantallaAncha,
+      matches: query.includes("prefers-reduced-motion") ? movimientoReducido : pantallaAncha,
       media: query,
       onchange: null,
       addEventListener: () => undefined,

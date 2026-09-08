@@ -69,12 +69,24 @@
   --mnd-indigo-800: oklch(31% 0.11 272);
 
   /*
-   * Ámbar: la MONEDA, y solo la moneda.
+   * Ámbar: la MONEDA y la MASCOTA. Nada más.
    *
    * Llegó a pintar el panel entero del acceso y ahí estuvo el error: un color
    * que lo cubre todo deja de significar algo. Sobre el índigo profundo, un
    * punto ámbar ES dinero. Tres pasos bastan porque ya no tiene que modelar
    * ninguna superficie.
+   *
+   * DECÍA «la moneda, y SOLO la moneda», y `redesign-assistant-chat` lo
+   * reasignó a conciencia. La mascota entra y no lo diluye, porque Monedín ES
+   * una moneda: no son dos cosas que comparten color por casualidad, son la
+   * misma. Que su voz lleve el color del dinero apunta al mismo referente en vez
+   * de gastarlo.
+   *
+   * Lo que la reserva existía para impedir sigue prohibido palabra por palabra:
+   * un botón cualquiera, una tarjeta cualquiera, un aviso cualquiera. Y desde
+   * ese change lo comprueba un TEST con lista cerrada de archivos autorizados,
+   * en vez de este comentario — que es lo que hace que relajar la regla la haya
+   * dejado más fuerte que antes.
    */
   --mnd-amber-100: oklch(96% 0.05 85);
   --mnd-amber-400: oklch(80% 0.16 80);
@@ -123,8 +135,15 @@
   --color-primary-soft: var(--mnd-indigo-100);
 
   /*
-   * La moneda. Reservada: si el ámbar también pinta botones genéricos, deja de
-   * significar «monedas». Ver la pregunta abierta del design.
+   * La moneda, y la voz de la mascota. RESERVADO: si el ámbar también pinta
+   * botones o tarjetas genéricos deja de significar «monedas», que es lo único
+   * que este color existe para decir.
+   *
+   * La reserva NO vive en este comentario. La comprueba
+   * `tests/ui/style-rules.test.ts` con una lista cerrada de archivos: uno que no
+   * esté en ella y use `bg-coin-soft` hace fallar la verificación. Añadirse a la
+   * lista es una decisión visible en una revisión; acordarse de un comentario,
+   * no lo era.
    */
   /*
    * El color de la MARCA como superficie, para las pantallas que se pintan
@@ -187,6 +206,25 @@
   --shadow-card: 0 1px 2px oklch(25% 0.024 265 / 0.06), 0 4px 12px oklch(25% 0.024 265 / 0.05);
   --shadow-raised: 0 2px 4px oklch(25% 0.024 265 / 0.08), 0 12px 28px oklch(25% 0.024 265 / 0.08);
 
+  /*
+   * QUIÉN TAPA A QUIÉN. Dos capas flotantes, y el orden se lee aquí.
+   *
+   * Hasta `add-assistant-access` esto era un `z-50` escrito a mano dentro de
+   * `Toast.tsx`, el único número de apilado del proyecto. Con una sola capa
+   * flotante nadie lo notaba; en cuanto hay dos que ocupan el MISMO píxel —la
+   * esquina inferior derecha— dos números en dos archivos distintos son dos
+   * decisiones que nadie ha comparado.
+   *
+   * Se nombran por su PAPEL y no por su valor, igual que un color: el punto de
+   * uso pide «la capa del aviso», no un número.
+   *
+   * EL AVISO VA ENCIMA, y es la decisión, no una casualidad del orden: un aviso
+   * que dice «tarea aprobada» tapando una mascota decorativa es inofensivo; una
+   * mascota tapando el aviso esconde información que alguien necesita.
+   */
+  --z-index-widget: 40;
+  --z-index-toast: 50;
+
   /* Anchos con nombre, para que ninguna pieza escriba `max-w-[28rem]`. */
   --container-dialog: 28rem;
   --container-reading: 40rem;
@@ -240,6 +278,13 @@
    * puerta pública: cuanto más fuera, más despacio, para que el conjunto se lea
    * como un sistema y no como tres cosas girando.
    */
+  /*
+   * La frase de Monedín al relevarse. Corta y solo de entrada: lo que sale no se
+   * despide, se sustituye, y animar la salida obligaría a mantener dos frases
+   * montadas a la vez para nada.
+   */
+  --animate-fade-in: mnd-fade-in var(--duration-normal) ease-out;
+
   --animate-disc-slow: mnd-orbit 70s linear infinite;
   --animate-disc-slow-reverse: mnd-orbit-reverse 70s linear infinite;
 }
@@ -259,6 +304,12 @@
 @keyframes mnd-strip {
   to {
     transform: translateX(-50%);
+  }
+}
+
+@keyframes mnd-fade-in {
+  from {
+    opacity: 0;
   }
 }
 

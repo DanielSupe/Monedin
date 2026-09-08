@@ -1,4 +1,4 @@
-import { PIN_LENGTH } from "@monedin/contracts";
+import { CHILD_AGE_MAX, CHILD_AGE_MIN, PIN_LENGTH } from "@monedin/contracts";
 
 /**
  * Catálogo de textos visibles del front.
@@ -715,6 +715,118 @@ export const messages = {
   },
 
   /**
+   * Las preguntas frecuentes.
+   *
+   * UNA SOLA LISTA para los dos roles, decidido a conciencia. Se acepta que un
+   * niño lea enunciados escritos para toda la familia; si al usarla se ve que no
+   * encuentra su duda, se parte entonces y con el motivo medido, no antes.
+   *
+   * Las respuestas que llevan una CIFRA no están aquí enteras: se componen abajo
+   * desde su constante, como `PIN_LABEL`. El test que prohíbe dígitos dentro de
+   * una cadena recorre también los arrays, y aquí se habla de edades y de
+   * dígitos de un PIN — que es justo el caso que ese test existe para cazar.
+   */
+  help: {
+    title: "Preguntas frecuentes",
+    lead: "Lo que más se pregunta sobre Monedín.",
+
+    coinsQ: "¿Qué son las monedas?",
+    coinsA:
+      "Son monedas de mentira que solo valen dentro de tu familia. No son dinero real y no se " +
+      "pueden cambiar por dinero: sirven para aprender cómo funciona ganar y gastar.",
+
+    earnQ: "¿Cómo se ganan monedas?",
+    earnA:
+      "Un adulto crea una tarea y le pone un valor. Cuando el niño la hace, la marca como " +
+      "terminada y queda esperando revisión.",
+
+    approveQ: "¿Cuándo se pagan las monedas de una tarea?",
+    approveA:
+      "Al aprobarla. Aprobar es lo que acredita las monedas, así que hasta que un adulto la " +
+      "revisa el saldo no cambia. Marcar una tarea no paga nada por sí solo.",
+
+    twiceQ: "Aprobé dos veces y me avisó. ¿Hice algo mal?",
+    twiceA:
+      "No. La primera aprobación ya contó y pagó las monedas; la segunda se rechaza para no " +
+      "pagar dos veces por lo mismo. El aviso está para que sepas que ya estaba hecho.",
+
+    rewardQ: "¿Cómo se consigue un premio?",
+    rewardA:
+      "El niño lo pide desde sus premios y un adulto lo aprueba. Aprobar es lo que descuenta las " +
+      "monedas, y el precio queda fijado en el momento de pedirlo aunque después cambie.",
+
+    rejectQ: "Si rechazan un canje, ¿se pierden las monedas?",
+    rejectA:
+      "No se pierde nada. Las monedas solo se descuentan al aprobar, así que un canje rechazado " +
+      "deja el saldo exactamente como estaba.",
+
+    siblingQ: "¿Puede un niño ver las monedas de su hermano?",
+    siblingA:
+      "No. Cada niño ve solo lo suyo: sus tareas, sus premios y su saldo. Ni siquiera " +
+      "preguntándomelo a mí, porque yo tampoco lo sé.",
+
+    /** Compuestas abajo: llevan cifras y no pueden vivir enteras aquí. */
+    ageQLead: "¿Para qué edades es Monedín? De",
+    ageQTail: "años",
+    ageA:
+      "Está pensado para esas edades, que es cuando el ciclo de esfuerzo, ingreso y decisión de " +
+      "gasto se entiende mejor haciéndolo que explicándolo.",
+
+    pinQLead: "¿Y si alguien olvida su PIN de",
+    pinQTail: "dígitos?",
+    pinA:
+      "Un adulto puede reponer el PIN de un hijo desde su perfil. Y si el que se olvida es el " +
+      "del adulto, se restablece con el correo y la contraseña de la cuenta.",
+
+    moreDoubts: "¿Más dudas?",
+    askMonedin: "Pregúntale a Monedín",
+  },
+
+  /**
+   * Lo que dice Monedín flotando en la esquina.
+   *
+   * Agrupadas por ROL y por ÁREA, con el mismo nombre que usa
+   * `app/widget-lines.ts`: quien añada un área ahí encuentra aquí dónde escribir
+   * sus frases sin tener que inventarse una convención.
+   *
+   * Son un ANZUELO, no una explicación: dicen lo justo para que a alguien le
+   * apetezca preguntar. Lo que explica de verdad son las preguntas frecuentes y
+   * el chat, y meter aquí la respuesta entera convertiría un bocadillo en un
+   * cartel que hay que leer cada ocho segundos.
+   */
+  widget: {
+    /** El nombre del destino. FIJO: es lo que oye quien no ve la pantalla. */
+    openChat: "Pregúntale a Monedín",
+
+    childHomeBalance: "¿Quieres saber de dónde salieron tus monedas?",
+    childHomeAsk: "Pregúntame lo que quieras sobre tus monedas.",
+    childHomeCycle: "¿Sabes cómo se ganan monedas aquí?",
+    childTasksDo: "¿No sabes por dónde empezar? Yo te ayudo.",
+    childTasksApproval: "¿Ya la hiciste y sigue esperando? Te cuento por qué.",
+    childRewardsChoose: "¿Te ayudo a elegir a cuál llegas antes?",
+    childRewardsGoal: "¿Cuánto te falta para el que más quieres?",
+    childRedemptionsWait: "¿Tu premio sigue esperando? Pregúntame.",
+    childRedemptionsWhy: "¿Te dijeron que no? Te explico qué pasó.",
+    childAccountPin: "¿Se te olvidó tu PIN? Te digo qué hacer.",
+    childAccountAvatar: "¿Quieres cambiar tu foto? Te digo cómo.",
+    childHelp: "Si tu duda no está aquí, pregúntamela.",
+
+    parentHomePending: "¿Te cuento qué tienes esperando?",
+    parentHomeAsk: "Pregúntame por las tareas o los premios de tu familia.",
+    parentTasksApprove: "¿Dudas de cuánto vale una tarea? Hablemos.",
+    parentTasksConflict: "¿Aprobaste y te avisó? Te explico por qué.",
+    parentRewardsPrice: "¿Te ayudo a poner un precio que motive?",
+    parentRewardsRetire: "¿Retirar o dejar de ofrecer? No es lo mismo.",
+    parentRedemptionsFrozen: "El precio se congela al pedirlo. ¿Te lo explico?",
+    parentRedemptionsReject: "¿Rechazar devuelve monedas? Pregúntame.",
+    parentChildrenPin: "¿Alguien olvidó su PIN? Te digo cómo reponerlo.",
+    parentChildrenBalance: "¿Quieres repasar cómo va cada uno?",
+    parentAccountLeave: "Salir del perfil y cerrar sesión no son lo mismo.",
+    parentAccountAsk: "¿Alguna duda sobre tu cuenta?",
+    parentHelp: "Si tu duda no está aquí, pregúntamela.",
+  },
+
+  /**
    * El chat con Monedín.
    *
    * Un solo juego de textos para los dos roles, igual que la pantalla: el marco
@@ -734,15 +846,35 @@ export const messages = {
     you: "Tú",
     monedin: "Monedín",
 
+    /**
+     * Lo que ocupa el hueco del hilo mientras esta vacio.
+     *
+     * En gris tenue y sin accion: no es un aviso ni un error, es la pantalla
+     * diciendo para que sirve el hueco que se ve. Antes ese espacio estaba en
+     * blanco y el campo de abajo era lo unico que sugeria que se podia escribir.
+     */
+    emptyHint: "Pregúntame lo que quieras sobre tus tareas, tus premios o tus monedas.",
+
     inputLabel: "Tu pregunta",
     placeholder: "Escribe tu pregunta…",
     send: "Preguntar",
     thinking: "Monedín está pensando…",
     retry: "Volver a intentarlo",
 
-    /** Arranques sugeridos, para que la pantalla vacía no sea un folio en blanco. */
-    ideasTitle: "No sabes qué preguntar?",
+    /**
+     * Arranques sugeridos.
+     *
+     * Desde `redesign-assistant-chat` NO desaparecen al empezar a conversar:
+     * dejan de ser el remedio del folio en blanco y pasan a ser el atajo para
+     * cambiar de tema sin escribir. Para quien todavía escribe despacio —un niño
+     * de seis años— eso es la diferencia entre seguir preguntando y cerrar.
+     */
+    ideasTitle: "Explora con Monedín",
     ideaBalance: "¿Cómo consigo más monedas?",
+    /** Los tres glifos de las sugerencias. Decorativos: lo que dice es el texto. */
+    ideaBalanceGlyph: "🪙",
+    ideaTasksGlyph: "🧹",
+    ideaRewardsGlyph: "🎁",
     ideaTasks: "¿Qué me falta por hacer?",
     ideaRewards: "¿Para qué premio me alcanza?",
 
@@ -776,3 +908,17 @@ export const messages = {
  * tiene un solo punto de uso.
  */
 export const PIN_LABEL = `${messages.auth.pinLead} ${PIN_LENGTH} ${messages.auth.pinTail}`;
+
+/**
+ * Las dos preguntas frecuentes que llevan una cifra dentro.
+ *
+ * Se componen AQUÍ y no en la pantalla, por lo mismo que `PIN_LABEL`: el número
+ * sale de la constante del contrato, así que el día que el PIN pase a cinco
+ * dígitos o el rango de edad cambie, el texto cambia solo. Tenerlo escrito a
+ * mano acaba con la pantalla diciendo una cosa y la validación exigiendo otra.
+ */
+export const HELP_AGE_QUESTION =
+  `${messages.help.ageQLead} ${CHILD_AGE_MIN} a ${CHILD_AGE_MAX} ${messages.help.ageQTail}`;
+
+export const HELP_PIN_QUESTION =
+  `${messages.help.pinQLead} ${PIN_LENGTH} ${messages.help.pinQTail}`;

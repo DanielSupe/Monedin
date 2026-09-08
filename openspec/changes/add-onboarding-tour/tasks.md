@@ -71,10 +71,14 @@
 
 ## 9. Lo que ningún test cubre
 
-- [ ] 9.1 **Abrir la aplicación** con una cuenta nueva: entrar al perfil del padre y al de un hijo,
-      ver que sale una vez y no vuelve, y que el foco cae sobre lo que dice.
-- [ ] 9.2 Estrechar la ventana y comprobar que el foco sigue cuadrando.
-- [ ] 9.3 Con **movimiento reducido**: sin transiciones entre pasos.
+- [x] 9.1 **Abrir la aplicación** con una cuenta nueva: entrar al perfil del padre y al de un hijo,
+      ver que sale una vez y no vuelve, y que el foco cae sobre lo que dice. Comprobado con una cuenta
+      recién creada: los cinco pasos del padre en orden, el botón cambiando a «Empezar» en el último,
+      y tras terminarlo no vuelve ni recargando.
+- [x] 9.2 Estrechar la ventana y comprobar que el foco sigue cuadrando. A 390 px, el hueco cae
+      exactamente sobre la tarjeta del saldo del niño y el panel se coloca debajo.
+- [x] 9.3 Con **movimiento reducido**: sin transiciones entre pasos. El panel resuelve a 1 ms de
+      transición y de animación, que es lo que el bloque de `tokens.css` impone.
 
 ## 10. Documentar
 

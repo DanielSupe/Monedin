@@ -30,6 +30,13 @@ export interface RouterContext {
  * ancho. Las pantallas previas a tener un rol —acceso y rejilla— quieren el
  * ancho de lectura, que es lo de por defecto.
  *
+ * `fullHeight` lo pide el chat, y por una razón distinta: es la única pantalla
+ * que DESPLAZA POR DENTRO. Su hilo crece y su campo de escribir se queda abajo,
+ * como en cualquier mensajería; para eso su alto tiene que estar acotado por la
+ * ventana en vez de crecer con el contenido, que es lo que hace el resto del
+ * producto. Con el documento desplazando, el campo se iría hacia abajo con los
+ * mensajes y habría que perseguirlo.
+ *
  * Se declara en la ruta y no con un `if` sobre la dirección en este archivo:
  * una dirección escrita a mano aquí se desincroniza el día que alguien renombre
  * la ruta, y el typecheck no lo vería.
@@ -37,6 +44,7 @@ export interface RouterContext {
 declare module "@tanstack/react-router" {
   interface StaticDataRouteOption {
     fullBleed?: boolean;
+    fullHeight?: boolean;
   }
 }
 
@@ -62,13 +70,30 @@ function AppFrame(): React.ReactElement {
   const aSangre = useRouterState({
     select: (estado) => estado.matches.some((match) => match.staticData.fullBleed === true),
   });
+  const altoCompleto = useRouterState({
+    select: (estado) => estado.matches.some((match) => match.staticData.fullHeight === true),
+  });
 
   if (actor?.familyRole === "CHILD") {
-    return <ChildShell avatar={actor.avatar} name={actor.name} />;
+    return (
+      <ChildShell
+        avatar={actor.avatar}
+        name={actor.name}
+        tutorialSeen={actor.tutorialSeen}
+        fullHeight={altoCompleto}
+      />
+    );
   }
 
   if (actor?.familyRole === "PARENT") {
-    return <ParentShell avatar={actor.avatar} name={actor.name} />;
+    return (
+      <ParentShell
+        avatar={actor.avatar}
+        name={actor.name}
+        tutorialSeen={actor.tutorialSeen}
+        fullHeight={altoCompleto}
+      />
+    );
   }
 
   return aSangre ? <Outlet /> : <EntryShell />;

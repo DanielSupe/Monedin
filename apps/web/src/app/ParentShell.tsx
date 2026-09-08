@@ -6,10 +6,12 @@ import {
   MenuButton,
   Sidebar,
   SidebarLabel,
+  HelpLink,
   SidebarProfile,
   sidebarItemClasses,
 } from "./Sidebar.js";
 import { cx } from "../ui/cx.js";
+import { MonedinWidget } from "./MonedinWidget.js";
 import { useDrawer } from "./use-drawer.js";
 import { useIsWide } from "./use-wide.js";
 import {
@@ -39,9 +41,37 @@ import {
 export function ParentShell({
   avatar,
   name,
+  tutorialSeen,
+  fullHeight,
 }: {
   avatar: string | null;
   name: string;
+  /**
+   * Si a este perfil ya se le explicó el producto.
+   *
+   * El marco lo necesita para NO montar el widget de la mascota mientras el
+   * recorrido de bienvenida está en pantalla: allí ya hay un Monedín hablando, y
+   * el segundo saldría apagado detrás del velo compitiendo con él.
+   *
+   * Se resuelve así y no cableando una señal desde `features/tutorial`, que es
+   * quien monta el recorrido: esta es la MISMA condición con la que las dos
+   * pantallas de inicio deciden montarlo, así que no hace falta un segundo
+   * camino que pueda separarse del primero.
+   */
+  tutorialSeen: boolean;
+  /**
+   * Si la pantalla de dentro gestiona su propio alto y desplaza por dentro.
+   *
+   * Hoy solo el chat. Lo declara la RUTA con `staticData`, igual que
+   * `fullBleed`, y no un `if` sobre la dirección: una dirección escrita a mano
+   * aquí se desincroniza el día que alguien renombre la ruta y el typecheck no
+   * lo vería.
+   *
+   * Lo que cambia: el marco se ata a la ventana también en ESTRECHO, y el
+   * `<main>` deja de crecer con su contenido. Sin las dos cosas, el campo de
+   * escribir del chat se iría hacia abajo con los mensajes.
+   */
+  fullHeight: boolean;
 }): React.ReactElement {
   const { open, setOpen } = useDrawer();
   const ancho = useIsWide();
@@ -133,7 +163,7 @@ export function ParentShell({
       data-scale="parent"
       className={cx(
         "flex flex-col bg-surface text-ink",
-        ancho ? "h-dvh overflow-hidden" : "min-h-dvh",
+        ancho || fullHeight ? "h-dvh overflow-hidden" : "min-h-dvh",
       )}
     >
       <header className="flex items-center gap-3 border-b border-border bg-surface-raised px-4 py-2">
@@ -160,6 +190,8 @@ export function ParentShell({
           está usando esto, que la lista de destinos no responde. Es la única
           excepción declarada a «ningún destino dos veces».
         */}
+        <HelpLink />
+
         <Link to="/account" aria-label={messages.nav.parentAccount}>
           <Avatar value={avatar} size="small" />
         </Link>
@@ -213,13 +245,41 @@ export function ParentShell({
           en su borde. Los dos ejes tienen que estar en el mismo sitio.
         */}
         <div
-          className={cx("flex min-w-0 flex-1 flex-col overflow-x-auto", ancho && "overflow-y-auto")}
+          className={cx(
+            "flex min-w-0 flex-1 flex-col overflow-x-auto",
+            /*
+              Los DOS ejes en el mismo elemento, siempre: cuando uno es `auto` y
+              el otro `visible`, CSS obliga a que `visible` compute a `auto`, y
+              entonces este envoltorio desplaza también en vertical sin que
+              nadie lo haya pedido. Costó dos intentos en `polish-home-layout`.
+
+              Con `fullHeight` desplaza la PANTALLA, no el marco: si aquí
+              quedara `auto`, habría dos contenedores de desplazamiento anidados
+              y el de fuera se llevaría el campo de escribir del chat. Lo destapó
+              un test que comprobaba justo eso.
+            */
+            fullHeight ? "overflow-y-hidden" : ancho ? "overflow-y-auto" : "overflow-y-visible",
+          )}
         >
-          <main className="mx-auto w-full min-w-0 max-w-wide flex-1 px-4 py-4">
+          <main
+            className={cx(
+              "mx-auto w-full min-w-0 max-w-wide flex-1 px-4 py-4",
+              // Sin esto, un hijo alto empuja al `<main>` y el desplazamiento
+              // vuelve a ser del marco: `flex-1` deja `min-height: auto`.
+              fullHeight && "min-h-0",
+            )}
+          >
             <Outlet />
           </main>
         </div>
       </div>
+
+      {/*
+        Monedín ofreciéndose, y NO mientras se está explicando el producto: allí
+        ya hay un Monedín hablando dentro del foco, y el segundo saldría apagado
+        detrás del velo compitiendo con él.
+      */}
+      {tutorialSeen && <MonedinWidget role={"PARENT"} />}
     </div>
   );
 }

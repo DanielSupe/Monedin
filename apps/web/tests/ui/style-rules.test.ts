@@ -70,6 +70,124 @@ describe("el estilo no se escribe fuera de los tokens", () => {
     ).toEqual([]);
   });
 
+  /*
+   * Quién tapa a quién, cuando lo que se apila FLOTA SOBRE LA PÁGINA.
+   *
+   * Hasta `add-assistant-access` esto era un `z-50` escrito a mano dentro de
+   * `Toast.tsx`, el único del proyecto. Con una sola capa flotante nadie lo
+   * notaba; con dos que ocupan el mismo píxel —la esquina inferior derecha—,
+   * dos números en dos archivos distintos son dos decisiones que nadie ha
+   * comparado.
+   *
+   * EL ALCANCE ES DELIBERADAMENTE ESTRECHO, y esa es la parte que hay que leer.
+   * Solo se persigue el apilado de lo que se posiciona respecto a la VENTANA
+   * —`fixed` o `sticky`—, porque solo eso es una afirmación sobre la página
+   * entera. Un `z-10` dentro de la propia caja de un componente ordena hermanos
+   * dentro de su contexto de apilado y es otra decisión: `Orbits` pone así su
+   * disco central por encima de sus anillos, y obligarle a pedir «la capa del
+   * aviso» sería peor, no mejor.
+   *
+   * Se mira cada cadena de clases entera: la regla es que aparezcan JUNTOS el
+   * posicionamiento y el número, que es lo que los convierte en una capa global.
+   */
+  it("ninguna capa flotante fija su apilado con un número", () => {
+    const culpables: string[] = [];
+    const FLOTA = /\b(?:fixed|sticky)\b/;
+    const APILADO = /\bz-(?:[1-9]\d*|\[[^\]]+\])/;
+
+    for (const ruta of ARCHIVOS) {
+      const contenido = sinComentarios(readFileSync(ruta, "utf8"));
+      // Cada literal de cadena del archivo: es donde viven las clases, tanto en
+      // un `className` como dentro de un `Record` de variantes.
+      const cadenas = contenido.match(/(["'`])(?:\\.|(?!\1)[^\\])*\1/g) ?? [];
+      const malas = cadenas.filter((c) => FLOTA.test(c) && APILADO.test(c));
+
+      if (malas.length > 0) {
+        culpables.push(`${relative(SRC, ruta)} → ${malas.join(" | ")}`);
+      }
+    }
+
+    expect(
+      culpables,
+      `una capa que flota sobre la página pide su sitio por nombre, y el orden se lee en src/styles/tokens.css:\n${culpables.join(
+        "\n",
+      )}`,
+    ).toEqual([]);
+  });
+
+  /**
+   * El color de la moneda está RESERVADO, y aquí es donde se hace cumplir.
+   *
+   * Vivía en un comentario de `tokens.css` —«la moneda, y solo la moneda»— y un
+   * comentario no lo lee ninguna verificación. Al escribir este test se vio lo
+   * que eso cuesta: la regla **ya era falsa en dos sitios** antes de que nadie
+   * la tocara. Una regla que solo vive en un comentario deriva en silencio, que
+   * es justo lo que este proyecto tiene escrito que pasa.
+   *
+   * `redesign-assistant-chat` la amplió a la moneda Y LA MASCOTA —Monedín ES una
+   * moneda, así que su voz llevando el color apunta al mismo referente en vez de
+   * gastarlo— y la reversión se pagó con esto: una lista cerrada. Añadirse a
+   * ella es una decisión visible en una revisión; acordarse de un comentario, no.
+   *
+   * Lo que sigue prohibido es lo que la reserva existía para impedir: un botón
+   * cualquiera, una tarjeta cualquiera, un aviso cualquiera.
+   */
+  const AUTORIZADOS_AL_COLOR_MONEDA = [
+    // La cifra. Es la razón de que este color exista.
+    join("ui", "Coins.tsx"),
+    // La marca ES una moneda dibujada.
+    join("ui", "Logo.tsx"),
+    // Lo que falta para un premio, medido en monedas.
+    join("ui", "ProgressBar.tsx"),
+    /*
+     * La variante `contrast`, sobre la superficie de marca. Es un botón
+     * genérico y contradice la letra de la reserva; está declarada en CLAUDE.md
+     * —«pasó de tinta oscura a ámbar al cambiar la superficie»— y se hereda tal
+     * cual. Fue el primero de los dos sitios donde la regla ya no se cumplía.
+     */
+    join("ui", "Button.tsx"),
+    /*
+     * La corona del perfil adulto. HEREDADO y sin auditar: no es dinero ni es la
+     * mascota, así que no encaja en la reserva ni siquiera ampliada. Se anota en
+     * vez de cambiarse porque esta pantalla no es la que se rediseña aquí, y
+     * cambiarle el color de paso sería tocar algo que nadie pidió. Queda a la
+     * vista para quien vuelva a esa pantalla.
+     */
+    join("features", "auth", "ProfileGrid.tsx"),
+    // Los globos de Monedín en el chat, que es lo que abrió esta lista.
+    join("features", "assistant", "AssistantChat.tsx"),
+  ];
+
+  it("hay archivos autorizados al color de la moneda", () => {
+    // Sin esto, vaciar la lista haría pasar la comprobación de abajo por no
+    // encontrar nada que revisar — que es la forma silenciosa de desactivarla.
+    expect(AUTORIZADOS_AL_COLOR_MONEDA.length).toBeGreaterThan(0);
+  });
+
+  it("solo los archivos autorizados usan el color de la moneda", () => {
+    const culpables: string[] = [];
+
+    for (const ruta of ARCHIVOS) {
+      const relativa = relative(SRC, ruta);
+      if (AUTORIZADOS_AL_COLOR_MONEDA.includes(relativa)) continue;
+
+      const contenido = sinComentarios(readFileSync(ruta, "utf8"));
+      // `bg-coin`, `text-coin-ink`, `fill-coin`, `border-coin-soft`…
+      const encontrados = contenido.match(/\b(?:bg|text|border|fill|stroke|ring)-coin(?:-[a-z]+)?\b/g);
+
+      if (encontrados !== null) {
+        culpables.push(`${relativa} → ${[...new Set(encontrados)].join(", ")}`);
+      }
+    }
+
+    expect(
+      culpables,
+      `el color de la moneda es para el dinero y para la mascota. Si un archivo nuevo lo necesita de verdad, se añade a AUTORIZADOS_AL_COLOR_MONEDA y se ve en la revisión:\n${culpables.join(
+        "\n",
+      )}`,
+    ).toEqual([]);
+  });
+
   it("ninguna utilidad con valor arbitrario", () => {
     const culpables: string[] = [];
 

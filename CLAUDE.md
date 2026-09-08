@@ -881,6 +881,19 @@ se lee como juguete justo donde alguien decide si esto es de fiar. El ámbar no 
 papel: pintando media pantalla no decía nada, y sobre índigo un punto ámbar **es dinero**. La
 rejilla, el PIN y la puerta pública siguen claros.
 
+**El ámbar es la moneda Y LA MASCOTA, y esto se reasignó a conciencia.** Decía «la moneda, y solo la
+moneda». `redesign-assistant-chat` lo amplió para que los globos de Monedín en el chat lleven ámbar
+suave, y el argumento es que **Monedín ES una moneda**: no son dos cosas que comparten color por
+casualidad, son la misma, así que su voz llevando el color del dinero apunta al mismo referente en
+vez de gastarlo. Lo que la reserva existía para impedir sigue prohibido palabra por palabra: un botón
+cualquiera, una tarjeta cualquiera, un aviso cualquiera.
+
+Y **la reversión se pagó con una mejora, que es la única forma honesta de relajar una regla**: la
+reserva pasó de vivir en un comentario de `tokens.css` —que ninguna verificación lee— a un test con
+**lista cerrada de archivos autorizados**. Antes decía «no pintes botones de ámbar» y nada lo
+comprobaba. Añadirse a esa lista es una decisión visible en una revisión; acordarse de un comentario,
+no lo era. Si algún día hace falta relajar otra regla de color, este es el precio.
+
 **Los neutros y las superficies se reasignan por SUPERFICIE, igual que los tamaños por audiencia.**
 `[data-surface="brand"]` cambia el valor de la tinta, los bordes, las sombras **y
 `--color-surface-raised`**. Esto último no es un detalle: sobre un fondo oscuro no basta con invertir

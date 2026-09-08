@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as AssistantRouteImport } from './routes/assistant'
+import { Route as HelpRouteImport } from './routes/help'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as WelcomeRouteImport } from './routes/welcome'
@@ -47,6 +48,11 @@ const AccountRoute = AccountRouteImport.update({
 const AssistantRoute = AssistantRouteImport.update({
   id: '/assistant',
   path: '/assistant',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignInRoute = SignInRouteImport.update({
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/assistant': typeof AssistantRoute
+  '/help': typeof HelpRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/welcome': typeof WelcomeRoute
@@ -185,6 +192,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/assistant': typeof AssistantRoute
+  '/help': typeof HelpRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/welcome': typeof WelcomeRoute
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/assistant': typeof AssistantRoute
+  '/help': typeof HelpRoute
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/welcome': typeof WelcomeRoute
@@ -240,6 +249,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/assistant'
+    | '/help'
     | '/sign-in'
     | '/sign-up'
     | '/welcome'
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/assistant'
+    | '/help'
     | '/sign-in'
     | '/sign-up'
     | '/welcome'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/assistant'
+    | '/help'
     | '/sign-in'
     | '/sign-up'
     | '/welcome'
@@ -319,6 +331,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   AssistantRoute: typeof AssistantRoute
+  HelpRoute: typeof HelpRoute
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   WelcomeRoute: typeof WelcomeRoute
@@ -363,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/assistant'
       fullPath: '/assistant'
       preLoaderRoute: typeof AssistantRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sign-in': {
@@ -519,6 +539,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   AssistantRoute: AssistantRoute,
+  HelpRoute: HelpRoute,
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   WelcomeRoute: WelcomeRoute,

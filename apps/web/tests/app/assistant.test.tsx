@@ -6,6 +6,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { messages } from "../../src/lib/messages.js";
 import { routeTree } from "../../src/routeTree.gen";
+import { conPantallaAncha } from "../setup.js";
 import { comoNino, comoPadre } from "../support/router.js";
 
 /**
@@ -289,5 +290,231 @@ describe("es un destino de los DOS roles", () => {
 
     expect(direccion()).toBe("/assistant");
     expect(screen.getByRole("heading", { name: messages.assistant.title })).toBeTruthy();
+  });
+});
+
+/**
+ * La forma de la conversación, desde `redesign-assistant-chat`.
+ *
+ * Antes eran tarjetas iguales una debajo de otra y lo único que separaba una
+ * pregunta de una respuesta era leer la etiqueta. Ahora se distingue por TRES
+ * señales a la vez, y los tests las persiguen por separado: si alguien quitara
+ * una, el resto seguiría en verde y nadie se enteraría.
+ */
+describe("un turno se distingue del anterior sin leer de quién es", () => {
+  /** Los globos: el elemento con la superficie, dentro de cada turno de la lista. */
+  function globos(): HTMLElement[] {
+    return [...document.querySelectorAll("li > div")] as HTMLElement[];
+  }
+
+  it("no comparten superficie ni alineación", async () => {
+    const usuario = userEvent.setup();
+    await montarChat("nino", respondeSiempre("Tienes 120 monedas."));
+
+    await preguntar(usuario, "¿cuántas tengo?");
+    await screen.findByText("Tienes 120 monedas.");
+
+    const filas = [...document.querySelectorAll("li")] as HTMLElement[];
+    expect(filas).toHaveLength(2);
+
+    // POSICIÓN: uno a cada lado. Es lo que se lee de un vistazo.
+    expect(filas[0]?.className).toContain("justify-end");
+    expect(filas[1]?.className).toContain("justify-start");
+
+    // COLOR: superficies distintas. Distingue con la pantalla en blanco y negro.
+    const [mio, suyo] = globos();
+    expect(mio?.className).not.toBe(suyo?.className);
+    expect(suyo?.className).toContain("bg-coin-soft");
+    expect(mio?.className).not.toContain("bg-coin-soft");
+  });
+
+  /*
+   * La tercera señal, y la que NO se puede perder por hacerlo más bonito: la
+   * etiqueta escrita es lo único que oye quien no ve la pantalla. El requisito
+   * dice que la respuesta se atribuye «y no solo distinguida por un color».
+   */
+  it("cada turno sigue diciendo de quién es, sin ver nada", async () => {
+    const usuario = userEvent.setup();
+    await montarChat("nino", respondeSiempre("Hola."));
+
+    await preguntar(usuario, "hola");
+    await screen.findByText("Hola.");
+
+    const hilo = within(screen.getByRole("list"));
+    expect(hilo.getByText(messages.assistant.you)).toBeTruthy();
+    expect(hilo.getByText(messages.assistant.monedin)).toBeTruthy();
+  });
+
+  it("un turno corto no ocupa la línea entera", async () => {
+    const usuario = userEvent.setup();
+    await montarChat("padre", respondeSiempre("Sí."));
+
+    await preguntar(usuario, "¿sí?");
+    await screen.findByText("Sí.");
+
+    // Cada globo lleva su tope: un bloque de borde a borde no se lee como algo
+    // que alguien dijo.
+    for (const globo of globos()) {
+      expect(globo.className).toContain("max-w-");
+    }
+  });
+});
+
+/**
+ * Monedín y las sugerencias viven en la columna de la derecha, que SOLO existe
+ * cuando hay ancho.
+ *
+ * Las dos decisiones cambiaron al ver la pantalla montada, y las dos en la misma
+ * dirección: en un teléfono lo único que cabe es el chat. La mascota se retiraba
+ * al empezar a conversar y ahora se queda —es con quien se habla, y quitarla
+ * dejaba la pantalla sin la cara que le da nombre—; las sugerencias bajaban
+ * debajo del hilo en estrecho y ahora no se montan, porque comían el alto que
+ * necesita lo que se va a leer.
+ */
+describe("la columna de la derecha solo existe con ancho", () => {
+  function mascota(): Element | null {
+    return document.querySelector("aside img");
+  }
+
+  function sugerencia(): HTMLElement[] {
+    return screen.queryAllByRole("button", { name: new RegExp(messages.assistant.ideaBalance) });
+  }
+
+  it("en estrecho NO hay ni mascota ni sugerencias: la pantalla es el chat", async () => {
+    await montarChat("nino", respondeSiempre("hola"));
+
+    expect(mascota()).toBeNull();
+    // Se CUENTAN, no se mira si se ven: jsdom no aplica CSS, así que esconderlas
+    // con `hidden` pasaría este test mientras siguen ahí para quien recorre el
+    // documento con teclado.
+    expect(sugerencia()).toHaveLength(0);
+    // Y el chat sí está, que es la otra mitad: si no se montara nada, lo de
+    // arriba pasaría en verde.
+    expect(screen.getByLabelText(messages.assistant.inputLabel)).toBeTruthy();
+  });
+
+  it("en ancho están las dos", async () => {
+    conPantallaAncha();
+    await montarChat("nino", respondeSiempre("hola"));
+
+    expect(mascota()).not.toBeNull();
+    expect(sugerencia()).toHaveLength(1);
+  });
+
+  /*
+   * SIEMPRE, antes y después de conversar. Es el cambio respecto a la primera
+   * versión, y se comprueba en los dos momentos porque medio test —solo el hilo
+   * vacío— pasaría con la versión que las retiraba.
+   */
+  it("siguen ahí con la conversación empezada", async () => {
+    conPantallaAncha();
+    const usuario = userEvent.setup();
+    await montarChat("nino", respondeSiempre("Ya te cuento."));
+
+    expect(mascota()).not.toBeNull();
+    expect(sugerencia()).toHaveLength(1);
+
+    await preguntar(usuario, "hola");
+    await screen.findByText("Ya te cuento.");
+
+    expect(mascota()).not.toBeNull();
+    expect(sugerencia()).toHaveLength(1);
+  });
+
+  it("elegir una la PREGUNTA, no la escribe en el campo", async () => {
+    conPantallaAncha();
+    const usuario = userEvent.setup();
+    const { enviados } = await montarChat("nino", respondeSiempre("Con tareas."));
+
+    await usuario.click(sugerencia()[0]!);
+
+    // Se envió de verdad, y aparece en el hilo como suya.
+    await screen.findByText("Con tareas.");
+    expect(enviados[0]?.question).toBe(messages.assistant.ideaBalance);
+    // Y el campo sigue vacío: rellenarlo pediría un segundo gesto para algo que
+    // ya se decidió al pulsar.
+    expect(
+      (screen.getByLabelText(messages.assistant.inputLabel) as HTMLInputElement).value,
+    ).toBe("");
+  });
+});
+
+/**
+ * El campo de escribir no se va con los mensajes.
+ *
+ * Es la única pantalla del producto que desplaza por dentro. Que el campo se
+ * quede abajo no se puede medir en jsdom —no aplica CSS ni calcula alto— pero sí
+ * se puede comprobar lo que lo hace cierto: que el campo NO esté dentro del
+ * elemento que desplaza. Si alguien lo metiera dentro, se iría con el hilo.
+ */
+describe("el campo de escribir se queda abajo", () => {
+  it("no está dentro del contenedor que desplaza", async () => {
+    const usuario = userEvent.setup();
+    await montarChat("nino", respondeSiempre("Hola."));
+
+    await preguntar(usuario, "hola");
+    await screen.findByText("Hola.");
+
+    const desplazable = document.querySelector(".overflow-y-auto");
+    expect(desplazable, "no hay ningún contenedor que desplace").not.toBeNull();
+
+    // El hilo SÍ está dentro.
+    expect(desplazable?.contains(screen.getByRole("list"))).toBe(true);
+    // Y el campo NO.
+    expect(desplazable?.contains(screen.getByLabelText(messages.assistant.inputLabel))).toBe(
+      false,
+    );
+  });
+});
+
+/**
+ * El hueco del hilo vacío dice para qué sirve.
+ *
+ * Antes estaba en blanco y lo único que sugería que se podía escribir era el
+ * campo de abajo.
+ */
+/**
+ * El hilo baja al mensaje nuevo.
+ *
+ * Sin esto, la respuesta que se acaba de pedir aparece FUERA de la vista: el
+ * hilo desplaza por dentro, crece hacia abajo, y la parte visible se queda donde
+ * estaba. Ningún test de los que miran texto lo caza, porque el nodo SÍ está en
+ * el documento — se vio abriendo la aplicación, con la última respuesta cortada.
+ *
+ * jsdom no calcula alto, así que `scrollHeight` es 0 y no se puede comprobar que
+ * quede abajo del todo. Lo que SÍ se puede comprobar, y es donde está el riesgo,
+ * es que alguien tocó el desplazamiento al llegar un turno: si el efecto
+ * desapareciera, esto vuelve a ser lo que era.
+ */
+describe("el hilo baja al mensaje nuevo", () => {
+  it("mueve el desplazamiento del hilo al recibir una respuesta", async () => {
+    const usuario = userEvent.setup();
+    await montarChat("nino", respondeSiempre("Una respuesta larga."));
+
+    const desplazable = document.querySelector(".overflow-y-auto") as HTMLElement;
+    // jsdom deja `scrollHeight` en 0, así que se finge un hilo con alto para que
+    // asignar `scrollTop` tenga algo que asignar.
+    Object.defineProperty(desplazable, "scrollHeight", { value: 800, configurable: true });
+    desplazable.scrollTop = 0;
+
+    await preguntar(usuario, "hola");
+    await screen.findByText("Una respuesta larga.");
+
+    expect(desplazable.scrollTop).toBe(800);
+  });
+});
+
+describe("con el hilo vacío la pantalla invita", () => {
+  it("aparece la invitación, y se va al primer mensaje", async () => {
+    const usuario = userEvent.setup();
+    await montarChat("nino", respondeSiempre("Claro."));
+
+    expect(screen.getByText(messages.assistant.emptyHint)).toBeTruthy();
+
+    await preguntar(usuario, "hola");
+    await screen.findByText("Claro.");
+
+    // Las dos mitades: si se quedara, competiría con la conversación.
+    expect(screen.queryByText(messages.assistant.emptyHint)).toBeNull();
   });
 });

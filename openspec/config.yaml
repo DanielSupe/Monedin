@@ -252,6 +252,74 @@ context: |
                 Los ACCESOS al chat —el widget flotante de Monedin y el icono de ayuda de la
                 cabecera— son el change siguiente, `add-assistant-access`. Hasta entonces /assistant
                 se alcanza escribiendo la direccion.
+    /help       Preguntas frecuentes, con `add-assistant-access`. Solo front: ninguna ruta nueva de
+                API, ninguna migracion, ningun contrato. Segundo destino compartido por los dos roles
+                despues del chat, tambien con `requireActor`.
+                Los ACCESOS que faltaban al chat: un widget flotante de la mascota en la esquina de
+                los dos marcos, y un icono de ayuda en la cabecera junto al avatar.
+                El widget dice frases que cuelgan del AREA y no de la direccion —`areaOf` reparte por
+                prefijos, asi que `/me/tasks` y `/tasks` caen igual y una ruta nueva hereda—, y las
+                frases viven en un `Record<FamilyRole, Record<Area, …>>`: un area nueva NO COMPILA
+                hasta que los dos roles la cubren.
+                No se monta durante el recorrido de bienvenida —alli ya hay un Monedin hablando— ni
+                en la propia ayuda, donde el pie ya ofrece el chat con el mismo nombre. Los dos marcos
+                reciben `tutorialSeen` para lo primero, que es la MISMA condicion con la que las
+                pantallas de inicio deciden montar el recorrido.
+                Con movimiento reducido NO se turna: hay que PARAR el temporizador, porque acortar la
+                transicion la convierte en un salto. `use-reduced-motion.ts` lee la preferencia de
+                forma sincrona al inicializar, como `use-wide.ts`.
+                ESCALA DE APILADO en tokens, y el aviso emergente migra a ella: hasta ahora habia un
+                `z-50` escrito a mano en `Toast`, el unico del proyecto, y dos capas flotantes
+                solapandose en el mismo pixel sin que ninguna declarara quien va encima. El aviso va
+                ENCIMA del widget. Un test lo hace cumplir, acotado a lo que flota sobre la pagina
+                —`fixed` o `sticky`— y no al apilado local dentro de la caja de un componente.
+                El design decia que Tailwind 4 no genera `z-*` desde `@theme` y ERA FALSO: se
+                comprobo antes de escribirlo y si los genera, asi que van en la capa 2 junto a los
+                colores. Una precaucion copiada de otro sitio hay que comprobarla, no heredarla.
+                Pieza `Accordion` en `ui/`, sobre Radix por lo mismo que el dialogo y las pestanas: el
+                estado anunciado, la relacion control/region y el recorrido con flechas. Varias
+                abiertas a la vez, y lo decide la pieza.
+                La ayuda NO entra en el cajon lateral: no es un destino de TRABAJO sino meta, asi que
+                vive en el armazon del marco como el avatar. La excepcion declarada de «ningun destino
+                dos veces» sigue siendo UNA, el perfil.
+                Dos preguntas llevan cifras —edades y digitos del PIN— y se componen desde las
+                constantes del contrato, como `PIN_LABEL`. Era el fallo mas probable del change y el
+                test que lo persigue paso a la primera.
+                `redesign-assistant-chat` viste la pantalla del chat, que se habia entregado con lo
+                minimo: una columna de tarjetas iguales con una etiqueta encima diciendo quien habla.
+                Solo front, una pantalla, cero API. Lo que deja construido:
+                GLOBOS por lado, con TRES senales a la vez y cada una cubriendo lo que las otras no:
+                posicion —lo que se lee de un vistazo—, color —que distingue en blanco y negro— y la
+                ETIQUETA ESCRITA, que se queda porque es lo unico que oye quien no ve la pantalla. El
+                requisito vigente dice «y no solo distinguida por un color», y hacerlo mas bonito no
+                puede romperlo. Los tres se prueban por separado y los tres caen al inyectar su fallo.
+                EL AMBAR SE REASIGNA, y es la reversion de una regla escrita. Decia «la moneda, y solo
+                la moneda»; ahora es la moneda Y LA MASCOTA, porque Monedin ES una moneda: su voz
+                llevando el color del dinero apunta al mismo referente en vez de gastarlo. Lo prohibido
+                sigue siendo lo mismo —un boton, una tarjeta o un aviso cualquiera—.
+                Y la reversion se pago con una MEJORA, que es la unica forma honesta de relajar una
+                regla: la reserva paso de un comentario de `tokens.css` —que ninguna verificacion lee—
+                a un test con LISTA CERRADA de archivos autorizados. Al escribirlo se vio lo que costaba
+                no tenerlo: la regla YA ERA FALSA en dos sitios —la variante `contrast` de `Button` y la
+                corona de `ProfileGrid`—, que llevaban tiempo pintando de ambar sin que nada se quejara.
+                Una regla que solo vive en un comentario deriva en silencio.
+                LA PANTALLA DESPLAZA POR DENTRO, la unica del producto. Su ruta lo declara con
+                `staticData: { fullHeight: true }`, igual que `/welcome` declara `fullBleed`; el marco
+                se ata a la ventana tambien en estrecho, su `<main>` recibe `min-h-0`, y el envoltorio
+                que desplaza pasa a `overflow-y-hidden` — lo destapo un test, porque con `auto` habia
+                DOS contenedores de desplazamiento anidados y el de fuera se llevaba el campo de
+                escribir igual. El hilo baja solo al mensaje nuevo.
+                En ESTRECHO la pantalla es el chat y nada mas: ni mascota ni sugerencias, y no
+                escondidas con CSS sino sin montar. En ancho estan las dos SIEMPRE, antes y despues de
+                conversar: retirar la mascota al empezar dejaba la pantalla sin la cara que le da
+                nombre. Las dos decisiones se corrigieron al ver la pantalla montada, y el design lo
+                dice.
+                CERO piezas nuevas en `ui/`: el globo se compone con utilidades dentro de la pantalla.
+                Extraerlo con un solo consumidor seria inventar una pieza adivinando su segundo uso.
+                Los diez tests que ya existian del chat pasaron SIN tocarlos: miraban comportamiento y
+                no forma, que es la senal de que estaban bien escritos.
+                No incluye el DICTADO POR VOZ que la maqueta de referencia sugeria: un boton que no
+                hace nada es peor que ninguno, y para un nino que lo pulsa y no pasa nada, mucho peor.
 
   FRONT (etapa de interfaz y diseno, en curso)
     El front era un andamio funcional sin una sola linea de CSS: clientes de API validados con Zod,

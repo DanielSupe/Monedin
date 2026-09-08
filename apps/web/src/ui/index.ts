@@ -11,6 +11,7 @@
  * proveedores. Hay un test que lo comprueba.
  */
 
+export { Accordion, type AccordionItem, type AccordionProps } from "./Accordion.js";
 export { Alert, type AlertProps, type AlertTone } from "./Alert.js";
 export { Avatar, type AvatarProps, type AvatarShape, type AvatarSize } from "./Avatar.js";
 export { Badge, type BadgeProps, type BadgeTone } from "./Badge.js";

@@ -1,7 +1,9 @@
+import { Link } from "@tanstack/react-router";
 import { type ButtonHTMLAttributes, type ReactNode, forwardRef } from "react";
 import { messages } from "../lib/messages.js";
 import { Avatar } from "../ui/index.js";
 import { cx } from "../ui/cx.js";
+import { IconHelp } from "./nav-icons.js";
 
 /**
  * El botón que abre el cajón.
@@ -200,5 +202,35 @@ export function SidebarProfile({
         )}
       </span>
     </span>
+  );
+}
+
+/**
+ * El acceso a la ayuda, en la cabecera de los dos marcos.
+ *
+ * SE EXTRAE EL ENLACE Y NO LA CABECERA ENTERA, y conviene decir por qué para que
+ * no parezca un olvido: las dos cabeceras difieren en el destino del avatar y en
+ * el fondo del marco del padre, así que un `AppHeader` común necesitaría props
+ * para las dos cosas y sería el mismo `if` mudado de sitio. Con un cuarto
+ * elemento común valdrá la pena; con tres, no.
+ *
+ * LLEVA NOMBRE y no solo un símbolo: un interrogante suelto no dice a dónde va.
+ *
+ * Y no está además en el cajón. Un destino ofrecido dos veces es un defecto, y
+ * la única excepción declarada es el perfil. La ayuda no entra en la lista
+ * porque no es un destino de TRABAJO: el cajón enumera dónde se hacen cosas
+ * —tareas, premios, canjes, hijos— y la ayuda es meta, responde «¿cómo funciona
+ * esto?» en vez de «¿qué tengo que hacer hoy?». Es el precedente del avatar, que
+ * está en la cabecera porque responde a otra pregunta.
+ */
+export function HelpLink(): React.ReactElement {
+  return (
+    <Link
+      to="/help"
+      aria-label={messages.help.title}
+      className="tap-target rounded-control flex items-center justify-center px-2 text-ink-muted no-underline transition-colors duration-quick hover:text-primary"
+    >
+      <IconHelp />
+    </Link>
   );
 }

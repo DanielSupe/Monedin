@@ -72,17 +72,22 @@ describe("el rol equivocado no se queda parado donde no le toca", () => {
  */
 describe("hay destinos que son de los dos roles", () => {
   it.each([
-    ["un niño", comoNino],
-    ["un padre", comoPadre],
-  ])("%s llega a /assistant y se queda ahí", async (_quien, sesion) => {
-    const app = await montarApp("/assistant", sesion());
+    ["un niño en /assistant", comoNino, "/assistant"],
+    ["un padre en /assistant", comoPadre, "/assistant"],
+    ["un niño en /help", comoNino, "/help"],
+    ["un padre en /help", comoPadre, "/help"],
+  ])("%s llega y se queda ahí", async (_quien, sesion, destino) => {
+    const app = await montarApp(destino, sesion());
 
-    expect(app.direccion()).toBe("/assistant");
+    expect(app.direccion()).toBe(destino);
   });
 
-  it("sin perfil elegido NO se llega: se pide antes ser alguien", async () => {
-    const app = await montarApp("/assistant", SOLO_CUENTA);
+  it.each(["/assistant", "/help"])(
+    "sin perfil elegido NO se llega a %s: se pide antes ser alguien",
+    async (destino) => {
+      const app = await montarApp(destino, SOLO_CUENTA);
 
-    expect(app.direccion()).toBe("/profiles");
-  });
+      expect(app.direccion()).toBe("/profiles");
+    },
+  );
 });
