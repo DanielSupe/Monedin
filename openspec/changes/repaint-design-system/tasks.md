@@ -69,16 +69,17 @@
 
 ## 6. Documentación y comprobación a ojo
 
-- [ ] 6.1 Actualizar `CLAUDE.md` §8: el índigo deja de ser la acción, los cuatro tonos de aviso se
+- [x] 6.1 Actualizar `CLAUDE.md` §8: el índigo deja de ser la acción, los cuatro tonos de aviso se
       renombran, y el tema oscuro deja de ser una promesa. Decir qué cambió y con qué argumento — una
       reversión que no se explica se lee como que la regla no valía.
-- [ ] 6.2 Actualizar el catálogo vivo (`ui.html`): añadir el conmutador de tema para poder ver las
+- [x] 6.2 Actualizar el catálogo vivo (`ui.html`): añadir el conmutador de tema para poder ver las
       piezas en los dos, que es lo único que hace revisable el oscuro.
 - [ ] 6.3 **Abrir la aplicación en los tres marcos y en los dos temas** —el del padre, el del niño y
       el de entrada— y confirmar que ninguna pantalla se enteró de nada salvo del color. Esto no lo
-      cubre ningún test y es el riesgo real de tocar tokens.
-- [ ] 6.4 Comprobar que `design/ui/` no entra en ningún glob de lint ni de test. Son 2 489 estilos en
+      cubre ningún test y es el riesgo real de tocar tokens. **Pendiente: hay que abrir el navegador.**
+- [x] 6.4 Comprobar que `design/ui/` no entra en ningún glob de lint ni de test. Son 2 489 estilos en
       línea y 20 radios sueltos: si alguna verificación los alcanza, el change no pasa por una razón
       que no tiene nada que ver con él.
-- [ ] 6.5 `pnpm verify`. Si muere con `allocation failure`, es la contención conocida:
-      `pnpm turbo run lint typecheck test build --force --concurrency=1`.
+- [x] 6.5 Lint, typecheck y batería del front, en verde. La pasada en paralelo hizo caer un test
+      distinto cada vez y todos pasan aislados: es la contención que `CLAUDE.md` ya documenta, no un
+      defecto. Con `--no-file-parallelism` pasa entera.

@@ -763,13 +763,22 @@ tiene que **morir** con ella. Y se cierra al cambiar la DIRECCIÓN, no en el `on
 el botón atrás también cambia la dirección, y un panel abierto tapando la pantalla a la que se acaba
 de volver es peor que no tenerlo.
 
-**Un 409 se cuenta como ADVERTENCIA, no como error.** `Alert` lo declara desde `add-design-system`
-—«nadie hizo nada mal: el padre aprobó dos veces, o el hermano llegó antes»— y hasta
-`redesign-parent-inbox` esa distinción no llegaba a ninguna pantalla: las dos bandejas del padre, que
-son las **únicas** que producen un 409 de verdad, aplanaban todos sus errores en el mismo párrafo
-rojo. La API está construida entera alrededor de esa diferencia y la interfaz la tiraba. Lo decide
-`alertToneFor(error)`, en `lib/` y no en `ui/` porque mira el CÓDIGO de un error y una pieza no sabe
-de eso.
+**Un 409 tiene TONO PROPIO y no es un error.** `Alert` lo declara desde `add-design-system` —«nadie
+hizo nada mal: el padre aprobó dos veces, o el hermano llegó antes»— y hasta `redesign-parent-inbox`
+esa distinción no llegaba a ninguna pantalla: las dos bandejas del padre, que son las **únicas** que
+producen un 409 de verdad, aplanaban todos sus errores en el mismo párrafo rojo. La API está
+construida entera alrededor de esa diferencia y la interfaz la tiraba. Lo decide `alertToneFor(error)`,
+en `lib/` y no en `ui/` porque mira el CÓDIGO de un error y una pieza no sabe de eso.
+
+Ese tono se llama `conflict` desde `repaint-design-system`, y antes se llamaba `warning`. **Se
+renombró porque su nombre describía un color** —el ámbar— y al repintar la paleta habría quedado
+mintiendo. Lo mismo con `success`, que era verde y pasó a `done`.
+
+**Y `info` NO se renombró, que es la mitad que importa de esa regla.** Nunca nombró un color: nombra
+un papel, y sigue siendo exacto ahora que su valor es arena. Se descubrió implementándolo, con el
+aviso de «dos claves, para dos cosas distintas» del registro — no espera a nadie, solo explica, y con
+el nombre `waiting` que el design proponía habría quedado mintiendo justo ahí. Un renombrado que
+arrastra todo lo que puede no es una regla, es una moda.
 
 **Un filtro que vive en la dirección es un conjunto de ENLACES, no de pestañas.** `Tabs` prometía en
 su cabecera que la estrenarían los filtros por estado del padre. Al ir a usarla no encajaba, y no por
@@ -875,11 +884,40 @@ contrato, nunca escrito a mano: tenerlo en dos sitios acaba con uno de los dos m
 piden dos credenciales en la misma pantalla, se explica para qué sirve cada una — si no, parece un
 error del producto.
 
-**El acceso va en ÍNDIGO PROFUNDO, y el ámbar es el acento.** Es la única pantalla del producto que
+**La paleta son DOS tonos, la moneda, y un rojo que solo existe para el error.** Desde
+`repaint-design-system`: coral `#FF6B4A` = **hacer** —la acción, el destino activo, la voz de la
+mascota—; violeta `#6C4BD6` = **conseguido y ahorrado** —los premios, el progreso, una tarea aprobada—;
+ámbar = la moneda, sin cambiar de valor; y arena para **esperando**, que pierde su color a propósito
+porque no es un estado con voz: es la AUSENCIA de acción. Antes había cinco tonos en pantalla y
+ninguno mandaba.
+
+El rojo del error sobrevive como **la única excepción declarada**, y no por nostalgia: un color de
+peligro no es una decisión de marca. Si el error llevara el coral de la acción, el mismo color diría
+«pulsa aquí» y «esto falló», que es justo lo que ese color existe para impedir.
+
+**El modo oscuro dejó de ser una promesa.** `tokens.css` llevaba escrito desde `add-design-system` que
+sería «reasignar la capa 2 y nada más», y eso es exactamente lo que es: un tercer bloque, con TRES
+estados —claro explícito, oscuro explícito y, sin atributo, lo que diga el sistema—. Ninguna pieza lo
+conoce. **Sigue al sistema y no se elige**: sin interruptor, sin almacenamiento y sin campo nuevo en
+el contrato. El día que se quiera elegir, la preferencia va DENTRO del actor como `tutorialSeen` y
+nunca en el navegador — la tablet es compartida, y con `localStorage` el niño heredaría el tema de su
+padre.
+
+Dos trampas que ese change pagó y conviene no volver a pisar. **`[data-surface="default"]` se invierte
+en oscuro**: existe para que un `Alert` recupere su fondo dentro del acceso, y escribía los primitivos
+claros; con dos temas eso deja el aviso claro sobre claro. Ahora restituye variables de tema, así que
+«por defecto» significa el del tema vigente. Y **`color-scheme` tiene que seguir al tema**, o se
+quedan con el contrario los cuatro controles nativos que esta aplicación tiene: la barra de
+desplazamiento, el autocompletado, el selector de la fecha límite y el de archivo de una foto.
+
+**El acceso va en VIOLETA PROFUNDO, y el ámbar es el acento.** Es la única pantalla del producto que
 mira un adulto: la calidez le corresponde al niño —su inicio, sus tareas, sus premios— y en la puerta
 se lee como juguete justo donde alguien decide si esto es de fiar. El ámbar no desaparece, cambia de
-papel: pintando media pantalla no decía nada, y sobre índigo un punto ámbar **es dinero**. La
+papel: pintando media pantalla no decía nada, y sobre el violeta un punto ámbar **es dinero**. La
 rejilla, el PIN y la puerta pública siguen claros.
+
+Iba en índigo hasta `repaint-design-system`, que retiró ese color del sistema. **Lo que cambió es el
+matiz, no el argumento**: sigue siendo el tono profundo de la marca, y sigue sin ser el del niño.
 
 **El ámbar es la moneda Y LA MASCOTA, y esto se reasignó a conciencia.** Decía «la moneda, y solo la
 moneda». `redesign-assistant-chat` lo amplió para que los globos de Monedín en el chat lleven ámbar

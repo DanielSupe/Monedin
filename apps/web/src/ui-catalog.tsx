@@ -463,9 +463,68 @@ function Piezas(): React.ReactElement {
  * El atributo lo pondrá el shell en `add-app-shell`; hasta entonces se declara
  * aquí a mano, que es lo que permite ver la diferencia sin haberlo construido.
  */
+/**
+ * El conmutador de tema, y es lo único que hace revisable el oscuro.
+ *
+ * jsdom no aplica CSS, así que ninguna batería puede decir si el tema oscuro se
+ * ve bien: lo único que se comprueba automáticamente es que no le falte ningún
+ * token. Lo demás se mira, y aquí es donde se mira — con las piezas enteras,
+ * en sus estados y en las dos escalas.
+ *
+ * Los TRES estados y no dos, igual que el mecanismo real: quitar el atributo no
+ * es «claro», es «lo que diga el sistema», y hay que poder probar ese caso
+ * porque es el que usa todo el mundo.
+ *
+ * Vive en el catálogo y NO en una pieza: el producto no tiene interruptor de
+ * tema, sigue al sistema. Si algún día lo tiene, la preferencia irá dentro del
+ * actor y no en el navegador.
+ */
+type Tema = "sistema" | "light" | "dark";
+
+function ConmutadorDeTema(): React.ReactElement {
+  const [tema, setTema] = useState<Tema>("sistema");
+
+  const elegir = (siguiente: Tema): void => {
+    setTema(siguiente);
+
+    if (siguiente === "sistema") {
+      delete document.documentElement.dataset.theme;
+      return;
+    }
+
+    document.documentElement.dataset.theme = siguiente;
+  };
+
+  return (
+    <fieldset className="rounded-card flex flex-wrap items-center gap-2 border border-border p-3">
+      <legend className="text-small px-1 font-bold">Tema</legend>
+
+      {(
+        [
+          ["sistema", "Lo que diga el sistema"],
+          ["light", "Claro"],
+          ["dark", "Oscuro"],
+        ] as const
+      ).map(([valor, texto]) => (
+        <Button
+          key={valor}
+          variant={tema === valor ? "primary" : "secondary"}
+          onClick={() => elegir(valor)}
+        >
+          {texto}
+        </Button>
+      ))}
+    </fieldset>
+  );
+}
+
 function Catalogo(): React.ReactElement {
   return (
     <ToastProvider>
+      <div className="mx-auto flex max-w-(--container-reading) flex-col gap-4 p-4 lg:max-w-none">
+        <ConmutadorDeTema />
+      </div>
+
       <div className="mx-auto flex max-w-(--container-reading) flex-col gap-4 p-4 lg:max-w-none lg:flex-row lg:items-start">
         <div data-scale="parent" className="flex-1">
           <h1>Escala del padre</h1>
