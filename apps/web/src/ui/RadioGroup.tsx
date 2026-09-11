@@ -29,6 +29,11 @@ export interface RadioGroupProps {
  * las opciones hasta que se abre, y esto existe justo para lo contrario. Con dos
  * o tres opciones que hay que COMPARAR —«el mismo valor para todos» frente a «uno
  * para cada uno»— esconderlas obliga a abrir para decidir.
+ *
+ * EL NOMBRE DE CADA OPCIÓN SE ATA A MANO, igual que en `Checkbox` y por lo mismo:
+ * lo que Radix dibuja es un `<button role="radio">` vacío, y el nombre de un
+ * botón sale de su contenido antes que del `<label>` que lo envuelve. Sin esto,
+ * las dos opciones se anuncian sin nombre.
  */
 export function RadioGroup({
   label,
@@ -59,6 +64,7 @@ export function RadioGroup({
           >
             <RadixRadioGroup.Item
               value={opcion.value}
+              aria-label={opcion.label}
               className={cx(
                 "rounded-pill flex size-5 shrink-0 items-center justify-center border-2",
                 elegida ? "border-primary" : "border-border-strong",

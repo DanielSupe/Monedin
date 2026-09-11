@@ -1,7 +1,7 @@
 import { COINS_MAX, COINS_MIN, MAX_CHILDREN_PER_FAMILY } from "@monedin/contracts";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
-import { Avatar, Field, Input, Skeleton } from "../../ui/index.js";
+import { Avatar, Checkbox, Field, Input, RadioGroup, Skeleton } from "../../ui/index.js";
 import { useChildren } from "./use-children.js";
 
 /**
@@ -137,44 +137,43 @@ export function ChildrenPicker({
         siempre uno por hijo, y ofrecer ahí «el mismo para todos» sería ofrecer
         algo que no significa nada.
 
-        Con `name` compartido, que es lo que convierte dos radios sueltos en un
-        grupo por el que se navega con las flechas.
+        SOBRE `RadioGroup`, que es lo que trae lo difícil: las flechas mueven la
+        selección dentro del grupo, el tabulador entra y sale del grupo ENTERO y
+        no opción por opción, y el grupo se anuncia con su nombre antes de leer
+        las opciones. A mano eran dos `<input type="radio">` con un `name`
+        compartido, que acierta el grupo y no el resto.
       */}
       {mode === "both" && (
-        <div className="flex flex-wrap gap-4">
-          <label className="text-body flex items-center gap-2">
-            <input
-              type="radio"
-              name="coins-mode"
-              checked={mismoValor}
-              onChange={() => picker.setMismoValor(true)}
-            />
-            {labels.sameCoins}
-          </label>
-          <label className="text-body flex items-center gap-2">
-            <input
-              type="radio"
-              name="coins-mode"
-              checked={!mismoValor}
-              onChange={() => picker.setMismoValor(false)}
-            />
-            {labels.coinsPerChild}
-          </label>
-        </div>
+        <RadioGroup
+          label={labels.legend}
+          value={mismoValor ? "same" : "perChild"}
+          onValueChange={(valor) => picker.setMismoValor(valor === "same")}
+          options={[
+            { value: "same", label: labels.sameCoins },
+            { value: "perChild", label: labels.coinsPerChild },
+          ]}
+        />
       )}
 
       <ul className="flex list-none flex-col gap-2 p-0">
         {hijos.map((hijo) => (
           <li key={hijo.id} className="flex min-w-0 flex-wrap items-center gap-3">
-            <label className="text-body flex min-w-0 flex-1 items-center gap-3">
-              <input
-                type="checkbox"
-                checked={elegidos.includes(hijo.id)}
-                onChange={() => picker.alternar(hijo.id)}
-              />
-              <Avatar value={hijo.avatar} size="small" />
-              <span className="truncate font-semibold">{hijo.name}</span>
-            </label>
+            {/*
+              SOBRE `Checkbox`, y lo que se gana es el área tocable: la etiqueta
+              envuelve al control, así que se marca pulsando la fila entera y no
+              un cuadrado de 20px. En una tablet que un padre usa con el pulgar,
+              esa es la diferencia entre acertar a la primera o a la tercera.
+            */}
+            <Checkbox
+              className="min-w-0 flex-1"
+              checked={elegidos.includes(hijo.id)}
+              onCheckedChange={() => picker.alternar(hijo.id)}
+            >
+              <span className="flex min-w-0 items-center gap-3">
+                <Avatar value={hijo.avatar} size="small" />
+                <span className="truncate">{hijo.name}</span>
+              </span>
+            </Checkbox>
 
             {porCadaUno && elegidos.includes(hijo.id) && (
               <Input

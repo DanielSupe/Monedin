@@ -39,7 +39,12 @@ export function ChildrenList({ page }: { page: number }): React.ReactElement {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-title font-bold">{messages.children.title}</h2>
+        <div className="flex flex-col gap-1">
+          <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+            {messages.children.listLead}
+          </span>
+          <h2 className="text-display font-extrabold">{messages.children.title}</h2>
+        </div>
         <Link to="/children/new" className={buttonClasses("primary")}>
           {messages.children.addChild}
         </Link>
@@ -129,7 +134,7 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
             <Avatar value={child.avatar} size="small" />
 
             <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <p className="truncate text-body font-bold">{child.name}</p>
+              <p className="truncate text-lead font-extrabold">{child.name}</p>
               {child.age !== null && (
                 <p className="text-small text-ink-muted">
                   {messages.children.age}: {child.age}
@@ -149,9 +154,19 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
           </div>
 
           <div className="flex flex-wrap gap-2">
+            {/*
+              ETIQUETAS CORTAS Y NOMBRE COMPLETO ANUNCIADO.
+
+              La fila de un perfil bloqueado lleva cinco controles y es la que se
+              sale; con las etiquetas enteras no caben. Y cortarlas crearía el
+              otro problema —cuatro «Editar» seguidos suenan idénticos a quien no
+              ve la pantalla—, así que cada una se anuncia con el nombre de su
+              hijo. Es el mismo criterio que las dos bandejas del padre.
+            */}
             <Link
               to="/children/$childId/edit"
               params={{ childId: child.id }}
+              aria-label={`${messages.children.editFull} ${child.name}`}
               className={buttonClasses("secondary")}
             >
               {messages.children.edit}
@@ -163,14 +178,16 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
               to="/children/$childId/coins"
               params={{ childId: child.id }}
               search={{ page: 1 }}
+              aria-label={`${messages.children.historyFull} ${child.name}`}
               className={buttonClasses("secondary")}
             >
-              {messages.coins.seeChildHistory}
+              {messages.children.historyShort}
             </Link>
 
             <Button
               type="button"
               variant="secondary"
+              aria-label={`${messages.children.resetPinFull} ${child.name}`}
               onClick={() => setReponiendoPin((abierto) => !abierto)}
             >
               {messages.children.resetPin}
@@ -182,6 +199,7 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
               <Button
                 type="button"
                 variant="secondary"
+                aria-label={`${messages.children.unlockFull} ${child.name}`}
                 pending={unlock.isPending}
                 onClick={() => unlock.mutate(child.id)}
               >
@@ -189,7 +207,12 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
               </Button>
             )}
 
-            <Button type="button" variant="danger" onClick={() => setConfirmando(true)}>
+            <Button
+              type="button"
+              variant="danger"
+              aria-label={`${messages.children.deactivateFull} ${child.name}`}
+              onClick={() => setConfirmando(true)}
+            >
               {messages.children.deactivate}
             </Button>
           </div>
@@ -263,6 +286,32 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
               </>
             }
           >
+            {/*
+              LA SALIDA, para el caso que de verdad trae a un padre hasta aquí.
+
+              Un perfil bloqueado es un niño que falló el PIN, y la fila enseña
+              «Dar de baja» a un dedo de distancia. Avisar de que no se deshace no
+              ataja ese error por sí solo: hay que decir cuál es la otra cosa y
+              ofrecerla aquí mismo, sin obligar a cerrar y buscarla.
+            */}
+            {child.locked && (
+              <Alert tone="conflict">
+                {messages.children.deactivateLockedHint}
+                <div className="mt-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    pending={unlock.isPending}
+                    onClick={() =>
+                      unlock.mutate(child.id, { onSuccess: () => setConfirmando(false) })
+                    }
+                  >
+                    {messages.children.unlock}
+                  </Button>
+                </div>
+              </Alert>
+            )}
+
             {deactivate.error !== null && (
               <Alert tone={alertToneFor(deactivate.error)}>
                 {describeChildrenError(deactivate.error)}

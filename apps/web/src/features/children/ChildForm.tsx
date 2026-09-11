@@ -113,7 +113,7 @@ export function ChildForm({
 
   return (
     <section className="flex w-full max-w-md flex-col gap-4">
-      <h2 className="text-title font-bold">
+      <h2 className="text-display font-extrabold">
         {editing ? messages.children.editChildTitle : messages.children.newChildTitle}
       </h2>
 

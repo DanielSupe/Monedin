@@ -82,7 +82,7 @@ export function TaskForm({ onSaved }: { onSaved: () => void }): React.ReactEleme
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-title font-bold">{messages.tasks.newTaskTitle}</h2>
+      <h2 className="text-display font-extrabold">{messages.tasks.newTaskTitle}</h2>
 
       <Card>
         <form onSubmit={enviar} className="flex max-w-2xl flex-col gap-4">

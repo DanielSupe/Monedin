@@ -133,6 +133,8 @@ export const messages = {
     parentRedemptions: "Canjes",
     parentChildren: "Hijos",
     parentAccount: "Mi cuenta",
+    /** Lo que encabeza la cuenta del padre, antes del título. */
+    parentAccountLead: "Tu foto, tu PIN y tu sesión",
 
     /*
      * Lo que la cifra de una insignia significa, para quien no ve la pantalla.
@@ -463,12 +465,52 @@ export const messages = {
     edit: "Editar",
     locked: "Bloqueado",
     unlock: "Desbloquear",
-    resetPin: "Cambiar su PIN",
+
+    /*
+     * LAS ETIQUETAS DE LA FILA VAN CORTAS, y el nombre completo va aparte.
+     *
+     * La fila de un perfil BLOQUEADO lleva un control más que las otras, y es la
+     * que se sale: con «Ver su historial» y «Cambiar su PIN» enteras, cinco
+     * controles no caben. Cortarlas resuelve el ancho y crea el otro problema
+     * —cuatro «Editar» seguidos suenan idénticos para quien no ve la pantalla—,
+     * así que cada acción se anuncia con el nombre del hijo, igual que en las dos
+     * bandejas del padre.
+     */
+    resetPin: "Su PIN",
+    resetPinFull: "Cambiar el PIN de",
+    historyShort: "Historial",
+    historyFull: "Ver el historial de",
+    editFull: "Editar el perfil de",
+    unlockFull: "Desbloquear el perfil de",
+    deactivateFull: "Dar de baja el perfil de",
+
+    /*
+     * BAJA Y BLOQUEO NO SON LO MISMO, y confundirlos cuesta caro justo aquí.
+     *
+     * Un perfil bloqueado es un niño que falló el PIN varias veces y se arregla
+     * con un toque; una baja no se deshace. Sin esta frase, la fila enseña las
+     * dos cosas juntas y la palabra «Bloqueado» invita a resolverlo con el botón
+     * rojo que tiene al lado.
+     */
+    lockedVsDeactivated:
+      "Dar de baja no se puede deshacer. Bloqueado es otra cosa: pasa cuando alguien falla el PIN varias veces, y se quita desde aquí.",
+    /** Lo que encabeza la pantalla, antes del título. */
+    listLead: "Cada uno con su PIN y su saldo",
 
     /** La baja es definitiva: la interfaz tiene que decirlo antes, no después. */
     deactivate: "Dar de baja",
     deactivateConfirm:
       "Este perfil dejará de aparecer y no se puede recuperar. Su historial de monedas se conserva. ¿Seguro?",
+    /*
+     * LA SALIDA, para el caso que de verdad trae a un padre hasta aquí.
+     *
+     * Un perfil bloqueado es un niño que falló el PIN, y la fila enseña «Dar de
+     * baja» a un dedo de distancia. Un diálogo que solo avisa de que no se
+     * deshace no ataja ese error: hay que decir cuál es la otra cosa, y
+     * ofrecerla.
+     */
+    deactivateLockedHint:
+      "Este perfil solo está bloqueado porque alguien falló el PIN. Eso se quita con un toque y no borra nada.",
     deactivateSubmit: "Sí, dar de baja",
 
     /**
@@ -631,6 +673,8 @@ export const messages = {
   },
 
   rewards: {
+    /** Lo que encabeza el catálogo del padre, antes del título. */
+    catalogLead: "Lo que tus hijos pueden pedir",
     /** Gestión del padre. */
     title: "Premios",
     empty: "Todavía no has publicado ningún premio.",
@@ -668,9 +712,14 @@ export const messages = {
 
     /** La baja es lógica: la interfaz tiene que decirlo antes, no después. */
     retire: "Retirar",
+    /*
+     * Corto, y con la vuelta atrás DENTRO: retirar se revierte publicando el
+     * premio otra vez, así que no es una decisión que haya que pensarse. Decirlo
+     * es lo que separa este diálogo del de dar de baja, que sí es definitivo.
+     */
     retireConfirm:
-      "Este premio dejará de poder pedirse y desaparecerá del escaparate de tus hijos. " +
-      "Sigue en tu catálogo. ¿Seguro?",
+      "Dejará de poder pedirse y desaparecerá del escaparate de tus hijos. " +
+      "Sigue en tu catálogo: publicándolo otra vez vuelve. ¿Seguro?",
     retireSubmit: "Sí, retirar",
 
     /** Filtro del catálogo. */

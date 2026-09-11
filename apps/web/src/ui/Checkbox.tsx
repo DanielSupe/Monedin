@@ -1,5 +1,5 @@
 import * as RadixCheckbox from "@radix-ui/react-checkbox";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { cx } from "./cx.js";
 
 export interface CheckboxProps {
@@ -28,6 +28,14 @@ export interface CheckboxProps {
  * La etiqueta envuelve al control, así que el área tocable es la fila entera y
  * no un cuadrado de 20px. En una tablet que usa un padre con el pulgar, eso es
  * la diferencia entre marcar a la primera o a la tercera.
+ *
+ * Y EL NOMBRE SE ATA A MANO, con `aria-labelledby`. Envolver el control en un
+ * `<label>` basta con un `<input>` nativo y NO con esto: lo que Radix dibuja es
+ * un `<button role="checkbox">`, y el nombre de un botón sale de su CONTENIDO
+ * antes que de su etiqueta — contenido que aquí es un visto que ni siquiera
+ * existe mientras la casilla está sin marcar. La pieza se escribió en
+ * `add-design-pieces` sin montarla en ninguna pantalla, así que la casilla no
+ * tenía nombre y nada lo decía. Lo cazó el primer test que la buscó por él.
  */
 export function Checkbox({
   checked,
@@ -36,6 +44,8 @@ export function Checkbox({
   disabled = false,
   className,
 }: CheckboxProps): React.ReactElement {
+  const nombre = useId();
+
   return (
     <label
       className={cx(
@@ -51,6 +61,7 @@ export function Checkbox({
         checked={checked}
         onCheckedChange={(estado) => onCheckedChange(estado === true)}
         disabled={disabled}
+        aria-labelledby={nombre}
         className={cx(
           "rounded-control flex size-6 shrink-0 items-center justify-center border-2 transition duration-quick",
           checked ? "border-primary bg-primary" : "border-border-strong bg-surface-raised",
@@ -73,7 +84,9 @@ export function Checkbox({
         </RadixCheckbox.Indicator>
       </RadixCheckbox.Root>
 
-      <span className="text-body min-w-0 font-semibold">{children}</span>
+      <span id={nombre} className="text-body min-w-0 font-semibold">
+        {children}
+      </span>
     </label>
   );
 }

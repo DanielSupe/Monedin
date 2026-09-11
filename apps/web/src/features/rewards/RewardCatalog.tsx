@@ -65,9 +65,15 @@ export function RewardCatalog({
   const premios = data?.items ?? [];
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-title font-bold">{messages.rewards.title}</h2>
+    <section className="flex flex-col gap-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+            {messages.rewards.catalogLead}
+          </span>
+          <h2 className="text-display font-extrabold">{messages.rewards.title}</h2>
+        </div>
+
         <Link to="/rewards/new" className={buttonClasses("primary")}>
           {messages.rewards.newReward}
         </Link>
@@ -268,7 +274,7 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
 
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="flex min-w-0 flex-col gap-1">
-                  <p className="text-body font-bold">{reward.title}</p>
+                  <p className="text-lead font-extrabold">{reward.title}</p>
                   {reward.description !== null && (
                     <p className="text-small text-ink-muted">
                       {reward.description}

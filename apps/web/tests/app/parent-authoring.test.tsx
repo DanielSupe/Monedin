@@ -86,10 +86,26 @@ async function montar(direccion: string, hijos: Child[] = HIJOS) {
   return router;
 }
 
-/** Escribe el título y elige a un hijo. Lo mínimo para poder enviar. */
+/**
+ * Elige a un hijo y escribe el título. Lo mínimo para poder enviar.
+ *
+ * EL ORDEN IMPORTA, y es lo que cambió al traer la casilla de `Checkbox`.
+ *
+ * Lo que el requisito dice es «escribir el título y pulsar Enter», así que el
+ * foco tiene que quedarse en el campo de texto. Antes daba igual porque una
+ * casilla nativa también envía con Enter; la traída es un `<button>` de verdad
+ * —es lo que le da su estado anunciado y su barra espaciadora— y Enter sobre un
+ * botón lo PULSA, que es lo que hace cualquier navegador. Así que marcar al
+ * hijo el último dejaba el foco donde Enter significa «marca y desmarca».
+ *
+ * No es un defecto que tapar: es el comportamiento correcto de un botón. Lo que
+ * estaba mal era que el test comprobara el envío desde un sitio que no es el que
+ * el requisito describe.
+ */
 async function rellenarMinimo(etiquetaTitulo: string): Promise<void> {
-  await userEvent.type(await screen.findByLabelText(etiquetaTitulo), "Recoger la mesa");
-  await userEvent.click(screen.getByRole("checkbox", { name: /Mateo/ }));
+  // La lista de hijos llega DESPUÉS del formulario: se espera a ella, no al campo.
+  await userEvent.click(await screen.findByRole("checkbox", { name: /Mateo/ }));
+  await userEvent.type(screen.getByLabelText(etiquetaTitulo), "Recoger la mesa");
 }
 
 /**
@@ -213,5 +229,69 @@ describe("cancelar es una navegación", () => {
 
     const salir = await screen.findByRole("link", { name: messages.children.cancel });
     expect(salir).toHaveAttribute("href", expect.stringContaining("/children"));
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * LOS CONTROLES TRAÍDOS CAMBIAN LO QUE YA FUNCIONABA, Y ESO NO LO VE UN TEST DE
+ * ASPECTO.
+ *
+ * Los tres eran controles NATIVOS y ahora son de Radix, que dibuja botones. Lo
+ * que se gana —estado anunciado, recorrido por el grupo entero con una sola
+ * parada de tabulación— se paga en que el teclado deja de ser el del navegador
+ * y pasa a ser el de la librería. Si algo de eso se rompiera, la pantalla
+ * seguiría viéndose bien.
+ *
+ * Ya se cobró una vez: marcar al hijo el ÚLTIMO dejaba el foco en un botón, y
+ * ahí Enter lo pulsa en vez de enviar el formulario. No era un defecto —es lo
+ * que hace cualquier navegador con un botón— pero sí un cambio de comportamiento
+ * que nadie había mirado.
+ */
+describe("los controles traídos siguen funcionando con el teclado", () => {
+  it("la casilla de un hijo se marca con la barra espaciadora", async () => {
+    await montar("/tasks/new");
+
+    const casilla = await screen.findByRole("checkbox", { name: /Mateo/ });
+    expect(casilla).toHaveAttribute("aria-checked", "false");
+
+    casilla.focus();
+    await userEvent.keyboard(" ");
+
+    expect(casilla).toHaveAttribute("aria-checked", "true");
+  });
+
+  /*
+   * LO QUE ESTE TEST NO PUEDE PROBAR, DICHO CON TODAS LAS LETRAS.
+   *
+   * Que las FLECHAS muevan la selección dentro del grupo es lo que `RadioGroup`
+   * aporta sobre dos botones escritos a mano, y NO se comprueba aquí: el
+   * recorrido de Radix mueve el foco con su propia maquinaria y jsdom —que no
+   * hace `layout` ni pinta— no la reproduce. Fingirlo despachando el evento a
+   * mano probaría que el evento se despacha, no que el control responde.
+   *
+   * Queda como tarea de «abrir la aplicación», igual que si caben cuatro
+   * columnas a 390px. Lo que SÍ se fija aquí es lo que se rompería en silencio:
+   * que el grupo se anuncia como tal, que sus dos opciones tienen nombre —que
+   * es justo lo que faltaba en la pieza recién traída— y que elegir la segunda
+   * cambia de verdad lo que el formulario pide.
+   */
+  it("el grupo del valor se anuncia, y elegir el otro modo cambia lo que se pide", async () => {
+    await montar("/tasks/new");
+
+    await userEvent.click(await screen.findByRole("checkbox", { name: /Mateo/ }));
+
+    const mismo = screen.getByRole("radio", { name: messages.tasks.sameCoins });
+    const porHijo = screen.getByRole("radio", { name: messages.tasks.coinsPerChild });
+
+    expect(mismo).toHaveAttribute("aria-checked", "true");
+    expect(porHijo).toHaveAttribute("aria-checked", "false");
+
+    await userEvent.click(porHijo);
+
+    expect(porHijo).toHaveAttribute("aria-checked", "true");
+    // Y el efecto de verdad: el valor pasa a pedirse hijo por hijo.
+    expect(screen.getByLabelText(`${messages.tasks.coins} · Mateo`)).toBeInTheDocument();
   });
 });

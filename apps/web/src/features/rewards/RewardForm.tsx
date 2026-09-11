@@ -94,7 +94,7 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-title font-bold">{messages.rewards.newRewardTitle}</h2>
+      <h2 className="text-display font-extrabold">{messages.rewards.newRewardTitle}</h2>
 
       <Card>
         <form onSubmit={enviar} className="flex max-w-2xl flex-col gap-4">

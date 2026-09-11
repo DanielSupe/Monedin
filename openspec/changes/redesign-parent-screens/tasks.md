@@ -31,31 +31,39 @@
 
 ## 4. Premios, hijos y sus formularios
 
-- [ ] 4.1 El catálogo con el precio por hijo en cada tarjeta y las tres acciones.
-- [ ] 4.2 «Nuevo premio» y «Nueva tarea» con los controles traídos: la casilla de a quién, el grupo de
+- [x] 4.1 El catálogo con el precio por hijo en cada tarjeta y las tres acciones.
+- [x] 4.2 «Nuevo premio» y «Nueva tarea» con los controles traídos: la casilla de a quién, el grupo de
       opción del valor y el calendario de la fecha límite.
-- [ ] 4.3 El recorte de foto con el deslizador traído, que hoy en las maquetas es una barra dibujada.
-- [ ] 4.4 El listado de perfiles: acciones con etiqueta corta para que la fila de un perfil bloqueado
+- [x] 4.3 El recorte de foto con el deslizador traído, que hoy en las maquetas es una barra dibujada.
+- [x] 4.4 El listado de perfiles: acciones con etiqueta corta para que la fila de un perfil bloqueado
       quepa. Ese caso lleva un control más y es el que se sale.
-- [ ] 4.5 «Editar perfil» y el historial de un hijo, con los tonos del historial: ganar en el color de
+- [x] 4.5 «Editar perfil» y el historial de un hijo, con los tonos del historial: ganar en el color de
       la moneda, gastar en el del ahorro.
-- [ ] 4.6 «Mi cuenta» y las preguntas frecuentes del padre.
+- [x] 4.6 «Mi cuenta» y las preguntas frecuentes del padre.
 
 ## 5. Los tres diálogos
 
-- [ ] 5.1 Retirar un premio: diálogo corto que dice que se revierte publicándolo otra vez.
-- [ ] 5.2 Dar de baja: dice que **no se deshace**, qué se pierde, y **ofrece desbloquear** para el
+- [x] 5.1 Retirar un premio: diálogo corto que dice que se revierte publicándolo otra vez.
+- [x] 5.2 Dar de baja: dice que **no se deshace**, qué se pierde, y **ofrece desbloquear** para el
       perfil que solo falló el PIN.
-- [ ] 5.3 Recortar una foto: el diálogo con el deslizador y el encuadre.
-- [ ] 5.4 Comprobar que ninguna acción irreversible se confirma dentro de la fila.
-- [ ] 5.5 Test del diálogo de baja: dice que es irreversible **y** nombra desbloquear. Sin la segunda
+- [x] 5.3 Recortar una foto: el diálogo con el deslizador y el encuadre.
+- [x] 5.4 Comprobar que ninguna acción irreversible se confirma dentro de la fila.
+- [x] 5.5 Test del diálogo de baja: dice que es irreversible **y** nombra desbloquear. Sin la segunda
       mitad, un diálogo que solo avisa pasaría igual y no ataja el error real.
 
 ## 6. Cierre
 
-- [ ] 6.1 Ni un estilo en línea, ni un color literal, ni un valor arbitrario en las doce pantallas.
-- [ ] 6.2 Los objetivos de toque en 40 px, que es la escala del padre. No «corregirlos» a 44.
+- [x] 6.1 Ni un estilo en línea, ni un color literal, ni un valor arbitrario en las doce pantallas.
+- [x] 6.2 Los objetivos de toque en 40 px, que es la escala del padre. No «corregirlos» a 44.
 - [ ] 6.3 Abrir las doce en los dos temas y a ancho estrecho.
-- [ ] 6.4 Probar con teclado el envío de los cuatro formularios tocados. Los controles traídos cambian
+- [x] 6.4 Probar con teclado el envío de los cuatro formularios tocados. Los controles traídos cambian
       el comportamiento de lo que hoy funciona, y eso no lo ve ningún test de aspecto.
+      **Cazó uno**: al traer la casilla, marcar al hijo el último deja el foco en un `<button>`, y ahí
+      Enter lo pulsa en vez de enviar. No es un defecto —es lo que hace cualquier navegador— pero el
+      test comprobaba el envío desde un sitio que no es el que el requisito describe. Corregido.
+      Y cazó otro antes: la casilla y el grupo de opción llegaron de `add-design-pieces` SIN NOMBRE
+      ACCESIBLE. Se escribieron sin montarlas en ninguna pantalla, así que nada lo dijo hasta que un
+      test las buscó por él. Atado con `aria-labelledby` y `aria-label`.
+      **Queda fuera del alcance de un test**: que las flechas recorran el grupo de opción y el
+      deslizador. Es maquinaria de Radix que jsdom no reproduce, y está escrito en el propio test.
 - [ ] 6.5 `pnpm verify`, y si muere con `allocation failure`, con `--concurrency=1`.

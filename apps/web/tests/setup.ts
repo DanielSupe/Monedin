@@ -79,3 +79,29 @@ if (typeof window !== "undefined") {
       dispatchEvent: () => false,
     }) as MediaQueryList;
 }
+
+/**
+ * `ResizeObserver`, que jsdom no trae y Radix da por hecho.
+ *
+ * Lo usan los controles que se colocan respecto a algo —el grupo de opción, el
+ * deslizador— para recalcularse cuando cambia el tamaño. Sin él, montar
+ * cualquier pantalla que los lleve revienta ANTES de pintar nada, y el fallo
+ * llega disfrazado: la pantalla sale vacía y el test dice que no encuentra un
+ * control, no que el navegador de mentira se quedó corto.
+ *
+ * Es un doble VACÍO a propósito y no una implementación: jsdom no hace `layout`,
+ * así que no hay medida que observar. Lo único que hace falta es que exista.
+ */
+if (typeof globalThis.ResizeObserver === "undefined") {
+  globalThis.ResizeObserver = class {
+    observe(): void {
+      // jsdom no calcula medidas: no hay nada que observar.
+    }
+    unobserve(): void {
+      // Ídem.
+    }
+    disconnect(): void {
+      // Ídem.
+    }
+  };
+}

@@ -101,7 +101,7 @@ describe("dar de baja se confirma en un diálogo", () => {
     await montar([hijo("h1", "Mateo", false)]);
 
     await userEvent.click(
-      within(await filaDe("Mateo")).getByRole("button", { name: messages.children.deactivate }),
+      within(await filaDe("Mateo")).getByRole("button", { name: new RegExp(`^${messages.children.deactivate}\\b`) }),
     );
 
     const dialogo = await screen.findByRole("dialog");
@@ -113,7 +113,7 @@ describe("dar de baja se confirma en un diálogo", () => {
     await montar([hijo("h1", "Mateo", false)]);
 
     await userEvent.click(
-      within(await filaDe("Mateo")).getByRole("button", { name: messages.children.deactivate }),
+      within(await filaDe("Mateo")).getByRole("button", { name: new RegExp(`^${messages.children.deactivate}\\b`) }),
     );
     await screen.findByRole("dialog");
 
@@ -127,7 +127,7 @@ describe("dar de baja se confirma en un diálogo", () => {
     await montar([hijo("h1", "Mateo", false)]);
 
     await userEvent.click(
-      within(await filaDe("Mateo")).getByRole("button", { name: messages.children.deactivate }),
+      within(await filaDe("Mateo")).getByRole("button", { name: new RegExp(`^${messages.children.deactivate}\\b`) }),
     );
     const dialogo = await screen.findByRole("dialog");
 
@@ -168,9 +168,9 @@ describe("un perfil bloqueado se lee como estado", () => {
 
     // Ofrecer desbloquear un perfil que no lo está es prometer algo que no hace
     // nada, la misma regla que gobierna las dos bandejas.
-    expect(screen.getAllByRole("button", { name: messages.children.unlock })).toHaveLength(1);
+    expect(screen.getAllByRole("button", { name: new RegExp(`^${messages.children.unlock}\\b`) })).toHaveLength(1);
     expect(
-      within(await filaDe("Mateo")).getByRole("button", { name: messages.children.unlock }),
+      within(await filaDe("Mateo")).getByRole("button", { name: new RegExp(`^${messages.children.unlock}\\b`) }),
     ).toBeInTheDocument();
   });
 });
@@ -184,7 +184,7 @@ describe("reponer el PIN es un formulario", () => {
 
     const fila = await filaDe("Mateo");
     await userEvent.click(
-      within(fila).getByRole("button", { name: messages.children.resetPin }),
+      within(fila).getByRole("button", { name: new RegExp(`^${messages.children.resetPinFull}\\b`) }),
     );
 
     await userEvent.type(await within(fila).findByLabelText(PIN_LABEL), "1234");
@@ -202,5 +202,56 @@ describe("cada perfil enseña lo que hace falta para decidir", () => {
     await screen.findByText("Mateo");
 
     expect(within(await filaDe("Mateo")).getByLabelText(/120\s+monedas/)).toBeInTheDocument();
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * EL DIÁLOGO DE BAJA TIENE QUE HACER DOS COSAS, Y LA SEGUNDA ES LA QUE IMPORTA.
+ *
+ * Avisar de que no se deshace es lo obvio, y no ataja el error real: quien llega
+ * aquí suele ser un padre cuyo hijo se quedó fuera por fallar el PIN, con «Dar de
+ * baja» a un dedo de «Bloqueado» en la misma fila. Un diálogo que solo avise
+ * pasaría este test con la mitad del trabajo hecho, así que se comprueban las
+ * dos: que dice que es definitivo Y que ofrece la otra salida.
+ *
+ * Y la ofrece SOLO cuando existe: sobre un perfil que no está bloqueado, hablar
+ * de desbloquear es ruido que aleja de la decisión que se está tomando.
+ */
+describe("dar de baja avisa, y ofrece la salida cuando la hay", () => {
+  it("sobre un perfil bloqueado, dice que es definitivo y ofrece desbloquear", async () => {
+    await montar([hijo("h1", "Mateo", true)]);
+
+    await userEvent.click(
+      within(await filaDe("Mateo")).getByRole("button", {
+        name: new RegExp(`^${messages.children.deactivate}\\b`),
+      }),
+    );
+
+    const dialogo = await screen.findByRole("dialog");
+
+    expect(within(dialogo).getByText(messages.children.deactivateConfirm)).toBeInTheDocument();
+    expect(within(dialogo).getByText(messages.children.deactivateLockedHint)).toBeInTheDocument();
+    expect(
+      within(dialogo).getByRole("button", {
+        name: new RegExp(`^${messages.children.unlock}\\b`),
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("y sobre uno que no lo está, no habla de desbloquear", async () => {
+    await montar([hijo("h1", "Mateo", false)]);
+
+    await userEvent.click(
+      within(await filaDe("Mateo")).getByRole("button", {
+        name: new RegExp(`^${messages.children.deactivate}\\b`),
+      }),
+    );
+
+    const dialogo = await screen.findByRole("dialog");
+
+    expect(within(dialogo).getByText(messages.children.deactivateConfirm)).toBeInTheDocument();
+    expect(within(dialogo).queryByText(messages.children.deactivateLockedHint)).toBeNull();
   });
 });

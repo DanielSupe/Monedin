@@ -234,7 +234,15 @@ describe("se llega al historial desde el saldo", () => {
     );
 
     const fila = (await screen.findByText("Mateo")).closest("li") as HTMLElement;
-    const enlace = within(fila).getByRole("link", { name: messages.coins.seeChildHistory });
+    /*
+     * Por el nombre COMPLETO y no por la etiqueta visible: desde
+     * `redesign-parent-screens` la fila lleva «Historial» a la vista y «Ver el
+     * historial de Mateo» anunciado, porque cuatro hijos dan cuatro etiquetas
+     * idénticas para quien no ve la pantalla.
+     */
+    const enlace = within(fila).getByRole("link", {
+      name: `${messages.children.historyFull} Mateo`,
+    });
 
     expect(enlace).toHaveAttribute("href", expect.stringContaining("/children/h1/coins"));
   });

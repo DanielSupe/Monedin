@@ -3,7 +3,7 @@ import { useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
 import { putToUploadUrl, UploadError } from "../../lib/s3-upload.js";
 import { messages } from "../../lib/messages.js";
-import { Alert, Button, buttonClasses, cx } from "../../ui/index.js";
+import { Alert, Button, Slider, buttonClasses, cx } from "../../ui/index.js";
 import { cropToBlob, isAllowedImage, prepareImage } from "./prepare-image.js";
 
 /**
@@ -184,18 +184,25 @@ export function ImageUploadField({
           />
         </div>
 
-        <label className="text-small flex items-center gap-2 font-semibold">
-          {messages.uploads.zoom}
-          <input
-            type="range"
-            min={1}
-            max={3}
-            step={0.1}
+        {/*
+          SOBRE `Slider`, que es lo que trae lo difícil: flechas, inicio y fin
+          con el teclado, arrastre táctil que no selecciona texto por error, y el
+          valor y el rango anunciados. Un `input[type=range]` nativo hace casi
+          todo eso y se pinta distinto en cada navegador — que es justo lo que un
+          sistema de diseño existe para que no pase.
+
+          La etiqueta se ve Y se anuncia: la ve quien mira y la oye quien no, sin
+          repetirla, porque el control la recibe por `label` y no la dibuja.
+        */}
+        <div className="flex items-center gap-3">
+          <span className="text-small shrink-0 font-semibold">{messages.uploads.zoom}</span>
+          <Slider
+            label={messages.uploads.zoom}
             value={zoom}
-            onChange={(event) => setZoom(Number(event.target.value))}
+            onValueChange={setZoom}
             className="min-w-0 flex-1"
           />
-        </label>
+        </div>
 
         <div className="flex flex-wrap gap-2">
           <Button variant="primary" onClick={() => void confirmarRecorte()}>
