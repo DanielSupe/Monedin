@@ -13,20 +13,20 @@
 
 ## 2. La bandeja de tareas
 
-- [ ] 2.1 Los repartos como tarjetas con sus filas por hijo, con `IconTile` y los tonos nuevos.
-- [ ] 2.2 Aprobar como acción principal; rechazar acompañando, sin tono de peligro.
-- [ ] 2.3 Cada acción dice sobre qué tarea y qué hijo actúa, para quien no ve la pantalla. Cuatro
+- [x] 2.1 Los repartos como tarjetas con sus filas por hijo, con `IconTile` y los tonos nuevos.
+- [x] 2.2 Aprobar como acción principal; rechazar acompañando, sin tono de peligro.
+- [x] 2.3 Cada acción dice sobre qué tarea y qué hijo actúa, para quien no ve la pantalla. Cuatro
       botones «Aprobar» seguidos no se distinguen por el orden.
-- [ ] 2.4 Conservar la nota de que un reparto filtrado se enseña entero, que ya existe.
-- [ ] 2.5 Test: las dos acciones no comparten forma, y rechazar no usa el tono del peligro.
+- [x] 2.4 Conservar la nota de que un reparto filtrado se enseña entero, que ya existe.
+- [x] 2.5 Test: las dos acciones no comparten forma, y rechazar no usa el tono del peligro.
 
 ## 3. La bandeja de canjes
 
-- [ ] 3.1 Las filas con el hijo, el premio, el precio y la fecha; estados con los tonos nuevos.
-- [ ] 3.2 **Las tres reglas, en la propia bandeja**: se descuenta al aprobar, el precio se congeló al
+- [x] 3.1 Las filas con el hijo, el premio, el precio y la fecha; estados con los tonos nuevos.
+- [x] 3.2 **Las tres reglas, en la propia bandeja**: se descuenta al aprobar, el precio se congeló al
       pedir, rechazar no descuenta. Textos al catálogo de mensajes, no incrustados.
-- [ ] 3.3 Aprobar principal y rechazar acompañando, igual que en tareas.
-- [ ] 3.4 Test: con solicitudes pendientes, las tres afirmaciones están en la pantalla. Que falle si
+- [x] 3.3 Aprobar principal y rechazar acompañando, igual que en tareas.
+- [x] 3.4 Test: con solicitudes pendientes, las tres afirmaciones están en la pantalla. Que falle si
       falta una, no si faltan todas.
 
 ## 4. Premios, hijos y sus formularios

@@ -10,6 +10,7 @@ import {
   Card,
   Coins,
   EmptyState,
+  IconTile,
   Pagination,
   Skeleton,
   buttonClasses,
@@ -65,8 +66,13 @@ export function RedemptionInbox({
   const canjes = data?.items ?? [];
 
   return (
-    <section className="flex flex-col gap-4">
-      <h2 className="text-title font-bold">{messages.redemptions.title}</h2>
+    <section className="flex flex-col gap-5">
+      <div className="flex flex-col gap-1">
+        <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+          {messages.redemptions.inboxLead}
+        </span>
+        <h2 className="text-display font-extrabold">{messages.redemptions.title}</h2>
+      </div>
 
       <nav
         aria-label={messages.redemptions.filterLabel}
@@ -87,6 +93,25 @@ export function RedemptionInbox({
         ))}
       </nav>
 
+      {/*
+        LAS TRES REGLAS, DONDE SE DECIDE.
+
+        Solo cuando hay algo que resolver: son las respuestas a lo que un padre
+        se pregunta ANTES de pulsar, y sin ninguna solicitud pendiente no hay
+        nada que preguntarse. Es el mismo criterio que la nota de los repartos,
+        que tampoco sale cuando no explica nada.
+
+        Tres tramos y no una frase: es lo que permite comprobar que están LAS
+        TRES. Con un solo texto, perder una regla no se notaría.
+      */}
+      {canjes.some((canje) => canje.status === "PENDING") && (
+        <p className="text-small flex flex-wrap gap-x-1 text-ink-muted">
+          <span>{messages.redemptions.ruleDiscountOnApprove}</span>
+          <span>{messages.redemptions.rulePriceFrozen}</span>
+          <span>{messages.redemptions.ruleRejectFree}</span>
+        </p>
+      )}
+
       {isPending ? (
         <Skeleton lines={4} />
       ) : error ? (
@@ -94,11 +119,19 @@ export function RedemptionInbox({
       ) : canjes.length === 0 ? (
         <EmptyState glyph="🎟️" title={messages.redemptions.empty} />
       ) : (
-        <ul className="flex list-none flex-col gap-3 p-0">
-          {canjes.map((canje) => (
-            <RedemptionRow key={canje.id} redemption={canje} />
-          ))}
-        </ul>
+        /*
+          UNA tarjeta con las filas divididas, y no una tarjeta por canje. Es la
+          misma forma que el historial de monedas y por la misma razón: lo que se
+          hace aquí es recorrer una lista de renglones iguales, y una tarjeta por
+          fila convierte esa lectura en doce objetos sueltos.
+        */
+        <Card>
+          <ul className="flex list-none flex-col p-0">
+            {canjes.map((canje) => (
+              <RedemptionRow key={canje.id} redemption={canje} />
+            ))}
+          </ul>
+        </Card>
       )}
 
       {data !== undefined && (
@@ -145,48 +178,148 @@ function RedemptionRow({ redemption }: { redemption: Redemption }): React.ReactE
   const fallo = approve.error ?? reject.error;
 
   return (
-    <li>
-      <Card>
-        <div className="flex min-w-0 flex-col gap-3">
-          <div className="flex min-w-0 flex-wrap items-center gap-3">
-            <Avatar value={redemption.child.avatar} size="small" />
-            <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <p className="truncate text-body font-semibold">{redemption.child.name}</p>
-              <p className="truncate text-small text-ink-muted">{redemption.reward.title}</p>
-            </div>
-            <Coins amount={redemption.coins} />
-            <Badge tone={TONO[redemption.status]}>
-              {describeRedemptionStatus(redemption.status)}
-            </Badge>
-          </div>
+    <li className="flex min-w-0 flex-col gap-2 border-b border-border py-3 first:pt-0 last:border-b-0 last:pb-0">
+      <div className="flex min-w-0 flex-wrap items-center gap-3">
+        <Avatar value={redemption.child.avatar} size="small" />
 
-          {/* Resolver solo lo que está sin resolver: aprobar DESCUENTA y
-              rechazar es terminal, así que un segundo intento acaba en 409. */}
-          {redemption.status === "PENDING" && (
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="primary"
-                disabled={trabajando}
-                onClick={() => approve.mutate(redemption.id)}
-              >
-                {messages.redemptions.approve}
-              </Button>
-              <Button
-                variant="secondary"
-                disabled={trabajando}
-                onClick={() => reject.mutate(redemption.id)}
-              >
-                {messages.redemptions.reject}
-              </Button>
-            </div>
-          )}
-
-          {/* Mismo criterio que en la bandeja de tareas: el 409 es advertencia. */}
-          {fallo != null && (
-            <Alert tone={alertToneFor(fallo)}>{describeRedemptionsError(fallo)}</Alert>
-          )}
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <p className="truncate text-body font-bold">{redemption.child.name}</p>
+          <p className="truncate text-small font-bold text-ink-muted">
+            {messages.redemptions.requestedLabel} {formatearFecha(redemption.createdAt)}
+          </p>
         </div>
-      </Card>
+
+        {/*
+          El premio, con su tesela. La misma en todas las filas: un canje solo
+          trae el identificador y el título de su premio, así que dibujar algo
+          distinto por fila exigiría un dato que el contrato no da.
+        */}
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <IconTile tone="saving">
+            <IconoPremio />
+          </IconTile>
+          <span className="truncate text-body font-bold">{redemption.reward.title}</span>
+        </div>
+
+        <Coins amount={redemption.coins} />
+
+        {/* Resolver solo lo que está sin resolver: aprobar DESCUENTA y
+            rechazar es terminal, así que un segundo intento acaba en 409. */}
+        {redemption.status === "PENDING" ? (
+          <div className="flex shrink-0 flex-wrap gap-2">
+            {/*
+              Cada acción dice sobre QUÉ actúa: cuatro «Aprobar» seguidos suenan
+              idénticos para quien no ve la pantalla, que no tiene el orden para
+              distinguirlos. Mismo criterio que la bandeja de tareas.
+            */}
+            <Button
+              variant="primary"
+              aria-label={sobreQue(messages.redemptions.approve, redemption)}
+              disabled={trabajando}
+              onClick={() => approve.mutate(redemption.id)}
+            >
+              <IconoVisto />
+              {messages.redemptions.approve}
+            </Button>
+
+            {/*
+              Rechazar ACOMPAÑA y no va en peligro: no descuenta nada y no
+              destruye nada. Es el mismo argumento por el que el niño lo ve en
+              advertencia — decir que no a un premio no es un error de nadie.
+            */}
+            <Button
+              variant="secondary"
+              aria-label={sobreQue(messages.redemptions.reject, redemption)}
+              disabled={trabajando}
+              onClick={() => reject.mutate(redemption.id)}
+            >
+              <IconoCruz />
+              {messages.redemptions.reject}
+            </Button>
+          </div>
+        ) : (
+          <Badge tone={TONO[redemption.status]}>
+            {describeRedemptionStatus(redemption.status)}
+          </Badge>
+        )}
+      </div>
+
+      {/* Mismo criterio que en la bandeja de tareas: el 409 es advertencia. */}
+      {fallo != null && (
+        <Alert tone={alertToneFor(fallo)}>{describeRedemptionsError(fallo)}</Alert>
+      )}
     </li>
+  );
+}
+
+/** Cuándo se pidió. En corto: es contexto, no una cuenta atrás. */
+function formatearFecha(iso: string): string {
+  return new Date(iso).toLocaleDateString();
+}
+
+/**
+ * «Aprobar: Helado, Mateo».
+ *
+ * Se compone aquí y no en el catálogo porque las tres partes son datos —la
+ * acción sí sale del catálogo— y lo que las une son dos signos de puntuación,
+ * que no se traducen.
+ */
+function sobreQue(accion: string, redemption: Redemption): string {
+  return `${accion}: ${redemption.reward.title}, ${redemption.child.name}`;
+}
+
+/** El regalo de la fila. Decorativo: lo nombra su título, al lado. */
+function IconoPremio(): React.ReactElement {
+  return (
+    <Glifo grosor="2">
+      <path d="M3.5 9.5h17v3h-17z" />
+      <path d="M5 12.5v8h14v-8" />
+      <path d="M12 9.5v11" />
+      <path d="M12 9.5C10.5 6 9 5 7.5 5a2.5 2.5 0 000 4.5z" />
+      <path d="M12 9.5C13.5 6 15 5 16.5 5a2.5 2.5 0 010 4.5z" />
+    </Glifo>
+  );
+}
+
+/** El visto de aprobar. Decorativo: lo nombra el botón. */
+function IconoVisto(): React.ReactElement {
+  return (
+    <Glifo>
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </Glifo>
+  );
+}
+
+/** La cruz de rechazar. Decorativa: lo nombra el botón. */
+function IconoCruz(): React.ReactElement {
+  return (
+    <Glifo>
+      <path d="M7 7l10 10" />
+      <path d="M17 7L7 17" />
+    </Glifo>
+  );
+}
+
+function Glifo({
+  children,
+  grosor = "2.8",
+}: {
+  children: React.ReactNode;
+  grosor?: string;
+}): React.ReactElement {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      className="size-4 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={grosor}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {children}
+    </svg>
   );
 }

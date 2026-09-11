@@ -553,6 +553,10 @@ export const messages = {
     dueDate: "Fecha límite (opcional)",
     dueDateHelp: "Solo se muestra: no caduca ni avisa.",
     dueLabel: "Para el",
+    /** Cuándo se repartió. La fecha va aparte: ninguna cadena lleva cifras. */
+    handedOutLabel: "Repartida el",
+    /** Lo que encabeza la pantalla, antes del título. */
+    inboxLead: "Lo que tus hijos han marcado",
     forWhom: "¿Para quién?",
     noChildren: "Primero crea un perfil de hijo.",
     sameCoins: "El mismo valor para todos",
@@ -705,6 +709,27 @@ export const messages = {
   redemptions: {
     /** Bandeja del padre. */
     title: "Canjes",
+    /** Lo que encabeza la pantalla, antes del título. */
+    inboxLead: "Lo que tus hijos han pedido",
+    /** Cuándo se pidió. La fecha va aparte: ninguna cadena lleva cifras. */
+    requestedLabel: "Pedido el",
+
+    /*
+     * LAS TRES REGLAS DEL CANJE, EN LA PROPIA BANDEJA.
+     *
+     * Son TRES cadenas y no un párrafo, y eso no es un capricho de formato: un
+     * test comprueba que las tres están, y con una sola cadena bastaría con que
+     * el párrafo existiera para pasar aunque le faltara una de las reglas.
+     *
+     * Las tres responden a preguntas que un padre se hace ANTES de pulsar y que
+     * hasta hoy solo estaban escritas en `CLAUDE.md`: cuándo se cobra, qué
+     * precio se aplica y qué cuesta decir que no. La tercera es la que más
+     * tranquiliza y la que menos se adivina.
+     */
+    ruleDiscountOnApprove: "Las monedas se descuentan al aprobar, no al pedir.",
+    rulePriceFrozen:
+      "El precio se congela el día de la solicitud: si luego subes el del premio, este canje mantiene el que tenía.",
+    ruleRejectFree: "Rechazar no descuenta nada.",
     empty: "No hay ninguna solicitud de canje todavía.",
     approve: "Aprobar",
     reject: "Rechazar",

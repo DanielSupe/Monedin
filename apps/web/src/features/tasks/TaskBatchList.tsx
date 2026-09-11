@@ -10,6 +10,7 @@ import {
   Card,
   Coins,
   EmptyState,
+  IconTile,
   Pagination,
   Skeleton,
   buttonClasses,
@@ -65,9 +66,15 @@ export function TaskBatchList({
   const repartos = data?.items ?? [];
 
   return (
-    <section className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-title font-bold">{messages.tasks.title}</h2>
+    <section className="flex flex-col gap-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+            {messages.tasks.inboxLead}
+          </span>
+          <h2 className="text-display font-extrabold">{messages.tasks.title}</h2>
+        </div>
+
         <Link to="/tasks/new" className={buttonClasses("primary")}>
           {messages.tasks.newTask}
         </Link>
@@ -113,21 +120,43 @@ export function TaskBatchList({
             <li key={reparto.batchId}>
               <Card>
                 <div className="flex min-w-0 flex-col gap-3">
-                  <div className="flex min-w-0 flex-col gap-1">
-                    <p className="text-body font-bold">{reparto.title}</p>
-                    {reparto.description !== null && (
-                      <p className="text-small text-ink-muted">{reparto.description}</p>
-                    )}
-                    {reparto.dueDate !== null && (
-                      <p className="text-small text-ink-muted">
-                        {messages.tasks.dueLabel} {formatearFecha(reparto.dueDate)}
+                  <div className="flex min-w-0 items-center gap-3">
+                    <IconTile tone="action">
+                      <IconoReparto />
+                    </IconTile>
+
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <p className="text-lead font-extrabold">{reparto.title}</p>
+                      {reparto.description !== null && (
+                        <p className="text-small text-ink-muted">{reparto.description}</p>
+                      )}
+                      <p className="text-small font-bold text-ink-muted">
+                        {messages.tasks.handedOutLabel} {formatearFecha(reparto.createdAt)}
+                        {reparto.dueDate !== null &&
+                          ` · ${messages.tasks.dueLabel} ${formatearFecha(reparto.dueDate)}`}
                       </p>
+                    </div>
+
+                    {/*
+                      LO QUE VALE VA EN LA CABECERA DEL REPARTO Y NO EN CADA FILA.
+
+                      Un reparto puede dar distinto a cada hijo, así que solo se
+                      enseña aquí cuando todos cobran lo MISMO — que es el caso
+                      normal—. Repetir la misma cifra en cuatro renglones era
+                      ruido; cuando no coinciden, cada fila lo dice.
+                    */}
+                    {valorComun(reparto.tasks) !== null && (
+                      <Coins amount={valorComun(reparto.tasks) ?? 0} className="shrink-0" />
                     )}
                   </div>
 
-                  <ul className="flex list-none flex-col gap-3 p-0">
+                  <ul className="flex list-none flex-col gap-0 p-0">
                     {reparto.tasks.map((tarea) => (
-                      <TaskRow key={tarea.id} task={tarea} />
+                      <TaskRow
+                        key={tarea.id}
+                        task={tarea}
+                        conValorPropio={valorComun(reparto.tasks) === null}
+                      />
                     ))}
                   </ul>
                 </div>
@@ -173,7 +202,28 @@ export function TaskBatchList({
   );
 }
 
-function TaskRow({ task }: { task: Task }): React.ReactElement {
+/**
+ * Lo que vale el reparto, si vale lo mismo para todos.
+ *
+ * `null` cuando no coinciden: el alta permite «un valor para cada uno», así que
+ * una sola cifra en la cabecera sería falsa justo en el caso que el producto
+ * ofrece a propósito.
+ */
+function valorComun(tareas: Task[]): number | null {
+  const primera = tareas[0];
+  if (primera === undefined) return null;
+
+  return tareas.every((tarea) => tarea.coins === primera.coins) ? primera.coins : null;
+}
+
+function TaskRow({
+  task,
+  conValorPropio,
+}: {
+  task: Task;
+  /** Cuando el reparto NO paga lo mismo a todos, la cifra baja a la fila. */
+  conValorPropio: boolean;
+}): React.ReactElement {
   const approve = useApproveTask();
   const reject = useRejectTask();
   const remove = useDeleteTask();
@@ -182,11 +232,11 @@ function TaskRow({ task }: { task: Task }): React.ReactElement {
   const fallo = approve.error ?? reject.error ?? remove.error;
 
   return (
-    <li className="flex min-w-0 flex-col gap-2 border-t border-border pt-3 first:border-0 first:pt-0">
+    <li className="flex min-w-0 flex-col gap-2 border-t border-border py-3 last:pb-0">
       <div className="flex min-w-0 flex-wrap items-center gap-3">
         <Avatar value={task.child.avatar} size="small" />
-        <span className="min-w-0 flex-1 truncate text-body font-semibold">{task.child.name}</span>
-        <Coins amount={task.coins} />
+        <span className="min-w-0 flex-1 truncate text-body font-bold">{task.child.name}</span>
+        {conValorPropio && <Coins amount={task.coins} />}
         <Badge tone={TONO[task.status]}>{describeTaskStatus(task.status)}</Badge>
       </div>
 
@@ -207,10 +257,37 @@ function TaskRow({ task }: { task: Task }): React.ReactElement {
           la API va a rechazar con 409 es prometer algo que no se cumple. */}
       {task.status === "COMPLETED" && (
         <div className="flex flex-wrap gap-2">
-          <Button variant="primary" disabled={trabajando} onClick={() => approve.mutate(task.id)}>
+          {/*
+            CADA ACCIÓN DICE SOBRE QUÉ ACTÚA.
+
+            Un reparto con cuatro hijos esperando pone cuatro botones «Aprobar»
+            seguidos, y de viva voz suenan idénticos: quien no ve la pantalla no
+            tiene el orden para distinguirlos. El nombre visible se queda corto
+            —repetir la tarea y el hijo en cada botón llenaría la fila— así que
+            el nombre COMPLETO va en `aria-label`, que es donde hace falta.
+          */}
+          <Button
+            variant="primary"
+            aria-label={sobreQue(messages.tasks.approve, task)}
+            disabled={trabajando}
+            onClick={() => approve.mutate(task.id)}
+          >
+            <IconoVisto />
             {messages.tasks.approve}
           </Button>
-          <Button variant="secondary" disabled={trabajando} onClick={() => reject.mutate(task.id)}>
+
+          {/*
+            Rechazar ACOMPAÑA y no va en peligro: devuelve la tarea a pendiente y
+            no destruye nada. El rojo le diría al padre que hizo algo grave por
+            pedirle a su hijo que la repita.
+          */}
+          <Button
+            variant="secondary"
+            aria-label={sobreQue(messages.tasks.reject, task)}
+            disabled={trabajando}
+            onClick={() => reject.mutate(task.id)}
+          >
+            <IconoCruz />
             {messages.tasks.reject}
           </Button>
         </div>
@@ -218,7 +295,16 @@ function TaskRow({ task }: { task: Task }): React.ReactElement {
 
       {task.status === "PENDING" && (
         <div className="flex flex-wrap gap-2">
-          <Button variant="danger" disabled={trabajando} onClick={() => remove.mutate(task.id)}>
+          {/*
+            Borrar SÍ va en peligro, y no contradice lo de arriba: rechazar
+            devuelve una tarea a pendiente y esto la hace desaparecer.
+          */}
+          <Button
+            variant="danger"
+            aria-label={sobreQue(messages.tasks.remove, task)}
+            disabled={trabajando}
+            onClick={() => remove.mutate(task.id)}
+          >
             {messages.tasks.remove}
           </Button>
         </div>
@@ -237,4 +323,64 @@ function TaskRow({ task }: { task: Task }): React.ReactElement {
 /** La fecha límite se enseña en corto: es informativa, no una cuenta atrás. */
 function formatearFecha(iso: string): string {
   return new Date(iso).toLocaleDateString();
+}
+
+/**
+ * «Aprobar: Tender la cama, Mateo».
+ *
+ * Se compone aquí y no en el catálogo porque las tres partes son datos —la
+ * acción sí sale del catálogo— y lo que las une son dos signos de puntuación,
+ * que no se traducen.
+ */
+function sobreQue(accion: string, task: Task): string {
+  return `${accion}: ${task.title}, ${task.child.name}`;
+}
+
+/** El reparto, dibujado. Decorativo: lo nombra su título. */
+function IconoReparto(): React.ReactElement {
+  return (
+    <Glifo>
+      <path d="M4 7.5l2.5 2.5L11 5" />
+      <path d="M13.5 8h7" />
+      <path d="M4 17.5L6.5 20 11 15" />
+      <path d="M13.5 18h7" />
+    </Glifo>
+  );
+}
+
+/** El visto de aprobar. Decorativo: lo nombra el botón. */
+function IconoVisto(): React.ReactElement {
+  return (
+    <Glifo>
+      <path d="M5 12.5l4.5 4.5L19 7.5" />
+    </Glifo>
+  );
+}
+
+/** La cruz de rechazar. Decorativa: lo nombra el botón. */
+function IconoCruz(): React.ReactElement {
+  return (
+    <Glifo>
+      <path d="M7 7l10 10" />
+      <path d="M17 7L7 17" />
+    </Glifo>
+  );
+}
+
+function Glifo({ children }: { children: React.ReactNode }): React.ReactElement {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      className="size-4 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {children}
+    </svg>
+  );
 }

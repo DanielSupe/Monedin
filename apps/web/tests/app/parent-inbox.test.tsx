@@ -28,6 +28,21 @@ function tarea(id: string, status: "PENDING" | "COMPLETED" | "APPROVED") {
   };
 }
 
+/**
+ * Los botones de una acción, buscados por el PRINCIPIO de su nombre.
+ *
+ * Desde `redesign-parent-screens` el nombre accesible de cada acción lleva
+ * detrás sobre qué actúa —«Aprobar: Recoger la mesa, Hijo t1»—, porque cuatro
+ * hijos esperando ponen cuatro botones «Aprobar» seguidos y de viva voz suenan
+ * idénticos: quien no ve la pantalla no tiene el orden para distinguirlos.
+ *
+ * Se busca con una expresión anclada al principio y no con el texto exacto, que
+ * es justo lo que dejaría de encontrar ese nombre completo.
+ */
+function acciones(accion: string): HTMLElement[] {
+  return screen.getAllByRole("button", { name: new RegExp(`^${accion}\\b`) });
+}
+
 /** Un reparto con las tres etapas dentro: lo que se ve al filtrar por una. */
 const REPARTO_MEZCLADO = {
   batchId: "b1",
@@ -151,7 +166,7 @@ describe("un conflicto no se cuenta como un error", () => {
     });
 
     await userEvent.click(
-      (await screen.findAllByRole("button", { name: messages.tasks.approve }))[0] as HTMLElement,
+      (await screen.findAllByRole("button", { name: new RegExp(`^${messages.tasks.approve}\\b`) }))[0] as HTMLElement,
     );
 
     await screen.findByText(messages.tasks.conflict);
@@ -167,7 +182,7 @@ describe("un conflicto no se cuenta como un error", () => {
     });
 
     await userEvent.click(
-      (await screen.findAllByRole("button", { name: messages.tasks.approve }))[0] as HTMLElement,
+      (await screen.findAllByRole("button", { name: new RegExp(`^${messages.tasks.approve}\\b`) }))[0] as HTMLElement,
     );
 
     await screen.findByText(messages.tasks.invalidData);
@@ -189,10 +204,10 @@ describe("cada fila ofrece solo lo que su estado permite", () => {
     await screen.findByText("Recoger la mesa");
 
     // Tres tareas en el reparto y UNA sola pareja de aprobar/rechazar.
-    expect(screen.getAllByRole("button", { name: messages.tasks.approve })).toHaveLength(1);
-    expect(screen.getAllByRole("button", { name: messages.tasks.reject })).toHaveLength(1);
+    expect(acciones(messages.tasks.approve)).toHaveLength(1);
+    expect(acciones(messages.tasks.reject)).toHaveLength(1);
     // Y borrar solo sobre la pendiente.
-    expect(screen.getAllByRole("button", { name: messages.tasks.remove })).toHaveLength(1);
+    expect(acciones(messages.tasks.remove)).toHaveLength(1);
   });
 
   it("un canje ya resuelto no se puede volver a resolver", async () => {
@@ -204,8 +219,8 @@ describe("cada fila ofrece solo lo que su estado permite", () => {
     // llegue la respuesta, así que esperarlo dejaría comprobando un esqueleto.
     await screen.findByText("Emma");
 
-    expect(screen.getAllByRole("button", { name: messages.redemptions.approve })).toHaveLength(1);
-    expect(screen.getAllByRole("button", { name: messages.redemptions.reject })).toHaveLength(1);
+    expect(acciones(messages.redemptions.approve)).toHaveLength(1);
+    expect(acciones(messages.redemptions.reject)).toHaveLength(1);
   });
 });
 
@@ -256,5 +271,130 @@ describe("un reparto filtrado explica por qué enseña lo que no casa", () => {
 
     await screen.findByText("Recoger la mesa");
     expect(screen.queryByText(messages.tasks.wholeBatchNote)).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * DOS ACCIONES EN LA MISMA FILA TIENEN QUE LEERSE DISTINTO.
+ *
+ * Comprobar que las dos etiquetas están en pantalla no comprueba que se
+ * distingan: con la misma variante en las dos, ese test seguiría en verde. Se
+ * comparan ENTRE SÍ.
+ *
+ * Y rechazar NO puede llevar el tono del peligro. Devuelve la tarea a pendiente
+ * y no destruye nada: pintarlo de rojo le diría al padre que hizo algo grave por
+ * pedirle a su hijo que la repita. Es el mismo argumento por el que un canje
+ * rechazado va en advertencia y no en error.
+ */
+describe("aprobar manda y rechazar acompaña", () => {
+  it("no comparten forma, y rechazar no es una acción peligrosa", async () => {
+    await montar("/tasks?page=1&status=ALL", { repartos: [REPARTO_MEZCLADO] });
+    await screen.findByText("Recoger la mesa");
+
+    const aprobar = acciones(messages.tasks.approve)[0] as HTMLElement;
+    const rechazar = acciones(messages.tasks.reject)[0] as HTMLElement;
+    const borrar = acciones(messages.tasks.remove)[0] as HTMLElement;
+
+    expect(aprobar.className).not.toEqual(rechazar.className);
+
+    // Y rechazar no se parece a lo único que sí destruye algo en esta pantalla.
+    expect(rechazar.className).not.toEqual(borrar.className);
+  });
+
+  /*
+   * CUATRO «APROBAR» SEGUIDOS NO SE DISTINGUEN POR EL ORDEN.
+   *
+   * El caso lleva DOS hijos esperando en el mismo reparto, que es el mínimo para
+   * que el defecto se note: con uno solo, un nombre genérico y uno completo
+   * serían igual de útiles y el test pasaría con el defecto puesto.
+   */
+  it("cada acción dice sobre qué tarea y qué hijo actúa", async () => {
+    await montar("/tasks?page=1&status=ALL", {
+      repartos: [
+        {
+          batchId: "b9",
+          title: "Tender la cama",
+          description: null,
+          dueDate: null,
+          createdAt: "2026-09-01T10:00:00.000Z",
+          tasks: [
+            {
+              ...tarea("t1", "COMPLETED"),
+              title: "Tender la cama",
+              child: { id: "h1", name: "Mateo", avatar: "zorro" },
+            },
+            {
+              ...tarea("t2", "COMPLETED"),
+              title: "Tender la cama",
+              child: { id: "h2", name: "Emma", avatar: "lechuza" },
+            },
+          ],
+        } as TaskBatch,
+      ],
+    });
+
+    await screen.findByText("Tender la cama");
+
+    const nombres = acciones(messages.tasks.approve).map((boton) =>
+      boton.getAttribute("aria-label"),
+    );
+
+    expect(nombres).toHaveLength(2);
+    // Los dos nombran su tarea y su hijo, y no son el mismo.
+    expect(new Set(nombres).size).toBe(2);
+    for (const nombre of nombres) {
+      expect(nombre).toContain("Tender la cama");
+    }
+    expect(nombres.some((n) => n?.includes("Mateo"))).toBe(true);
+    expect(nombres.some((n) => n?.includes("Emma"))).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * LAS TRES REGLAS DEL CANJE, DONDE SE DECIDE.
+ *
+ * Están escritas en `CLAUDE.md` desde `add-rewards` y hasta hoy no llegaban a
+ * ninguna pantalla: el padre pulsaba «Aprobar» sin saber que eso es lo que
+ * cobra, ni con qué precio, ni qué le cuesta decir que no.
+ *
+ * SE COMPRUEBAN UNA A UNA, y esa es la mitad que importa. Con una sola
+ * afirmación —«la nota está»— perder una de las tres reglas no se notaría: es
+ * el mismo error que el test de los tres estados que pasaba con el mismo tono
+ * en los tres.
+ */
+describe("la bandeja de canjes explica sus tres reglas", () => {
+  const REGLAS = [
+    messages.redemptions.ruleDiscountOnApprove,
+    messages.redemptions.rulePriceFrozen,
+    messages.redemptions.ruleRejectFree,
+  ];
+
+  it("con algo pendiente, las tres están en pantalla", async () => {
+    await montar("/redemptions?page=1&status=ALL", { canjes: [CANJE_PENDIENTE] });
+
+    await screen.findByText("Helado");
+
+    for (const regla of REGLAS) {
+      expect(screen.getByText(regla)).toBeInTheDocument();
+    }
+  });
+
+  /*
+   * Y NO SALEN CUANDO NO HAY NADA QUE DECIDIR. Son las respuestas a lo que un
+   * padre se pregunta ANTES de pulsar; sin ninguna solicitud pendiente no hay
+   * nada que preguntarse, y un párrafo permanente deja de leerse.
+   */
+  it("sin nada pendiente, no se dicen", async () => {
+    await montar("/redemptions?page=1&status=APPROVED", { canjes: [CANJE_RESUELTO] });
+
+    await screen.findByText("Helado");
+
+    for (const regla of REGLAS) {
+      expect(screen.queryByText(regla)).toBeNull();
+    }
   });
 });
