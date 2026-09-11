@@ -156,10 +156,18 @@ describe("el estilo no se escribe fuera de los tokens", () => {
    * cualquiera, una tarjeta cualquiera, un aviso cualquiera.
    */
   const AUTORIZADOS_AL_COLOR_MONEDA = [
+    /*
+     * EL DIBUJO DE LA MONEDA, y es el único sitio donde el ámbar se pinta.
+     *
+     * `Coins` y `Logo` estaban en esta lista cada uno con su motivo —la cifra y
+     * la marca— y los dos dibujaban su propia moneda. Ahora la comparten, así
+     * que la lista se acorta en vez de crecer: `Coins` sigue aquí porque además
+     * escribe la cifra en la tinta de la moneda, y `Logo` sale porque ya no
+     * pinta nada de ámbar.
+     */
+    join("ui", "coin-mark.tsx"),
     // La cifra. Es la razón de que este color exista.
     join("ui", "Coins.tsx"),
-    // La marca ES una moneda dibujada.
-    join("ui", "Logo.tsx"),
     // Lo que falta para un premio, medido en monedas.
     join("ui", "ProgressBar.tsx"),
     /*

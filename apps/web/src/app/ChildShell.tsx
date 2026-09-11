@@ -99,6 +99,9 @@ export function ChildShell({
             <SidebarProfile name={name} avatar={avatar}>
               {messages.children.myProfileTitle}
             </SidebarProfile>
+            {/* El icono del destino va DETRÁS en esta fila y no delante como en
+                los demás: aquí quien encabeza es el avatar, y dos glifos
+                seguidos compiten por el mismo sitio. */}
             <IconProfile />
           </Link>
         }
@@ -112,8 +115,11 @@ export function ChildShell({
             activeOptions={{ exact: exacto }}
             className={sidebarItemClasses()}
           >
-            <SidebarLabel>{texto}</SidebarLabel>
+            {/* Icono delante y texto detrás, igual que el marco del padre: es
+                la MISMA navegación con otros destinos, y dos órdenes distintos
+                se leen como dos productos. El icono es decorativo. */}
             <Icono />
+            <SidebarLabel>{texto}</SidebarLabel>
           </Link>
         ))}
     </Sidebar>

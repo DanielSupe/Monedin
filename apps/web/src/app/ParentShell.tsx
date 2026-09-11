@@ -97,10 +97,13 @@ export function ParentShell({
       {...(ancho ? { onToggleCollapse: () => setContraido((v) => !v) } : {})}
       profile={
           <Link to="/account" className={sidebarItemClasses()}>
-            <IconAccount />
             <SidebarProfile name={name} avatar={avatar}>
               {messages.nav.parentAccount}
             </SidebarProfile>
+            {/* El icono del destino va DETRÁS en esta fila y no delante como en
+                los demás: aquí quien encabeza es el avatar, y dos glifos
+                seguidos compiten por el mismo sitio. */}
+            <IconAccount />
           </Link>
         }
       >

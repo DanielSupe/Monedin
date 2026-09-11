@@ -233,11 +233,76 @@ function TaskRow({
 
   return (
     <li className="flex min-w-0 flex-col gap-2 border-t border-border py-3 last:pb-0">
+      {/*
+        EL HIJO, SU ESTADO Y LO QUE SE PUEDE HACER, EN LA MISMA FILA.
+
+        Las acciones colgaban en un bloque aparte debajo, así que cada hijo
+        ocupaba dos renglones y un reparto de tres llenaba la pantalla. Van aquí
+        dentro y el `flex-wrap` las baja solo cuando no caben — una sola
+        estructura para los dos anchos, que es lo que este proyecto exige.
+      */}
       <div className="flex min-w-0 flex-wrap items-center gap-3">
         <Avatar value={task.child.avatar} size="small" />
         <span className="min-w-0 flex-1 truncate text-body font-bold">{task.child.name}</span>
         {conValorPropio && <Coins amount={task.coins} />}
         <Badge tone={TONO[task.status]}>{describeTaskStatus(task.status)}</Badge>
+
+        {/* Lo que se ve y lo que se puede hacer van juntos: ofrecer una acción
+            que la API va a rechazar con 409 es prometer algo que no se cumple. */}
+        {task.status === "COMPLETED" && (
+          <span className="flex shrink-0 flex-wrap gap-2">
+            {/*
+              CADA ACCIÓN DICE SOBRE QUÉ ACTÚA.
+
+              Un reparto con cuatro hijos esperando pone cuatro botones «Aprobar»
+              seguidos, y de viva voz suenan idénticos: quien no ve la pantalla no
+              tiene el orden para distinguirlos. El nombre visible se queda corto
+              —repetir la tarea y el hijo en cada botón llenaría la fila— así que
+              el nombre COMPLETO va en `aria-label`, que es donde hace falta.
+            */}
+            <Button
+              variant="primary"
+              aria-label={sobreQue(messages.tasks.approve, task)}
+              disabled={trabajando}
+              onClick={() => approve.mutate(task.id)}
+            >
+              <IconoVisto />
+              {messages.tasks.approve}
+            </Button>
+
+            {/*
+              Rechazar ACOMPAÑA y no va en peligro: devuelve la tarea a pendiente
+              y no destruye nada. El rojo le diría al padre que hizo algo grave
+              por pedirle a su hijo que la repita.
+            */}
+            <Button
+              variant="secondary"
+              aria-label={sobreQue(messages.tasks.reject, task)}
+              disabled={trabajando}
+              onClick={() => reject.mutate(task.id)}
+            >
+              <IconoCruz />
+              {messages.tasks.reject}
+            </Button>
+          </span>
+        )}
+
+        {task.status === "PENDING" && (
+          <span className="flex shrink-0 flex-wrap gap-2">
+            {/*
+              Borrar SÍ va en peligro, y no contradice lo de arriba: rechazar
+              devuelve una tarea a pendiente y esto la hace desaparecer.
+            */}
+            <Button
+              variant="danger"
+              aria-label={sobreQue(messages.tasks.remove, task)}
+              disabled={trabajando}
+              onClick={() => remove.mutate(task.id)}
+            >
+              {messages.tasks.remove}
+            </Button>
+          </span>
+        )}
       </div>
 
       {/* La evidencia va ANTES de los botones: es para decidir con ella, no
@@ -251,63 +316,6 @@ function TaskRow({
             className="rounded-card max-h-32 object-cover"
           />
         </a>
-      )}
-
-      {/* Lo que se ve y lo que se puede hacer van juntos: ofrecer una acción que
-          la API va a rechazar con 409 es prometer algo que no se cumple. */}
-      {task.status === "COMPLETED" && (
-        <div className="flex flex-wrap gap-2">
-          {/*
-            CADA ACCIÓN DICE SOBRE QUÉ ACTÚA.
-
-            Un reparto con cuatro hijos esperando pone cuatro botones «Aprobar»
-            seguidos, y de viva voz suenan idénticos: quien no ve la pantalla no
-            tiene el orden para distinguirlos. El nombre visible se queda corto
-            —repetir la tarea y el hijo en cada botón llenaría la fila— así que
-            el nombre COMPLETO va en `aria-label`, que es donde hace falta.
-          */}
-          <Button
-            variant="primary"
-            aria-label={sobreQue(messages.tasks.approve, task)}
-            disabled={trabajando}
-            onClick={() => approve.mutate(task.id)}
-          >
-            <IconoVisto />
-            {messages.tasks.approve}
-          </Button>
-
-          {/*
-            Rechazar ACOMPAÑA y no va en peligro: devuelve la tarea a pendiente y
-            no destruye nada. El rojo le diría al padre que hizo algo grave por
-            pedirle a su hijo que la repita.
-          */}
-          <Button
-            variant="secondary"
-            aria-label={sobreQue(messages.tasks.reject, task)}
-            disabled={trabajando}
-            onClick={() => reject.mutate(task.id)}
-          >
-            <IconoCruz />
-            {messages.tasks.reject}
-          </Button>
-        </div>
-      )}
-
-      {task.status === "PENDING" && (
-        <div className="flex flex-wrap gap-2">
-          {/*
-            Borrar SÍ va en peligro, y no contradice lo de arriba: rechazar
-            devuelve una tarea a pendiente y esto la hace desaparecer.
-          */}
-          <Button
-            variant="danger"
-            aria-label={sobreQue(messages.tasks.remove, task)}
-            disabled={trabajando}
-            onClick={() => remove.mutate(task.id)}
-          >
-            {messages.tasks.remove}
-          </Button>
-        </div>
       )}
 
       {/*

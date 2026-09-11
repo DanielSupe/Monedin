@@ -197,24 +197,33 @@ function PendingLink({
       saber de rutas, que es justo lo que `ui/` no sabe.
     */
     <HeroPanel tone={tone} className="motion-safe:transition-transform motion-safe:hover:scale-105">
-      <IconTile tone="hero">{icon}</IconTile>
+      {/*
+        EN FILA, y hace falta decirlo: `HeroPanel` apila su contenido en COLUMNA
+        —es lo que quiere el saludo del inicio, título encima y frase debajo— así
+        que sin esta envoltura la tesela se estiraba de lado a lado del panel y
+        la flecha caía debajo del texto. No se ve en ningún test: jsdom no aplica
+        CSS. Lo cazó abrir el panel.
+      */}
+      <span className="flex w-full items-center gap-4">
+        <IconTile tone="hero">{icon}</IconTile>
 
-      <Link
-        to={to}
-        search={search}
-        className="flex min-w-0 flex-1 flex-col text-ink-inverted no-underline after:absolute after:inset-0"
-      >
-        <span className="text-display font-extrabold leading-none">
-          {/* El `+` dice «al menos»: la cuenta se quedó corta y no lo esconde. */}
-          {count.value}
-          {count.exact ? "" : "+"}
-        </span>
-        <span className="text-body font-bold opacity-90">
-          {count.value === 1 && count.exact ? one : many}
-        </span>
-      </Link>
+        <Link
+          to={to}
+          search={search}
+          className="flex min-w-0 flex-1 flex-col text-ink-inverted no-underline after:absolute after:inset-0"
+        >
+          <span className="text-display font-extrabold leading-none">
+            {/* El `+` dice «al menos»: la cuenta se quedó corta y no lo esconde. */}
+            {count.value}
+            {count.exact ? "" : "+"}
+          </span>
+          <span className="text-body font-bold opacity-90">
+            {count.value === 1 && count.exact ? one : many}
+          </span>
+        </Link>
 
-      <Flecha />
+        <Flecha />
+      </span>
     </HeroPanel>
   );
 }

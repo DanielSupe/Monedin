@@ -1,7 +1,7 @@
 import type { OwnRedemption } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
 import { contar } from "../../lib/plural.js";
-import { Alert, Badge, Coins, DataTable, EmptyState, IconTile, Skeleton } from "../../ui/index.js";
+import { Alert, Badge, Coins, DataTable, EmptyState, Skeleton } from "../../ui/index.js";
 import type { BadgeTone, DataColumn } from "../../ui/index.js";
 import {
   describeRedemptionStatus,
@@ -83,24 +83,25 @@ export function MyRedemptions(): React.ReactElement {
           rows={canjes.map((canje) => ({
             key: canje.id,
             cells: {
-              premio: (
-                <span className="flex items-center gap-3">
-                  {/*
-                    La tesela es la MISMA en todas las filas, y es a propósito: un
-                    canje solo trae el identificador y el título de su premio, sin
-                    imagen. Dibujar aquí algo distinto por fila exigiría un dato
-                    que el contrato no da.
+              /*
+                SIN TESELA, y es una reversión medida.
 
-                    Va en el color del AHORRO, que es el del premio en todo el
-                    producto — lo que la fila enseña es un premio conseguido, no
-                    un estado.
-                  */}
-                  <IconTile tone="saving">
-                    <IconoPremio />
-                  </IconTile>
-                  <span className="text-lead font-bold">{canje.reward.title}</span>
-                </span>
-              ),
+                La maqueta dibuja un regalo delante del título, y con él la tabla
+                ocupa 396px en una pantalla de 390: la cuarta columna —«Cuándo»—
+                se sale y el título parte en tres renglones. La maqueta está
+                dibujada a 1440 y ahí sobra sitio; el requisito dice que las
+                cuatro columnas quepan en la escala del NIÑO, que es quien mira
+                esto en una tablet o un teléfono.
+
+                Lo que se va es lo que menos cuesta: la tesela era la misma en
+                todas las filas —un canje solo trae el identificador y el título
+                de su premio, sin imagen—, así que no distinguía nada. Sin ella la
+                tabla mide 340 y cabe con holgura.
+
+                Lo cazó abrir la aplicación a 390px, que es exactamente para lo
+                que esa tarea existe: jsdom no aplica CSS y ningún test lo veía.
+              */
+              premio: <span className="text-body font-bold">{canje.reward.title}</span>,
               monedas: <Coins amount={canje.coins} />,
               estado: (
                 <Badge tone={TONO[canje.status]}>
@@ -150,32 +151,6 @@ const TONO: Record<OwnRedemption["status"], BadgeTone> = {
  */
 function corta(fecha: string): string {
   return new Date(fecha).toLocaleDateString(undefined, { day: "numeric", month: "short" });
-}
-
-/**
- * El regalo que encabeza cada fila. Decorativo: lo que nombra la fila es su
- * título, que va justo al lado.
- */
-function IconoPremio(): React.ReactElement {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      focusable="false"
-      className="size-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M3.5 9.5h17v3h-17z" />
-      <path d="M5 12.5v8h14v-8" />
-      <path d="M12 9.5v11" />
-      <path d="M12 9.5C10.5 6 9 5 7.5 5a2.5 2.5 0 000 4.5z" />
-      <path d="M12 9.5C13.5 6 15 5 16.5 5a2.5 2.5 0 010 4.5z" />
-    </svg>
-  );
 }
 
 /**

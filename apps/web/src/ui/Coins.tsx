@@ -1,4 +1,5 @@
 import { messages } from "../lib/messages.js";
+import { CoinMark } from "./coin-mark.js";
 import { cx } from "./cx.js";
 
 const format = new Intl.NumberFormat(messages.app.locale);
@@ -45,7 +46,16 @@ export function Coins({ amount, size = "normal", className }: CoinsProps): React
         className,
       )}
     >
-      <span aria-hidden="true">🪙</span>
+      {/*
+        LA MONEDA LA DIBUJA EL PROYECTO, NO EL DISPOSITIVO.
+
+        Era un emoji, y un emoji lo dibuja la fuente del sistema: en Windows sale
+        con una columna grabada, en Apple es otra moneda y en Android otra. Es el
+        mismo argumento que `Logo` lleva escrito desde el primer día y que
+        `add-brand-typography` ya pagó con la tipografía — aquí pesa más, porque
+        la moneda es el objeto que más se repite del producto.
+      */}
+      <CoinMark className={size === "hero" ? "size-12" : "size-4"} />
       <span aria-label={`${format.format(amount)} ${unidad}`}>{format.format(amount)}</span>
     </span>
   );
