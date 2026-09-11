@@ -1,11 +1,4 @@
-import celebra from "../../assets/tutorial/celebra.png";
-import bienHecho from "../../assets/tutorial/bien-hecho.png";
-import propone from "../../assets/tutorial/propone.png";
-import explica from "../../assets/tutorial/explica.png";
-import presenta from "../../assets/tutorial/presenta.png";
-import saluda from "../../assets/tutorial/saluda.png";
-import senalaAbajo from "../../assets/tutorial/senala-abajo.png";
-import senalaArriba from "../../assets/tutorial/senala-arriba.png";
+import { POSES } from "../../ui/mascot-poses.js";
 import { messages } from "../../lib/messages.js";
 
 /**
@@ -41,34 +34,34 @@ export const PARENT_STEPS: TutorialStep[] = [
     key: "bienvenida",
     title: messages.tutorial.parentWelcomeTitle,
     body: messages.tutorial.parentWelcomeBody,
-    image: saluda,
+    image: POSES.saluda,
   },
   {
     key: "pendientes",
     anchor: "parent-pending",
     title: messages.tutorial.parentPendingTitle,
     body: messages.tutorial.parentPendingBody,
-    image: propone,
+    image: POSES.propone,
   },
   {
     key: "hijos",
     anchor: "parent-children",
     title: messages.tutorial.parentChildrenTitle,
     body: messages.tutorial.parentChildrenBody,
-    image: explica,
+    image: POSES.explica,
   },
   {
     key: "crear",
     anchor: "parent-create",
     title: messages.tutorial.parentCreateTitle,
     body: messages.tutorial.parentCreateBody,
-    image: senalaArriba,
+    image: POSES.senalaArriba,
   },
   {
     key: "final",
     title: messages.tutorial.parentDoneTitle,
     body: messages.tutorial.parentDoneBody,
-    image: bienHecho,
+    image: POSES.bienHecho,
   },
 ];
 
@@ -77,33 +70,33 @@ export const CHILD_STEPS: TutorialStep[] = [
     key: "bienvenida",
     title: messages.tutorial.childWelcomeTitle,
     body: messages.tutorial.childWelcomeBody,
-    image: saluda,
+    image: POSES.saluda,
   },
   {
     key: "saldo",
     anchor: "child-balance",
     title: messages.tutorial.childBalanceTitle,
     body: messages.tutorial.childBalanceBody,
-    image: presenta,
+    image: POSES.presenta,
   },
   {
     key: "tareas",
     anchor: "child-tasks",
     title: messages.tutorial.childTasksTitle,
     body: messages.tutorial.childTasksBody,
-    image: senalaAbajo,
+    image: POSES.senalaAbajo,
   },
   {
     key: "premios",
     anchor: "child-rewards",
     title: messages.tutorial.childRewardsTitle,
     body: messages.tutorial.childRewardsBody,
-    image: celebra,
+    image: POSES.celebra,
   },
   {
     key: "final",
     title: messages.tutorial.childDoneTitle,
     body: messages.tutorial.childDoneBody,
-    image: bienHecho,
+    image: POSES.bienHecho,
   },
 ];

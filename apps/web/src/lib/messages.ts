@@ -206,6 +206,9 @@ export const messages = {
     coinsUnit: "monedas",
     coinsUnitSingular: "moneda",
     progressLabel: "Progreso",
+    /* El aro dice su valor a quien no lo ve: «dos de cinco hechas». */
+    progressOf: "de",
+    progressDone: "hechas",
     dismiss: "Cerrar",
     loading: "Cargando…",
 

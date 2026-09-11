@@ -1,13 +1,5 @@
 import type { FamilyRole } from "@monedin/contracts";
-import agobio from "../assets/tutorial/alcanza-la-meta.png";
-import corre from "../assets/tutorial/corre.png";
-import duda from "../assets/tutorial/duda.png";
-import elige from "../assets/tutorial/elige.png";
-import explica from "../assets/tutorial/explica.png";
-import idea from "../assets/tutorial/idea.png";
-import miraElSaldo from "../assets/tutorial/mira-el-saldo.png";
-import presenta from "../assets/tutorial/presenta.png";
-import sorpresa from "../assets/tutorial/sorpresa.png";
+import { POSES } from "../ui/mascot-poses.js";
 import { messages } from "../lib/messages.js";
 
 /**
@@ -95,57 +87,57 @@ const w = messages.widget;
 export const LINES: Record<FamilyRole, Record<Area, WidgetLine[]>> = {
   CHILD: {
     home: [
-      { text: w.childHomeBalance, image: miraElSaldo },
-      { text: w.childHomeAsk, image: presenta },
-      { text: w.childHomeCycle, image: idea },
+      { text: w.childHomeBalance, image: POSES.miraElSaldo },
+      { text: w.childHomeAsk, image: POSES.presenta },
+      { text: w.childHomeCycle, image: POSES.idea },
     ],
     tasks: [
-      { text: w.childTasksDo, image: corre },
-      { text: w.childTasksApproval, image: explica },
+      { text: w.childTasksDo, image: POSES.corre },
+      { text: w.childTasksApproval, image: POSES.explica },
     ],
     rewards: [
-      { text: w.childRewardsChoose, image: elige },
-      { text: w.childRewardsGoal, image: agobio },
+      { text: w.childRewardsChoose, image: POSES.elige },
+      { text: w.childRewardsGoal, image: POSES.alcanzaLaMeta },
     ],
     redemptions: [
-      { text: w.childRedemptionsWait, image: duda },
-      { text: w.childRedemptionsWhy, image: explica },
+      { text: w.childRedemptionsWait, image: POSES.duda },
+      { text: w.childRedemptionsWhy, image: POSES.explica },
     ],
     // Un niño no gestiona hijos, pero el tipo exige cubrir el área: si algún día
     // llegara ahí por una dirección escrita a mano, dice algo suyo.
-    children: [{ text: w.childHomeAsk, image: presenta }],
+    children: [{ text: w.childHomeAsk, image: POSES.presenta }],
     account: [
-      { text: w.childAccountPin, image: idea },
-      { text: w.childAccountAvatar, image: sorpresa },
+      { text: w.childAccountPin, image: POSES.idea },
+      { text: w.childAccountAvatar, image: POSES.sorpresa },
     ],
-    help: [{ text: w.childHelp, image: presenta }],
+    help: [{ text: w.childHelp, image: POSES.presenta }],
   },
   PARENT: {
     home: [
-      { text: w.parentHomePending, image: explica },
-      { text: w.parentHomeAsk, image: presenta },
+      { text: w.parentHomePending, image: POSES.explica },
+      { text: w.parentHomeAsk, image: POSES.presenta },
     ],
     tasks: [
-      { text: w.parentTasksApprove, image: idea },
-      { text: w.parentTasksConflict, image: duda },
+      { text: w.parentTasksApprove, image: POSES.idea },
+      { text: w.parentTasksConflict, image: POSES.duda },
     ],
     rewards: [
-      { text: w.parentRewardsPrice, image: elige },
-      { text: w.parentRewardsRetire, image: explica },
+      { text: w.parentRewardsPrice, image: POSES.elige },
+      { text: w.parentRewardsRetire, image: POSES.explica },
     ],
     redemptions: [
-      { text: w.parentRedemptionsFrozen, image: idea },
-      { text: w.parentRedemptionsReject, image: duda },
+      { text: w.parentRedemptionsFrozen, image: POSES.idea },
+      { text: w.parentRedemptionsReject, image: POSES.duda },
     ],
     children: [
-      { text: w.parentChildrenPin, image: explica },
-      { text: w.parentChildrenBalance, image: miraElSaldo },
+      { text: w.parentChildrenPin, image: POSES.explica },
+      { text: w.parentChildrenBalance, image: POSES.miraElSaldo },
     ],
     account: [
-      { text: w.parentAccountLeave, image: idea },
-      { text: w.parentAccountAsk, image: presenta },
+      { text: w.parentAccountLeave, image: POSES.idea },
+      { text: w.parentAccountAsk, image: POSES.presenta },
     ],
-    help: [{ text: w.parentHelp, image: presenta }],
+    help: [{ text: w.parentHelp, image: POSES.presenta }],
   },
 };
 

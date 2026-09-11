@@ -140,6 +140,16 @@ describe("el estilo no se escribe fuera de los tokens", () => {
     // Lo que falta para un premio, medido en monedas.
     join("ui", "ProgressBar.tsx"),
     /*
+     * La tesela de icono, y SOLO en su tono `coin`: el de una fila que mueve
+     * dinero —«Ganó 5», «Gastó 120»—. Sus otros tres tonos no lo tocan.
+     *
+     * Es una pieza genérica, así que hay que decir por qué no diluye la reserva:
+     * lo que ese tono pinta es el icono de un movimiento de monedas, no una
+     * tesela cualquiera que le apeteció ir de ámbar. Si algún día aparece una
+     * tesela ámbar que no habla de dinero, la que sobra es esa y no la regla.
+     */
+    join("ui", "IconTile.tsx"),
+    /*
      * La variante `contrast`, sobre la superficie de marca. Es un botón
      * genérico y contradice la letra de la reserva; está declarada en CLAUDE.md
      * —«pasó de tinta oscura a ámbar al cambiar la superficie»— y se hereda tal

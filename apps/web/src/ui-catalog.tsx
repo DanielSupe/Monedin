@@ -7,18 +7,25 @@ import {
   Badge,
   Button,
   Card,
+  Checkbox,
   Coins,
   DataTable,
   Dialog,
   Drawer,
   EmptyState,
   Field,
+  HeroPanel,
+  IconTile,
   Input,
   Logo,
+  Mascota,
   Pagination,
   ProgressBar,
+  ProgressRing,
+  RadioGroup,
   Select,
   Skeleton,
+  Slider,
   Spotlight,
   Tabs,
   Toast,
@@ -88,6 +95,9 @@ function Piezas(): React.ReactElement {
   const [avisoAbierto, setAvisoAbierto] = useState(false);
   const [pestana, setPestana] = useState("pendientes");
   const [cajonAbierto, setCajonAbierto] = useState(false);
+  const [marcado, setMarcado] = useState(true);
+  const [reparto, setReparto] = useState("igual");
+  const [acercamiento, setAcercamiento] = useState(1.4);
 
   return (
     <div className="flex flex-col gap-6">
@@ -453,7 +463,116 @@ function Piezas(): React.ReactElement {
           <p>Una tarjeta despegada del fondo, para lo que se mira.</p>
         </Card>
       </Seccion>
+
+      {/* Los DOS tonos, uno encima del otro: enseñar uno solo no enseña la
+          diferencia, que es lo único que hay que decidir al usarlo. */}
+      <Seccion titulo="HeroPanel">
+        <HeroPanel
+          tone="action"
+          mascot={<Mascota pose="saluda" size="large" />}
+          aside={<ProgressRing done={2} total={5} className="size-28" />}
+        >
+          <p className="text-display font-extrabold text-ink-inverted">Hola, {EJEMPLO.hija}</p>
+          <p className="text-body text-ink-inverted opacity-90">
+            Hoy te esperan dos tareas. Cuando termines una, aviso a tu papá o a tu mamá.
+          </p>
+        </HeroPanel>
+
+        <HeroPanel tone="saving" mascot={<Mascota pose="elige" size="medium" />}>
+          <p className="text-micro font-extrabold uppercase text-ink-inverted opacity-80">
+            Tu próximo premio
+          </p>
+          <p className="text-title font-extrabold text-ink-inverted">{EJEMPLO.premio}</p>
+          <ProgressBar value={128} max={300} label="Lo que llevas ahorrado" />
+        </HeroPanel>
+      </Seccion>
+
+      <Seccion titulo="IconTile">
+        <Fila>
+          <IconTile tone="action">
+            <IconoEjemplo />
+          </IconTile>
+          <IconTile tone="saving">
+            <IconoEjemplo />
+          </IconTile>
+          <IconTile tone="coin">
+            <IconoEjemplo />
+          </IconTile>
+          <IconTile tone="waiting">
+            <IconoEjemplo />
+          </IconTile>
+        </Fila>
+      </Seccion>
+
+      <Seccion titulo="Mascota">
+        <Fila>
+          <Mascota pose="saluda" size="small" />
+          <Mascota pose="celebra" size="medium" />
+          <Mascota pose="duda" size="large" />
+        </Fila>
+        <Mascota pose="explica">
+          <p className="text-body font-bold">Las monedas se van cuando lo aprueban.</p>
+          <p className="text-small text-ink-muted">No cuando lo pides.</p>
+        </Mascota>
+      </Seccion>
+
+      {/* Sobre la superficie de marca, que es donde vive: el aro se dibuja en
+          blanco y fuera de un panel de color no se vería. */}
+      <Seccion titulo="ProgressRing">
+        <HeroPanel tone="action">
+          <Fila>
+            <ProgressRing done={0} total={5} className="size-24" />
+            <ProgressRing done={2} total={5} className="size-24" />
+            <ProgressRing done={5} total={5} className="size-24" />
+          </Fila>
+        </HeroPanel>
+      </Seccion>
+
+      <Seccion titulo="Checkbox · RadioGroup · Slider">
+        <Fila>
+          <Checkbox checked={marcado} onCheckedChange={setMarcado}>
+            {EJEMPLO.hija}
+          </Checkbox>
+          <Checkbox checked={false} onCheckedChange={() => undefined} disabled>
+            Sin hijos que elegir
+          </Checkbox>
+        </Fila>
+
+        <RadioGroup
+          label="Cuánto vale la tarea"
+          value={reparto}
+          onValueChange={setReparto}
+          options={[
+            { value: "igual", label: "El mismo valor para todos" },
+            { value: "propio", label: "Un valor para cada uno", hint: "Se pide uno por hijo" },
+          ]}
+        />
+
+        <Slider label="Acercar" value={acercamiento} onValueChange={setAcercamiento} />
+      </Seccion>
     </div>
+  );
+}
+
+/** Un icono cualquiera, para enseñar la tesela sin inventar una biblioteca. */
+function IconoEjemplo(): React.ReactElement {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      className="size-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 7.5l2.5 2.5L11 5" />
+      <path d="M13.5 8h7" />
+      <path d="M4 17.5L6.5 20 11 15" />
+      <path d="M13.5 18h7" />
+    </svg>
   );
 }
 

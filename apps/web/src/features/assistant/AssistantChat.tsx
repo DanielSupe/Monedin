@@ -1,11 +1,10 @@
 import { ASSISTANT_MAX_HISTORY_TURNS, ASSISTANT_QUESTION_MAX_LENGTH } from "@monedin/contracts";
 import type { AssistantTurn } from "@monedin/contracts";
 import { useEffect, useRef, useState } from "react";
-import idea from "../../assets/tutorial/idea.png";
-import saluda from "../../assets/tutorial/saluda.png";
 import { useIsWide } from "../../app/use-wide.js";
 import { alertToneFor } from "../../lib/alert-tone.js";
 import { messages } from "../../lib/messages.js";
+import { POSES } from "../../ui/mascot-poses.js";
 import { Alert, Button, Card, Input, Skeleton } from "../../ui/index.js";
 import { cx } from "../../ui/cx.js";
 import { describeAssistantError, useAskAssistant } from "./use-assistant.js";
@@ -249,7 +248,7 @@ export function AssistantChat(): React.ReactElement {
               ilustración está en pantalla toda la conversación. La que piensa
               acompaña igual de bien al hilo vacío que al décimo turno.
             */}
-            <img src={idea} alt="" aria-hidden="true" className="h-56 w-auto" />
+            <img src={POSES.idea} alt="" aria-hidden="true" className="h-56 w-auto" />
 
             <div className="w-full">{sugerencias}</div>
           </aside>
@@ -365,7 +364,7 @@ function Turno({ turno }: { turno: Dicho }): React.ReactElement {
  * la mascota grande no la borre del todo de la pantalla.
  */
 function Mascota(): React.ReactElement {
-  return <img src={saluda} alt="" aria-hidden="true" className="h-10 w-auto shrink-0" />;
+  return <img src={POSES.saluda} alt="" aria-hidden="true" className="h-10 w-auto shrink-0" />;
 }
 
 /**
