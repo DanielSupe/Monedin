@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!--
+    GENERADO por design/ui/a-oscuro.mjs a partir de su pareja en claro.
+    NO SE EDITA A MANO: se edita la clara, o se edita el mapa de color de
+    ese script. `node design/ui/a-oscuro.mjs --check` falla si se separan.
+  -->
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
+  <style>
+    body { margin: 0; font-family: "Nunito", ui-rounded, "Segoe UI", system-ui, sans-serif; }
+    a { color: #8B6BF0; text-decoration: none; }
+    a:hover { color: #B9A6F2; }
+  </style>
+</helmet>
+
+<div style="display: flex; width: 1440px; height: 900px; overflow: hidden; background: #1C1620; color: #F5F0EA;">
+
+  <!-- La marca ocupa media pantalla: es lo primero que ve alguien que decide
+       si esto es de fiar. Morado profundo, y el ámbar como único acento. -->
+  <section style="position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; width: 560px; flex-shrink: 0; box-sizing: border-box; padding: 34px 44px; background: linear-gradient(150deg, #8B6BF0 0%, #6B4BD0 55%, #3E2590 100%);">
+    <div style="position: absolute; top: -120px; right: -90px; width: 340px; height: 340px; border-radius: 50%; background: rgba(255,255,255,0.08);"></div>
+    <div style="position: absolute; bottom: -150px; left: -110px; width: 360px; height: 360px; border-radius: 50%; background: rgba(255,255,255,0.06);"></div>
+    <svg width="40" height="40" viewBox="0 0 32 32" style="position: absolute; top: 300px; right: 90px; opacity: 0.9;"><circle cx="16" cy="16" r="15" fill="#F5B93B"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    <svg width="26" height="26" viewBox="0 0 32 32" style="position: absolute; bottom: 210px; right: 160px; opacity: 0.85;"><circle cx="16" cy="16" r="15" fill="#F5B93B"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+
+    <span style="display: flex; align-items: center; gap: 10px;">
+      <svg width="34" height="34" viewBox="0 0 32 32">
+        <circle cx="16" cy="16" r="15" fill="#F5B93B"></circle>
+        <circle cx="16" cy="16" r="11.5" fill="none" stroke="#8A5A10" stroke-width="1.5"></circle>
+        <path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span style="font-size: 24px; font-weight: 900; letter-spacing: -0.02em; color: #FFFFFF;">Monedín</span>
+    </span>
+
+    <div style="position: relative; display: flex; flex-direction: column; gap: 18px;">
+      <img src="saluda.png" alt="" style="width: 132px; height: auto;">
+      <p style="margin: 0; font-size: 34px; font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; color: #FFFFFF; text-wrap: pretty;">Empieza a repartir tareas y a ver crecer sus monedas.</p>
+    </div>
+
+    <p style="position: relative; margin: 0; font-size: 15px; font-weight: 700; color: rgba(255,255,255,0.75);">Dinero de mentira, decisiones de verdad.</p>
+  </section>
+
+  <main style="display: flex; align-items: center; justify-content: center; flex-grow: 1; padding: 40px;">
+    <form style="display: flex; flex-direction: column; gap: 16px; width: 400px;">
+      <div style="display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px;">
+        <span style="font-size: 15px; font-weight: 800; color: #C9BCAE;">¡Bienvenido!</span>
+        <h1 style="margin: 0; font-size: 32px; font-weight: 900; letter-spacing: -0.03em;">Crea tu cuenta</h1>
+      </div>
+
+        <label style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 15px; font-weight: 900;">Tu nombre</span>
+          <input type="text" value="Laura" style="box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid #453B52; background: #262031; font-family: inherit; font-size: 16px; font-weight: 700; color: #F5F0EA;">
+
+        </label>
+        <label style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 15px; font-weight: 900;">Correo</span>
+          <input type="email" value="laura@ejemplo.com" style="box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid #453B52; background: #262031; font-family: inherit; font-size: 16px; font-weight: 700; color: #F5F0EA;">
+
+        </label>
+        <label style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 15px; font-weight: 900;">Contraseña</span>
+          <input type="password" value="••••••••••" style="box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid #453B52; background: #262031; font-family: inherit; font-size: 16px; font-weight: 700; color: #F5F0EA;">
+          <span style="font-size: 13px; font-weight: 700; color: #C9BCAE;">Al menos 8 caracteres.</span>
+        </label>
+        <label style="display: flex; flex-direction: column; gap: 6px;">
+          <span style="font-size: 15px; font-weight: 900;">PIN de 4 dígitos</span>
+          <input type="password" value="••••" style="box-sizing: border-box; width: 100%; min-height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid #453B52; background: #262031; font-family: inherit; font-size: 16px; font-weight: 700; color: #F5F0EA;">
+          <span style="font-size: 13px; font-weight: 700; color: #C9BCAE;">Lo usarás cada vez que entres a tu perfil.</span>
+        </label>
+      <p style="display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 12px 14px; border-radius: 12px; background: #302847; font-size: 13px; font-weight: 700; line-height: 1.45; color: #B9A6F2;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B9A6F2" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v6"></path><path d="M12 7.5v.1"></path></svg>
+        <span><strong style="font-weight: 900;">Dos claves, para dos cosas distintas.</strong> La contraseña solo la usarás al vincular un dispositivo nuevo. El PIN es lo que teclearás cada vez que entres a tu perfil.</span>
+      </p>
+        <button type="button" style="display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 50px; border: 0; border-radius: 14px; background: #FF6B4A; font-family: inherit; font-size: 16px; font-weight: 900; color: #FFFFFF; cursor: pointer; box-shadow: 0 6px 16px rgba(255,107,74,0.3);">
+          Crear mi cuenta
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"></path><path d="M13.5 6.5L20 12l-6.5 5.5"></path></svg>
+        </button>
+
+      <p style="margin: 4px 0 0 0; text-align: center; font-size: 15px; font-weight: 800;">¿Ya tienes cuenta? <a href="#">Entra</a></p>
+    </form>
+  </main>
+</div>
+</x-dc>
+</body>
+</html>
