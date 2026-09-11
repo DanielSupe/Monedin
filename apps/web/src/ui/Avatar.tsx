@@ -1,5 +1,5 @@
 import { cx } from "./cx.js";
-import { avatarGlyph, isAvatarUrl } from "./avatars.js";
+import { avatarDrawing, isAvatarUrl } from "./avatars.js";
 
 export type AvatarSize = "small" | "medium" | "large" | "xlarge";
 
@@ -29,11 +29,16 @@ const SHAPES: Record<AvatarShape, string> = {
  * la talla se le añade a la pieza y NO se escribe una medida suelta en la
  * pantalla que la usa.
  */
+/*
+ * Sin tamaño de texto: desde que el avatar es un dibujo y no un glifo, lo que
+ * decide su tamaño es la caja, y el SVG la llena. Con emojis la medida tenía que
+ * ir en `font-size`, que es lo que hacía que cada sistema lo pintara distinto.
+ */
 const SIZES: Record<AvatarSize, string> = {
-  small: "size-8 text-body",
-  medium: "size-12 text-title",
-  large: "size-24 text-hero",
-  xlarge: "size-36 text-hero",
+  small: "size-8",
+  medium: "size-12",
+  large: "size-24",
+  xlarge: "size-36",
 };
 
 export interface AvatarProps {
@@ -49,8 +54,8 @@ export interface AvatarProps {
  * El avatar de un perfil, sea del catálogo o una foto propia.
  *
  * Un único sitio donde se decide entre las dos formas. Sin esto, cada pantalla
- * que llama a `avatarGlyph()` tendría que acordarse de mirar si el valor es una
- * URL, y la que se olvidara pintaría una nutria sobre la foto de alguien.
+ * que pidiera un dibujo tendría que acordarse de mirar si el valor es una URL, y
+ * la que se olvidara pintaría una nutria sobre la foto de alguien.
  *
  * Se mudó aquí desde `features/auth/` en `add-design-system`: lo usan cuatro
  * áreas y ninguna tiene que ver con la autenticación. Su lógica de dos formas
@@ -87,7 +92,7 @@ export function Avatar({
         className,
       )}
     >
-      {avatarGlyph(value)}
+      {avatarDrawing(value)}
     </span>
   );
 }

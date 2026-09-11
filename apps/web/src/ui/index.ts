@@ -56,5 +56,5 @@ export {
 export { Tabs, tabLinkClasses, type TabItem, type TabsProps } from "./Tabs.js";
 export { Toast, ToastProvider, type ToastProps, type ToastTone } from "./Toast.js";
 
-export { AVATAR_OPTIONS, avatarGlyph, isAvatarUrl } from "./avatars.js";
+export { AVATAR_OPTIONS, avatarDrawing, isAvatarUrl } from "./avatars.js";
 export { cx } from "./cx.js";

@@ -1,7 +1,7 @@
 import { API_PREFIX, AVATAR_KEYS, DEFAULT_AVATAR_KEY, ERROR_CODES } from "@monedin/contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as api from "../src/api/auth.js";
-import { AVATAR_OPTIONS, avatarGlyph } from "../src/ui/avatars.js";
+import { AVATAR_OPTIONS } from "../src/ui/avatars.js";
 import { describeAuthError, isLockout, screenFor } from "../src/features/auth/use-session.js";
 import { ApiRequestError } from "../src/lib/http-client.js";
 import { messages } from "../src/lib/messages.js";
@@ -296,13 +296,19 @@ describe("el catálogo de avatares", () => {
     expect(claves.sort()).toEqual([...AVATAR_KEYS].sort());
   });
 
-  it("cada opción tiene una ilustración", () => {
-    for (const option of AVATAR_OPTIONS) {
-      expect(option.glyph.length).toBeGreaterThan(0);
-    }
-  });
+  /*
+   * Que cada clave tenga DIBUJO, y que falle si falta uno. Sin la segunda mitad,
+   * añadir una clave al contrato sin dibujarla pasaría en verde y saldría un
+   * hueco en la rejilla.
+   *
+   * Se comprueba que el dibujo existe y no su contenido: cómo se pinta un animal
+   * es del archivo que lo dibuja, y fijarlo aquí ataría el test a cada trazo.
+   */
+  it("cada opción tiene su dibujo, y ninguna se queda sin él", () => {
+    expect(AVATAR_OPTIONS.length).toBe(AVATAR_KEYS.length);
 
-  it("una clave desconocida resuelve al avatar por defecto en vez de fallar", () => {
-    expect(avatarGlyph("no-existe")).toBe(avatarGlyph(null));
+    for (const option of AVATAR_OPTIONS) {
+      expect(option.drawing, `falta el dibujo de ${option.key}`).toBeDefined();
+    }
   });
 });

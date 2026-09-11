@@ -52,10 +52,33 @@ describe("el estilo no se escribe fuera de los tokens", () => {
     expect(ARCHIVOS.length).toBeGreaterThan(10);
   });
 
+  /*
+   * La ÚNICA excepción, y es de otra clase que las demás: un avatar es
+   * CONTENIDO, como una foto.
+   *
+   * El pardo de una nutria y el rosa de un ajolote no son decisiones de tema:
+   * son lo que ese animal es. No se reasignan en oscuro ni cambian con la
+   * paleta, y darles tokens los metería en un sistema al que no pertenecen —el
+   * día que la marca cambiara de color, los animales cambiarían con ella.
+   *
+   * Lo que sí sigue al tema es el círculo sobre el que se dibujan, y eso lo pone
+   * `Avatar` con los tokens de siempre.
+   *
+   * Es una lista de UN archivo a propósito. Si aparece un segundo, la pregunta
+   * es si de verdad es contenido o si alguien encontró la puerta de atrás.
+   */
+  const COLOR_ES_CONTENIDO = [join("ui", "avatars.tsx")];
+
+  it("la excepción de color como contenido no se ensancha sola", () => {
+    expect(COLOR_ES_CONTENIDO).toEqual([join("ui", "avatars.tsx")]);
+  });
+
   it("ningún color literal fuera de tokens.css", () => {
     const culpables: string[] = [];
 
     for (const ruta of ARCHIVOS) {
+      if (COLOR_ES_CONTENIDO.some((permitido) => ruta.endsWith(permitido))) continue;
+
       const contenido = sinComentarios(readFileSync(ruta, "utf8"));
       const encontrados = contenido.match(/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(|oklch\(/g);
 

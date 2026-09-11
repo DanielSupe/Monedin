@@ -57,7 +57,7 @@ export function AvatarPicker({
               aria-pressed={value === option.key}
               aria-label={option.key}
               className={cx(
-                "rounded-control text-title tap-target flex items-center justify-center border bg-surface-raised px-2 leading-none transition-colors duration-quick",
+                "rounded-control tap-target flex items-center justify-center border bg-surface-raised p-1.5 transition-colors duration-quick",
                 // El elegido se marca con el color de acción y un borde más
                 // grueso: `aria-pressed` lo dice a quien no ve la pantalla, y
                 // esto a quien sí.
@@ -66,7 +66,7 @@ export function AvatarPicker({
                   : "border-border-strong hover:bg-surface-sunken",
               )}
             >
-              {option.glyph}
+              {option.drawing}
             </button>
           ))}
         </div>
