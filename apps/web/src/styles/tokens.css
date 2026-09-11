@@ -449,13 +449,29 @@
 
 :root,
 [data-scale="parent"] {
-  --text-hero: 1.75rem;
-  --text-title: 1.375rem;
-  --text-body: 1rem;
-  --text-small: 0.875rem;
+  /*
+   * Siete pasos, nombrados por su PAPEL. Eran cuatro, y con cuatro cada pantalla
+   * elegía su píxel para lo que no encajaba: el rediseño salió con 24 tamaños
+   * distintos dibujados a mano. Los tres nuevos —micro, lead y display— son los
+   * que esas pantallas estaban inventando.
+   */
+  --text-micro: 0.75rem;
+  --text-small: 0.8125rem;
+  --text-body: 0.9375rem;
+  --text-lead: 1.0625rem;
+  --text-title: 1.3125rem;
+  --text-display: 1.625rem;
+  --text-hero: 2.75rem;
 
-  --radius-control: 0.5rem;
-  --radius-card: 0.75rem;
+  /*
+   * Cinco radios, nombrados por lo que ENVUELVEN. Eran tres, y el de una píldora
+   * se escribía a mano en cada punto de uso — que es justo lo que la regla del
+   * origen único prohíbe.
+   */
+  --radius-control: 0.75rem;
+  --radius-card: 1.125rem;
+  --radius-panel: 1.625rem;
+  --radius-pill: 999px;
   /* La lámina blanca que sube desde abajo en el acceso. */
   --radius-sheet: 2rem;
 
@@ -478,19 +494,59 @@
 [data-scale="child"] {
   /* El saldo es el elemento más grande de la aplicación, y es a propósito:
      es lo que el producto enseña. */
+  --text-micro: 0.8125rem;
+  --text-small: 0.875rem;
+  --text-body: 1.0625rem;
+  --text-lead: 1.1875rem;
+  --text-title: 1.625rem;
+  --text-display: 2.125rem;
   --text-hero: 4rem;
-  --text-title: 1.75rem;
-  --text-body: 1.125rem;
-  --text-small: 1rem;
 
   --radius-control: 0.875rem;
-  --radius-card: 1.5rem;
+  --radius-card: 1.375rem;
 
   /* 44px es el mínimo, no el objetivo. Lo exige la spec. */
   --tap-min: 2.75rem;
 }
 
+/*
+ * La puerta pública es una audiencia propia, no una excepción.
+ *
+ * Sus titulares se leen de pie y de un vistazo, por alguien que todavía no es
+ * nadie en el producto. Estirar la escala del niño hasta ahí la deformaría en
+ * todas las pantallas que la usan por culpa de una sola — y el `--text-hero` del
+ * niño está calibrado para el saldo, que es otra cosa.
+ *
+ * Solo hereda lo que no cambia: los radios, los toques y las duraciones salen
+ * de la escala del padre, porque sus controles son los de un adulto.
+ */
+[data-scale="public"] {
+  --text-micro: 0.8125rem;
+  --text-small: 0.9375rem;
+  --text-body: 1.125rem;
+  --text-lead: 1.25rem;
+  --text-title: 1.875rem;
+  --text-display: 2.875rem;
+  --text-hero: 3.625rem;
+}
+
 /* Las utilidades de la capa 3, para que ninguna pieza escriba una medida. */
+
+@utility text-micro {
+  font-size: var(--text-micro);
+  line-height: 1.4;
+}
+
+@utility text-lead {
+  font-size: var(--text-lead);
+  line-height: 1.35;
+}
+
+@utility text-display {
+  font-size: var(--text-display);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
 
 @utility text-hero {
   font-size: var(--text-hero);
@@ -512,17 +568,24 @@
   line-height: 1.45;
 }
 
+@utility rounded-pill {
+  border-radius: var(--radius-pill);
+}
+
 @utility rounded-control {
   border-radius: var(--radius-control);
 }
 
 /*
- * El radio de un PANEL. `rounded-card` son 0.75rem, correctos para una tarjeta
- * de lista y pequeños para media pantalla: con ellos un panel parece una caja.
- * Reutiliza el radio de la lámina, que ya describe «una superficie grande».
+ * El radio de un PANEL. `rounded-card` es el de una tarjeta de lista y se queda
+ * pequeño para media pantalla: con él un panel parece una caja.
+ *
+ * Hasta `repaint-design-system` reutilizaba el de la lámina por no tener el
+ * suyo. Ahora lo tiene, porque un panel de realce y una lámina que sube desde
+ * abajo no son la misma superficie y no tienen por qué moverse juntas.
  */
 @utility rounded-panel {
-  border-radius: var(--radius-sheet);
+  border-radius: var(--radius-panel);
 }
 
 @utility rounded-t-sheet {

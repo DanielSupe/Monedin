@@ -215,6 +215,46 @@ describe("el estilo no se escribe fuera de los tokens", () => {
       `una medida se declara en src/styles/tokens.css, no en el punto de uso:\n${culpables.join("\n")}`,
     ).toEqual([]);
   });
+
+  /*
+   * La escala es CERRADA, y la otra mitad de esa regla es esta.
+   *
+   * El test de arriba caza `rounded-[19px]`, que es una medida escrita a mano.
+   * No caza `rounded-xl` ni `text-2xl`: son utilidades legítimas de Tailwind, y
+   * para ESLint y para aquel test son texto correcto. Pero son un paso que el
+   * sistema no declara, y una escala en la que cada pantalla puede elegir un
+   * paso intermedio no es una escala.
+   *
+   * `rounded-none` queda fuera a propósito: cero no es una medida, es la
+   * ausencia de una. Se usa para quitar el radio a un ancho estrecho, y darle un
+   * token propio sería declarar un paso que no modela nada.
+   */
+  it("ningún paso de escala fuera de los declarados", () => {
+    const RADIO_AJENO = /\brounded(?:-[tblr]{1,2})?-(?:xs|sm|md|lg|xl|[2-9]xl|full)\b/g;
+    const TAMANO_AJENO = /\btext-(?:xs|sm|base|lg|xl|[2-9]xl)\b/g;
+    const culpables: string[] = [];
+
+    for (const ruta of ARCHIVOS) {
+      if (!ruta.endsWith(".tsx")) continue;
+
+      const contenido = sinComentarios(readFileSync(ruta, "utf8"));
+      const ajenos = [
+        ...(contenido.match(RADIO_AJENO) ?? []),
+        ...(contenido.match(TAMANO_AJENO) ?? []),
+      ];
+
+      if (ajenos.length > 0) {
+        culpables.push(`${relative(SRC, ruta)} → ${[...new Set(ajenos)].join(", ")}`);
+      }
+    }
+
+    expect(
+      culpables,
+      `los pasos son los del sistema —rounded-control|card|panel|sheet|pill y text-micro|small|body|lead|title|display|hero—, no los de Tailwind:\n${culpables.join(
+        "\n",
+      )}`,
+    ).toEqual([]);
+  });
 });
 
 /**

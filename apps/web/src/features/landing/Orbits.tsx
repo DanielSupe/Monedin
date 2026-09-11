@@ -115,7 +115,7 @@ export function Orbits(): React.ReactElement {
             `m-auto` con tamaño explícito centra sin tocar `transform`, que aquí
             lo ocupa la animación de giro.
           */
-          className={`absolute inset-0 m-auto rounded-full border border-primary-soft ${
+          className={`absolute inset-0 m-auto rounded-pill border border-primary-soft ${
             orbita.invertida ? "animate-orbit-reverse" : "animate-orbit"
           }`}
         >

@@ -15,7 +15,7 @@ export type AvatarSize = "small" | "medium" | "large" | "xlarge";
 export type AvatarShape = "circle" | "rounded";
 
 const SHAPES: Record<AvatarShape, string> = {
-  circle: "rounded-full",
+  circle: "rounded-pill",
   rounded: "rounded-card",
 };
 

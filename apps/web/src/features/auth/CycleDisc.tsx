@@ -98,7 +98,7 @@ export function CycleDisc(): React.ReactElement {
         <div
           key={anillo.hueco}
           aria-hidden="true"
-          className={`absolute ${anillo.hueco} ${anillo.giro} ${anillo.vuelta} rounded-full border border-brand-soft`}
+          className={`absolute ${anillo.hueco} ${anillo.giro} ${anillo.vuelta} rounded-pill border border-brand-soft`}
         >
           {anillo.piezas.map((glifo, indice) => (
             <span key={glifo} className={`absolute ${SITIOS[indice]}`}>

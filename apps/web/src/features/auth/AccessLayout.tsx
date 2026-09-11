@@ -56,7 +56,7 @@ export function AccessLayout({
       */}
       <div
         aria-hidden="true"
-        className="absolute -top-24 right-0 hidden size-96 rounded-full bg-brand/10 blur-3xl lg:block"
+        className="absolute -top-24 right-0 hidden size-96 rounded-pill bg-brand/10 blur-3xl lg:block"
       />
 
       <div className="relative mx-auto flex min-h-dvh w-full max-w-(--container-wide) flex-col justify-center gap-6 lg:flex-row lg:items-stretch lg:justify-center lg:gap-10 lg:px-8 lg:py-12">

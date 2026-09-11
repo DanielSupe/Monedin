@@ -26,7 +26,7 @@ export function Badge({ tone = "neutral", className, ...rest }: BadgeProps): Rea
     <span
       {...rest}
       className={cx(
-        "text-small inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold",
+        "text-small inline-flex items-center gap-1 rounded-pill px-2 py-0.5 font-semibold",
         TONES[tone],
         className,
       )}

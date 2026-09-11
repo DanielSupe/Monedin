@@ -27,16 +27,16 @@
 
 ## 3. La escala de radios y de tipografía
 
-- [ ] 3.1 Cerrar los cinco radios —`control`, `card`, `panel`, `sheet`, `pill`— con sus valores por
+- [x] 3.1 Cerrar los cinco radios —`control`, `card`, `panel`, `sheet`, `pill`— con sus valores por
       audiencia. `panel` y `pill` son nuevos.
-- [ ] 3.2 Sustituir en `ui/` los `rounded-full` y los radios sueltos por el token, que es donde hoy se
+- [x] 3.2 Sustituir en `ui/` los `rounded-full` y los radios sueltos por el token, que es donde hoy se
       escapa el 999 a mano.
-- [ ] 3.3 Cerrar los siete pasos de tipografía y declarar las utilidades de los tres nuevos:
+- [x] 3.3 Cerrar los siete pasos de tipografía y declarar las utilidades de los tres nuevos:
       `text-micro`, `text-lead`, `text-display`.
-- [ ] 3.4 Declarar `[data-scale="public"]` con sus valores, y montarlo solo en la puerta pública.
-- [ ] 3.5 Test: ningún archivo de `apps/web/src` usa un radio o un tamaño que no sea un paso
+- [x] 3.4 Declarar `[data-scale="public"]` con sus valores, y montarlo solo en la puerta pública.
+- [x] 3.5 Test: ningún archivo de `apps/web/src` usa un radio o un tamaño que no sea un paso
       declarado. Ampliar el test de valores arbitrarios que ya existe, en vez de escribir otro.
-- [ ] 3.6 **Inyectar la violación**: poner un `rounded-[19px]` en una pieza y ver caer 3.5. Revertir.
+- [x] 3.6 **Inyectar la violación**: poner un `rounded-[19px]` en una pieza y ver caer 3.5. Revertir.
 
 ## 4. El tema oscuro
 

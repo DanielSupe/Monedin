@@ -192,7 +192,7 @@ function Keypad({
           <span
             key={indice}
             className={cx(
-              "size-3 rounded-full",
+              "size-3 rounded-pill",
               indice < pin.length ? "bg-primary" : "bg-border-strong",
             )}
           />

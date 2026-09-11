@@ -31,7 +31,7 @@ export function ProgressBar({ value, max, label, className }: ProgressBarProps):
       aria-valuemin={0}
       aria-valuemax={tope}
       aria-label={label ?? messages.ui.progressLabel}
-      className={cx("h-2 w-full overflow-hidden rounded-full bg-surface-sunken", className)}
+      className={cx("h-2 w-full overflow-hidden rounded-pill bg-surface-sunken", className)}
     >
       {/*
         ÚNICO estilo en línea del sistema, y la razón por la que
@@ -41,7 +41,7 @@ export function ProgressBar({ value, max, label, className }: ProgressBarProps):
         archivo, que es distinto de que nadie se entere.
       */}
       <div
-        className="h-full rounded-full bg-coin transition-size duration-slow"
+        className="h-full rounded-pill bg-coin transition-size duration-slow"
         style={{ inlineSize: `${porcentaje}%` }}
       />
     </div>

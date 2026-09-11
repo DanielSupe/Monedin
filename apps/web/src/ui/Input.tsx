@@ -26,7 +26,7 @@ const SHAPES: Record<InputShape, string> = {
    * de marca reasigna a su propio tono, así que sobre blanco sigue siendo el
    * gris de siempre.
    */
-  pill: "rounded-full shadow-card pl-11 pr-4",
+  pill: "rounded-pill shadow-card pl-11 pr-4",
 };
 
 /**

@@ -30,7 +30,16 @@ import { useTypewriter } from "./use-typewriter.js";
  */
 export function LandingPage(): React.ReactElement {
   return (
-    <div className="flex min-h-dvh flex-col bg-surface text-ink">
+    /*
+      La puerta pública declara su propia escala, y es la ÚNICA pantalla que lo
+      hace. Se lee de pie y de un vistazo, por alguien que todavía no es nadie en
+      el producto: ni la escala del padre ni la del niño sirven.
+
+      Va en la RAÍZ de la página, que sigue sin adoptar la escala de un rol. Las
+      maquetas que enseñan las dos caras del producto declaran cada una la suya,
+      y eso es contenido que ilustra la diferencia, no la página adoptando un rol.
+    */
+    <div data-scale="public" className="flex min-h-dvh flex-col bg-surface text-ink">
       <header className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
         <Logo size="medium" />
 
@@ -58,7 +67,7 @@ export function LandingPage(): React.ReactElement {
         <div className="relative flex w-full shrink-0 justify-center lg:w-auto">
           <div
             aria-hidden="true"
-            className="absolute inset-0 m-auto size-(--container-orbit) rounded-full bg-primary-soft opacity-60 blur-3xl"
+            className="absolute inset-0 m-auto size-(--container-orbit) rounded-pill bg-primary-soft opacity-60 blur-3xl"
           />
           <Orbits />
         </div>

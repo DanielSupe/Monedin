@@ -75,13 +75,13 @@ export function buttonClasses(
  *
  * Existe para el envío del acceso, que la maqueta dibuja como una flecha. Va
  * aquí y no como clases sueltas en la pantalla porque `cx` no fusiona
- * utilidades: `rounded-full` junto al radio de la pieza lo resolvería el orden
+ * utilidades: `rounded-pill` junto al radio de la pieza lo resolvería el orden
  * del CSS generado.
  *
  * Quien la use TIENE que dar `aria-label`: una flecha sola no dice si envía,
  * avanza o vuelve. El tipo lo exige, así que olvidarlo no compila.
  */
-const ICON_ONLY = "size-14 shrink-0 rounded-full px-0";
+const ICON_ONLY = "size-14 shrink-0 rounded-pill px-0";
 
 interface ButtonBaseProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
