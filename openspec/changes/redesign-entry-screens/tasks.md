@@ -70,9 +70,13 @@
       **Comprobado**, y con el caso difícil resuelto: el aviso dentro del panel de marca recupera
       su fondo en los dos temas. Cazó además la moneda del disco de acceso, que era un emoji del
       sistema justo en la única pantalla que mira un adulto que decide si esto es de fiar.
-- [ ] 6.3 Recorrer el camino entero con teclado: puerta pública → crear cuenta → rejilla → PIN →
+- [x] 6.3 Recorrer el camino entero con teclado: puerta pública → crear cuenta → rejilla → PIN →
       dentro, y la vuelta por restablecer el PIN. Es el único camino que le queda a quien ya es usuario
       y se le caducó la sesión.
+      **Recorrido entero**: puerta pública → Enter en «Empezar» → el registro con los cuatro
+      campos en orden hasta «Crear mi cuenta» → rejilla, donde el perfil BLOQUEADO se salta solo
+      porque no es un enlace → Enter en un perfil → PIN con el teclado físico, con su borrado. Y la
+      vuelta: «¿Olvidaste tu PIN?» → contraseña, PIN nuevo, «Restablecer», «Volver».
 - [~] 6.4 `pnpm verify`, y si muere con `allocation failure`, con `--concurrency=1`.
       **Corrido en parte, y se dice cuál.** `lint`, `typecheck` y `build` pasan en los cuatro
       paquetes, y la batería del front entera (571 tests) con `--no-file-parallelism`. Lo que NO se
