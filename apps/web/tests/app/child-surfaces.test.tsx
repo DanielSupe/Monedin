@@ -169,10 +169,18 @@ describe("el historial de canjes", () => {
    * ordena por `createdAt desc` con desempate por identificador. Lo que la
    * pantalla tiene que garantizar, entonces, no es ordenar sino NO REORDENAR.
    *
-   * Los datos están elegidos para que eso se note: por precio serían 60, 200,
-   * 350 y por título Helado, Ir al cine, Patines — los dos distintos del orden
-   * correcto. Un `sort` accidental al pasar a tabla, que es el riesgo real de
-   * este cambio, da una lista diferente.
+   * Los datos están elegidos para que un orden accidental por CUALQUIERA de las
+   * cuatro columnas dé una lista distinta de la correcta —Ir al cine, Helado,
+   * Patines—:
+   *
+   *   por precio      60, 200, 350   → Helado, Ir al cine, Patines
+   *   por título      alfabético     → Helado, Ir al cine, Patines
+   *   por estado      alfabético     → Helado, Ir al cine, Patines
+   *   por identificador c1, c2, c3   → Patines, Ir al cine, Helado
+   *
+   * Que un caso legal no distinga lo correcto de lo incorrecto es la forma
+   * silenciosa de escribir un test que no prueba nada. Comprobado inyectando las
+   * tres primeras: las tres lo tumban.
    */
   const CANJES = [
     canje("c2", "Ir al cine", 200, "PENDING", "2026-09-03T10:00:00.000Z"),

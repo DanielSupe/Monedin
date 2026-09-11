@@ -37,14 +37,14 @@
 
 ## 4. Canjes, monedas, perfil y ayuda
 
-- [ ] 4.1 La tabla de canjes con sus estados y los tonos nuevos, sin reordenar: el servidor ya ordena,
+- [x] 4.1 La tabla de canjes con sus estados y los tonos nuevos, sin reordenar: el servidor ya ordena,
       y lo que hay que garantizar es que la pantalla NO reordene.
-- [ ] 4.2 Test de no-reordenación con datos elegidos para que un orden accidental por cualquier
+- [x] 4.2 Test de no-reordenación con datos elegidos para que un orden accidental por cualquier
       columna dé una lista distinta.
-- [ ] 4.3 El historial de monedas: ganar en el color de la moneda, gastar en el del ahorro. Hasta hoy
+- [x] 4.3 El historial de monedas: ganar en el color de la moneda, gastar en el del ahorro. Hasta hoy
       salían idénticos y son lo contrario.
-- [ ] 4.4 «Mi perfil» con los doce animales dibujados y el cambio de PIN.
-- [ ] 4.5 Las preguntas frecuentes del niño con el acordeón del sistema.
+- [x] 4.4 «Mi perfil» con los doce animales dibujados y el cambio de PIN.
+- [x] 4.5 Las preguntas frecuentes del niño con el acordeón del sistema.
 
 ## 5. El chat y el recorrido
 

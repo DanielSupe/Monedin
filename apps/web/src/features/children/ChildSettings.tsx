@@ -1,6 +1,7 @@
 import { PIN_LENGTH, changeOwnChildPinSchema } from "@monedin/contracts";
 import { useState } from "react";
-import { messages } from "../../lib/messages.js";
+import { MY_PIN_EXPLAINER, messages } from "../../lib/messages.js";
+import { contar } from "../../lib/plural.js";
 import { LeaveProfile } from "../auth/LeaveProfile.js";
 import { describeAuthError, useChangeOwnChildPin } from "../auth/use-session.js";
 import * as childrenApi from "../../api/children.js";
@@ -34,35 +35,54 @@ export function ChildSettings(): React.ReactElement {
   }
 
   return (
-    <section className="mx-auto flex w-full max-w-dialog flex-col gap-4">
-      <h2 className="text-title font-bold">{messages.children.myProfileTitle}</h2>
+    <section className="flex w-full flex-col gap-5">
+      <h2 className="text-display font-extrabold">{messages.children.myProfileTitle}</h2>
 
-      <Card>
-        <div className="flex items-center gap-4">
-          <Avatar value={data.avatar} size="large" alt={data.name} />
-          <div className="flex min-w-0 flex-col gap-1">
-            <p className="text-title font-bold">{data.name}</p>
-            <Coins amount={data.coins} />
-          </div>
+      {/*
+        Dos columnas donde hay ancho, y una debajo de la otra donde no.
+
+        Son dos cosas distintas —quién soy y con qué entro— y en una sola
+        columna la segunda queda al final de un desplazamiento largo, después de
+        doce animales. No es la misma decisión que el lateral: aquí NO se monta
+        una de las dos formas, se coloca la misma en dos sitios, así que no hay
+        estructura duplicada que esconder.
+      */}
+      <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
+        <div className="flex flex-col gap-4">
+          <Card>
+            <div className="flex items-center gap-4">
+              <Avatar value={data.avatar} size="large" alt={data.name} />
+              <div className="flex min-w-0 flex-col gap-1">
+                <p className="text-title font-extrabold">{data.name}</p>
+                {data.age !== null && (
+                  <p className="text-small font-bold text-ink-muted">
+                    {contar(data.age, messages.children.yearsOne, messages.children.yearsMany)}
+                  </p>
+                )}
+                <Coins amount={data.coins} />
+              </div>
+            </div>
+          </Card>
+
+          <AvatarPicker
+            value={data.avatar}
+            onChange={(avatar) => updateAvatar.mutate({ avatar })}
+            label={messages.children.chooseAvatar}
+            requestUploadUrl={childrenApi.requestOwnAvatarUploadUrl}
+            onUpload={(avatarUploadKey) => updateAvatar.mutate({ avatarUploadKey })}
+          />
+
+          {updateAvatar.isSuccess && <Alert tone="done">{messages.children.avatarSaved}</Alert>}
+          {updateAvatar.error !== null && (
+            <Alert tone="danger">{describeChildrenError(updateAvatar.error)}</Alert>
+          )}
         </div>
-      </Card>
 
-      <AvatarPicker
-        value={data.avatar}
-        onChange={(avatar) => updateAvatar.mutate({ avatar })}
-        label={messages.children.chooseAvatar}
-        requestUploadUrl={childrenApi.requestOwnAvatarUploadUrl}
-        onUpload={(avatarUploadKey) => updateAvatar.mutate({ avatarUploadKey })}
-      />
-
-      {updateAvatar.isSuccess && <Alert tone="done">{messages.children.avatarSaved}</Alert>}
-      {updateAvatar.error !== null && (
-        <Alert tone="danger">{describeChildrenError(updateAvatar.error)}</Alert>
-      )}
-
-      <OwnPinForm />
-
-      <ReplayTour />
+        <div className="flex flex-col gap-4">
+          <OwnPinForm />
+          <ReplayTour />
+        </div>
+      </div>
 
       {/*
         Salir del perfil vive TAMBIÉN aquí, y no solo al final del inicio.
@@ -114,7 +134,14 @@ function OwnPinForm(): React.ReactElement {
   return (
     <Card>
       <form onSubmit={submit} className="flex flex-col gap-3">
-        <h3 className="text-body font-bold">{messages.children.changeMyPin}</h3>
+        <h3 className="text-lead font-extrabold">{messages.children.changeMyPin}</h3>
+
+        {/*
+          Qué es el PIN, antes de los dos campos. Un niño que se olvida el suyo y
+          no sabe que hay salida deja de entrar, y esa mitad de la frase es la
+          que ninguna pantalla decía.
+        */}
+        <p className="text-small text-ink-muted">{MY_PIN_EXPLAINER}</p>
 
         <Field label={messages.auth.currentPin}>
           <Input

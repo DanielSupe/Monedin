@@ -1,7 +1,7 @@
 import type { OwnRedemption } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
 import { contar } from "../../lib/plural.js";
-import { Alert, Badge, Coins, DataTable, EmptyState, Skeleton } from "../../ui/index.js";
+import { Alert, Badge, Coins, DataTable, EmptyState, IconTile, Skeleton } from "../../ui/index.js";
 import type { BadgeTone, DataColumn } from "../../ui/index.js";
 import {
   describeRedemptionStatus,
@@ -52,9 +52,11 @@ export function MyRedemptions(): React.ReactElement {
   const canjes = data?.items ?? [];
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex flex-col gap-5">
       <div className="flex flex-wrap items-baseline gap-3">
-        <h2 className="text-title font-bold">{messages.redemptions.myRedemptionsTitle}</h2>
+        <h2 className="text-display font-extrabold">
+          {messages.redemptions.myRedemptionsTitle}
+        </h2>
 
         {/*
           La cuenta sale del `total` del listado, y aquí eso SÍ es la cifra:
@@ -81,10 +83,35 @@ export function MyRedemptions(): React.ReactElement {
           rows={canjes.map((canje) => ({
             key: canje.id,
             cells: {
-              premio: canje.reward.title,
+              premio: (
+                <span className="flex items-center gap-3">
+                  {/*
+                    La tesela es la MISMA en todas las filas, y es a propósito: un
+                    canje solo trae el identificador y el título de su premio, sin
+                    imagen. Dibujar aquí algo distinto por fila exigiría un dato
+                    que el contrato no da.
+
+                    Va en el color del AHORRO, que es el del premio en todo el
+                    producto — lo que la fila enseña es un premio conseguido, no
+                    un estado.
+                  */}
+                  <IconTile tone="saving">
+                    <IconoPremio />
+                  </IconTile>
+                  <span className="text-lead font-bold">{canje.reward.title}</span>
+                </span>
+              ),
               monedas: <Coins amount={canje.coins} />,
               estado: (
-                <Badge tone={TONO[canje.status]}>{describeRedemptionStatus(canje.status)}</Badge>
+                <Badge tone={TONO[canje.status]}>
+                  {/*
+                    El icono acompaña, no sustituye: el tono y la forma son las
+                    dos maneras de leer el estado sin depender del color, y la
+                    palabra sigue ahí para quien no ve ninguno de los dos.
+                  */}
+                  <IconoEstado status={canje.status} />
+                  {describeRedemptionStatus(canje.status)}
+                </Badge>
               ),
               cuando: <span className="text-small text-ink-muted">{corta(canje.createdAt)}</span>,
             },
@@ -123,4 +150,67 @@ const TONO: Record<OwnRedemption["status"], BadgeTone> = {
  */
 function corta(fecha: string): string {
   return new Date(fecha).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+}
+
+/**
+ * El regalo que encabeza cada fila. Decorativo: lo que nombra la fila es su
+ * título, que va justo al lado.
+ */
+function IconoPremio(): React.ReactElement {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      className="size-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M3.5 9.5h17v3h-17z" />
+      <path d="M5 12.5v8h14v-8" />
+      <path d="M12 9.5v11" />
+      <path d="M12 9.5C10.5 6 9 5 7.5 5a2.5 2.5 0 000 4.5z" />
+      <path d="M12 9.5C13.5 6 15 5 16.5 5a2.5 2.5 0 010 4.5z" />
+    </svg>
+  );
+}
+
+/**
+ * La forma de cada estado, dentro de su insignia.
+ *
+ * Son tres formas distintas y no tres tintes de una: el reloj espera, el visto
+ * cerró bien y la cruz cerró sin dar nada. Quien no distingue el coral del
+ * violeta sigue viendo tres dibujos distintos.
+ */
+function IconoEstado({ status }: { status: OwnRedemption["status"] }): React.ReactElement {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      className="size-4 shrink-0"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {status === "PENDING" && (
+        <>
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M12 7.5V12l3 2" />
+        </>
+      )}
+      {status === "APPROVED" && <path d="M5 12.5l4.5 4.5L19 7.5" />}
+      {status === "REJECTED" && (
+        <>
+          <path d="M7 7l10 10" />
+          <path d="M17 7L7 17" />
+        </>
+      )}
+    </svg>
+  );
 }

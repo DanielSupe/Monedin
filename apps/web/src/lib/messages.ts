@@ -513,6 +513,21 @@ export const messages = {
     avatarSaved: "¡Listo!",
     changeMyPin: "Cambiar mi PIN",
 
+    /*
+     * Qué es el PIN, dicho para quien lo teclea. Va partido porque lleva una
+     * cifra dentro y ninguna cadena del catálogo puede llevarla: se compone
+     * abajo, desde la constante del contrato, igual que `PIN_LABEL`.
+     *
+     * La segunda mitad importa tanto como la primera: un niño que se olvida su
+     * PIN y no sabe que hay salida, deja de entrar.
+     */
+    myPinLead: "Son tus",
+    myPinTail: "números secretos. Si se te olvidan, un adulto puede ponerte otros.",
+
+    /** La edad, en la tarjeta de identidad. La cifra se compone al usarla. */
+    yearsOne: "año",
+    yearsMany: "años",
+
     /** Errores. Un 409 aquí NO es «correo ya registrado». */
     maxReached: "Esta familia ya tiene el máximo de perfiles. Da de baja alguno para crear otro.",
     notFound: "No encontramos ese perfil.",
@@ -963,3 +978,7 @@ export const HELP_AGE_QUESTION =
 
 export const HELP_PIN_QUESTION =
   `${messages.help.pinQLead} ${PIN_LENGTH} ${messages.help.pinQTail}`;
+
+/** «Son tus 4 números secretos…», con el 4 saliendo de la misma constante. */
+export const MY_PIN_EXPLAINER =
+  `${messages.children.myPinLead} ${PIN_LENGTH} ${messages.children.myPinTail}`;

@@ -84,32 +84,65 @@ async function filaCon(texto: string): Promise<HTMLElement> {
   return (await screen.findByText(texto)).closest("li") as HTMLElement;
 }
 
+/** Lo que se ganó o se gastó, tal como lo escribe la fila: «Ganó 5». */
+function dice(movimiento: CoinTransaction): string {
+  const verbo = movimiento.amount > 0 ? messages.coins.earned : messages.coins.spent;
+  return `${verbo} ${Math.abs(movimiento.amount)}`;
+}
+
+/**
+ * La tesela de color de una fila.
+ *
+ * Va `aria-hidden` a propósito —lo que dice qué pasó es «Ganó» o «Gastó»—, así
+ * que no se busca por papel ni por nombre: es el primer hijo del renglón.
+ */
+function teselaDe(fila: HTMLElement): HTMLElement {
+  return fila.firstElementChild as HTMLElement;
+}
+
 /**
  * Que una fila sume o reste es lo MÁS importante que dice, y `-60` frente a `60`
  * lo deja colgando de un solo carácter.
  */
 describe("acreditar y descontar se distinguen por más que el signo", () => {
-  it("cada uno lleva su palabra", async () => {
-    await montar("/me/coins?page=1", [movimiento("m1", 20, 20), movimiento("m2", -60, 40)]);
+  const GANA = movimiento("m1", 20, 20);
+  const GASTA = movimiento("m2", -60, 40);
 
-    expect(await screen.findByText(messages.coins.earned)).toBeInTheDocument();
-    expect(screen.getByText(messages.coins.spent)).toBeInTheDocument();
+  it("cada uno lleva su palabra, con su cantidad dentro", async () => {
+    await montar("/me/coins?page=1", [GANA, GASTA]);
+
+    expect(await screen.findByText(dice(GANA))).toBeInTheDocument();
+    expect(screen.getByText(dice(GASTA))).toBeInTheDocument();
   });
 
+  /*
+   * Se comparan los dos tonos ENTRE SÍ. Comprobar que las dos palabras están en
+   * pantalla no comprueba que se distingan: con el mismo tono en las dos, ese
+   * test seguiría en verde. Comprobado inyectando esa violación.
+   *
+   * Y se mira la TESELA y no el texto, que es donde vive el color desde
+   * `redesign-child-screens`: los dos renglones se escriben igual —misma medida,
+   * mismo grosor— y lo que los separa es el cuadrado de la izquierda.
+   */
   it("y se distinguen entre SÍ, no solo por su texto", async () => {
-    await montar("/me/coins?page=1", [movimiento("m1", 20, 20), movimiento("m2", -60, 40)]);
+    await montar("/me/coins?page=1", [GANA, GASTA]);
 
-    await screen.findByText(messages.coins.earned);
+    const gana = teselaDe(await filaCon(dice(GANA)));
+    const gasta = teselaDe(await filaCon(dice(GASTA)));
 
-    /*
-     * Se comparan los dos tonos ENTRE SÍ. Comprobar que las dos palabras están
-     * en pantalla no comprueba que se distingan: con el mismo tono en las dos,
-     * ese test seguiría en verde. Comprobado inyectando esa violación.
-     */
-    const gana = screen.getByText(messages.coins.earned).className;
-    const gasta = screen.getByText(messages.coins.spent).className;
+    expect(gana.className).not.toEqual(gasta.className);
+  });
 
-    expect(gana).not.toEqual(gasta);
+  /*
+   * Cuál es cuál, y no solo que sean distintos. Ganar va en el color de la
+   * MONEDA porque es dinero entrando; gastar en el del AHORRO porque lo que sale
+   * se convirtió en un premio. Intercambiados, el test de arriba seguiría verde.
+   */
+  it("ganar lleva el color de la moneda y gastar el del ahorro", async () => {
+    await montar("/me/coins?page=1", [GANA, GASTA]);
+
+    expect(teselaDe(await filaCon(dice(GANA))).className).toContain("bg-coin-soft");
+    expect(teselaDe(await filaCon(dice(GASTA))).className).toContain("bg-done-soft");
   });
 });
 
@@ -126,18 +159,21 @@ describe("el saldo de cada fila es el que viene, no uno acumulado", () => {
      * respuestas coincidirían y el test no probaría nada — es el error que
      * `redesign-parent-home` costó aprender.
      */
-    await montar("/me/coins?page=1", [
-      movimiento("m1", 20, 500),
-      movimiento("m2", 60, 777),
-    ]);
+    const primero = movimiento("m1", 20, 500);
+    const segundo = movimiento("m2", 60, 777);
 
-    const primera = await filaCon(`${messages.coins.balanceAfter} 500`);
-    expect(primera).toBeInTheDocument();
-    expect(screen.getByText(`${messages.coins.balanceAfter} 777`)).toBeInTheDocument();
+    await montar("/me/coins?page=1", [primero, segundo]);
+
+    // El saldo se dibuja con `Coins`, así que se busca por lo que anuncia.
+    const arriba = await filaCon(dice(primero));
+    const abajo = await filaCon(dice(segundo));
+
+    expect(within(arriba).getByText("500")).toBeInTheDocument();
+    expect(within(abajo).getByText("777")).toBeInTheDocument();
 
     // Y ninguno de los dos acumulados aparece.
-    expect(screen.queryByText(`${messages.coins.balanceAfter} 20`)).toBeNull();
-    expect(screen.queryByText(`${messages.coins.balanceAfter} 80`)).toBeNull();
+    expect(within(arriba).queryByText("20", { selector: "span" })).toBeNull();
+    expect(within(abajo).queryByText("80")).toBeNull();
   });
 });
 

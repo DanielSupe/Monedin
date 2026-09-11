@@ -6,6 +6,14 @@ export interface AccordionItem {
   value: string;
   /** Lo que se lee plegado. Es la pregunta, no la respuesta. */
   label: string;
+  /**
+   * Lo que va DELANTE de la pregunta: un número, una tesela, nada.
+   *
+   * Decorativo por contrato —lo que nombra la fila es su pregunta—, y por eso lo
+   * pone quien coloca la lista y no la pieza: un acordeón no sabe si sus
+   * elementos se numeran.
+   */
+  lead?: ReactNode;
   content: ReactNode;
 }
 
@@ -54,7 +62,13 @@ export function Accordion({ items }: AccordionProps): React.ReactElement {
               la escala del niño eso es la diferencia entre acertar y no.
             */}
             <RadixAccordion.Trigger className="group tap-target text-body flex w-full items-center justify-between gap-3 border-0 bg-transparent px-4 text-left font-semibold text-ink">
-              {item.label}
+              {item.lead !== undefined && (
+                <span aria-hidden="true" className="shrink-0">
+                  {item.lead}
+                </span>
+              )}
+
+              <span className="flex-1">{item.label}</span>
               {/*
                 El signo es DECORATIVO: quien no ve la pantalla ya oye si está
                 abierto o cerrado, porque Radix lo anuncia en el propio botón.
