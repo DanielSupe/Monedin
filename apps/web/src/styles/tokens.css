@@ -155,6 +155,42 @@
    * componentes se compone `oklch(var(--mnd-violeta-shadow) / 0.3)` sin repetir
    * los números.
    */
+  /*
+   * El tema OSCURO. Son primitivos como cualquier otro: un tema no inventa
+   * colores, elige otros de la misma paleta.
+   *
+   * El papel es tinta CÁLIDA y no negro. Con negro puro el coral vibra encima, y
+   * se pierde justo la calidez que define la marca.
+   *
+   * Y las superficies SUBEN en vez de bajar: en oscuro lo que separa una tarjeta
+   * de su fondo es su luminosidad, no su sombra. Las sombras dejan de hacer
+   * trabajo, así que la tarjeta tiene que aclararse.
+   */
+  --mnd-noche-0: oklch(21.2% 0.021 312);
+  --mnd-noche-100: oklch(24.2% 0.029 310);
+  --mnd-noche-200: oklch(25.8% 0.032 300);
+  --mnd-noche-300: oklch(30.4% 0.032 303);
+  --mnd-noche-400: oklch(30.7% 0.039 302);
+  --mnd-noche-500: oklch(37.2% 0.041 304);
+  --mnd-noche-tinta: oklch(95.7% 0.01 73);
+
+  /*
+   * Los fondos suaves, invertidos DE VERDAD: cada uno conserva su tono en vez de
+   * volverse gris. Volverlos neutros borraría lo que cada estado significa, que
+   * es lo único que esos fondos existen para decir.
+   */
+  --mnd-coral-noche: oklch(29.5% 0.037 35);
+  --mnd-violeta-noche: oklch(30.1% 0.056 295);
+  --mnd-amber-noche: oklch(32.4% 0.033 79);
+
+  /*
+   * El violeta se ACLARA y el coral no: un violeta medio se hunde sobre fondo
+   * oscuro y el coral aguanta. El ámbar hasta brilla más.
+   */
+  --mnd-violeta-claro: oklch(62.4% 0.192 291);
+  --mnd-amber-claro: oklch(85.7% 0.111 82);
+  --mnd-coral-claro: oklch(72.9% 0.115 38);
+
   --mnd-violeta-shadow: 24% 0.07 290;
   --mnd-arena-shadow: 27.6% 0.037 298;
 }
@@ -396,7 +432,11 @@
   --color-ink-muted: var(--mnd-violeta-200);
 
   /* Un campo sobre el panel es más CLARO que él, no blanco: sobre oscuro, una
-     píldora blanca es un agujero. */
+     píldora blanca es un agujero.
+
+     En el tema oscuro sigue la rampa del violeta igual que en el claro: el panel
+     de marca ya ES una superficie oscura, así que el tema casi no lo toca. Lo
+     que sí cambia es lo que un componente con fondo propio restituye encima. */
   --color-surface-raised: var(--mnd-violeta-800);
   --color-surface-sunken: var(--mnd-violeta-900);
   --color-border: var(--mnd-violeta-600);
@@ -410,9 +450,191 @@
     0 2px 4px oklch(var(--mnd-violeta-shadow) / 0.35), 0 12px 28px oklch(var(--mnd-violeta-shadow) / 0.4);
 }
 
+/* ------------------------------------------------------------------ *
+ * Los nombres que espera una librería externa, con NUESTROS valores.
+ *
+ * shadcn/ui escribe sus componentes contra unas variables propias —`background`,
+ * `foreground`, `muted-foreground`…— y trae un bloque de tema con sus colores.
+ * Ese bloque NO se copia: serían dos fuentes de verdad del color, que es la
+ * regla que este proyecto protege con más celo.
+ *
+ * Con estos alias, un componente traído se repinta con la paleta de Monedín sin
+ * tocarle una clase, y sigue el tema oscuro sin enterarse — porque lo que cambia
+ * es el valor de los tokens de aquí, no una clase suya.
+ *
+ * Por eso TAMPOCO se usa su modo oscuro, que es una clase `.dark` y un
+ * `@custom-variant`. Si aparece un `dark:` en el código, es que alguien copió un
+ * componente sin adaptarlo, y hay un test que lo caza.
+ *
+ * `--color-primary` y `--color-border` ya se llaman igual en los dos sistemas y
+ * significan lo mismo, así que no necesitan alias.
+ * ------------------------------------------------------------------ */
+
+@theme inline {
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-ink);
+  --color-card: var(--color-surface-raised);
+  --color-card-foreground: var(--color-ink);
+  --color-popover: var(--color-surface-raised);
+  --color-popover-foreground: var(--color-ink);
+  --color-primary-foreground: var(--color-ink-inverted);
+  --color-secondary: var(--color-surface-sunken);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: var(--color-surface-sunken);
+  --color-muted-foreground: var(--color-ink-muted);
+  --color-accent: var(--color-primary-soft);
+  --color-accent-foreground: var(--color-primary-hover);
+  --color-destructive: var(--color-danger);
+  --color-input: var(--color-border-strong);
+  --color-ring: var(--color-primary);
+}
+
+/* ------------------------------------------------------------------ *
+ * EL TEMA. Tres estados, no dos.
+ *
+ * Claro explícito, oscuro explícito, y —sin atributo— lo que diga el sistema.
+ * Con solo dos estados habría que escribir uno por defecto en el HTML antes del
+ * primer pintado, que es de donde salen los destellos al cargar.
+ *
+ * Hoy nadie escribe el atributo: el producto sigue al sistema y ya está. El
+ * selector existe para que el día que se quiera elegir no haya que rehacer el
+ * mecanismo — y ese día la preferencia irá DENTRO del actor, como `tutorialSeen`,
+ * nunca en el navegador: la tablet es compartida y el niño heredaría el tema de
+ * su padre.
+ *
+ * Es el MISMO mecanismo que la superficie y que la escala: una pieza sigue
+ * pidiendo «texto secundario» y lo que cambia es el VALOR de ese token. Ninguna
+ * pieza necesita una rama, una clase ni una prop.
+ *
+ * LOS ACENTOS NO CAMBIAN. El coral, el ámbar y el rojo valen lo mismo en los dos
+ * temas, y el violeta solo se aclara. Eso es lo que hace que sea el mismo
+ * producto y no dos.
+ *
+ * Los DOS bloques de abajo declaran la misma lista, y esa duplicación es
+ * deliberada: CSS no puede aplicar un mismo bloque desde dentro y desde fuera de
+ * una media query. Lo que NO se duplica son los valores —viven una vez, en
+ * `--noche-*`— y que ninguno de los dos bloques se quede corto lo comprueba un
+ * test, no la memoria de quien edite.
+ * ------------------------------------------------------------------ */
+
+:root {
+  /* Los valores del tema oscuro, una sola vez. */
+  --noche-surface: var(--mnd-noche-0);
+  --noche-surface-raised: var(--mnd-noche-200);
+  --noche-surface-sunken: var(--mnd-noche-300);
+  --noche-ink: var(--mnd-noche-tinta);
+  --noche-ink-muted: var(--mnd-arena-500);
+  --noche-ink-inverted: var(--mnd-noche-0);
+  --noche-border: var(--mnd-noche-400);
+  --noche-border-strong: var(--mnd-noche-500);
+  --noche-primary: var(--mnd-coral-700);
+  --noche-primary-hover: var(--mnd-coral-600);
+  --noche-primary-soft: var(--mnd-coral-noche);
+  --noche-brand: var(--mnd-violeta-800);
+  --noche-brand-deep: var(--mnd-violeta-950);
+  --noche-brand-line: var(--mnd-violeta-600);
+  --noche-brand-soft: var(--mnd-violeta-400);
+  --noche-spotlight-veil: oklch(12% 0.02 300 / 0.78);
+  --noche-coin: var(--mnd-amber-400);
+  --noche-coin-soft: var(--mnd-amber-noche);
+  --noche-coin-ink: var(--mnd-amber-claro);
+  --noche-done: var(--mnd-violeta-claro);
+  --noche-done-soft: var(--mnd-violeta-noche);
+  --noche-info: var(--mnd-arena-500);
+  --noche-info-soft: var(--mnd-noche-300);
+  --noche-conflict: var(--mnd-coral-claro);
+  --noche-conflict-soft: var(--mnd-coral-noche);
+  --noche-danger: var(--mnd-red-100);
+  --noche-danger-soft: oklch(28% 0.08 25);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-surface: var(--noche-surface);
+    --color-surface-raised: var(--noche-surface-raised);
+    --color-surface-sunken: var(--noche-surface-sunken);
+    --color-ink: var(--noche-ink);
+    --color-ink-muted: var(--noche-ink-muted);
+    --color-ink-inverted: var(--noche-ink-inverted);
+    --color-border: var(--noche-border);
+    --color-border-strong: var(--noche-border-strong);
+    --color-primary: var(--noche-primary);
+    --color-primary-hover: var(--noche-primary-hover);
+    --color-primary-soft: var(--noche-primary-soft);
+    --color-brand: var(--noche-brand);
+    --color-brand-deep: var(--noche-brand-deep);
+    --color-brand-line: var(--noche-brand-line);
+    --color-brand-soft: var(--noche-brand-soft);
+    --color-spotlight-veil: var(--noche-spotlight-veil);
+    --color-coin: var(--noche-coin);
+    --color-coin-soft: var(--noche-coin-soft);
+    --color-coin-ink: var(--noche-coin-ink);
+    --color-done: var(--noche-done);
+    --color-done-soft: var(--noche-done-soft);
+    --color-info: var(--noche-info);
+    --color-info-soft: var(--noche-info-soft);
+    --color-conflict: var(--noche-conflict);
+    --color-conflict-soft: var(--noche-conflict-soft);
+    --color-danger: var(--noche-danger);
+    --color-danger-soft: var(--noche-danger-soft);
+
+    --tema-ink: var(--noche-ink);
+    --tema-ink-muted: var(--noche-ink-muted);
+    --tema-surface-raised: var(--noche-surface-raised);
+    --tema-surface-sunken: var(--noche-surface-sunken);
+    --tema-border: var(--noche-border);
+    --tema-border-strong: var(--noche-border-strong);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-surface: var(--noche-surface);
+  --color-surface-raised: var(--noche-surface-raised);
+  --color-surface-sunken: var(--noche-surface-sunken);
+  --color-ink: var(--noche-ink);
+  --color-ink-muted: var(--noche-ink-muted);
+  --color-ink-inverted: var(--noche-ink-inverted);
+  --color-border: var(--noche-border);
+  --color-border-strong: var(--noche-border-strong);
+  --color-primary: var(--noche-primary);
+  --color-primary-hover: var(--noche-primary-hover);
+  --color-primary-soft: var(--noche-primary-soft);
+  --color-brand: var(--noche-brand);
+  --color-brand-deep: var(--noche-brand-deep);
+  --color-brand-line: var(--noche-brand-line);
+  --color-brand-soft: var(--noche-brand-soft);
+  --color-spotlight-veil: var(--noche-spotlight-veil);
+  --color-coin: var(--noche-coin);
+  --color-coin-soft: var(--noche-coin-soft);
+  --color-coin-ink: var(--noche-coin-ink);
+  --color-done: var(--noche-done);
+  --color-done-soft: var(--noche-done-soft);
+  --color-info: var(--noche-info);
+  --color-info-soft: var(--noche-info-soft);
+  --color-conflict: var(--noche-conflict);
+  --color-conflict-soft: var(--noche-conflict-soft);
+  --color-danger: var(--noche-danger);
+  --color-danger-soft: var(--noche-danger-soft);
+
+  --tema-ink: var(--noche-ink);
+  --tema-ink-muted: var(--noche-ink-muted);
+  --tema-surface-raised: var(--noche-surface-raised);
+  --tema-surface-sunken: var(--noche-surface-sunken);
+  --tema-border: var(--noche-border);
+  --tema-border-strong: var(--noche-border-strong);
+}
+
 /*
- * Vuelta a la superficie CLARA, para lo que trae su propio fondo claro dentro
- * de una superficie de color.
+ * Lo que un componente con fondo propio RESTITUYE, en variables aparte.
+ *
+ * Antes este bloque escribía los primitivos claros, y con un solo tema eso era
+ * correcto. Con dos se vuelve exactamente del revés: en oscuro el fondo de
+ * `Alert` es oscuro, así que restituir la tinta clara lo dejaría claro sobre
+ * claro dentro del acceso.
+ *
+ * Declarando el valor por defecto aparte, «volver al valor por defecto» pasa a
+ * significar el del tema VIGENTE. Es la misma razón por la que ya repetía las
+ * REFERENCIAS a los primitivos en vez de copiar sus valores.
  *
  * `Alert` pinta su fondo suave y su borde: es una superficie clara esté donde
  * esté. Sin esto, dentro del acceso su cuerpo heredaba la tinta clara del panel
@@ -422,13 +644,22 @@
  * cambia, este bloque lo sigue. Es la contrapartida de que una superficie pueda
  * reasignar neutros, y hace falta en cuanto una anida dentro de otra.
  */
+:root {
+  --tema-ink: var(--mnd-arena-900);
+  --tema-ink-muted: var(--mnd-arena-700);
+  --tema-surface-raised: var(--mnd-arena-0);
+  --tema-surface-sunken: var(--mnd-arena-200);
+  --tema-border: var(--mnd-arena-300);
+  --tema-border-strong: var(--mnd-arena-400);
+}
+
 [data-surface="default"] {
-  --color-ink: var(--mnd-arena-900);
-  --color-ink-muted: var(--mnd-arena-700);
-  --color-surface-raised: var(--mnd-arena-0);
-  --color-surface-sunken: var(--mnd-arena-200);
-  --color-border: var(--mnd-arena-300);
-  --color-border-strong: var(--mnd-arena-400);
+  --color-ink: var(--tema-ink);
+  --color-ink-muted: var(--tema-ink-muted);
+  --color-surface-raised: var(--tema-surface-raised);
+  --color-surface-sunken: var(--tema-surface-sunken);
+  --color-border: var(--tema-border);
+  --color-border-strong: var(--tema-border-strong);
 }
 
 /* ------------------------------------------------------------------ *
@@ -637,7 +868,21 @@
 
 @layer base {
   html {
+    /*
+     * Sigue al tema, o los controles NATIVOS se quedan con el contrario: las
+     * barras de desplazamiento, el autocompletado, el selector de la fecha
+     * límite de una tarea y el de archivo de una foto. Esta aplicación tiene los
+     * cuatro.
+     */
+    color-scheme: light dark;
+  }
+
+  :root[data-theme="light"] {
     color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
   }
 
   body {

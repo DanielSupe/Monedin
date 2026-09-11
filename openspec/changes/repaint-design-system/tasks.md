@@ -40,30 +40,30 @@
 
 ## 4. El tema oscuro
 
-- [ ] 4.1 Extraer los valores por defecto a variables de tema —`--tema-ink`, `--tema-surface-raised`,
+- [x] 4.1 Extraer los valores por defecto a variables de tema —`--tema-ink`, `--tema-surface-raised`,
       y las demás que `[data-surface="default"]` restituye—, y hacer que ese bloque las referencie en
       vez de escribir valores. Sin este paso, `Alert` dentro del acceso sale claro sobre claro.
-- [ ] 4.2 Declarar el bloque oscuro con los tres estados: `@media (prefers-color-scheme: dark)`
+- [x] 4.2 Declarar el bloque oscuro con los tres estados: `@media (prefers-color-scheme: dark)`
       guardado con `:root:not([data-theme="light"])`, y `:root[data-theme="dark"]`. Los valores, en
       `design/ui/tokens.md`.
 - [ ] 4.3 Hacer que `color-scheme` siga al tema, y comprobarlo a mano en los cuatro controles nativos
       que esta aplicación tiene: barra de desplazamiento, autocompletado, la fecha límite de una tarea
-      y el selector de archivo de una foto.
-- [ ] 4.4 Reasignar también `[data-surface="brand"]` en oscuro: su superficie elevada tiene que seguir
+      y el selector de archivo de una foto. **Declarado y con test; falta abrirlo en el navegador.**
+- [x] 4.4 Reasignar también `[data-surface="brand"]` en oscuro: su superficie elevada tiene que seguir
       la rampa oscura, o un campo sobre el panel del acceso se queda con el valor claro.
-- [ ] 4.5 Test de paridad: el bloque oscuro reasigna TODOS los tokens semánticos que declara el claro.
+- [x] 4.5 Test de paridad: el bloque oscuro reasigna TODOS los tokens semánticos que declara el claro.
       Que falle nombrando el token, no con un booleano.
-- [ ] 4.6 **Inyectar la violación**: quitar una línea del bloque oscuro y ver caer 4.5 nombrándola.
+- [x] 4.6 **Inyectar la violación**: quitar una línea del bloque oscuro y ver caer 4.5 nombrándola.
       Revertir.
 
 ## 5. La capa de alias para componentes de terceros
 
-- [ ] 5.1 Declarar el `@theme inline` con los nombres que shadcn espera apuntando a los tokens de
+- [x] 5.1 Declarar el `@theme inline` con los nombres que shadcn espera apuntando a los tokens de
       aquí. Once líneas; `--color-primary` y `--color-border` ya coinciden y no necesitan alias.
-- [ ] 5.2 Comentar el bloque diciendo qué es y qué NO se hace: no se copia su paleta, y no se usa su
+- [x] 5.2 Comentar el bloque diciendo qué es y qué NO se hace: no se copia su paleta, y no se usa su
       modo oscuro —aquí el tema cambia el valor de las variables, así que sus componentes se repintan
       solos sin escribir un `dark:`—.
-- [ ] 5.3 Test: ningún archivo de `apps/web/src` fuera del archivo de tokens declara un color de la
+- [x] 5.3 Test: ningún archivo de `apps/web/src` fuera del archivo de tokens declara un color de la
       librería externa, y no aparece la variante `dark:` en ningún sitio. Un `dark:` en el código
       significa que alguien copió un componente sin adaptarlo.
 

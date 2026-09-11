@@ -117,22 +117,35 @@ describe("la puerta pública", () => {
   });
 
   /*
-   * La RAÍZ, no el documento entero.
+   * La RAÍZ, y lo que se afirma de ella se ha estrechado DOS veces.
    *
-   * Decía «ningún `[data-scale]` en la página», y la intención sigue siendo
-   * buena: la puerta pública no adopta el marco de un rol, porque todavía no se
-   * sabe de quién sería. Pero desde `redesign-public-entry` la página enseña las
-   * dos caras de la aplicación, y cada maqueta lleva su escala DE VERDAD — es lo
-   * que hace que la diferencia que se ve sea la del producto y no una imitación.
+   * Primero decía «ningún `[data-scale]` en la página». Envejeció en cuanto la
+   * página enseñó las dos caras de la aplicación: cada maqueta lleva su escala DE
+   * VERDAD, que es lo que hace que la diferencia que se ve sea la del producto y
+   * no una imitación.
    *
-   * Así que lo que hay que afirmar es que la página no se mete en un marco, no
-   * que dentro no haya ninguna escala. Ver la decisión 3 del design.
+   * Después decía «la raíz no declara ninguna escala». Envejeció con
+   * `repaint-design-system`, que le dio a esta página una audiencia PROPIA: se
+   * lee de pie y de un vistazo, y sus titulares no caben ni en la escala del
+   * padre ni en la del niño. Estirar una de ellas la habría deformado en toda la
+   * aplicación por culpa de una sola pantalla.
+   *
+   * Lo que la afirmación quería decir desde el principio, y ahora dice: la página
+   * no adopta el marco de un ROL. Todavía no se sabe de quién sería.
    */
   it("no adopta el marco de un rol: todavía no se sabe de quién sería", async () => {
     await montarApp("/welcome", SIN_SESION);
 
     const raiz = screen.getByRole("banner").parentElement as HTMLElement;
-    expect(raiz.getAttribute("data-scale")).toBeNull();
+    expect(raiz.getAttribute("data-scale")).not.toBe("parent");
+    expect(raiz.getAttribute("data-scale")).not.toBe("child");
+  });
+
+  it("tiene audiencia propia: se lee de pie, no como el padre ni como el niño", async () => {
+    await montarApp("/welcome", SIN_SESION);
+
+    const raiz = screen.getByRole("banner").parentElement as HTMLElement;
+    expect(raiz.getAttribute("data-scale")).toBe("public");
   });
 
   it("pero las maquetas sí llevan la escala de su audiencia, y son distintas", async () => {
