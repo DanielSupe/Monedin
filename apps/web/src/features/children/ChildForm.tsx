@@ -166,6 +166,7 @@ export function ChildForm({
             value={avatar}
             onChange={setAvatar}
             label={messages.children.avatar}
+            {...(editing ? {} : { note: messages.children.photoLater })}
             {...(editing
               ? {
                   requestUploadUrl: (contentType: ImageContentType) =>

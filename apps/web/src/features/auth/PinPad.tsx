@@ -2,8 +2,8 @@ import { ERROR_CODES, PIN_LENGTH, type SelectableProfile } from "@monedin/contra
 import { Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { ApiRequestError } from "../../lib/http-client.js";
-import { messages } from "../../lib/messages.js";
-import { Alert, Avatar, Button, cx } from "../../ui/index.js";
+import { MY_PIN_EXPLAINER, messages } from "../../lib/messages.js";
+import { Alert, Avatar, Button, Card, HeroPanel, Mascota, cx } from "../../ui/index.js";
 import { describeAuthError, isLockout, useEnterProfile, useProfiles } from "./use-session.js";
 
 /**
@@ -180,12 +180,36 @@ function Keypad({
   const error = enter.error ? describeProfileEnterError(enter.error, profile.familyRole) : undefined;
 
   return (
-    <section className="mx-auto flex max-w-dialog flex-col items-center gap-6 py-8">
-      <Avatar value={profile.avatar} size="large" />
+    /*
+      LA TARJETA VA CENTRADA EN HORIZONTAL, Y LA MASCOTA NO CUENTA PARA EL CENTRO.
 
-      <h2 className="text-title text-center font-bold">
-        {profile.name}: {manage ? messages.auth.pinPromptToEdit : messages.auth.pinPrompt}
-      </h2>
+      Puesta en la misma fila, Monedín empujaba el teclado hacia la izquierda: lo
+      que se mira aquí es el teclado, y un teclado descentrado en la pantalla que
+      un niño usa cada día se lee como un defecto de montaje.
+
+      Se saca del flujo a partir de `lg`, que es donde hay sitio a los lados. Es
+      UN solo elemento colocado de dos maneras, no dos montados a la vez: lo que
+      `pin-sidebar-on-desktop` prohíbe es duplicar ESTRUCTURA, y el globo dice lo
+      mismo en los dos sitios — en estrecho se queda debajo, donde sigue
+      leyéndose, en vez de desaparecer.
+    */
+    <section className="relative mx-auto flex w-full max-w-(--container-wide) flex-col items-center gap-6 py-8">
+      <Card className="flex w-full max-w-dialog flex-col items-center gap-6 p-0">
+        {/*
+          La cabecera dice de QUIÉN es el PIN que se está pidiendo. Con su cara
+          dentro, porque en una tablet compartida esa es la pregunta: no «cuál es
+          el PIN» sino «¿este soy yo?».
+        */}
+        <HeroPanel className="w-full flex-col rounded-b-none text-center">
+          <span className="rounded-pill relative bg-surface-raised/20 p-1.5">
+            <Avatar value={profile.avatar} size="large" />
+          </span>
+
+          <p className="text-title font-extrabold text-ink-inverted">{profile.name}</p>
+          <h2 className="text-body font-bold text-ink-inverted opacity-90">
+            {manage ? messages.auth.pinPromptToEdit : messages.auth.pinPrompt}
+          </h2>
+        </HeroPanel>
 
       <p aria-label="pin" className="text-hero flex gap-3 font-bold tabular-nums">
         {Array.from({ length: PIN_LENGTH }, (_, indice) => (
@@ -231,10 +255,30 @@ function Keypad({
         </Button>
       </div>
 
-      {error !== undefined && <Alert tone="danger">{error}</Alert>}
+      {error !== undefined && (
+          <div className="w-full px-6">
+            <Alert tone="danger">{error}</Alert>
+          </div>
+        )}
 
-      {/* Solo para el perfil del padre: es su vía de rescate. */}
-      {isParent && <Link to="/profiles/reset-pin">{messages.auth.forgotPin}</Link>}
+        {/* Solo para el perfil del padre: es su vía de rescate. */}
+        {isParent && (
+          <Link to="/profiles/reset-pin" className="pb-6">
+            {messages.auth.forgotPin}
+          </Link>
+        )}
+      </Card>
+
+      {/*
+        Monedín acompaña también aquí, que es la primera pantalla del niño. El
+        globo dice qué es un PIN y, sobre todo, que si se olvida hay salida: sin
+        esa mitad, un niño que no se acuerda deja de entrar.
+      */}
+      <div className="lg:absolute lg:right-0 lg:top-1/2 lg:-translate-y-1/2">
+        <Mascota pose="duda" size="medium">
+          <p className="text-small m-0 max-w-(--container-card) font-bold">{MY_PIN_EXPLAINER}</p>
+        </Mascota>
+      </div>
 
       <Link to="/profiles" search={{ manage: manage || undefined }}>
         {messages.auth.back}

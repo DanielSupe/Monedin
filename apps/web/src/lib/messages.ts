@@ -397,7 +397,20 @@ export const messages = {
      * cuatro veces.
      */
     manageProfiles: "Administrar perfiles",
-    manageProfilesTitle: "Administrar perfiles:",
+    manageProfilesTitle: "Administrar perfiles",
+
+    /*
+     * QUÉ HARÁ TOCAR UN PERFIL, dicho una vez y en la pantalla.
+     *
+     * El lápiz sobre cada tesela dice que ALGO cambió, no qué. Y lo que cambió
+     * es el MODO, no cada perfil: enterarse mirando un distintivo pequeño en
+     * doce sitios es justo el trabajo que una frase arriba ahorra.
+     *
+     * Lleva dentro el precio, que es lo que de verdad sorprende: editar un
+     * perfil exige el PIN DE ESE PERFIL. Sin decirlo, pulsar la cara de un hijo
+     * para cambiarle la foto acaba en un teclado que parece un error.
+     */
+    manageProfilesLead: "Toca un perfil para editarlo. Te pedirá su PIN.",
     manageDone: "Listo",
     editProfile: "Editar",
     /** Título del teclado de PIN cuando se viene a administrar. */
@@ -455,6 +468,20 @@ export const messages = {
     age: "Edad",
     ageOptional: "Edad (opcional)",
     avatar: "Animal",
+
+    /*
+     * DÓNDE SÍ SE PUEDE PONER LA FOTO.
+     *
+     * En el alta no se puede, y es deuda conocida con dueño: la clave de subida
+     * cuelga del identificador del hijo, que todavía no existe. Hasta hoy el
+     * hueco estaba sin explicar, así que el padre que buscaba la foto concluía
+     * que el producto no la tiene.
+     *
+     * La frase dice las DOS cosas a propósito. Decir solo «aquí no» deja a quien
+     * lo lee sin saber qué hacer, que es la peor forma de documentar un límite:
+     * una limitación sin salida se lee como un defecto.
+     */
+    photoLater: "La foto se pone después, al editar este perfil.",
     pinHelp: "Es el que usará para entrar a su perfil.",
     coins: "Monedas",
     save: "Guardar",

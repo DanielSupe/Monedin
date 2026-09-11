@@ -27,9 +27,22 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
 
   return (
     <section className="flex w-full max-w-(--container-wide) flex-col items-center gap-8">
-      <h2 className="text-title text-center font-bold">
-        {manage ? messages.auth.manageProfilesTitle : messages.auth.whoIsPlaying}
-      </h2>
+      <div className="flex flex-col items-center gap-2">
+        <h2 className="text-display text-center font-extrabold">
+          {manage ? messages.auth.manageProfilesTitle : messages.auth.whoIsPlaying}
+        </h2>
+
+        {/*
+          El modo se anuncia con una FRASE, no solo con el lápiz de cada tesela.
+          Lo que cambió es el modo y no cada perfil, y enterarse mirando un
+          distintivo pequeño en doce sitios es el trabajo que esta línea ahorra.
+        */}
+        {manage && (
+          <p className="text-body text-center text-ink-muted">
+            {messages.auth.manageProfilesLead}
+          </p>
+        )}
+      </div>
 
       <ul className="flex list-none flex-wrap justify-center gap-6 p-0">
         {profiles.map((profile) => (

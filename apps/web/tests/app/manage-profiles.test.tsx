@@ -173,3 +173,31 @@ describe("la rejilla en modo de administración", () => {
     expect(app.router.state.location.searchStr).not.toContain("manage=true");
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * EL MODO SE ANUNCIA, Y NO SOLO CON EL LÁPIZ DE CADA TESELA.
+ *
+ * Lo que cambió es el MODO, no cada perfil. Un distintivo pequeño repetido doce
+ * veces obliga a deducirlo mirando; una frase arriba lo dice. Y lleva dentro el
+ * precio que de verdad sorprende —editar un perfil pide el PIN DE ESE PERFIL—,
+ * sin el cual pulsar la cara de un hijo acaba en un teclado que parece un error.
+ *
+ * Se comprueban LAS DOS mitades: que con el modo lo dice y que sin él no. Sin la
+ * segunda, una frase permanente pasaría igual — y entonces no diría nada.
+ */
+describe("el modo de administración se anuncia en la pantalla", () => {
+  it("con el modo, dice qué hará tocar un perfil", async () => {
+    await montarApp("/profiles?manage=true", SOLO_CUENTA, PERFILES);
+
+    expect(await screen.findByText(messages.auth.manageProfilesLead)).toBeInTheDocument();
+  });
+
+  it("y sin el modo, no lo dice", async () => {
+    await montarApp("/profiles", SOLO_CUENTA, PERFILES);
+
+    await screen.findByText(messages.auth.whoIsPlaying);
+    expect(screen.queryByText(messages.auth.manageProfilesLead)).toBeNull();
+  });
+});

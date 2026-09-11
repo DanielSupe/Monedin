@@ -25,12 +25,22 @@ export function AvatarPicker({
   value,
   onChange,
   label,
+  note,
   requestUploadUrl,
   onUpload,
 }: {
   value: string | undefined;
   onChange: (avatar: AvatarKey) => void;
   label: string;
+  /**
+   * Qué pasa con lo que este selector NO ofrece.
+   *
+   * Existe para el alta, donde no se puede subir una foto —la clave de subida
+   * cuelga del identificador del hijo, que todavía no existe—. Un hueco sin
+   * explicar se lee como un defecto del producto, y decir solo «aquí no» deja a
+   * quien lo lee sin saber qué hacer.
+   */
+  note?: string;
   /** Con las dos, el selector ofrece además subir una foto. */
   requestUploadUrl?: (contentType: ImageContentType) => Promise<UploadUrl>;
   onUpload?: (key: string) => void;
@@ -70,6 +80,10 @@ export function AvatarPicker({
             </button>
           ))}
         </div>
+
+        {note !== undefined && !puedeSubir && (
+          <p className="text-small text-ink-muted">{note}</p>
+        )}
 
         {puedeSubir && (
           <div className="flex min-w-0 flex-col gap-3 border-t border-border pt-3">

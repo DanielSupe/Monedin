@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { messages } from "../../lib/messages.js";
-import { POSES, Logo, buttonClasses } from "../../ui/index.js";
+import { Logo, Mascota, buttonClasses } from "../../ui/index.js";
 import { AppPreview } from "./AppPreview.js";
 import { FinalCta } from "./FinalCta.js";
 import { HowItWorks } from "./HowItWorks.js";
@@ -158,7 +158,14 @@ function About(): React.ReactElement {
           pierde algo que no está en ningún otro sitio. Esta acompaña a un texto
           que ya lo dice todo, así que anunciarla sería la misma frase dos veces.
         */}
-        <img src={POSES.explica} alt="" className="w-full max-w-tile shrink-0" />
+        {/*
+          Por la PIEZA y no por su ruta: era el último sitio del proyecto que
+          importaba un PNG de Monedín a mano, y la medida la decide el sistema.
+          Sigue siendo decorativa, que es lo contrario de `Orbits`: aquella lleva
+          nombre porque comunica el ciclo y esta acompaña a un texto que ya lo
+          dice todo.
+        */}
+        <Mascota pose="explica" size="large" className="shrink-0" />
 
         <div className="flex min-w-0 flex-col gap-4">
           <h2 className="text-title font-extrabold">{messages.landing.aboutTitle}</h2>
