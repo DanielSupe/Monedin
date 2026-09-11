@@ -66,3 +66,36 @@ export function metaMasCercana(rewards: OwnReward[]): OwnReward | null {
     }, null) ?? null
   );
 }
+
+/** Las tres etapas, en el orden del CICLO y no del volumen. */
+export const ETAPAS = ["PENDING", "COMPLETED", "APPROVED"] as const;
+
+export type Etapa = (typeof ETAPAS)[number];
+
+export interface Grupo {
+  etapa: Etapa;
+  tasks: OwnTask[];
+}
+
+/**
+ * Las tareas del niño, por la etapa en la que están.
+ *
+ * Las tres etapas son la máquina de estados que el producto protege con
+ * transiciones condicionales y pruebas de doble tap, y en pantalla no se veían:
+ * una columna con una insignia por fila obliga a leer cada insignia para saber
+ * qué se puede hacer.
+ *
+ * UN GRUPO VACÍO NO SE DEVUELVE. La pantalla de un niño que no tiene nada
+ * pendiente tiene que verse tranquila, no llena de ceros — es la misma regla que
+ * ya cumple el panel del padre con sus avisos.
+ *
+ * Y el orden es el del ciclo, NUNCA el del volumen. Ordenar por cantidad haría
+ * que la pantalla cambiara de forma cada día, y de una pantalla se aprende dónde
+ * están las cosas.
+ */
+export function porEtapa(tasks: OwnTask[]): Grupo[] {
+  return ETAPAS.map((etapa) => ({
+    etapa,
+    tasks: tasks.filter((task) => task.status === etapa),
+  })).filter((grupo) => grupo.tasks.length > 0);
+}

@@ -2,7 +2,7 @@ import type { OwnReward, OwnTask } from "@monedin/contracts";
 import { screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { messages } from "../../src/lib/messages.js";
-import { avanceDeTareas, metaMasCercana } from "../../src/features/children/home-data.js";
+import { avanceDeTareas, metaMasCercana, porEtapa } from "../../src/features/children/home-data.js";
 import { comoNino, montarApp, pagina } from "../support/router.js";
 
 afterEach(() => {
@@ -194,5 +194,53 @@ describe("la meta y sus dos ausencias", () => {
 
     expect(screen.queryByText(messages.children.homeNextRewardTitle)).toBeNull();
     expect(screen.queryByText(messages.children.homeAllAffordableTitle)).toBeNull();
+  });
+});
+
+/**
+ * El agrupado por etapa, con un caso que DISTINGUE.
+ *
+ * Las cantidades son 2, 1 y 2 a propósito: con 1, 1 y 1 un error de agrupación
+ * —mezclar dos etapas, o contar el total en cada grupo— daría el mismo número
+ * en los tres y pasaría en verde. Es el error que ya se pagó una vez contando
+ * tareas por aprobar en el panel del padre.
+ */
+describe("las tareas se agrupan por su etapa del ciclo", () => {
+  const CINCO = [
+    tarea("t1", "Tender la cama", "PENDING"),
+    tarea("t2", "Leer 15 minutos", "PENDING"),
+    tarea("t3", "Poner la mesa", "COMPLETED"),
+    tarea("t4", "Sacar la basura", "APPROVED"),
+    tarea("t5", "Guardar los juguetes", "APPROVED"),
+  ];
+
+  it("en el orden del ciclo, y cada grupo con lo suyo", () => {
+    const grupos = porEtapa(CINCO);
+
+    expect(grupos.map((g) => g.etapa)).toEqual(["PENDING", "COMPLETED", "APPROVED"]);
+    expect(grupos.map((g) => g.tasks.length)).toEqual([2, 1, 2]);
+  });
+
+  it("un grupo vacío no se devuelve, ni siquiera con cero", () => {
+    const soloHechas = porEtapa([tarea("t1", "Sacar la basura", "APPROVED")]);
+
+    expect(soloHechas).toHaveLength(1);
+    expect(soloHechas[0]?.etapa).toBe("APPROVED");
+  });
+
+  /*
+   * El orden NO depende del volumen. Con una etapa que acumula la mayoría, una
+   * ordenación por cantidad la pondría primera — y la pantalla cambiaría de
+   * forma cada día, que es justo lo que se aprende de una pantalla.
+   */
+  it("el orden no cambia aunque una etapa acumule casi todo", () => {
+    const desequilibrada = [
+      tarea("t1", "a", "APPROVED"),
+      tarea("t2", "b", "APPROVED"),
+      tarea("t3", "c", "APPROVED"),
+      tarea("t4", "d", "PENDING"),
+    ];
+
+    expect(porEtapa(desequilibrada).map((g) => g.etapa)).toEqual(["PENDING", "APPROVED"]);
   });
 });

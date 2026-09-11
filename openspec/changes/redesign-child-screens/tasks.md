@@ -12,15 +12,15 @@
 
 ## 2. Las tareas del niño
 
-- [ ] 2.1 Agrupar por etapa, en el orden del ciclo, con la cuenta de cada grupo.
-- [ ] 2.2 No dibujar los grupos vacíos.
-- [ ] 2.3 El anillo con `ProgressRing`, alimentado con las hechas y las que esperan revisión sobre el
+- [x] 2.1 Agrupar por etapa, en el orden del ciclo, con la cuenta de cada grupo.
+- [x] 2.2 No dibujar los grupos vacíos.
+- [x] 2.3 El anillo con `ProgressRing`, alimentado con las hechas y las que esperan revisión sobre el
       total. **Sin la palabra «hoy»** en ningún texto.
-- [ ] 2.4 Test del agrupado con un caso que DISTINGA: tres etapas con cantidades distintas —por
+- [x] 2.4 Test del agrupado con un caso que DISTINGA: tres etapas con cantidades distintas —por
       ejemplo 2, 1 y 2— de modo que contar mal dé un número distinto en cada grupo. Con 1, 1 y 1 un
       error de agrupación pasaría en verde.
-- [ ] 2.5 Test: con una etapa vacía, su grupo no está en el documento. No basta con que no se vea.
-- [ ] 2.6 Test: ningún texto de la pantalla ni del catálogo de mensajes dice «hoy» sobre las tareas.
+- [x] 2.5 Test: con una etapa vacía, su grupo no está en el documento. No basta con que no se vea.
+- [x] 2.6 Test: ningún texto de la pantalla ni del catálogo de mensajes dice «hoy» sobre las tareas.
 
 ## 3. El escaparate
 

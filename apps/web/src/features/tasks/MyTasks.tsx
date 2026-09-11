@@ -6,6 +6,8 @@ import { contar } from "../../lib/plural.js";
 import { Alert, Badge, Button, Card, Coins, EmptyState, Skeleton } from "../../ui/index.js";
 import type { BadgeTone } from "../../ui/index.js";
 import { ImageUploadField } from "../uploads/ImageUploadField.js";
+import { avanceDeTareas, porEtapa, type Etapa } from "../children/home-data.js";
+import { ProgressRing, HeroPanel, Mascota, IconTile } from "../../ui/index.js";
 import { describeTasksError, useCompleteTask, useOwnTasks } from "./use-tasks.js";
 
 /**
@@ -28,11 +30,13 @@ export function MyTasks(): React.ReactElement {
 
   const tareas = data?.items ?? [];
   const pendientes = tareas.filter((tarea) => tarea.status === "PENDING").length;
+  const grupos = porEtapa(tareas);
+  const avance = avanceDeTareas(tareas);
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex flex-col gap-5">
       <div className="flex flex-wrap items-baseline gap-3">
-        <h2 className="text-title font-bold">{messages.tasks.myTasksTitle}</h2>
+        <h2 className="text-display font-extrabold">{messages.tasks.myTasksTitle}</h2>
 
         {/*
           Se cuentan las PENDIENTES, no las tareas.
@@ -54,18 +58,71 @@ export function MyTasks(): React.ReactElement {
         )}
       </div>
 
+      {/*
+        Cuánto lleva, sin contar las filas. Y sin la palabra «hoy»: una tarea no
+        tiene concepto de jornada, así que decirlo sería enseñar como dato algo
+        que el modelo no sabe. Ver `design/ui/datos-derivados.md`.
+      */}
+      {tareas.length > 0 && (
+        <HeroPanel
+          mascot={<Mascota pose={pendientes === 0 ? "celebra" : "corre"} size="medium" />}
+          aside={<ProgressRing done={avance.done} total={avance.total} className="size-24" />}
+        >
+          {/*
+            UNA frase, y la que la cabecera no dice. El título ya está en el
+            `h2` y la cuenta de pendientes justo al lado: repetir cualquiera de
+            las dos aquí sería decir lo mismo dos veces en la misma pantalla.
+          */}
+          <p className="text-lead font-extrabold text-ink-inverted">
+            {pendientes === 0
+              ? messages.children.homeAllDone
+              : messages.children.homeMarkExplains}
+          </p>
+        </HeroPanel>
+      )}
+
       {tareas.length === 0 ? (
         <EmptyState glyph="🧹" title={messages.tasks.myTasksEmpty} />
       ) : (
-        <ul className="flex list-none flex-col gap-3 p-0">
-          {tareas.map((tarea) => (
-            <MyTaskRow key={tarea.id} task={tarea} />
+        /*
+          Agrupadas por ETAPA, que es lo que decide qué se puede hacer con cada
+          una. Antes eran una columna con una insignia por fila, así que la
+          máquina de estados que el producto protege con transiciones
+          condicionales no se veía por ninguna parte.
+
+          Un grupo vacío no llega hasta aquí: `porEtapa` no lo devuelve.
+        */
+        <div className="flex flex-col gap-6">
+          {grupos.map((grupo) => (
+            <section key={grupo.etapa} className="flex flex-col gap-3">
+              <h3 className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+                {TITULO_GRUPO[grupo.etapa]} · {grupo.tasks.length}
+              </h3>
+
+              <ul className="flex list-none flex-col gap-3 p-0">
+                {grupo.tasks.map((tarea) => (
+                  <MyTaskRow key={tarea.id} task={tarea} />
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
       )}
     </section>
   );
 }
+
+/**
+ * Cómo se encabeza cada grupo.
+ *
+ * Son las mismas etapas que las insignias de cada fila, dichas como encabezado
+ * de una lista y no como estado: «Por hacer» encabeza, «Pendiente» describe.
+ */
+const TITULO_GRUPO: Record<Etapa, string> = {
+  PENDING: messages.tasks.groupPending,
+  COMPLETED: messages.tasks.groupCompleted,
+  APPROVED: messages.tasks.groupApproved,
+};
 
 /**
  * Cómo se lee cada etapa del ciclo.
@@ -101,8 +158,12 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
       <Card>
         <div className="flex min-w-0 flex-col gap-3">
           <div className="flex flex-wrap items-start justify-between gap-2">
-            <div className="flex min-w-0 flex-col gap-1">
-              <p className="text-body font-bold">{task.title}</p>
+            <IconTile tone={TONO_TESELA[task.status]}>
+              <IconoEtapa status={task.status} />
+            </IconTile>
+
+            <div className="flex min-w-0 flex-1 flex-col gap-1">
+              <p className="text-lead font-bold">{task.title}</p>
               {task.description !== null && (
                 <p className="text-small text-ink-muted">{task.description}</p>
               )}
@@ -186,5 +247,47 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
         </div>
       </Card>
     </li>
+  );
+}
+
+/** El tinte de la tesela sigue a la etapa, con los tonos del sistema. */
+const TONO_TESELA: Record<OwnTask["status"], "action" | "waiting" | "saving"> = {
+  PENDING: "action",
+  COMPLETED: "waiting",
+  APPROVED: "saving",
+};
+
+/**
+ * El icono de una etapa. Decorativo: lo que dice en qué punto está la tarea es
+ * su insignia, que se queda.
+ */
+function IconoEtapa({ status }: { status: OwnTask["status"] }): React.ReactElement {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      className="size-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {status === "PENDING" && (
+        <>
+          <path d="M4 20l6-6" />
+          <path d="M12 12l4-4" />
+          <path d="M14.5 4.5l5 5-6 2-1-1z" />
+        </>
+      )}
+      {status === "COMPLETED" && (
+        <>
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M12 7.5V12l3 2" />
+        </>
+      )}
+      {status === "APPROVED" && <path d="M5 12.5l4.5 4.5L19 7.5" />}
+    </svg>
   );
 }

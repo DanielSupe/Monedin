@@ -567,6 +567,15 @@ export const messages = {
     wholeBatchNote: "Cada reparto se muestra completo, incluso las tareas que no casan con el filtro.",
 
     /** Estados, tal como los lee una persona. */
+    /*
+     * Los tres GRUPOS de la pantalla del niño. Son las mismas etapas que las
+     * insignias, dichas como encabezado de una lista y no como estado de una
+     * fila: «Por hacer» encabeza, «Pendiente» describe.
+     */
+    groupPending: "Por hacer",
+    groupCompleted: "Esperando revisión",
+    groupApproved: "Hechas",
+
     statusPending: "Pendiente",
     statusCompleted: "Hecha, esperando revisión",
     statusApproved: "Aprobada",
