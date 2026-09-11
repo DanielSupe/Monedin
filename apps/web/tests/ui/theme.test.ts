@@ -70,7 +70,35 @@ function coloresDe(bloque: string): string[] {
   return [...bloque.matchAll(/^\s*(--color-[\w-]+)\s*:/gm)].map((m) => m[1] ?? "");
 }
 
-const CLARO = coloresDe(bloqueDe("@theme {"));
+/**
+ * Los que NO se reasignan, con su porqué, uno a uno.
+ *
+ * La lista es CERRADA y corta a propósito: cada entrada es una decisión visible
+ * en una revisión, igual que la de los archivos autorizados al color de la
+ * moneda. Añadirse aquí para callar un fallo es exactamente lo que no se puede
+ * hacer sin que alguien lo vea.
+ *
+ * Los tres dicen lo mismo con distintas palabras: nombran un color que va
+ * PEGADO a otro que tampoco cambia, así que cambiar con el tema los deja mal en
+ * uno de los dos por construcción.
+ *
+ * - `--color-ink-inverted` es la tinta ENCIMA de un acento —el coral de un botón
+ *   principal, el violeta de un panel de realce—. Reasignada, en oscuro salía
+ *   casi negra sobre el coral, y con ella cada panel de realce del producto.
+ * - `--color-on-coin` es la tinta encima del ámbar, y `--color-danger-solid` el
+ *   relleno de la acción peligrosa. Los dos botones que los usan quedaban claro
+ *   sobre claro en oscuro —1.14 y 1.18 de contraste— y perfectos en claro, que
+ *   es lo que lo hizo invisible.
+ *
+ * Ninguno de los tres lo veía un test: jsdom no pinta. Los cazó abrir el
+ * catálogo en oscuro y medir el contraste de cada pareja, que es exactamente
+ * para lo que esa tarea manual existe.
+ */
+const NO_SE_REASIGNAN = ["--color-ink-inverted", "--color-on-coin", "--color-danger-solid"];
+
+const CLARO = coloresDe(bloqueDe("@theme {")).filter(
+  (token) => !NO_SE_REASIGNAN.includes(token),
+);
 const POR_SISTEMA = coloresDe(bloqueDesde(CSS, CSS.indexOf('(prefers-color-scheme: dark)')));
 const POR_ATRIBUTO = coloresDe(bloqueDe(':root[data-theme="dark"] {'));
 
@@ -95,6 +123,37 @@ describe("el tema oscuro reasigna la capa semántica entera", () => {
       faltan,
       `el tema oscuro elegido a mano no reasigna:\n  ${faltan.join("\n  ")}`,
     ).toEqual([]);
+  });
+
+  /*
+   * LA OTRA MITAD: los que no cambian, NO cambian.
+   *
+   * Sin esto, la lista de exenciones sería una puerta abierta — bastaría con
+   * añadir un nombre para que un token dejara de comprobarse en las dos
+   * direcciones. Aquí un token exento que APAREZCA en un bloque oscuro falla, que
+   * es la regresión de verdad: alguien lo reasigna «para que se vea bien en
+   * oscuro» y rompe el claro sin enterarse.
+   */
+  it("los que no se reasignan no aparecen en ningún bloque oscuro", () => {
+    const colados = NO_SE_REASIGNAN.filter(
+      (token) => POR_SISTEMA.includes(token) || POR_ATRIBUTO.includes(token),
+    );
+
+    expect(
+      colados,
+      `estos nombran la tinta de una superficie que NO cambia con el tema, así que ellos tampoco pueden:\n  ${colados.join("\n  ")}`,
+    ).toEqual([]);
+  });
+
+  it("la lista de exentos es corta y cada entrada está declarada", () => {
+    expect(NO_SE_REASIGNAN.length).toBeGreaterThan(0);
+    expect(NO_SE_REASIGNAN.length).toBeLessThanOrEqual(4);
+
+    for (const token of NO_SE_REASIGNAN) {
+      expect(bloqueDe("@theme {"), `${token} tiene que existir en el tema claro`).toContain(
+        `${token}:`,
+      );
+    }
   });
 
   /*

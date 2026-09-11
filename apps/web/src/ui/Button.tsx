@@ -43,8 +43,14 @@ const VARIANTS: Record<ButtonVariant, string> = {
   primary: "border-primary bg-primary text-ink-inverted hover:bg-primary-hover",
   secondary: "border-border-strong bg-surface-raised text-ink hover:bg-surface-sunken",
   ghost: "border-transparent bg-transparent text-primary hover:bg-primary-soft",
-  danger: "border-danger bg-danger text-ink-inverted hover:brightness-110",
-  contrast: "border-coin bg-coin text-coin-ink hover:brightness-105",
+  /*
+     Los dos RELLENAN, así que sus dos colores son de los que no cambian con el
+     tema. Con las tintas de página —`--color-danger` y `--color-coin-ink`— estos
+     dos botones quedaban claro sobre claro en oscuro, y bien en claro: por eso
+     no lo vio nadie hasta abrir el catálogo.
+  */
+  danger: "border-danger-solid bg-danger-solid text-ink-inverted hover:brightness-110",
+  contrast: "border-coin bg-coin text-on-coin hover:brightness-105",
 };
 
 /**

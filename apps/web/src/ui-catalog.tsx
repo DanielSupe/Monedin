@@ -1,6 +1,7 @@
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
+  AVATAR_OPTIONS,
   Accordion,
   Alert,
   Avatar,
@@ -216,6 +217,25 @@ function Piezas(): React.ReactElement {
           <Avatar value="nutria" size="medium" shape="rounded" alt={EJEMPLO.hija} />
           <Avatar value="zorro" size="large" shape="rounded" alt={EJEMPLO.hija} />
           <Avatar value="pulpo" size="xlarge" shape="rounded" alt={EJEMPLO.hija} />
+        </Fila>
+
+        {/*
+          LOS DOCE JUNTOS, y no cuatro de muestra.
+
+          Es lo único que enseña lo que hay que mirar de este catálogo de
+          animales: que ninguno se parece demasiado a otro a tamaño pequeño, y
+          que los doce se leen como una familia y no como doce dibujos sueltos.
+          Eso no se ve de uno en uno, y mirarlos en la pantalla que los usa —el
+          selector del alta— exige montar la aplicación entera.
+
+          Y aquí se ve la otra mitad: su color NO se reasigna con el tema. Un
+          animal es CONTENIDO, como una foto, así que un zorro naranja sigue
+          siendo naranja en oscuro. Lo que sí cambia es el círculo de debajo.
+        */}
+        <Fila>
+          {AVATAR_OPTIONS.map((opcion) => (
+            <Avatar key={opcion.key} value={opcion.key} size="large" alt={opcion.key} />
+          ))}
         </Fila>
       </Seccion>
 

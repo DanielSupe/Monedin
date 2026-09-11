@@ -136,7 +136,24 @@ const DIBUJOS: Record<AvatarKey, React.ReactElement> = {
   ),
   tucan: (
     <>
-      <path d="M14 12c6 0 11 4.5 11 10.5S20 33 14 33 3 28.5 3 22.5 8 12 14 12z" fill="#2F3446" />
+      {/*
+        EL CUERPO NO VA EN LA TINTA DE LOS OJOS, y era el único que lo hacía.
+
+        Un tucán es negro, así que su cuerpo se dibujó con `#2F3446` —el mismo
+        valor que los ojos y los hocicos de los otros once—. Sobre el círculo de
+        arena se leía; sobre el oscuro, que está a ese mismo valor, el pájaro
+        desaparecía y quedaban flotando un ojo y un pico.
+
+        Y NO se arregla reasignándolo por tema: un animal es contenido, como una
+        foto, y esa regla es la que hace que un zorro naranja siga siendo naranja
+        de noche. Se arregla eligiendo un valor que se lea sobre los dos fondos,
+        que es lo que ya hacen los otros once. Lo que identifica a un tucán es su
+        pico, y ese no se toca.
+
+        Lo cazó abrir el catálogo en oscuro, que es justo para lo que esa tarea
+        existe: ningún test puede verlo, porque jsdom no pinta.
+      */}
+      <path d="M14 12c6 0 11 4.5 11 10.5S20 33 14 33 3 28.5 3 22.5 8 12 14 12z" fill="#55658A" />
       <path d="M24 17c4-2 9-2.5 13 .5-3.5 3-8 4.5-13 4z" fill="#EE8B4A" />
       <path
         d="M24 19.5c3-1 6-1 8.5.5"

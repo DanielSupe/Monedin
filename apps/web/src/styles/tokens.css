@@ -206,6 +206,23 @@
   --color-surface-sunken: var(--mnd-arena-200);
   --color-ink: var(--mnd-arena-900);
   --color-ink-muted: var(--mnd-arena-700);
+  /*
+   * LA TINTA QUE VA ENCIMA DE UN ACENTO, Y NO CAMBIA CON EL TEMA.
+   *
+   * Su nombre invita a leerla como «lo contrario de la tinta», y con esa lectura
+   * el bloque oscuro la reasignaba a casi negro. Pero lo que nombra es la tinta
+   * para ir SOBRE una superficie de acento —el coral de un botón principal, el
+   * violeta de un panel de realce—, y esas superficies valen lo mismo en los dos
+   * temas a propósito: es lo que hace que esto sea el mismo producto y no dos.
+   *
+   * Una tinta que cambia sobre un fondo que no cambia es, por construcción,
+   * incorrecta en uno de los dos temas. Y lo era: en oscuro, «Hola, Ana» salía
+   * casi negro sobre el coral, y cada panel de realce con él.
+   *
+   * Por eso vive aquí y NO tiene pareja en `--noche-*`. La lista de los que no
+   * cambian está en `tests/ui/theme.test.ts`, que ahora comprueba las dos
+   * mitades: que lo demás se reasigna y que estos no.
+   */
   --color-ink-inverted: var(--mnd-arena-0);
   --color-border: var(--mnd-arena-300);
   --color-border-strong: var(--mnd-arena-400);
@@ -253,6 +270,25 @@
    * color, y ningún componente escribe un color.
    */
   --color-spotlight-veil: oklch(var(--mnd-arena-shadow) / 0.72);
+
+  /*
+   * LO QUE RELLENA Y LO QUE ESCRIBE NO PUEDEN SER EL MISMO TOKEN.
+   *
+   * `--color-coin-ink` y `--color-danger` son TINTAS: van sobre la superficie de
+   * la página, así que se oscurecen en claro y se aclaran en oscuro. Eso está
+   * bien para lo que son — la cifra de `Coins`, el texto de un `Alert`.
+   *
+   * Dos botones las usaban del otro lado: `contrast` escribía con la tinta de la
+   * moneda SOBRE el ámbar, y `danger` rellenaba con la tinta del peligro. En
+   * oscuro las dos se aclaran, así que quedaron claro sobre claro: 1.14 y 1.18 de
+   * contraste, ilegibles. En claro se veían bien, que es lo que lo hizo invisible.
+   *
+   * Estos dos son los del OTRO lado y no cambian nunca, porque lo que tienen
+   * debajo o encima tampoco cambia. Es la misma regla que `--color-ink-inverted`,
+   * y están en la misma lista del test.
+   */
+  --color-on-coin: var(--mnd-amber-800);
+  --color-danger-solid: var(--mnd-red-600);
 
   --color-coin: var(--mnd-amber-400);
   --color-coin-soft: var(--mnd-amber-100);
@@ -524,7 +560,6 @@
   --noche-surface-sunken: var(--mnd-noche-300);
   --noche-ink: var(--mnd-noche-tinta);
   --noche-ink-muted: var(--mnd-arena-500);
-  --noche-ink-inverted: var(--mnd-noche-0);
   --noche-border: var(--mnd-noche-400);
   --noche-border-strong: var(--mnd-noche-500);
   --noche-primary: var(--mnd-coral-700);
@@ -555,7 +590,6 @@
     --color-surface-sunken: var(--noche-surface-sunken);
     --color-ink: var(--noche-ink);
     --color-ink-muted: var(--noche-ink-muted);
-    --color-ink-inverted: var(--noche-ink-inverted);
     --color-border: var(--noche-border);
     --color-border-strong: var(--noche-border-strong);
     --color-primary: var(--noche-primary);
@@ -593,7 +627,6 @@
   --color-surface-sunken: var(--noche-surface-sunken);
   --color-ink: var(--noche-ink);
   --color-ink-muted: var(--noche-ink-muted);
-  --color-ink-inverted: var(--noche-ink-inverted);
   --color-border: var(--noche-border);
   --color-border-strong: var(--noche-border-strong);
   --color-primary: var(--noche-primary);
