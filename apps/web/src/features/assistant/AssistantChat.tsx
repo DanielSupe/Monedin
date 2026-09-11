@@ -4,8 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useIsWide } from "../../app/use-wide.js";
 import { alertToneFor } from "../../lib/alert-tone.js";
 import { messages } from "../../lib/messages.js";
-import { POSES } from "../../ui/mascot-poses.js";
-import { Alert, Button, Card, Input, Skeleton } from "../../ui/index.js";
+import { Alert, Button, Card, HeroPanel, Input, Mascota, Skeleton } from "../../ui/index.js";
 import { cx } from "../../ui/cx.js";
 import { describeAssistantError, useAskAssistant } from "./use-assistant.js";
 
@@ -151,10 +150,18 @@ export function AssistantChat(): React.ReactElement {
       se escape al marco.
     */
     <section className="flex h-full min-h-0 flex-col gap-4">
-      <header className="flex flex-col gap-1">
-        <h2 className="text-title font-bold text-ink">{messages.assistant.title}</h2>
-        <p className="text-body text-ink-muted">{messages.assistant.lead}</p>
-      </header>
+      {/*
+        La cabecera es el realce del sistema y no un título suelto: esta pantalla
+        no tiene contenido hasta que alguien escribe, así que sin ella el hilo
+        vacío empieza con una frase gris en la esquina. La mascota grande de la
+        derecha NO la sustituye — no se monta en estrecho.
+      */}
+      <HeroPanel className="shrink-0" mascot={<Mascota pose="celebra" size="medium" />}>
+        <h2 className="text-title m-0 font-extrabold text-ink-inverted">
+          {messages.assistant.title}
+        </h2>
+        <p className="text-body m-0 text-ink-inverted opacity-90">{messages.assistant.lead}</p>
+      </HeroPanel>
 
       <div className="flex min-h-0 flex-1 gap-4">
         <div className="flex min-w-0 min-h-0 flex-1 flex-col gap-3">
@@ -248,7 +255,7 @@ export function AssistantChat(): React.ReactElement {
               ilustración está en pantalla toda la conversación. La que piensa
               acompaña igual de bien al hilo vacío que al décimo turno.
             */}
-            <img src={POSES.idea} alt="" aria-hidden="true" className="h-56 w-auto" />
+            <Mascota pose="idea" size="large" />
 
             <div className="w-full">{sugerencias}</div>
           </aside>
@@ -287,7 +294,7 @@ function Conversacion({
 
       {esperando && (
         <li className="flex items-end gap-2">
-          <Mascota />
+          <Mascota pose="saluda" size="small" />
           <div className="rounded-panel flex max-w-reading flex-col gap-2 bg-coin-soft px-4 py-3">
             <p className="text-small m-0 font-semibold text-coin-ink">
               {messages.assistant.monedin}
@@ -325,11 +332,16 @@ function Conversacion({
  * lista de archivos autorizados a usarlo está en `tests/ui/style-rules.test.ts`.
  */
 function Turno({ turno }: { turno: Dicho }): React.ReactElement {
+  /*
+   * La ilustración del turno es DECORATIVA: quien dice de quién es el turno es
+   * la etiqueta escrita, así que anunciarla además lo diría dos veces. Es lo que
+   * hace que retirar la mascota grande en estrecho no la borre de la pantalla.
+   */
   const esDeMonedin = turno.role === "assistant";
 
   return (
     <li className={cx("flex items-end gap-2", esDeMonedin ? "justify-start" : "justify-end")}>
-      {esDeMonedin && <Mascota />}
+      {esDeMonedin && <Mascota pose="saluda" size="small" />}
 
       <div
         className={cx(
@@ -354,17 +366,6 @@ function Turno({ turno }: { turno: Dicho }): React.ReactElement {
       </div>
     </li>
   );
-}
-
-/**
- * Monedín junto a lo que dice.
- *
- * DECORATIVA: quien dice de quién es el turno es la etiqueta escrita, así que
- * anunciar además la ilustración lo diría dos veces. Es lo que hace que retirar
- * la mascota grande no la borre del todo de la pantalla.
- */
-function Mascota(): React.ReactElement {
-  return <img src={POSES.saluda} alt="" aria-hidden="true" className="h-10 w-auto shrink-0" />;
 }
 
 /**

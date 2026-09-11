@@ -160,6 +160,27 @@ describe("se avanza, y se sale", () => {
     expect(marcados(espia)).toEqual([{ seen: true }]);
   });
 
+  /*
+   * ESCAPE TAMBIÉN ES SALIR, y hasta ahora nada lo comprobaba.
+   *
+   * Que las tres salidas cuenten igual está escrito en el código con todas sus
+   * letras, y lo escrito no falla. La que se escapa no es «terminar» —esa la
+   * cubre el test de abajo— sino la LATERAL: el camino que una copia razonable
+   * de este componente se dejaría fuera, porque no pasa por ningún `onClick`
+   * suyo sino por el `onOpenChange` que le pone Radix.
+   *
+   * Una salida que no se recuerda devuelve el recorrido en la siguiente visita,
+   * justo a quien acaba de cerrarlo.
+   */
+  it("y salir con Escape cuenta igual que saltar", async () => {
+    const espia = await montarInicio("padre", false);
+    await screen.findByRole("dialog");
+
+    await userEvent.keyboard("{Escape}");
+
+    expect(marcados(espia)).toEqual([{ seen: true }]);
+  });
+
   it("y llegar al final también", async () => {
     const espia = await montarInicio("nino", false);
     await screen.findByRole("dialog");

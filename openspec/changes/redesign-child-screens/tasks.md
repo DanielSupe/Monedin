@@ -48,15 +48,15 @@
 
 ## 5. El chat y el recorrido
 
-- [ ] 5.1 Llevar el chat a las piezas nuevas sin tocar su comportamiento: lo que cambia es el marco,
+- [x] 5.1 Llevar el chat a las piezas nuevas sin tocar su comportamiento: lo que cambia es el marco,
       no la conversación.
-- [ ] 5.2 Repasar el recorrido de bienvenida con los tokens nuevos: el velo, el agujero y el globo.
-- [ ] 5.3 Comprobar que terminar y saltar siguen haciendo lo mismo, y que Escape y pulsar fuera
+- [x] 5.2 Repasar el recorrido de bienvenida con los tokens nuevos: el velo, el agujero y el globo.
+- [x] 5.3 Comprobar que terminar y saltar siguen haciendo lo mismo, y que Escape y pulsar fuera
       cuentan como salida. Una salida que no se recuerda devuelve el recorrido en la siguiente visita.
 
 ## 6. Cierre
 
-- [ ] 6.1 Ni un estilo en línea, ni un color literal, ni un valor arbitrario en las ocho pantallas.
+- [x] 6.1 Ni un estilo en línea, ni un color literal, ni un valor arbitrario en las ocho pantallas.
 - [ ] 6.2 Abrir las ocho en los dos temas y a ancho estrecho. El estrecho no está dibujado en las
       maquetas y es el escenario más probable: tablet compartida.
 - [ ] 6.3 Comprobar que las cuatro columnas de la tabla de canjes caben en la escala del niño a

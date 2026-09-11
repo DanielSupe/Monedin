@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
-import { Button, Spotlight } from "../../ui/index.js";
+import { Button, Mascota, Spotlight } from "../../ui/index.js";
 import { useUpdateTutorial } from "../auth/use-session.js";
 import type { TutorialStep } from "./steps.js";
 import { useAnchorRect } from "./use-anchor-rect.js";
@@ -90,17 +90,12 @@ export function Tutorial({ steps }: { steps: TutorialStep[] }): React.ReactEleme
         veces, igual que en la puerta pública.
       */}
       {/*
-        ALTURA fija y ancho natural, no un cuadrado.
-
-        Estaba en `size-24`, que fija los dos lados: las ilustraciones no son
-        cuadradas —cada una se recortó ajustada a su figura— así que salían
-        estiradas. `object-contain` es el cinturón por si alguna llegara con otra
-        proporción.
-
-        Y a 40 es donde se lee: a 24 la mascota era un icono, y lo que hace es
-        acompañar la explicación.
+        La medida sale de la pieza y no de esta pantalla. Estuvo en `size-24`
+        —que fija los dos lados y estiraba unas ilustraciones que no son
+        cuadradas— y después en un alto escrito aquí; las dos veces era una
+        decisión de sistema tomada en un punto de uso.
       */}
-      <img src={paso.image} alt="" className="mx-auto h-40 w-auto object-contain" />
+      <Mascota pose={paso.pose} size="large" className="mx-auto" />
     </Spotlight>
   );
 }
