@@ -138,7 +138,7 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
           />
 
           {imageUploadKey !== null && (
-            <Alert tone="success">{messages.rewards.imageReady}</Alert>
+            <Alert tone="done">{messages.rewards.imageReady}</Alert>
           )}
 
           <ChildrenPicker

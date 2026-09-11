@@ -43,11 +43,13 @@ familia de neutros CÁLIDOS. El ámbar se queda como está.
 | `--color-coin-soft` | amber-100 | `#FFF4DD` |
 | `--color-coin-ink` | amber-800 | `#8A5A10` |
 | `--color-done` *(era success)* | green-600 | `#6C4BD6` / soft `#EDE8FC` |
-| `--color-waiting` *(era info)* | blue-600 | `#6B6053` / soft `#F1E9DA` |
+| `--color-info` *(mismo nombre)* | blue-600 | `#6B6053` / soft `#F1E9DA` |
 | `--color-conflict` *(era warning)* | orange-700 | `#B5533A` / soft `#F9E4DC` |
 | `--color-danger` | red-600 | **sin cambio** |
 
-El renombrado de los tres últimos está argumentado en `decisiones.md`.
+Solo se renombran los dos que nombraban un color. `info` conserva el suyo porque
+nombra un papel, y sigue siendo exacto con un valor arena. Argumentado en
+`decisiones.md`.
 
 ## La superficie de marca
 

@@ -46,7 +46,7 @@ export function PinPad({
   if (profile === undefined) {
     return (
       <section className="flex flex-col items-center gap-4 py-8">
-        <Alert tone="warning">{messages.auth.profileNotFound}</Alert>
+        <Alert tone="conflict">{messages.auth.profileNotFound}</Alert>
         <Link to="/profiles">{messages.auth.back}</Link>
       </section>
     );

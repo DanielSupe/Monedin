@@ -81,7 +81,7 @@ export function MyTasks(): React.ReactElement {
 const TONO: Record<OwnTask["status"], BadgeTone> = {
   PENDING: "neutral",
   COMPLETED: "info",
-  APPROVED: "success",
+  APPROVED: "done",
 };
 
 const ETIQUETA: Record<OwnTask["status"], string> = {

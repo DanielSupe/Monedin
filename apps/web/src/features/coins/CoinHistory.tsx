@@ -85,7 +85,7 @@ function MovementRow({ movement }: { movement: CoinTransaction }): React.ReactEl
       <Card>
         <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 flex-col gap-1">
-            <Badge tone={acredita ? "success" : "neutral"}>
+            <Badge tone={acredita ? "done" : "neutral"}>
               {acredita ? messages.coins.earned : messages.coins.spent}
             </Badge>
             <p className="text-small text-ink-muted">{RAZON[movement.reason]}</p>

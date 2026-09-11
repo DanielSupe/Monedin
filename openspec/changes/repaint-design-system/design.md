@@ -87,13 +87,20 @@ de `Button` pasó de tinta oscura a ámbar sin tocar su nombre ni un solo punto 
 
 ```
 --color-success → --color-done       tone="success" → tone="done"
---color-info    → --color-waiting    tone="info"    → tone="waiting"
 --color-warning → --color-conflict   tone="warning" → tone="conflict"
---color-danger  → --color-danger     tone="danger"  → tone="danger"
+--color-info    → --color-info       sin cambio: nunca nombró un color
+--color-danger  → --color-danger     sin cambio
 ```
 
-Los tres nombres nuevos además dicen algo que el producto ya tiene: son las etapas por las que pasa
-una tarea y un canje.
+> **Corregido durante la implementación.** Este change decía TRES renombrados.
+> Son dos: `info` nunca nombró un color, nombró un papel —información—, y sigue
+> siendo exacto ahora que su valor es arena. Lo destapó el aviso de «dos claves,
+> para dos cosas distintas» del registro, que no espera a nadie: solo explica.
+> Renombrarlo habría sido cambiar por cambiar, que es lo contrario de la regla
+> que este change defiende.
+
+Los dos nombres nuevos además dicen algo que el producto ya tiene: `done` es una tarea aprobada y un
+canje resuelto, y `conflict` es exactamente el 409 que la API distingue.
 
 **Y `danger` conserva el rojo**, que es la única excepción declarada a los dos tonos. Un color de
 peligro no es una decisión de marca. Colapsarlo con el naranja de la acción haría que el mismo color

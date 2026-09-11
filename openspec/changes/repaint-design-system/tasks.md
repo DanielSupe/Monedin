@@ -1,28 +1,28 @@
 ## 1. La capa 1: los primitivos
 
-- [ ] 1.1 Sustituir el bloque de primitivos de `apps/web/src/styles/tokens.css`: fuera el índigo, el
+- [x] 1.1 Sustituir el bloque de primitivos de `apps/web/src/styles/tokens.css`: fuera el índigo, el
       verde, el naranja de aviso y el azul; dentro los neutros CÁLIDOS, el naranja y el morado. El
       ámbar y el rojo se quedan exactamente como están. Los valores, en `design/ui/tokens.md`.
-- [ ] 1.2 Actualizar los comentarios del bloque: hoy explican por qué el neutro lleva una pizca de
+- [x] 1.2 Actualizar los comentarios del bloque: hoy explican por qué el neutro lleva una pizca de
       azul y por qué el índigo es la acción. Las dos frases dejan de ser ciertas, y un comentario que
       miente es peor que ninguno.
-- [ ] 1.3 Comprobar que la capa 1 sigue FUERA de `@theme`. Es lo que impide que exista
+- [x] 1.3 Comprobar que la capa 1 sigue FUERA de `@theme`. Es lo que impide que exista
       `bg-mnd-naranja-500` y lo que hace que «solo la capa 2» no dependa de que nadie se despiste.
 
 ## 2. La capa 2: reasignar y renombrar
 
-- [ ] 2.1 Reasignar los semánticos de superficie, tinta, borde, acción y marca a los valores nuevos.
+- [x] 2.1 Reasignar los semánticos de superficie, tinta, borde, acción y marca a los valores nuevos.
       `--color-coin*` no se toca.
-- [ ] 2.2 Renombrar tres tonos por su papel: `--color-success → --color-done`,
-      `--color-info → --color-waiting`, `--color-warning → --color-conflict`, con sus `-soft`.
-      `--color-danger` conserva nombre, papel y matiz.
-- [ ] 2.3 Renombrar la prop de `ui/Alert.tsx` y `ui/Badge.tsx`: `tone="done" | "waiting" | "conflict"
-      | "danger"`. El typecheck señala cada punto de uso; no quedan alias del nombre viejo, porque dos
+- [x] 2.2 Renombrar DOS tonos por su papel: `--color-success → --color-done` y
+      `--color-warning → --color-conflict`, con sus `-soft`. `--color-info` y `--color-danger`
+      conservan el suyo: nunca nombraron un color.
+- [x] 2.3 Renombrar la prop de `ui/Alert.tsx`, `ui/Badge.tsx` y `ui/Toast.tsx`: `tone="info" |
+      "done" | "conflict" | "danger"`. El typecheck señala cada punto de uso; no quedan alias del nombre viejo, porque dos
       nombres para lo mismo es el problema que el renombrado resuelve.
-- [ ] 2.4 Recorrer los puntos de uso que el typecheck señale y traducir el tono, **mirando qué dice
+- [x] 2.4 Recorrer los puntos de uso que el typecheck señale y traducir el tono, **mirando qué dice
       cada uno**: un 409 es `conflict` y no `danger`, y una tarea aprobada es `done` y no `waiting`.
       Traducir a ciegas por el nombre viejo es cómo se pierde la distinción que la API sostiene.
-- [ ] 2.5 Actualizar el comentario de la reserva del ámbar: sigue valiendo palabra por palabra, pero
+- [x] 2.5 Actualizar el comentario de la reserva del ámbar: sigue valiendo palabra por palabra, pero
       menciona el índigo como la acción.
 
 ## 3. La escala de radios y de tipografía

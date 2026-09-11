@@ -47,8 +47,8 @@ const FILTROS: Array<{ valor: RedemptionStatus | "ALL"; texto: string }> = [
  */
 const TONO: Record<RedemptionStatus, BadgeTone> = {
   PENDING: "neutral",
-  APPROVED: "success",
-  REJECTED: "warning",
+  APPROVED: "done",
+  REJECTED: "conflict",
 };
 
 export function RedemptionInbox({

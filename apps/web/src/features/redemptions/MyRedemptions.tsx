@@ -111,8 +111,8 @@ export function MyRedemptions(): React.ReactElement {
  */
 const TONO: Record<OwnRedemption["status"], BadgeTone> = {
   PENDING: "neutral",
-  APPROVED: "success",
-  REJECTED: "warning",
+  APPROVED: "done",
+  REJECTED: "conflict",
 };
 
 /**

@@ -43,44 +43,84 @@
  * ------------------------------------------------------------------ */
 
 :root {
-  /* Neutros, con una pizca de azul para que el gris no sea sucio. */
-  --mnd-slate-0: oklch(100% 0 0);
-  --mnd-slate-50: oklch(98.5% 0.003 265);
-  --mnd-slate-100: oklch(96.5% 0.005 265);
-  --mnd-slate-200: oklch(92% 0.008 265);
-  --mnd-slate-300: oklch(85% 0.012 265);
-  --mnd-slate-500: oklch(58% 0.018 265);
-  --mnd-slate-900: oklch(25% 0.024 265);
-
   /*
-   * Índigo: la acción, y desde `polish-brand-surface` también la superficie del
-   * acceso.
+   * Neutros CÁLIDOS. El gris de este producto tira a arena, no a azul.
    *
-   * Los pasos oscuros son para pintar un panel entero; los claros, para lo que
-   * va ENCIMA de ese panel —texto secundario y trazas—, porque sobre un fondo
-   * oscuro la tinta se invierte en vez de templarse.
+   * Llevaban una pizca de azul para que el gris no saliera sucio, y con una
+   * paleta de índigo eso era lo correcto. Con naranja y morado ese mismo azul
+   * los enfría: el crema deja de leerse como papel y, al lado de un acento
+   * cálido, un neutro frío se ve gris de verdad. El matiz de los neutros
+   * acompaña al de los acentos, no al revés.
+   *
+   * El paso más oscuro se va al violeta y no al marrón: es la TINTA, y una
+   * tinta que tira al morado pertenece a la paleta en vez de ser un negro
+   * cualquiera apoyado encima.
    */
-  --mnd-indigo-100: oklch(94% 0.03 275);
-  --mnd-indigo-200: oklch(88% 0.05 275);
-  --mnd-indigo-300: oklch(80% 0.08 275);
-  --mnd-indigo-500: oklch(55% 0.19 275);
-  --mnd-indigo-600: oklch(48% 0.19 275);
-  --mnd-indigo-700: oklch(40% 0.15 273);
-  --mnd-indigo-800: oklch(31% 0.11 272);
+  --mnd-arena-0: oklch(100% 0 0);
+  --mnd-arena-50: oklch(97.9% 0.017 76);
+  --mnd-arena-100: oklch(96% 0.018 81);
+  --mnd-arena-200: oklch(93.6% 0.022 83);
+  --mnd-arena-300: oklch(92.9% 0.022 77);
+  --mnd-arena-400: oklch(88.2% 0.028 76);
+  --mnd-arena-500: oklch(80.2% 0.024 70);
+  --mnd-arena-600: oklch(66.3% 0.024 50);
+  --mnd-arena-700: oklch(49.6% 0.025 72);
+  --mnd-arena-900: oklch(27.6% 0.037 298);
 
   /*
-   * Ámbar: la MONEDA y la MASCOTA. Nada más.
+   * Coral: HACER. La acción principal, el destino activo y la voz de la
+   * mascota.
    *
-   * Llegó a pintar el panel entero del acceso y ahí estuvo el error: un color
-   * que lo cubre todo deja de significar algo. Sobre el índigo profundo, un
-   * punto ámbar ES dinero. Tres pasos bastan porque ya no tiene que modelar
-   * ninguna superficie.
+   * Sustituye al índigo, que era la acción hasta `repaint-design-system`. El
+   * cambio no es de gusto: con dos tonos y no cinco, cada uno tiene que
+   * significar una cosa, y lo que un niño busca al abrir la aplicación es qué
+   * le toca hacer.
+   *
+   * Los pasos 100-300 son para fondos suaves y teselas; el 700 es el apagado
+   * con el que se dice que algo se cerró sin pasar —un canje rechazado, un
+   * perfil dado de baja—, y no es el rojo del error.
+   */
+  --mnd-coral-100: oklch(95% 0.026 38);
+  --mnd-coral-200: oklch(93.4% 0.026 42);
+  --mnd-coral-300: oklch(91.4% 0.046 40);
+  --mnd-coral-400: oklch(84.4% 0.06 43);
+  --mnd-coral-500: oklch(83.5% 0.094 38);
+  --mnd-coral-600: oklch(73.2% 0.167 36);
+  --mnd-coral-700: oklch(70.7% 0.187 34);
+  --mnd-coral-800: oklch(66.1% 0.202 32);
+  --mnd-coral-900: oklch(56.8% 0.171 33);
+  --mnd-coral-apagado: oklch(56.1% 0.133 35);
+
+  /*
+   * Violeta: CONSEGUIDO y AHORRADO. Los premios, el progreso hacia uno, una
+   * tarea aprobada y un canje resuelto.
+   *
+   * Es también el color de la marca donde una pantalla se pinta entera: el
+   * acceso y el registro. Por eso tiene rampa y no un solo valor — los pasos
+   * oscuros pintan el panel y los claros van encima de él.
+   */
+  --mnd-violeta-100: oklch(94.1% 0.027 297);
+  --mnd-violeta-200: oklch(89.9% 0.048 296);
+  --mnd-violeta-300: oklch(89.2% 0.051 296);
+  --mnd-violeta-400: oklch(76.9% 0.109 295);
+  --mnd-violeta-500: oklch(60.1% 0.191 291);
+  --mnd-violeta-600: oklch(57.4% 0.193 290);
+  --mnd-violeta-700: oklch(52.8% 0.202 288);
+  --mnd-violeta-800: oklch(45.8% 0.197 288);
+  --mnd-violeta-900: oklch(39.1% 0.164 287);
+  --mnd-violeta-950: oklch(37% 0.164 286);
+
+  /*
+   * Ámbar: la MONEDA y la MASCOTA. Nada más, y por eso no cambia de valor.
+   *
+   * Es el único color que sobrevive intacto al rediseño, y es a propósito: una
+   * moneda que cambiara de color con la paleta dejaría de ser la misma moneda.
    *
    * DECÍA «la moneda, y SOLO la moneda», y `redesign-assistant-chat` lo
    * reasignó a conciencia. La mascota entra y no lo diluye, porque Monedín ES
    * una moneda: no son dos cosas que comparten color por casualidad, son la
-   * misma. Que su voz lleve el color del dinero apunta al mismo referente en vez
-   * de gastarlo.
+   * misma. Que su voz lleve el color del dinero apunta al mismo referente en
+   * vez de gastarlo.
    *
    * Lo que la reserva existía para impedir sigue prohibido palabra por palabra:
    * un botón cualquiera, una tarjeta cualquiera, un aviso cualquiera. Y desde
@@ -88,30 +128,35 @@
    * en vez de este comentario — que es lo que hace que relajar la regla la haya
    * dejado más fuerte que antes.
    */
-  --mnd-amber-100: oklch(96% 0.05 85);
-  --mnd-amber-400: oklch(80% 0.16 80);
-  --mnd-amber-800: oklch(45% 0.11 70);
+  --mnd-amber-100: oklch(97% 0.032 85);
+  --mnd-amber-400: oklch(82% 0.151 82);
+  --mnd-amber-600: oklch(62.3% 0.124 72);
+  --mnd-amber-800: oklch(50.8% 0.103 71);
 
   /*
-   * Los componentes sueltos del índigo profundo, sin envolver en `oklch()`.
+   * Rojo: el ERROR, y solo el error.
+   *
+   * Es la única excepción declarada a los dos tonos, y tampoco cambia. No es
+   * una decisión de marca: es una señal universal. Si el error llevara el coral
+   * de la acción, el mismo color diría «pulsa aquí» y «esto falló», que es
+   * justo lo que un color de peligro existe para impedir.
+   *
+   * Un 409 NO es un error y no lleva este color: va en el coral apagado, porque
+   * nadie hizo nada mal.
+   */
+  --mnd-red-100: oklch(95% 0.03 25);
+  --mnd-red-600: oklch(52% 0.2 27);
+
+  /*
+   * Los componentes sueltos del violeta profundo, sin envolver en `oklch()`.
    *
    * Una sombra necesita el color CON alfa, y la barra de alfa solo funciona
    * dentro de la función: `var(--algo) / 0.3` no es CSS válido. Guardando los
-   * componentes se compone `oklch(var(--mnd-indigo-shadow) / 0.3)` sin repetir
-   * los números, que es como el bloque de sombras claras acabó duplicando el
-   * valor de `slate-900`.
+   * componentes se compone `oklch(var(--mnd-violeta-shadow) / 0.3)` sin repetir
+   * los números.
    */
-  --mnd-indigo-shadow: 20% 0.08 272;
-
-  /* Los cuatro tonos de aviso. */
-  --mnd-green-100: oklch(95% 0.04 150);
-  --mnd-green-600: oklch(52% 0.14 150);
-  --mnd-orange-100: oklch(96% 0.04 65);
-  --mnd-orange-700: oklch(52% 0.14 55);
-  --mnd-red-100: oklch(95% 0.03 25);
-  --mnd-red-600: oklch(52% 0.2 27);
-  --mnd-blue-100: oklch(95% 0.03 240);
-  --mnd-blue-600: oklch(52% 0.15 245);
+  --mnd-violeta-shadow: 24% 0.07 290;
+  --mnd-arena-shadow: 27.6% 0.037 298;
 }
 
 /* ------------------------------------------------------------------ *
@@ -120,19 +165,19 @@
 
 @theme {
   /* Superficies y tinta. */
-  --color-surface: var(--mnd-slate-50);
-  --color-surface-raised: var(--mnd-slate-0);
-  --color-surface-sunken: var(--mnd-slate-100);
-  --color-ink: var(--mnd-slate-900);
-  --color-ink-muted: var(--mnd-slate-500);
-  --color-ink-inverted: var(--mnd-slate-0);
-  --color-border: var(--mnd-slate-200);
-  --color-border-strong: var(--mnd-slate-300);
+  --color-surface: var(--mnd-arena-50);
+  --color-surface-raised: var(--mnd-arena-0);
+  --color-surface-sunken: var(--mnd-arena-200);
+  --color-ink: var(--mnd-arena-900);
+  --color-ink-muted: var(--mnd-arena-700);
+  --color-ink-inverted: var(--mnd-arena-0);
+  --color-border: var(--mnd-arena-300);
+  --color-border-strong: var(--mnd-arena-400);
 
   /* Acción. */
-  --color-primary: var(--mnd-indigo-500);
-  --color-primary-hover: var(--mnd-indigo-600);
-  --color-primary-soft: var(--mnd-indigo-100);
+  --color-primary: var(--mnd-coral-700);
+  --color-primary-hover: var(--mnd-coral-800);
+  --color-primary-soft: var(--mnd-coral-100);
 
   /*
    * La moneda, y la voz de la mascota. RESERVADO: si el ámbar también pinta
@@ -158,32 +203,32 @@
    * el ACENTO. Pintando media pantalla no decía nada; sobre índigo, un punto
    * ámbar es dinero.
    */
-  --color-brand: var(--mnd-indigo-800);
+  --color-brand: var(--mnd-violeta-800);
   /** El pie del degradado de un panel de marca: es lo que le da cuerpo. */
-  --color-brand-deep: var(--mnd-indigo-700);
+  --color-brand-deep: var(--mnd-violeta-950);
   /** Trazos y bordes DIBUJADOS sobre la marca, que tienen que distinguirse. */
-  --color-brand-line: var(--mnd-indigo-600);
+  --color-brand-line: var(--mnd-violeta-600);
   /** Y el apagado, para lo que solo tiene que insinuarse: la traza de una órbita. */
-  --color-brand-soft: var(--mnd-indigo-300);
+  --color-brand-soft: var(--mnd-violeta-400);
 
   /*
    * El velo del recorrido de bienvenida: lo que atenúa la pantalla alrededor de
    * lo que se está explicando. Va aquí y no en el punto de uso porque es un
    * color, y ningún componente escribe un color.
    */
-  --color-spotlight-veil: oklch(25% 0.024 265 / 0.72);
+  --color-spotlight-veil: oklch(var(--mnd-arena-shadow) / 0.72);
 
   --color-coin: var(--mnd-amber-400);
   --color-coin-soft: var(--mnd-amber-100);
   --color-coin-ink: var(--mnd-amber-800);
 
   /* Los cuatro tonos de aviso, cada uno con su fondo suave y su tinta. */
-  --color-info: var(--mnd-blue-600);
-  --color-info-soft: var(--mnd-blue-100);
-  --color-success: var(--mnd-green-600);
-  --color-success-soft: var(--mnd-green-100);
-  --color-warning: var(--mnd-orange-700);
-  --color-warning-soft: var(--mnd-orange-100);
+  --color-done: var(--mnd-violeta-700);
+  --color-done-soft: var(--mnd-violeta-100);
+  --color-info: var(--mnd-arena-700);
+  --color-info-soft: var(--mnd-arena-200);
+  --color-conflict: var(--mnd-coral-apagado);
+  --color-conflict-soft: var(--mnd-coral-200);
   --color-danger: var(--mnd-red-600);
   --color-danger-soft: var(--mnd-red-100);
 
@@ -203,8 +248,10 @@
   --font-sans: "Nunito Variable", ui-rounded, "SF Pro Rounded", "Segoe UI Variable", "Segoe UI",
     system-ui, sans-serif;
 
-  --shadow-card: 0 1px 2px oklch(25% 0.024 265 / 0.06), 0 4px 12px oklch(25% 0.024 265 / 0.05);
-  --shadow-raised: 0 2px 4px oklch(25% 0.024 265 / 0.08), 0 12px 28px oklch(25% 0.024 265 / 0.08);
+  --shadow-card:
+    0 1px 2px oklch(var(--mnd-arena-shadow) / 0.06), 0 4px 12px oklch(var(--mnd-arena-shadow) / 0.05);
+  --shadow-raised:
+    0 2px 4px oklch(var(--mnd-arena-shadow) / 0.08), 0 12px 28px oklch(var(--mnd-arena-shadow) / 0.08);
 
   /*
    * QUIÉN TAPA A QUIÉN. Dos capas flotantes, y el orden se lee aquí.
@@ -332,7 +379,7 @@
  * SOBRE OSCURO NO BASTA CON INVERTIR LA TINTA, y esa es la trampa. Si solo
  * cambiara `--color-ink`, la etiqueta de un campo quedaría bien y el TEXTO
  * DENTRO del campo saldría claro sobre un campo blanco. Por eso la superficie
- * reasigna también las superficies: `--color-surface-raised` pasa a índigo, el
+ * reasigna también las superficies: `--color-surface-raised` pasa a violeta, el
  * campo deja de ser una píldora blanca y pasa a ser un campo oscuro con texto
  * claro, y `Input` y `Field` componen solos sin enterarse.
  *
@@ -345,22 +392,22 @@
  * ------------------------------------------------------------------ */
 
 [data-surface="brand"] {
-  --color-ink: var(--mnd-slate-0);
-  --color-ink-muted: var(--mnd-indigo-200);
+  --color-ink: var(--mnd-arena-0);
+  --color-ink-muted: var(--mnd-violeta-200);
 
   /* Un campo sobre el panel es más CLARO que él, no blanco: sobre oscuro, una
      píldora blanca es un agujero. */
-  --color-surface-raised: var(--mnd-indigo-700);
-  --color-surface-sunken: var(--mnd-indigo-800);
-  --color-border: var(--mnd-indigo-600);
-  --color-border-strong: var(--mnd-indigo-500);
+  --color-surface-raised: var(--mnd-violeta-800);
+  --color-surface-sunken: var(--mnd-violeta-900);
+  --color-border: var(--mnd-violeta-600);
+  --color-border-strong: var(--mnd-violeta-500);
 
   /* Sombras más profundas: sobre un fondo oscuro, la sombra clara del sistema
      no separa nada. */
   --shadow-card:
-    0 1px 2px oklch(var(--mnd-indigo-shadow) / 0.3), 0 4px 12px oklch(var(--mnd-indigo-shadow) / 0.25);
+    0 1px 2px oklch(var(--mnd-violeta-shadow) / 0.3), 0 4px 12px oklch(var(--mnd-violeta-shadow) / 0.25);
   --shadow-raised:
-    0 2px 4px oklch(var(--mnd-indigo-shadow) / 0.35), 0 12px 28px oklch(var(--mnd-indigo-shadow) / 0.4);
+    0 2px 4px oklch(var(--mnd-violeta-shadow) / 0.35), 0 12px 28px oklch(var(--mnd-violeta-shadow) / 0.4);
 }
 
 /*
@@ -376,12 +423,12 @@
  * reasignar neutros, y hace falta en cuanto una anida dentro de otra.
  */
 [data-surface="default"] {
-  --color-ink: var(--mnd-slate-900);
-  --color-ink-muted: var(--mnd-slate-500);
-  --color-surface-raised: var(--mnd-slate-0);
-  --color-surface-sunken: var(--mnd-slate-100);
-  --color-border: var(--mnd-slate-200);
-  --color-border-strong: var(--mnd-slate-300);
+  --color-ink: var(--mnd-arena-900);
+  --color-ink-muted: var(--mnd-arena-700);
+  --color-surface-raised: var(--mnd-arena-0);
+  --color-surface-sunken: var(--mnd-arena-200);
+  --color-border: var(--mnd-arena-300);
+  --color-border-strong: var(--mnd-arena-400);
 }
 
 /* ------------------------------------------------------------------ *

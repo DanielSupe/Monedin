@@ -145,7 +145,7 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
               el rojo se lo diría. Mismo criterio que un canje rechazado y que un
               409. Y el tono acompaña al texto, nunca lo sustituye.
             */}
-            {child.locked && <Badge tone="warning">{messages.children.locked}</Badge>}
+            {child.locked && <Badge tone="conflict">{messages.children.locked}</Badge>}
           </div>
 
           <div className="flex flex-wrap gap-2">

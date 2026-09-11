@@ -55,7 +55,7 @@ export function ChildSettings(): React.ReactElement {
         onUpload={(avatarUploadKey) => updateAvatar.mutate({ avatarUploadKey })}
       />
 
-      {updateAvatar.isSuccess && <Alert tone="success">{messages.children.avatarSaved}</Alert>}
+      {updateAvatar.isSuccess && <Alert tone="done">{messages.children.avatarSaved}</Alert>}
       {updateAvatar.error !== null && (
         <Alert tone="danger">{describeChildrenError(updateAvatar.error)}</Alert>
       )}
@@ -142,7 +142,7 @@ function OwnPinForm(): React.ReactElement {
           {change.isPending ? messages.children.working : messages.auth.changePinSubmit}
         </Button>
 
-        {change.isSuccess && <Alert tone="success">{messages.auth.pinChanged}</Alert>}
+        {change.isSuccess && <Alert tone="done">{messages.auth.pinChanged}</Alert>}
         {error !== undefined && <Alert tone="danger">{error}</Alert>}
       </form>
     </Card>

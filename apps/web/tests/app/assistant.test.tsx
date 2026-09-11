@@ -202,16 +202,16 @@ describe("cuando Monedín no puede responder", () => {
 
     /*
      * Se mira la CLASE y no el `role`, porque el `role` no los distingue:
-     * `Alert` da `role="alert"` tanto a `warning` como a `danger` —los dos
+     * `Alert` da `role="alert"` tanto a `conflict` como a `danger` —los dos
      * interrumpen— y reserva `status` para lo que no interrumpe. Lo que separa
-     * un aviso ámbar de uno rojo es su tono, y en jsdom eso solo se ve en la
+     * un aviso en el tono del conflicto de uno rojo es su tono, y en jsdom eso solo se ve en la
      * clase.
      *
      * Y hace falta la aserción NEGATIVA: comprobar solo que el texto aparece
      * dejaría este test en verde con la rama del 503 quitada de `alertToneFor`,
      * que es exactamente la regresión que persigue.
      */
-    expect(aviso?.className).toContain("bg-warning-soft");
+    expect(aviso?.className).toContain("bg-conflict-soft");
     expect(aviso?.className).not.toContain("bg-danger-soft");
   });
 

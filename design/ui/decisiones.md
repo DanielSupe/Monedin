@@ -15,12 +15,12 @@ Antes había cinco tonos en pantalla más un degradado pastel distinto por tesel
 —unos diez colores— y ninguno mandaba.
 
 **Lo que esto rompe**: `Alert` tiene hoy cuatro tonos con cuatro colores, y tres
-de ellos se quedan sin hueco. La reasignación es:
+de ellos cambian de valor. La reasignación es:
 
 | Tono de hoy | Pasa a ser | Color |
 | ----------- | ---------- | ----- |
 | `success`   | `done`     | morado `#6C4BD6` sobre `#EDE8FC` |
-| `info`      | `waiting`  | arena `#6B6053` sobre `#F1E9DA` |
+| `info`      | `info`     | arena `#6B6053` sobre `#F1E9DA` |
 | `warning`   | `conflict` | naranja apagado `#B5533A` sobre `#F9E4DC` |
 | `danger`    | `danger`   | **rojo**, sin cambiar de papel |
 
@@ -40,7 +40,7 @@ hermano llegó antes.
 
 ---
 
-## 2. Los tonos se renombran por su PAPEL, no por su sensación
+## 2. Se renombra el tono que nombra un COLOR; el que nombra un papel, no
 
 **Decidido.** `--color-success` deja de ser verde, así que su nombre pasa a mentir
 el día que se aplique la paleta. Se renombra, y con él la prop de `Alert` y de
@@ -48,10 +48,19 @@ el día que se aplique la paleta. Se renombra, y con él la prop de `Alert` y de
 
 ```
 --color-success  →  --color-done       tone="success"  →  tone="done"
---color-info     →  --color-waiting    tone="info"     →  tone="waiting"
 --color-warning  →  --color-conflict   tone="warning"  →  tone="conflict"
---color-danger   →  --color-danger     tone="danger"   →  tone="danger"
+--color-info     →  --color-info       sin cambio
+--color-danger   →  --color-danger     sin cambio
 ```
+
+**`info` y `danger` NO se tocan, y esa es la mitad que importa.** Un renombrado
+que arrastra todo lo que puede no es una regla, es una moda: `info` nombra un
+papel —información— y sigue siendo exacto con un valor arena.
+
+Se descubrió al implementarlo, y conviene dejar dicho cómo: el aviso de «dos
+claves, para dos cosas distintas» del registro no espera a nadie, solo explica.
+Con el nombre `waiting` habría quedado mintiendo en la única pantalla donde ese
+tono se usa para informar de verdad.
 
 Cuesta visitar todos los puntos de uso, y se hace igual. Es la misma razón por la
 que `Button` nombra su variante `contrast` y no por el color que lleva: un nombre
@@ -59,8 +68,9 @@ que describe el VALOR se queda obsoleto en cuanto el valor cambia; uno que descr
 el PAPEL sobrevive. Y ya se pagó esa lección aquí — la variante `contrast` pasó de
 tinta oscura a ámbar sin tocar su nombre ni un solo punto de uso.
 
-Los tres nombres nuevos además dicen algo que el producto ya tiene: son las tres
-etapas por las que pasa una tarea y un canje.
+Los dos nombres nuevos además dicen algo que el producto ya tiene: `done` es una
+tarea aprobada y un canje resuelto, y `conflict` es exactamente el 409 que la API
+distingue.
 
 ---
 
@@ -138,9 +148,18 @@ El mapa completo —qué se trae, qué ya existe y qué hay que hacer a mano— 
 
 ---
 
-## 6. El saldo en la cabecera — ABIERTA
+## 6. El saldo en la cabecera — RESUELTA por una spec que ya existía
 
-**No decidida, y a propósito.**
+**Decidido: vuelve al inicio y sale de la cabecera.** Y no hizo falta decidirlo:
+al escribir `redesign-child-screens` apareció un requisito vigente que las
+maquetas incumplían —«el saldo SHALL ser el elemento más grande del inicio»—. La
+spec ya lo había decidido y la maqueta era la desviación.
+
+Lo que sí se añade es la mitad que faltaba por escribir: **que el marco no lo
+muestre**. Hasta hoy solo estaba dicho dónde vive, no dónde no puede vivir.
+
+Lo que sigue debajo es el planteamiento original, que se conserva porque explica
+los dos precios:
 
 Las maquetas del niño llevan una píldora con el saldo en la cabecera de todas sus
 pantallas. `CLAUDE.md` dice exactamente lo contrario, y lo argumenta: el saldo vive

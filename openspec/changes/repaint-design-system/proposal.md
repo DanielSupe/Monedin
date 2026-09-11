@@ -15,8 +15,9 @@ Tres cosas que el rediseño obliga a resolver aquí, y no más tarde:
 - **La paleta baja de cinco tonos a dos.** Índigo, verde y azul salen; entran naranja —hacer— y
   morado —conseguido y ahorrado—. El ámbar de la moneda no se toca. «Esperando» pierde su color a
   propósito: no es un estado con voz, es la AUSENCIA de acción.
-- **Tres de los cuatro tonos de aviso se quedan sin su color.** `success` deja de ser verde, así que
-  su nombre pasa a mentir el día que se aplique. Se renombran por su PAPEL.
+- **Dos de los cuatro tonos de aviso se quedan sin su color.** `success` deja de ser verde y
+  `warning` deja de ser ámbar, así que sus nombres pasan a mentir el día que se apliquen. Se
+  renombran por su PAPEL. `info` y `danger` conservan el suyo, que nunca describió un color.
 - **El tema oscuro existe desde el primer día**, y no como una capa añadida después. `tokens.css`
   lleva previsto desde `add-design-system` que el modo oscuro «será reasignar la capa 2 y nada más»;
   esto lo cobra.
@@ -24,8 +25,8 @@ Tres cosas que el rediseño obliga a resolver aquí, y no más tarde:
 ## What Changes
 
 - **La capa 1 se sustituye entera.** Neutros cálidos, naranja, morado; el ámbar y el rojo se quedan.
-- **La capa 2 se reasigna**, y tres tonos se renombran por su papel: `success → done`,
-  `info → waiting`, `warning → conflict`. `danger` no cambia de nombre ni de papel.
+- **La capa 2 se reasigna**, y dos tonos se renombran por su papel: `success → done` y
+  `warning → conflict`. `info` y `danger` no cambian de nombre.
 - **El rojo sobrevive como la única excepción declarada a los dos tonos.** No es una decisión de
   marca: es una señal universal. Colapsarlo con el naranja de la acción haría que el mismo color
   dijera «pulsa aquí» y «esto falló».

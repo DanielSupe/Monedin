@@ -176,8 +176,8 @@ function Piezas(): React.ReactElement {
         <Fila>
           <Badge>Pendiente</Badge>
           <Badge tone="info">Esperando</Badge>
-          <Badge tone="success">Aprobada</Badge>
-          <Badge tone="warning">En conflicto</Badge>
+          <Badge tone="done">Aprobada</Badge>
+          <Badge tone="conflict">En conflicto</Badge>
           <Badge tone="danger">Rechazada</Badge>
         </Fila>
       </Seccion>
@@ -211,10 +211,10 @@ function Piezas(): React.ReactElement {
 
       <Seccion titulo="Alert">
         <Alert tone="info">{EJEMPLO.tarea}</Alert>
-        <Alert tone="success" title="Tarea aprobada">
+        <Alert tone="done" title="Tarea aprobada">
           {EJEMPLO.tarea}
         </Alert>
-        <Alert tone="warning" title={EJEMPLO.conflicto}>
+        <Alert tone="conflict" title={EJEMPLO.conflicto}>
           {EJEMPLO.conflictoDetalle}
         </Alert>
         <Alert tone="danger" title="No se pudo aprobar">
@@ -299,7 +299,7 @@ function Piezas(): React.ReactElement {
               cells: {
                 que: "Helado",
                 cuanto: <Coins amount={60} />,
-                estado: <Badge tone="success">Aprobado</Badge>,
+                estado: <Badge tone="done">Aprobado</Badge>,
                 cuando: "3 sep",
               },
             },
@@ -319,7 +319,7 @@ function Piezas(): React.ReactElement {
                 cuanto: <Coins amount={350} />,
                 // Advertencia y NO peligro: que un padre diga que no a un premio
                 // no es un error del niño.
-                estado: <Badge tone="warning">No esta vez</Badge>,
+                estado: <Badge tone="conflict">No esta vez</Badge>,
                 cuando: "1 sep",
               },
             },
@@ -442,7 +442,7 @@ function Piezas(): React.ReactElement {
         <Toast
           open={avisoAbierto}
           onOpenChange={setAvisoAbierto}
-          tone="success"
+          tone="done"
           title="Tarea aprobada"
           description={EJEMPLO.tarea}
         />

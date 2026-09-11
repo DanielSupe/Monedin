@@ -48,7 +48,7 @@ const FILTROS: Array<{ valor: TaskStatus | "ALL"; texto: string }> = [
 const TONO: Record<TaskStatus, BadgeTone> = {
   PENDING: "neutral",
   COMPLETED: "info",
-  APPROVED: "success",
+  APPROVED: "done",
 };
 
 export function TaskBatchList({

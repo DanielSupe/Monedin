@@ -56,7 +56,7 @@ export function ParentAvatarScreen(): React.ReactElement {
         onUpload={(avatarUploadKey) => actualizar.mutate({ avatarUploadKey })}
       />
 
-      {actualizar.isSuccess && <Alert tone="success">{messages.children.avatarSaved}</Alert>}
+      {actualizar.isSuccess && <Alert tone="done">{messages.children.avatarSaved}</Alert>}
 
       {actualizar.error !== null && <Alert tone="danger">{messages.uploads.failed}</Alert>}
     </div>

@@ -1,13 +1,13 @@
 import type { HTMLAttributes } from "react";
 import { cx } from "./cx.js";
 
-export type BadgeTone = "neutral" | "info" | "success" | "warning" | "danger";
+export type BadgeTone = "neutral" | "info" | "done" | "conflict" | "danger";
 
 const TONES: Record<BadgeTone, string> = {
   neutral: "bg-surface-sunken text-ink-muted",
   info: "bg-info-soft text-info",
-  success: "bg-success-soft text-success",
-  warning: "bg-warning-soft text-warning",
+  done: "bg-done-soft text-done",
+  conflict: "bg-conflict-soft text-conflict",
   danger: "bg-danger-soft text-danger",
 };
 

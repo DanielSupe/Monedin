@@ -46,7 +46,7 @@ export function ResetPinScreen(): React.ReactElement {
   if (reset.isSuccess) {
     return (
       <section className="flex w-full max-w-sm flex-col gap-4">
-        <Alert tone="success">{messages.auth.pinReset}</Alert>
+        <Alert tone="done">{messages.auth.pinReset}</Alert>
         <Link to="/profiles" className={`${buttonClasses("primary")} self-start`}>
           {messages.auth.back}
         </Link>

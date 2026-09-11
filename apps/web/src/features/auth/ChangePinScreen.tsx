@@ -77,7 +77,7 @@ export function ChangePinScreen(): React.ReactElement {
         </form>
 
         {change.isSuccess && error === undefined && (
-          <Alert tone="success">{messages.auth.pinChanged}</Alert>
+          <Alert tone="done">{messages.auth.pinChanged}</Alert>
         )}
 
         {error !== undefined && <Alert tone="danger">{error}</Alert>}

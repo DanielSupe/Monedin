@@ -3,12 +3,12 @@ import type { ReactNode } from "react";
 import { messages } from "../lib/messages.js";
 import { cx } from "./cx.js";
 
-export type ToastTone = "info" | "success" | "warning" | "danger";
+export type ToastTone = "info" | "done" | "conflict" | "danger";
 
 const TONES: Record<ToastTone, string> = {
   info: "border-info bg-info-soft",
-  success: "border-success bg-success-soft",
-  warning: "border-warning bg-warning-soft",
+  done: "border-done bg-done-soft",
+  conflict: "border-conflict bg-conflict-soft",
   danger: "border-danger bg-danger-soft",
 };
 

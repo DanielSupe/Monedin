@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
 import { cx } from "./cx.js";
 
-export type AlertTone = "info" | "success" | "warning" | "danger";
+export type AlertTone = "info" | "done" | "conflict" | "danger";
 
 const TONES: Record<AlertTone, string> = {
   info: "border-info bg-info-soft text-info",
-  success: "border-success bg-success-soft text-success",
-  warning: "border-warning bg-warning-soft text-warning",
+  done: "border-done bg-done-soft text-done",
+  conflict: "border-conflict bg-conflict-soft text-conflict",
   danger: "border-danger bg-danger-soft text-danger",
 };
 
@@ -17,8 +17,8 @@ const TONES: Record<AlertTone, string> = {
  */
 const ROLES: Record<AlertTone, "alert" | "status"> = {
   info: "status",
-  success: "status",
-  warning: "alert",
+  done: "status",
+  conflict: "alert",
   danger: "alert",
 };
 
@@ -37,9 +37,16 @@ export interface AlertProps {
  * los aplanaba todos en un párrafo rojo. Un 422 —te equivocaste— y un 409
  * —alguien se te adelantó— no son la misma noticia y no se cuentan igual.
  *
- * El CONFLICTO es `warning`, no `danger`: nadie hizo nada mal. El padre aprobó
- * dos veces, o el hermano llegó antes. Pintarlo de rojo le echa la culpa a quien
- * está mirando.
+ * El CONFLICTO tiene tono propio y NO es `danger`: nadie hizo nada mal. El
+ * padre aprobó dos veces, o el hermano llegó antes. Pintarlo de rojo le echa la
+ * culpa a quien está mirando.
+ *
+ * `info` NO se renombró, y es la mitad que importa de la regla: nunca nombró
+ * un color, nombró un papel, y sigue siendo exacto aunque ahora sea arena.
+ *
+ * Los tonos se nombran por su PAPEL y no por su color, que es lo que permitió
+ * repintarlos enteros sin tocar un solo punto de uso: `success` describía un
+ * verde que ya no existe, `done` describe una tarea aprobada y sigue valiendo.
  */
 export function Alert({
   tone = "info",

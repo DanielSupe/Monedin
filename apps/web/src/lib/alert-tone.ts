@@ -6,7 +6,7 @@ import { ApiRequestError } from "./http-client.js";
  * Con qué tono se cuenta el fallo de una operación.
  *
  * `Alert` distingue el conflicto desde `add-design-system` y lo explica en su
- * propia cabecera: **el 409 es advertencia, no peligro**. Nadie hizo nada mal —el
+ * propia cabecera: **el 409 tiene tono propio, no el del peligro**. Nadie hizo nada mal —el
  * padre aprobó dos veces, o el hermano llegó antes—, y pintarlo de rojo le echa
  * la culpa a quien está mirando.
  *
@@ -36,7 +36,7 @@ export function alertToneFor(error: unknown): AlertTone {
   }
 
   if (error.code === ERROR_CODES.CONFLICT || error.code === ERROR_CODES.SERVICE_UNAVAILABLE) {
-    return "warning";
+    return "conflict";
   }
 
   return "danger";
