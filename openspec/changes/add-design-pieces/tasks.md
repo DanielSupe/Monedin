@@ -62,11 +62,15 @@
 
 - [x] 5.1 `ui/avatars.ts` pasa a `.tsx` y cada clave devuelve un SVG. Los doce están dibujados en
       `design/ui/pantallas/NuevoPerfil.dc.html`.
-- [ ] 5.2 Mirar los doce JUNTOS en el catálogo, no de uno en uno: lo que hay que ver es que ninguno
+- [x] 5.2 Mirar los doce JUNTOS en el catálogo, no de uno en uno: lo que hay que ver es que ninguno
       desentona con los otros once, y eso no se aprecia mirándolos por separado. **Dibujados y en el
       catálogo; falta abrirlo.**
-- [ ] 5.3 Comprobar que el color de cada animal NO se reasigna con el tema, y que el círculo sobre el
+      **Los doce no estaban en el catálogo**: enseñaba cuatro de muestra. Puestos, y mirados juntos.
+- [x] 5.3 Comprobar que el color de cada animal NO se reasigna con el tema, y que el círculo sobre el
       que va SÍ lo hace. Un avatar es contenido, como una foto.
+      **Confirmado en pantalla**: los animales conservan su color en oscuro y el círculo de debajo
+      sí cambia. Y destapó que el TUCÁN se disolvía: era el único cuyo cuerpo usaba la tinta de
+      los ojos, el mismo valor que el círculo oscuro. Corregido en la pieza y en la maqueta.
 - [x] 5.4 Test: cada clave de `AVATAR_KEYS` tiene ilustración, **y falla si falta una**. Sin la
       segunda mitad, añadir una clave al contrato sin dibujarla pasaría en verde.
 - [x] 5.5 Confirmar que no cambian `AVATAR_KEYS`, ni la validación, ni el almacenamiento. Si algo de
@@ -79,7 +83,7 @@
       es de donde copian las pantallas de los tres changes siguientes.
 - [x] 6.2 Repasar que ninguna pieza nueva importa de `features/` ni de `api/`, y que las once se
       montan en una prueba sin proveedores.
-- [ ] 6.3 Abrir el catálogo en los dos temas y en las dos escalas. Es lo único que enseña las once
+- [x] 6.3 Abrir el catálogo en los dos temas y en las dos escalas. Es lo único que enseña las once
       juntas, y mirarlas juntas es la mitad del trabajo.
 - [x] 6.4 Lint, typecheck y batería del front, en verde con `--no-file-parallelism`. La pasada en
       paralelo hace caer un test distinto cada vez y todos pasan aislados: es la contención que

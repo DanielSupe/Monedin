@@ -57,10 +57,15 @@
 ## 6. Cierre
 
 - [x] 6.1 Ni un estilo en línea, ni un color literal, ni un valor arbitrario en las ocho pantallas.
-- [ ] 6.2 Abrir las ocho en los dos temas y a ancho estrecho. El estrecho no está dibujado en las
+- [x] 6.2 Abrir las ocho en los dos temas y a ancho estrecho. El estrecho no está dibujado en las
       maquetas y es el escenario más probable: tablet compartida.
-- [ ] 6.3 Comprobar que las cuatro columnas de la tabla de canjes caben en la escala del niño a
+      **Comprobado**: ninguna de las ocho desborda a 390px, y las cuatro se ven bien en los dos
+      temas. Se corrigió la moneda, que la dibujaba el sistema operativo con un emoji.
+- [x] 6.3 Comprobar que las cuatro columnas de la tabla de canjes caben en la escala del niño a
       390 px. Eso no lo prueba jsdom, que no aplica CSS.
+      **NO CABÍAN.** La tabla medía 396 en una pantalla de 390 y «Cuándo» se salía. Lo que sobraba
+      era la tesela que este mismo change le puso copiando una maqueta dibujada a 1440. Retirada
+      —era la misma en todas las filas, así que no distinguía nada— la tabla mide 358.
 - [~] 6.4 `pnpm verify`, y si muere con `allocation failure`, con `--concurrency=1`.
       **Corrido en parte, y se dice cuál.** `lint`, `typecheck` y `build` pasan en los cuatro
       paquetes, y la batería del front entera (571 tests) con `--no-file-parallelism`. Lo que NO se

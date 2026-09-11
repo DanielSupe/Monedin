@@ -1,4 +1,5 @@
 import { messages } from "../../lib/messages.js";
+import { Logo } from "../../ui/index.js";
 
 /**
  * El ciclo del producto, en órbitas.
@@ -117,9 +118,16 @@ export function CycleDisc(): React.ReactElement {
         Allí lleva un saldo de ejemplo; aquí solo la moneda: en una pantalla de
         acceso, una cifra inventada es ruido con pinta de dato.
       */}
+      {/*
+        La moneda la dibuja el PROYECTO y no el dispositivo. Era un emoji, que en
+        Windows sale con una columna grabada y en cada sistema de otra forma — y
+        esta es la primera pantalla que mira un adulto que decide si esto es de
+        fiar. `Coins` con cero sería una cifra inventada, así que lo que va es la
+        moneda a secas: la misma que la marca.
+      */}
       <span aria-hidden="true" className="absolute inset-0 grid place-items-center">
-        <span className="rounded-card text-hero grid size-20 place-items-center bg-surface-raised shadow-raised">
-          🪙
+        <span className="rounded-card grid size-20 place-items-center bg-surface-raised shadow-raised">
+          <Logo size="large" markOnly />
         </span>
       </span>
     </div>

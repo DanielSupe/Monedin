@@ -794,6 +794,31 @@
   --text-hero: 3.625rem;
 }
 
+/*
+ * LA ESCALA PÚBLICA BAJA EN UN TELÉFONO, y es la única que lo necesita.
+ *
+ * Sus dos pasos grandes están pensados para una portada a 1440, donde un titular
+ * de 58px manda. A 390 ese mismo titular parte en SEIS renglones, ocupa 365px de
+ * alto y empuja bajo la línea de flotación todo lo que tiene que convencer a
+ * alguien — justo en la pantalla más larga del producto y en el dispositivo más
+ * probable para llegar a ella.
+ *
+ * Baja SOLO la escala pública. Las del padre y el niño ya están medidas para que
+ * la misma pieza rinda en una tablet, y tocarlas aquí cambiaría trece pantallas
+ * para arreglar una.
+ *
+ * Y baja en el TOKEN, no en la pantalla: una portada que escribiera
+ * `text-4xl sm:text-6xl` sacaría la decisión de la capa que la guarda, y la
+ * siguiente página que hiciera falta la tomaría otra vez a ojo.
+ */
+@media (width < 40rem) {
+  [data-scale="public"] {
+    --text-title: 1.5rem;
+    --text-display: 2rem;
+    --text-hero: 2.25rem;
+  }
+}
+
 /* Las utilidades de la capa 3, para que ninguna pieza escriba una medida. */
 
 @utility text-micro {

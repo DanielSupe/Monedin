@@ -14,11 +14,15 @@
       cuando un token repinta lo construido.
 - [x] 1.4 Test: la raíz no declara escala de rol, y cada maqueta sí declara la suya. Es el requisito
       que ya se estrechó una vez por ser demasiado amplio; que siga estrecho.
-- [ ] 1.5 Mirarla a ancho de móvil: titulares que envuelven, rejillas apretadas y texto pequeño. Es la
+- [x] 1.5 Mirarla a ancho de móvil: titulares que envuelven, rejillas apretadas y texto pequeño. Es la
       pantalla más larga del rediseño y la única que no cabe en una ventana.
 
 ## 2. Entrar y crear cuenta
 
+      **El titular medía 58px en una pantalla de 390** y partía en seis renglones: 365px de alto,
+      empujando bajo la línea de flotación lo que tiene que convencer. La escala pública baja
+      ahora por debajo de 40rem, en el TOKEN y no en la pantalla. El titular pasa a 36px y la
+      página de 4252px a 3783px.
 - [x] 2.1 El panel de marca a media pantalla, con la superficie de color del sistema. Los campos
       componen solos sobre ella: la superficie reasigna también las superficies, no solo la tinta.
 - [x] 2.2 Comprobar que los avisos dentro del panel recuperan su fondo claro. Es lo que hace el camino
@@ -61,8 +65,11 @@
 ## 6. Cierre
 
 - [x] 6.1 Ni un estilo en línea, ni un color literal, ni un valor arbitrario en las siete pantallas.
-- [ ] 6.2 Abrir las siete en los dos temas. El acceso es donde el tema oscuro tiene el caso más difícil
+- [x] 6.2 Abrir las siete en los dos temas. El acceso es donde el tema oscuro tiene el caso más difícil
       —un componente con fondo propio dentro de una superficie de color—, así que se mira ahí primero.
+      **Comprobado**, y con el caso difícil resuelto: el aviso dentro del panel de marca recupera
+      su fondo en los dos temas. Cazó además la moneda del disco de acceso, que era un emoji del
+      sistema justo en la única pantalla que mira un adulto que decide si esto es de fiar.
 - [ ] 6.3 Recorrer el camino entero con teclado: puerta pública → crear cuenta → rejilla → PIN →
       dentro, y la vuelta por restablecer el PIN. Es el único camino que le queda a quien ya es usuario
       y se le caducó la sesión.

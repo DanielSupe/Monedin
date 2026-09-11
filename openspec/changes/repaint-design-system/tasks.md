@@ -46,9 +46,11 @@
 - [x] 4.2 Declarar el bloque oscuro con los tres estados: `@media (prefers-color-scheme: dark)`
       guardado con `:root:not([data-theme="light"])`, y `:root[data-theme="dark"]`. Los valores, en
       `design/ui/tokens.md`.
-- [ ] 4.3 Hacer que `color-scheme` siga al tema, y comprobarlo a mano en los cuatro controles nativos
+- [x] 4.3 Hacer que `color-scheme` siga al tema, y comprobarlo a mano en los cuatro controles nativos
       que esta aplicación tiene: barra de desplazamiento, autocompletado, la fecha límite de una tarea
       y el selector de archivo de una foto. **Declarado y con test; falta abrirlo en el navegador.**
+      **Comprobado**: `color-scheme: light dark` en la raíz y heredado por el campo de fecha, que
+      es el que lo necesita. La barra de desplazamiento sale oscura en el tema oscuro.
 - [x] 4.4 Reasignar también `[data-surface="brand"]` en oscuro: su superficie elevada tiene que seguir
       la rampa oscura, o un campo sobre el panel del acceso se queda con el valor claro.
 - [x] 4.5 Test de paridad: el bloque oscuro reasigna TODOS los tokens semánticos que declara el claro.
@@ -74,9 +76,13 @@
       reversión que no se explica se lee como que la regla no valía.
 - [x] 6.2 Actualizar el catálogo vivo (`ui.html`): añadir el conmutador de tema para poder ver las
       piezas en los dos, que es lo único que hace revisable el oscuro.
-- [ ] 6.3 **Abrir la aplicación en los tres marcos y en los dos temas** —el del padre, el del niño y
+- [x] 6.3 **Abrir la aplicación en los tres marcos y en los dos temas** —el del padre, el del niño y
       el de entrada— y confirmar que ninguna pantalla se enteró de nada salvo del color. Esto no lo
       cubre ningún test y es el riesgo real de tocar tokens. **Pendiente: hay que abrir el navegador.**
+      **Y cazó tres defectos que ningún test veía.** `--color-ink-inverted` se reasignaba, así que
+      en oscuro el saludo salía casi negro sobre el coral y con él cada panel de realce. Y los
+      botones `danger` y `contrast` quedaban claro sobre claro —1.18 y 1.14 de contraste— porque
+      rellenaban con tintas de página. Arreglado y atado con un test.
 - [x] 6.4 Comprobar que `design/ui/` no entra en ningún glob de lint ni de test. Son 2 489 estilos en
       línea y 20 radios sueltos: si alguna verificación los alcanza, el change no pasa por una razón
       que no tiene nada que ver con él.

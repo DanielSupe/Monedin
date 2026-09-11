@@ -55,7 +55,10 @@
 
 - [x] 6.1 Ni un estilo en línea, ni un color literal, ni un valor arbitrario en las doce pantallas.
 - [x] 6.2 Los objetivos de toque en 40 px, que es la escala del padre. No «corregirlos» a 44.
-- [ ] 6.3 Abrir las doce en los dos temas y a ancho estrecho.
+- [x] 6.3 Abrir las doce en los dos temas y a ancho estrecho.
+      **Comprobado**, y cazó dos: los dos avisos del panel se apilaban —`HeroPanel` coloca en
+      columna— y las acciones de una tarea colgaban debajo de la fila de su hijo, así que cada
+      hijo ocupaba dos renglones.
 - [x] 6.4 Probar con teclado el envío de los cuatro formularios tocados. Los controles traídos cambian
       el comportamiento de lo que hoy funciona, y eso no lo ve ningún test de aspecto.
       **Cazó uno**: al traer la casilla, marcar al hijo el último deja el foco en un `<button>`, y ahí

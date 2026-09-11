@@ -187,14 +187,20 @@ function Keypad({
       que se mira aquí es el teclado, y un teclado descentrado en la pantalla que
       un niño usa cada día se lee como un defecto de montaje.
 
-      Se saca del flujo a partir de `lg`, que es donde hay sitio a los lados. Es
-      UN solo elemento colocado de dos maneras, no dos montados a la vez: lo que
-      `pin-sidebar-on-desktop` prohíbe es duplicar ESTRUCTURA, y el globo dice lo
-      mismo en los dos sitios — en estrecho se queda debajo, donde sigue
-      leyéndose, en vez de desaparecer.
+      TRES COLUMNAS IGUALES y la tarjeta en la de en medio: así el centro sale de
+      la rejilla y no de una cuenta, y la mascota vive en la tercera sin tocarla.
+      El primer intento la sacó del flujo con `absolute right-0` y acabó ENCIMA
+      del teclado, tapando el 3 y el 6 — porque lo que se anclaba a la derecha era
+      la mascota MÁS su globo, y el globo crece hacia dentro.
+
+      Es UNA sola estructura colocada de dos maneras, no dos montadas a la vez:
+      en estrecho todo se apila y el globo se queda debajo, donde sigue
+      leyéndose. Lo que `pin-sidebar-on-desktop` prohíbe es duplicar ESTRUCTURA,
+      no colocarla distinto.
     */
-    <section className="relative mx-auto flex w-full max-w-(--container-wide) flex-col items-center gap-6 py-8">
-      <Card className="flex w-full max-w-dialog flex-col items-center gap-6 p-0">
+    <section className="mx-auto flex w-full max-w-(--container-wide) flex-col items-center gap-6 py-8">
+      <div className="flex w-full flex-col items-center gap-6 lg:grid lg:grid-cols-3 lg:items-center lg:gap-8">
+        <Card className="flex w-full max-w-dialog flex-col items-center gap-6 p-0 lg:col-start-2 lg:justify-self-center">
         {/*
           La cabecera dice de QUIÉN es el PIN que se está pidiendo. Con su cara
           dentro, porque en una tablet compartida esa es la pregunta: no «cuál es
@@ -274,10 +280,11 @@ function Keypad({
         globo dice qué es un PIN y, sobre todo, que si se olvida hay salida: sin
         esa mitad, un niño que no se acuerda deja de entrar.
       */}
-      <div className="lg:absolute lg:right-0 lg:top-1/2 lg:-translate-y-1/2">
-        <Mascota pose="duda" size="medium">
-          <p className="text-small m-0 max-w-(--container-card) font-bold">{MY_PIN_EXPLAINER}</p>
-        </Mascota>
+        <div className="lg:col-start-3">
+          <Mascota pose="duda" size="medium">
+            <p className="text-small m-0 font-bold">{MY_PIN_EXPLAINER}</p>
+          </Mascota>
+        </div>
       </div>
 
       <Link to="/profiles" search={{ manage: manage || undefined }}>
