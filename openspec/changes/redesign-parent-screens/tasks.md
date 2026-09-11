@@ -1,14 +1,14 @@
 ## 1. El marco y el panel
 
-- [ ] 1.1 Llevar el marco del padre al lateral traído en `add-design-pieces`, conservando lo que
+- [x] 1.1 Llevar el marco del padre al lateral traído en `add-design-pieces`, conservando lo que
       decidió `pin-sidebar-on-desktop`: columna fija a partir de `lg`, contraíble, cajón por debajo, y
       **una sola de las dos formas montada**.
-- [ ] 1.2 Los dos avisos del panel con `HeroPanel`: el de tareas en el tono de la acción, el de canjes
+- [x] 1.2 Los dos avisos del panel con `HeroPanel`: el de tareas en el tono de la acción, el de canjes
       en el del ahorro. La cifra grande y el destino con el filtro ya puesto.
-- [ ] 1.3 Comprobar que la insignia del lateral sigue contando **filas con el estado buscado** y no el
+- [x] 1.3 Comprobar que la insignia del lateral sigue contando **filas con el estado buscado** y no el
       total del listado. El de tareas pagina por reparto: un reparto con dos hermanos esperando da 1
       por total y 2 de verdad.
-- [ ] 1.4 Test de la cuenta con un reparto de estados mezclados y **dos** tareas por aprobar, para que
+- [x] 1.4 Test de la cuenta con un reparto de estados mezclados y **dos** tareas por aprobar, para que
       la cuenta correcta y las dos equivocadas den números distintos. Con una sola, las tres coinciden.
 
 ## 2. La bandeja de tareas

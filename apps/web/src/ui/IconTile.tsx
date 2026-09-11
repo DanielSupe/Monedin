@@ -9,13 +9,22 @@ import { cx } from "./cx.js";
  * pelota está en el tejado del otro no hay nada que hacer, y el color no debe
  * fingir que sí.
  */
-export type IconTileTone = "action" | "saving" | "coin" | "waiting";
+export type IconTileTone = "action" | "saving" | "coin" | "waiting" | "hero";
 
 const TONES: Record<IconTileTone, string> = {
   action: "bg-primary-soft text-primary-hover",
   saving: "bg-done-soft text-done",
   coin: "bg-coin-soft text-coin-ink",
   waiting: "bg-surface-sunken text-ink-muted",
+  /*
+   * DENTRO de un `HeroPanel`, y solo ahí.
+   *
+   * Los otros cuatro pintan un fondo suave, que sobre un degradado es una mancha
+   * pálida. Este no elige un color: deja pasar el que hay debajo. Por eso se
+   * nombra por DÓNDE va y no por de qué habla — llamarlo `neutral` lo dejaría
+   * pareciendo un quinto tono usable en cualquier parte.
+   */
+  hero: "bg-surface-raised/20 text-ink-inverted",
 };
 
 export interface IconTileProps {

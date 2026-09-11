@@ -30,7 +30,23 @@ export type ParentConsole = {
   error: unknown;
 };
 
-export function useParentConsole(): ParentConsole {
+/**
+ * Las DOS cifras de bandeja, sin lo demás.
+ *
+ * Existe porque el lateral las necesita y no necesita a los hijos: pedirle al
+ * marco el panel entero traería una consulta más en cada pantalla del padre.
+ *
+ * Y existe COMO HOOK COMPARTIDO, no como una segunda cuenta: el panel llama a
+ * este mismo, así que la cifra de la insignia y la del aviso no pueden
+ * separarse. Dos cuentas del mismo número son dos que acaban discrepando — que
+ * es justo el error que el comentario de las TAREAS existe para evitar.
+ */
+export function usePendingCounts(): {
+  tasksToApprove: Recuento;
+  redemptionsWaiting: Recuento;
+  isPending: boolean;
+  error: unknown;
+} {
   /*
    * TAREAS: hay que traerlas para contarlas, y las dos cuentas obvias fallan.
    *
@@ -60,14 +76,6 @@ export function useParentConsole(): ParentConsole {
    */
   const canjes = useRedemptions({ page: 1, pageSize: 1, status: "PENDING" });
 
-  /*
-   * HIJOS: una sola página los trae a todos, y eso depende de que
-   * `MAX_CHILDREN_PER_FAMILY` (10) quepa en `DEFAULT_PAGE_SIZE` (20). Es una
-   * relación entre dos constantes que nadie escribió a propósito y que se
-   * rompería en silencio, así que hay un test que la compara.
-   */
-  const hijos = useChildren(1);
-
   const filasCompletadas = (tareas.data?.items ?? []).reduce(
     (suma, reparto) =>
       suma + reparto.tasks.filter((tarea) => tarea.status === "COMPLETED").length,
@@ -81,8 +89,31 @@ export function useParentConsole(): ParentConsole {
       exact: (tareas.data?.totalPages ?? 1) <= 1,
     },
     redemptionsWaiting: { value: canjes.data?.total ?? 0, exact: true },
+    isPending: tareas.isPending || canjes.isPending,
+    /*
+     * El fallo VIAJA con las cifras, y no se queda aquí. Sin esto, una bandeja
+     * que no responde da cero y el panel dice «todo al día» — la peor respuesta
+     * posible a un fallo, porque afirma lo contrario de lo que pasa.
+     */
+    error: tareas.error ?? canjes.error,
+  };
+}
+
+export function useParentConsole(): ParentConsole {
+  const bandejas = usePendingCounts();
+
+  /*
+   * HIJOS: una sola página los trae a todos, y eso depende de que
+   * `MAX_CHILDREN_PER_FAMILY` (10) quepa en `DEFAULT_PAGE_SIZE` (20). Es una
+   * relación entre dos constantes que nadie escribió a propósito y que se
+   * rompería en silencio, así que hay un test que la compara.
+   */
+  const hijos = useChildren(1);
+
+  return {
+    ...bandejas,
     children: hijos.data?.items ?? [],
-    isPending: tareas.isPending || canjes.isPending || hijos.isPending,
-    error: tareas.error ?? canjes.error ?? hijos.error,
+    isPending: bandejas.isPending || hijos.isPending,
+    error: bandejas.error ?? hijos.error,
   };
 }

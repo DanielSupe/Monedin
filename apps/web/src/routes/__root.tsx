@@ -9,6 +9,7 @@ import { ChildShell } from "../app/ChildShell.js";
 import { EntryShell } from "../app/EntryShell.js";
 import { ParentShell } from "../app/ParentShell.js";
 import { useSession } from "../features/auth/use-session.js";
+import { PendingBadge } from "../features/parents/PendingBadge.js";
 import { messages } from "../lib/messages.js";
 import { EmptyState, buttonClasses } from "../ui/index.js";
 
@@ -88,6 +89,8 @@ function AppFrame(): React.ReactElement {
   if (actor?.familyRole === "PARENT") {
     return (
       <ParentShell
+        tasksBadge={<PendingBadge kind="tasks" />}
+        redemptionsBadge={<PendingBadge kind="redemptions" />}
         avatar={actor.avatar}
         name={actor.name}
         tutorialSeen={actor.tutorialSeen}

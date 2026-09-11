@@ -1,5 +1,5 @@
 import { Link, Outlet } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { messages } from "../lib/messages.js";
 import { Avatar, Drawer, Logo } from "../ui/index.js";
 import {
@@ -43,6 +43,8 @@ export function ParentShell({
   name,
   tutorialSeen,
   fullHeight,
+  tasksBadge,
+  redemptionsBadge,
 }: {
   avatar: string | null;
   name: string;
@@ -72,6 +74,15 @@ export function ParentShell({
    * escribir del chat se iría hacia abajo con los mensajes.
    */
   fullHeight: boolean;
+  /**
+   * Cuánto espera en cada bandeja, si espera algo.
+   *
+   * Entran como CONTENIDO y no los calcula el marco: contar tareas por aprobar
+   * es negocio, y este archivo sabe de roles y de destinos. Es la misma frontera
+   * que impide a `Pagination` construir sus propios enlaces.
+   */
+  tasksBadge?: ReactNode;
+  redemptionsBadge?: ReactNode;
 }): React.ReactElement {
   const { open, setOpen } = useDrawer();
   const ancho = useIsWide();
@@ -86,55 +97,58 @@ export function ParentShell({
       {...(ancho ? { onToggleCollapse: () => setContraido((v) => !v) } : {})}
       profile={
           <Link to="/account" className={sidebarItemClasses()}>
+            <IconAccount />
             <SidebarProfile name={name} avatar={avatar}>
               {messages.nav.parentAccount}
             </SidebarProfile>
-            <IconAccount />
           </Link>
         }
       >
-        {/* Texto a la izquierda, icono a la derecha. El icono es DECORATIVO:
-            lo que nombra al destino es su texto, así que repetirlo en el
-            icono se lo diría dos veces a un lector de pantalla. */}
+        {/* Icono a la izquierda, texto, y la insignia al final si hay algo
+            esperando. El icono es DECORATIVO: lo que nombra al destino es su
+            texto, así que repetirlo en el icono se lo diría dos veces a un
+            lector de pantalla. */}
         <Link
           to="/"
           activeOptions={{ exact: true }}
           className={sidebarItemClasses()}
         >
-          <SidebarLabel>{messages.nav.parentHome}</SidebarLabel>
           <IconHome />
+          <SidebarLabel>{messages.nav.parentHome}</SidebarLabel>
         </Link>
         <Link
           to="/tasks"
           search={{ page: 1, status: "ALL" }}
           className={sidebarItemClasses()}
         >
-          <SidebarLabel>{messages.nav.parentTasks}</SidebarLabel>
           <IconTasks />
+          <SidebarLabel>{messages.nav.parentTasks}</SidebarLabel>
+          {tasksBadge}
         </Link>
         <Link
           to="/rewards"
           search={{ page: 1, status: "ACTIVE" }}
           className={sidebarItemClasses()}
         >
-          <SidebarLabel>{messages.nav.parentRewards}</SidebarLabel>
           <IconRewards />
+          <SidebarLabel>{messages.nav.parentRewards}</SidebarLabel>
         </Link>
         <Link
           to="/redemptions"
           search={{ page: 1, status: "ALL" }}
           className={sidebarItemClasses()}
         >
-          <SidebarLabel>{messages.nav.parentRedemptions}</SidebarLabel>
           <IconRedemptions />
+          <SidebarLabel>{messages.nav.parentRedemptions}</SidebarLabel>
+          {redemptionsBadge}
         </Link>
         <Link
           to="/children"
           search={{ page: 1 }}
           className={sidebarItemClasses()}
         >
-          <SidebarLabel>{messages.nav.parentChildren}</SidebarLabel>
           <IconChildren />
+          <SidebarLabel>{messages.nav.parentChildren}</SidebarLabel>
         </Link>
     </Sidebar>
   );

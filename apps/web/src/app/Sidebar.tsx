@@ -75,7 +75,7 @@ function Chevron({ pointing }: { pointing: "left" | "right" }): React.ReactEleme
  */
 export function sidebarItemClasses(): string {
   return cx(
-    "tap-target rounded-control text-body flex w-full items-center justify-between gap-3 px-3 font-semibold text-ink no-underline transition-colors duration-quick",
+    "tap-target rounded-control text-body flex w-full items-center gap-3 px-3 font-semibold text-ink no-underline transition-colors duration-quick",
     "hover:bg-surface-sunken",
     "data-[status=active]:bg-primary-soft data-[status=active]:text-primary",
     // Contraído, el texto sale del flujo con `sr-only` y solo queda el icono.

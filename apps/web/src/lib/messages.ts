@@ -134,6 +134,12 @@ export const messages = {
     parentChildren: "Hijos",
     parentAccount: "Mi cuenta",
 
+    /*
+     * Lo que la cifra de una insignia significa, para quien no ve la pantalla.
+     * Sin esto se oiría «Tareas 3», que no dice tres de qué.
+     */
+    pendingSuffix: "esperando",
+
     /** Qué es cada marco, para quien no ve la disposición. */
     childNavLabel: "Dónde ir",
     parentNavLabel: "Secciones",

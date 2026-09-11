@@ -8,7 +8,7 @@ import {
 } from "@monedin/contracts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createMemoryHistory, createRouter } from "@tanstack/react-router";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { routeTree } from "../../src/routeTree.gen";
 import { messages } from "../../src/lib/messages.js";
@@ -129,6 +129,27 @@ async function montarPanel({
 }
 
 /**
+ * El aviso de una bandeja, y la cifra que lleva dentro.
+ *
+ * Desde `redesign-parent-screens` la cifra y su unidad son DOS elementos —el
+ * número va grande encima, como manda la maqueta— así que ya no existe ningún
+ * nodo cuyo texto sea «2 tareas por aprobar». Lo que sigue siendo UNA cosa es el
+ * enlace, y dentro de él las dos partes se comprueban juntas.
+ *
+ * No se usa el nombre accesible del enlace para esto: jsdom no hace `layout`, así
+ * que concatena los dos tramos sin el espacio que un navegador sí pondría, y un
+ * test que dependiera de eso pasaría o fallaría por una razón que no es la suya.
+ */
+async function avisoDe(etiqueta: string): Promise<HTMLElement> {
+  return (await screen.findByText(etiqueta)).closest("a") as HTMLElement;
+}
+
+/** La cifra que enseña ese aviso, o `null` si el aviso no está. */
+function sinAvisoDe(etiqueta: string): boolean {
+  return screen.queryByText(etiqueta) === null;
+}
+
+/**
  * La trampa de este change.
  *
  * `GET /tasks?status=COMPLETED` pagina por REPARTO y devuelve el reparto
@@ -153,11 +174,12 @@ describe("las tareas por aprobar se cuentan por fila, no por reparto", () => {
      * 1: el test pasaba con la cuenta equivocada puesta. Comprobado
      * inyectándola.
      */
-    expect(
-      await screen.findByText(`2 ${messages.parents.tasksToApprove}`),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(`1 ${messages.parents.taskToApprove}`)).toBeNull();
-    expect(screen.queryByText(`3 ${messages.parents.tasksToApprove}`)).toBeNull();
+    const aviso = await avisoDe(messages.parents.tasksToApprove);
+
+    expect(within(aviso).getByText("2")).toBeInTheDocument();
+    expect(within(aviso).queryByText("3")).toBeNull();
+    // Con UNA sola, la unidad sería la del singular y este aviso no existiría.
+    expect(sinAvisoDe(messages.parents.taskToApprove)).toBe(true);
   });
 
   it("dos repartos con dos completadas cada uno cuentan CUATRO", async () => {
@@ -169,9 +191,9 @@ describe("las tareas por aprobar se cuentan por fila, no por reparto", () => {
     });
 
     // Aquí `total` habría dicho 2 y contar filas habría dicho 5.
-    expect(
-      await screen.findByText(`4 ${messages.parents.tasksToApprove}`),
-    ).toBeInTheDocument();
+    const aviso = await avisoDe(messages.parents.tasksToApprove);
+
+    expect(within(aviso).getByText("4")).toBeInTheDocument();
   });
 });
 
@@ -179,9 +201,9 @@ describe("una cifra que se queda corta lo dice", () => {
   it("con todo en una página, la cifra es exacta", async () => {
     await montarPanel({ repartos: [reparto("b1", ["COMPLETED", "COMPLETED"])] });
 
-    expect(
-      await screen.findByText(`2 ${messages.parents.tasksToApprove}`),
-    ).toBeInTheDocument();
+    const aviso = await avisoDe(messages.parents.tasksToApprove);
+
+    expect(within(aviso).getByText("2")).toBeInTheDocument();
   });
 
   it("con más páginas, la cifra se marca como mínimo", async () => {
@@ -190,9 +212,11 @@ describe("una cifra que se queda corta lo dice", () => {
       totalPaginasDeTareas: 3,
     });
 
-    expect(
-      await screen.findByText(`2+ ${messages.parents.tasksToApprove}`),
-    ).toBeInTheDocument();
+    const aviso = await avisoDe(messages.parents.tasksToApprove);
+
+    // El `+` dice «al menos»: la cuenta se quedó corta y no lo esconde.
+    expect(within(aviso).getByText("2+")).toBeInTheDocument();
+    expect(within(aviso).queryByText("2")).toBeNull();
   });
 });
 
@@ -207,11 +231,13 @@ describe("no tener nada pendiente es una respuesta, no dos ceros", () => {
   it("con solo una bandeja llena, la otra no aparece a cero", async () => {
     await montarPanel({ canjesPendientes: 2 });
 
-    expect(
-      await screen.findByText(`2 ${messages.parents.redemptionsWaiting}`),
-    ).toBeInTheDocument();
+    const aviso = await avisoDe(messages.parents.redemptionsWaiting);
+
+    expect(within(aviso).getByText("2")).toBeInTheDocument();
     expect(screen.queryByText(messages.parents.allClear)).toBeNull();
-    expect(screen.queryByText(`0 ${messages.parents.tasksToApprove}`)).toBeNull();
+    // La otra bandeja no aparece a cero: con cero no se dibuja.
+    expect(sinAvisoDe(messages.parents.tasksToApprove)).toBe(true);
+    expect(sinAvisoDe(messages.parents.taskToApprove)).toBe(true);
   });
 });
 

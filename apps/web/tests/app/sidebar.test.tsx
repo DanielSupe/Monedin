@@ -2,7 +2,7 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { messages } from "../../src/lib/messages.js";
-import { SOLO_CUENTA, comoNino, comoPadre, montarApp } from "../support/router.js";
+import { SOLO_CUENTA, comoNino, comoPadre, montarApp, pagina } from "../support/router.js";
 import { conPantallaAncha } from "../setup.js";
 
 afterEach(() => {
@@ -280,5 +280,114 @@ describe("contraído, los destinos conservan su nombre", () => {
     // Solo dibuja una flecha, así que sin nombre no diría nada.
     const expandir = screen.getByRole("button", { name: messages.nav.expandSidebar });
     expect(expandir).toHaveAttribute("aria-expanded", "false");
+  });
+});
+
+// ---------------------------------------------------------------------------
+
+/**
+ * LA INSIGNIA CUENTA FILAS, NO REPARTOS.
+ *
+ * `GET /tasks?status=COMPLETED` pagina por REPARTO y devuelve el reparto ENTERO,
+ * así que las dos cuentas obvias dan números equivocados en direcciones
+ * opuestas. El caso está elegido para que las tres den cifras DISTINTAS:
+ *
+ *   un reparto: Ana (COMPLETED), Luis (COMPLETED), Sara (PENDING)
+ *
+ *     total (repartos)            → 1
+ *     items.flatMap(b => b.tasks) → 3
+ *     filas en COMPLETED          → 2  ✓
+ *
+ * Con UNA sola completada las tres darían 1 y el test pasaría con la cuenta
+ * equivocada puesta. Es el error que `redesign-parent-home` costó aprender, y
+ * por eso el caso lleva dos.
+ */
+describe("el lateral dice cuánto espera en cada bandeja", () => {
+  function tarea(id: string, status: "PENDING" | "COMPLETED") {
+    return {
+      id,
+      title: "Recoger la mesa",
+      description: null,
+      coins: 20,
+      dueDate: null,
+      status,
+      evidence: null,
+      createdAt: "2026-09-01T10:00:00.000Z",
+      updatedAt: "2026-09-01T10:00:00.000Z",
+      child: { id: `hijo-${id}`, name: "Ana", avatar: "zorro" },
+      batchId: "b1",
+    };
+  }
+
+  const REPARTO_MEZCLADO = {
+    batchId: "b1",
+    title: "Recoger la mesa",
+    description: null,
+    dueDate: null,
+    createdAt: "2026-09-01T10:00:00.000Z",
+    tasks: [tarea("t1", "COMPLETED"), tarea("t2", "COMPLETED"), tarea("t3", "PENDING")],
+  };
+
+  /** El destino del lateral que lleva ese nombre. */
+  function destino(cajon: HTMLElement, nombre: string): HTMLElement {
+    return within(cajon).getByRole("link", { name: new RegExp(nombre) });
+  }
+
+  it("las tareas por aprobar se cuentan por FILA y no por reparto", async () => {
+    await montarApp("/", comoPadre(), [], {
+      "/tasks": pagina([REPARTO_MEZCLADO]),
+      "/redemptions": pagina([]),
+    });
+
+    const cajon = await abrirCajon();
+    const tareas = destino(cajon, messages.nav.parentTasks);
+
+    await waitFor(() => {
+      expect(within(tareas).getByText("2")).toBeInTheDocument();
+    });
+
+    // Ni el total de repartos ni el total de filas.
+    expect(within(tareas).queryByText("1")).toBeNull();
+    expect(within(tareas).queryByText("3")).toBeNull();
+  });
+
+  /*
+   * CON CERO NO SE DIBUJA, por lo mismo que en el panel: leer un cero para
+   * concluir lo que la ausencia ya dice es trabajo que el lateral existe para
+   * ahorrar, y una insignia permanente deja de significar nada.
+   */
+  it("y sin nada esperando no dibuja ninguna insignia", async () => {
+    await montarApp("/", comoPadre(), [], {
+      "/tasks": pagina([]),
+      "/redemptions": pagina([]),
+    });
+
+    const cajon = await abrirCajon();
+
+    await waitFor(() => {
+      expect(within(cajon).queryByText("0")).toBeNull();
+    });
+  });
+
+  /*
+   * La cifra sola diría «Tareas 3» a quien no ve la pantalla, que no dice tres
+   * de qué. La unidad va aparte y solo para ellos: verla escrita al lado del
+   * número la diría dos veces.
+   */
+  it("la cifra se anuncia con su unidad", async () => {
+    await montarApp("/", comoPadre(), [], {
+      "/tasks": pagina([REPARTO_MEZCLADO]),
+      "/redemptions": pagina([]),
+    });
+
+    const cajon = await abrirCajon();
+
+    await waitFor(() => {
+      expect(
+        within(destino(cajon, messages.nav.parentTasks)).getByText(
+          `2 ${messages.nav.pendingSuffix}`,
+        ),
+      ).toBeInTheDocument();
+    });
   });
 });
