@@ -177,23 +177,23 @@ describe("la meta y sus dos ausencias", () => {
   it("con una meta pendiente, la enseña con lo que le falta", async () => {
     await montar([], [premio("r1", "Noche de pelis", 300, false)]);
 
-    expect(await screen.findByText(messages.children.homeNextRewardTitle)).toBeInTheDocument();
+    expect(await screen.findByText(messages.rewards.nextRewardTitle)).toBeInTheDocument();
     expect(screen.getByText("Noche de pelis")).toBeInTheDocument();
   });
 
   it("si le alcanzan todos, lo celebra", async () => {
     await montar([], [premio("r1", "Helado", 50, true)]);
 
-    expect(await screen.findByText(messages.children.homeAllAffordableTitle)).toBeInTheDocument();
-    expect(screen.queryByText(messages.children.homeNextRewardTitle)).toBeNull();
+    expect(await screen.findByText(messages.rewards.allAffordableTitle)).toBeInTheDocument();
+    expect(screen.queryByText(messages.rewards.nextRewardTitle)).toBeNull();
   });
 
   it("sin premios ofrecidos no enseña ninguna de las dos cosas", async () => {
     await montar([tarea("t1", "Tender la cama", "PENDING")], []);
     await screen.findByText("Tender la cama");
 
-    expect(screen.queryByText(messages.children.homeNextRewardTitle)).toBeNull();
-    expect(screen.queryByText(messages.children.homeAllAffordableTitle)).toBeNull();
+    expect(screen.queryByText(messages.rewards.nextRewardTitle)).toBeNull();
+    expect(screen.queryByText(messages.rewards.allAffordableTitle)).toBeNull();
   });
 });
 
@@ -242,5 +242,37 @@ describe("las tareas se agrupan por su etapa del ciclo", () => {
     ];
 
     expect(porEtapa(desequilibrada).map((g) => g.etapa)).toEqual(["PENDING", "APPROVED"]);
+  });
+});
+
+/**
+ * El escaparate destaca su meta en la TESELA, no en un panel.
+ *
+ * Un panel encima repetiría el título de un premio que la rejilla ya enseña. Lo
+ * que hacía falta era contestar «¿a cuál llego antes?» sin comparar seis barras,
+ * y para eso basta con marcar cuál es.
+ */
+describe("el escaparate marca a cuál llega antes", () => {
+  it("solo una tesela lleva la marca, y es la del más barato que no alcanza", async () => {
+    await montarApp("/me/rewards", comoNino(), [], {
+      "/rewards/mine": pagina([
+        premio("r1", "Caro", 300, false),
+        premio("r2", "El más cerca", 150, false),
+        premio("r3", "Ya alcanzable", 50, true),
+      ]),
+    });
+
+    const marcadas = await screen.findAllByText(messages.rewards.nextRewardTitle);
+    expect(marcadas).toHaveLength(1);
+    expect(marcadas[0]?.closest("li")?.textContent).toContain("El más cerca");
+  });
+
+  it("si le alcanzan todos, ninguna tesela se marca como meta", async () => {
+    await montarApp("/me/rewards", comoNino(), [], {
+      "/rewards/mine": pagina([premio("r1", "Helado", 50, true)]),
+    });
+
+    expect(await screen.findByText("Helado")).toBeInTheDocument();
+    expect(screen.queryByText(messages.rewards.nextRewardTitle)).toBeNull();
   });
 });

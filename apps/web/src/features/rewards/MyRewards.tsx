@@ -19,6 +19,7 @@ import {
   useOwnRedemptions,
 } from "../redemptions/use-redemptions.js";
 import { describeRewardsError, useOwnRewards } from "./use-rewards.js";
+import { metaMasCercana } from "../children/home-data.js";
 
 /**
  * El escaparate de un niño: solo lo que se le ofrece a él, a SU precio.
@@ -50,10 +51,23 @@ export function MyRewards(): React.ReactElement {
     (pendientes.data?.items ?? []).map((canje) => canje.reward.id),
   );
 
+  /*
+   * La meta se destaca en SU tesela y no en un panel aparte.
+   *
+   * Un panel encima repetiría el título de un premio que la rejilla ya enseña —y
+   * decir lo mismo dos veces en la misma pantalla es el defecto que este
+   * rediseño arregla, no uno que traiga—. Lo que hacía falta era contestar «¿a
+   * cuál llego antes?» sin comparar seis barras, y para eso basta con marcar
+   * cuál es.
+   *
+   * En el INICIO sí va como panel, porque allí no hay rejilla que mirar.
+   */
+  const meta = metaMasCercana(premios);
+
   return (
-    <section className="flex flex-col gap-4">
+    <section className="flex flex-col gap-5">
       <div className="flex flex-wrap items-baseline gap-3">
-        <h2 className="text-title font-bold">
+        <h2 className="text-display font-extrabold">
           {messages.rewards.myRewardsTitle}
         </h2>
 
@@ -95,6 +109,7 @@ export function MyRewards(): React.ReactElement {
               reward={premio}
               balance={saldo}
               yaPedido={premiosYaPedidos.has(premio.id)}
+              esMeta={premio.id === meta?.id}
             />
           ))}
         </ul>
@@ -107,10 +122,13 @@ function MyRewardRow({
   reward,
   balance,
   yaPedido,
+  esMeta,
 }: {
   reward: OwnReward;
   balance: number;
   yaPedido: boolean;
+  /** El más barato de los que todavía no alcanza: al que llega antes. */
+  esMeta: boolean;
 }): React.ReactElement {
   // `affordable` decide el mensaje; la diferencia es solo para mostrar cuánto
   // falta, y se calcula contra el saldo de la SESIÓN, no contra uno propio del
@@ -137,23 +155,36 @@ function MyRewardRow({
         premio con descripción dejaba a sus vecinos más bajos. La altura la
         marca la fila y todas la ocupan.
       */}
-      <Card className="h-full">
+      <Card className={esMeta ? "h-full border-2 border-done" : "h-full"}>
         <div className="flex h-full min-w-0 flex-col gap-3">
-          <RewardImage image={reward.image} title={reward.title} />
+          {/*
+            La cinta va SOBRE la foto, no debajo del título.
 
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div className="flex min-w-0 flex-col gap-1">
-              <p className="text-body font-bold">{reward.title}</p>
-              {reward.description !== null && (
-                <p className="text-small text-ink-muted">
-                  {reward.description}
-                </p>
-              )}
-            </div>
-            {/* «Ya lo pediste» es un ESTADO, no un párrafo al final: lo que se
-                ve y lo que se puede hacer van juntos. */}
-            {pedido && (
-              <Badge tone="info">{messages.redemptions.alreadyRequested}</Badge>
+            «Ya lo pediste» y «ya te alcanza» son ESTADOS, y en una rejilla el
+            estado se busca en la imagen: es lo primero que se mira de cada
+            tesela. Debajo del título quedaba en la tercera línea, y con seis
+            premios eso son seis terceras líneas que hay que leer.
+          */}
+          <div className="relative">
+            <RewardImage image={reward.image} title={reward.title} />
+
+            {(pedido || reward.affordable || esMeta) && (
+              <span className="absolute right-2 top-2">
+                {pedido ? (
+                  <Badge tone="info">{messages.redemptions.alreadyRequested}</Badge>
+                ) : reward.affordable ? (
+                  <Badge tone="done">{messages.rewards.affordable}</Badge>
+                ) : (
+                  <Badge tone="done">{messages.rewards.nextRewardTitle}</Badge>
+                )}
+              </span>
+            )}
+          </div>
+
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-lead font-bold">{reward.title}</p>
+            {reward.description !== null && (
+              <p className="text-small text-ink-muted">{reward.description}</p>
             )}
           </div>
 
@@ -165,10 +196,6 @@ function MyRewardRow({
 
             {reward.affordable ? (
               <>
-                <p className="text-small font-semibold text-success">
-                  {messages.rewards.affordable}
-                </p>
-
                 {!pedido && (
                   <Button
                     variant="primary"

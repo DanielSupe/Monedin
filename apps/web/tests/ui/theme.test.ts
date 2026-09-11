@@ -137,6 +137,57 @@ describe("el tema oscuro reasigna la capa semántica entera", () => {
 });
 
 /**
+ * Una utilidad que apunta a un token que ya no existe no la ve NADIE.
+ *
+ * Al renombrar los tonos, el typecheck cazó todas las props —`tone="success"`—
+ * y ninguna de las clases: para TypeScript `text-success` es una cadena
+ * cualquiera, y para Tailwind es una utilidad que simplemente no genera nada.
+ * El resultado es un texto que se queda del color heredado, sin error en
+ * ninguna parte.
+ *
+ * Pasó: tres archivos se quedaron con `text-success` después del renombrado, y
+ * lo encontró una lectura a ojo. Esto lo convierte en algo que falla.
+ */
+describe("ninguna utilidad apunta a un token que ya no existe", () => {
+  /** Los que se renombraron, y las dos formas en que se escapan. */
+  const RETIRADOS = ["success", "warning"];
+
+  it("ningún archivo usa un color retirado del sistema", () => {
+    const culpables: string[] = [];
+    const patron = new RegExp(
+      `\\b(?:bg|text|border|ring|fill|stroke|from|via|to)-(?:${RETIRADOS.join("|")})(?:-soft)?\\b`,
+      "g",
+    );
+
+    for (const ruta of ARCHIVOS) {
+      if (!ruta.endsWith(".tsx")) continue;
+
+      const encontrados = sinComentarios(readFileSync(ruta, "utf8")).match(patron);
+      if (encontrados !== null) {
+        culpables.push(`${relative(SRC, ruta)} → ${[...new Set(encontrados)].join(", ")}`);
+      }
+    }
+
+    expect(
+      culpables,
+      `esos tokens se renombraron: \`success\` es \`done\` y \`warning\` es \`conflict\`. Una utilidad que apunta a un token retirado no pinta nada, y no falla en ninguna parte:\n${culpables.join(
+        "\n",
+      )}`,
+    ).toEqual([]);
+  });
+
+  /*
+   * La otra mitad: que los nombres nuevos SÍ estén declarados. Sin esto, el test
+   * de arriba pasaría en verde con los tres tokens borrados del archivo.
+   */
+  it("los nombres nuevos existen en los tokens", () => {
+    for (const token of ["--color-done", "--color-conflict", "--color-info", "--color-danger"]) {
+      expect(CSS, `falta ${token} en tokens.css`).toContain(`${token}:`);
+    }
+  });
+});
+
+/**
  * Un componente de fuera usa NUESTROS tokens, o no entra.
  *
  * La capa de alias deja que shadcn escriba `bg-background` y que eso resuelva a

@@ -70,6 +70,14 @@ Y los dos casos sin meta se distinguen entre sí: **le alcanzan todos** se celeb
 premios** no destaca nada. Tratar los dos igual diría que no hay nada que conseguir cuando lo que pasa
 es lo contrario.
 
+**Corregido al implementarlo: la meta se destaca DISTINTO en cada pantalla.** En el inicio va como
+panel, porque allí no hay rejilla que mirar. En el escaparate se marca SU TESELA, porque un panel
+encima repetiría el título de un premio que la rejilla ya enseña — y decir lo mismo dos veces en la
+misma pantalla es el defecto que este rediseño arregla, no uno que pueda traer.
+
+Lo destapó un test que YA existía: buscaba «Ir al cine» dentro de su tesela y encontraba dos, porque
+el panel llevaba el mismo título. La pieza `GoalPanel` se queda, usada solo por el inicio.
+
 ## Risks / Trade-offs
 
 - **El inicio gana contenido y puede alargarse.** Se acepta: lo que gana es lo que la pantalla existía

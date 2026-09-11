@@ -205,7 +205,7 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
                 label={messages.tasks.addEvidence}
               />
               {evidencia !== undefined && (
-                <p className="text-small text-success">{messages.tasks.evidenceReady}</p>
+                <p className="text-small text-done">{messages.tasks.evidenceReady}</p>
               )}
 
               <Button
@@ -238,7 +238,7 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
           )}
 
           {task.status === "APPROVED" && (
-            <p className="text-small font-semibold text-success">{messages.tasks.earned}</p>
+            <p className="text-small font-semibold text-done">{messages.tasks.earned}</p>
           )}
 
           {complete.error !== null && (

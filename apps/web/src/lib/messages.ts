@@ -507,10 +507,7 @@ export const messages = {
     homeTasksTitle: "Tus tareas",
     homeTasksAll: "Ver todas",
 
-    /* La meta: el premio más barato que todavía no alcanza. */
-    homeNextRewardTitle: "Tu próximo premio",
-    homeAllAffordableTitle: "¡Te alcanza para todo!",
-    homeAllAffordableBody: "Elige el que más te guste, que ya lo tienes.",
+
     myCoins: "Mis monedas",
     chooseAvatar: "Elige tu animal",
     avatarSaved: "¡Listo!",
@@ -658,6 +655,14 @@ export const messages = {
 
     /** Lo que ve el niño. */
     myRewardsTitle: "Mis premios",
+
+    /*
+     * La meta más cercana. Va en `rewards` y no en `children` porque habla de
+     * premios, y la usan DOS pantallas: el inicio y el escaparate.
+     */
+    nextRewardTitle: "Tu próximo premio",
+    allAffordableTitle: "¡Te alcanza para todo!",
+    allAffordableBody: "Elige el que más te guste, que ya lo tienes.",
     /** Las dos formas, SIN cifra: la compone `contar()` donde se usa. */
     countOne: "premio",
     countMany: "premios",

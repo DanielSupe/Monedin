@@ -10,14 +10,14 @@ import {
   HeroPanel,
   IconTile,
   Mascota,
-  ProgressBar,
   ProgressRing,
   Skeleton,
 } from "../../ui/index.js";
 import { LeaveProfile } from "../auth/LeaveProfile.js";
 import { useOwnTasks } from "../tasks/use-tasks.js";
 import { useOwnRewards } from "../rewards/use-rewards.js";
-import { avanceDeTareas, metaMasCercana } from "./home-data.js";
+import { GoalPanel } from "../rewards/GoalPanel.js";
+import { avanceDeTareas } from "./home-data.js";
 /*
  * Los iconos salen de `app/nav-icons` y NO de un archivo nuevo aquí.
  *
@@ -88,7 +88,6 @@ export function ChildHome({ name, coins }: { name: string; coins: number }): Rea
   const pendientes = suyas.filter((tarea) => tarea.status === "PENDING");
 
   const ofrecidos = premios.data?.items ?? [];
-  const meta = metaMasCercana(ofrecidos);
 
   return (
     <section className="mx-auto flex w-full max-w-reading flex-col gap-5">
@@ -195,26 +194,7 @@ export function ChildHome({ name, coins }: { name: string; coins: number }): Rea
         situaciones contrarias y tratarlas igual diría que no hay nada que
         conseguir cuando lo que pasa es lo opuesto.
       */}
-      {!premios.isPending && meta !== null && (
-        <HeroPanel tone="saving" mascot={<Mascota pose="elige" size="medium" />}>
-          <p className="text-micro font-extrabold uppercase text-ink-inverted opacity-80">
-            {messages.children.homeNextRewardTitle}
-          </p>
-          <p className="text-title font-extrabold text-ink-inverted">{meta.title}</p>
-          <ProgressBar value={coins} max={meta.coins} label={meta.title} />
-        </HeroPanel>
-      )}
-
-      {!premios.isPending && meta === null && ofrecidos.length > 0 && (
-        <HeroPanel tone="saving" mascot={<Mascota pose="celebra" size="medium" />}>
-          <p className="text-title font-extrabold text-ink-inverted">
-            {messages.children.homeAllAffordableTitle}
-          </p>
-          <p className="text-body text-ink-inverted opacity-90">
-            {messages.children.homeAllAffordableBody}
-          </p>
-        </HeroPanel>
-      )}
+      {!premios.isPending && <GoalPanel rewards={ofrecidos} balance={coins} />}
 
       {/*
         Tarjetas y no una lista de enlaces subrayados: quien usa esta pantalla

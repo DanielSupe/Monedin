@@ -24,14 +24,15 @@
 
 ## 3. El escaparate
 
-- [ ] 3.1 El panel de la meta más cercana: el más barato de los que no alcanza, con lo que le falta.
-- [ ] 3.2 Desempatar por identificador cuando dos cuesten lo mismo.
-- [ ] 3.3 Los dos casos sin meta, distintos entre sí: le alcanzan todos → se celebra; no tiene premios
+- [x] 3.1 La meta más cercana. **En el inicio como panel y en el escaparate marcando SU tesela**: un
+      panel encima de la rejilla repetiría el título de un premio que ya está ahí.
+- [x] 3.2 Desempatar por identificador cuando dos cuesten lo mismo.
+- [x] 3.3 Los dos casos sin meta, distintos entre sí: le alcanzan todos → se celebra; no tiene premios
       → no se destaca nada.
-- [ ] 3.4 Las cintas de estado sobre la foto, con contraste sobre las tres teselas de color y no solo
+- [x] 3.4 Las cintas de estado sobre la foto, con contraste sobre las tres teselas de color y no solo
       sobre la clara.
-- [ ] 3.5 Test del desempate: dos premios al mismo precio dan el mismo destacado en dos montajes.
-- [ ] 3.6 Test que distinga los tres casos: con meta, sin meta por alcance y sin meta por vacío. Los
+- [x] 3.5 Test del desempate: dos premios al mismo precio dan el mismo destacado en dos montajes.
+- [x] 3.6 Test que distinga los tres casos: con meta, sin meta por alcance y sin meta por vacío. Los
       tres tienen que dar pantallas distintas.
 
 ## 4. Canjes, monedas, perfil y ayuda
