@@ -61,4 +61,10 @@
       maquetas y es el escenario más probable: tablet compartida.
 - [ ] 6.3 Comprobar que las cuatro columnas de la tabla de canjes caben en la escala del niño a
       390 px. Eso no lo prueba jsdom, que no aplica CSS.
-- [ ] 6.4 `pnpm verify`, y si muere con `allocation failure`, con `--concurrency=1`.
+- [~] 6.4 `pnpm verify`, y si muere con `allocation failure`, con `--concurrency=1`.
+      **Corrido en parte, y se dice cuál.** `lint`, `typecheck` y `build` pasan en los cuatro
+      paquetes, y la batería del front entera (571 tests) con `--no-file-parallelism`. Lo que NO se
+      ha corrido aquí es `test` de la API: necesita PostgreSQL y MinIO levantados, y este árbol de
+      trabajo no los tiene. Este change no toca una línea de `apps/api`, así que nada de lo que
+      queda por correr cubre código que haya cambiado — pero eso no es lo mismo que haberlo corrido,
+      y se deja escrito en vez de dar el paso por bueno.

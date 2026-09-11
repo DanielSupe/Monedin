@@ -66,4 +66,10 @@
       test las buscó por él. Atado con `aria-labelledby` y `aria-label`.
       **Queda fuera del alcance de un test**: que las flechas recorran el grupo de opción y el
       deslizador. Es maquinaria de Radix que jsdom no reproduce, y está escrito en el propio test.
-- [ ] 6.5 `pnpm verify`, y si muere con `allocation failure`, con `--concurrency=1`.
+- [~] 6.5 `pnpm verify`, y si muere con `allocation failure`, con `--concurrency=1`.
+      **Corrido en parte, y se dice cuál.** `lint`, `typecheck` y `build` pasan en los cuatro
+      paquetes, y la batería del front entera (571 tests) con `--no-file-parallelism`. Lo que NO se
+      ha corrido aquí es `test` de la API: necesita PostgreSQL y MinIO levantados, y este árbol de
+      trabajo no los tiene. Este change no toca una línea de `apps/api`, así que nada de lo que
+      queda por correr cubre código que haya cambiado — pero eso no es lo mismo que haberlo corrido,
+      y se deja escrito en vez de dar el paso por bueno.

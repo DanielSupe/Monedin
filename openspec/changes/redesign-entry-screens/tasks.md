@@ -66,4 +66,10 @@
 - [ ] 6.3 Recorrer el camino entero con teclado: puerta pública → crear cuenta → rejilla → PIN →
       dentro, y la vuelta por restablecer el PIN. Es el único camino que le queda a quien ya es usuario
       y se le caducó la sesión.
-- [ ] 6.4 `pnpm verify`, y si muere con `allocation failure`, con `--concurrency=1`.
+- [~] 6.4 `pnpm verify`, y si muere con `allocation failure`, con `--concurrency=1`.
+      **Corrido en parte, y se dice cuál.** `lint`, `typecheck` y `build` pasan en los cuatro
+      paquetes, y la batería del front entera (571 tests) con `--no-file-parallelism`. Lo que NO se
+      ha corrido aquí es `test` de la API: necesita PostgreSQL y MinIO levantados, y este árbol de
+      trabajo no los tiene. Este change no toca una línea de `apps/api`, así que nada de lo que
+      queda por correr cubre código que haya cambiado — pero eso no es lo mismo que haberlo corrido,
+      y se deja escrito en vez de dar el paso por bueno.
