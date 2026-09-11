@@ -1,12 +1,13 @@
 ## 1. El inicio del niño
 
-- [ ] 1.1 Devolver el saldo a su sitio: el elemento más grande de la pantalla, con la pieza de
+- [x] 1.1 Devolver el saldo a su sitio: el elemento más grande de la pantalla, con la pieza de
       cantidades y con su unidad anunciada. Quitar la píldora de la cabecera.
-- [ ] 1.2 Quitar el saldo del marco del niño, en sus cinco pantallas. Es la mitad que faltaba por
-      escribir de la decisión vieja.
-- [ ] 1.3 Traer al inicio las tareas pendientes con su acción, y el panel de la meta más cercana.
-- [ ] 1.4 Montar el realce con la mascota usando `HeroPanel`, sin declarar un solo color.
-- [ ] 1.5 Test: el saldo sigue siendo el elemento de mayor tamaño del inicio **después** de añadir el
+- [x] 1.2 **El marco nunca lo tuvo**: lo proponían las referencias visuales, no el código. Lo que
+      faltaba era ESCRIBIRLO, y ya está en el delta de `app-navigation` — con un test que lo fija, o
+      la próxima referencia volvería a subirlo.
+- [x] 1.3 Traer al inicio las tareas pendientes con su acción, y el panel de la meta más cercana.
+- [x] 1.4 Montar el realce con la mascota usando `HeroPanel`, sin declarar un solo color.
+- [x] 1.5 Test: el saldo sigue siendo el elemento de mayor tamaño del inicio **después** de añadir el
       contenido nuevo. Es el requisito que este change casi rompe, así que es el que hay que fijar.
 
 ## 2. Las tareas del niño

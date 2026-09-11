@@ -68,13 +68,31 @@ function jsonResponse(body: unknown, status = 200): Response {
 }
 
 /**
+ * Lo que responde una ruta de la API, para los tests que SÍ prueban contenido.
+ *
+ * La clave es el principio de la dirección —`/tasks/mine`— y el valor, el cuerpo
+ * que se devuelve. Sin esto, una pantalla con datos había que montarla a mano
+ * repitiendo el router entero.
+ */
+export type Respuestas = Record<string, unknown>;
+
+/** Una página de listado, que es la forma que devuelve casi todo el producto. */
+export function pagina(items: unknown[]): unknown {
+  return { items, page: 1, pageSize: 20, total: items.length, totalPages: 1 };
+}
+
+/**
  * Responde la sesión y deja cualquier otra petición en una lista vacía.
  *
- * Las pantallas piden sus datos al montarse y aquí no se están probando: lo que
- * importa es la navegación. Una lista vacía las deja pintar su estado vacío en
- * vez de reventar.
+ * La lista vacía por defecto es a propósito: la mayoría de estos tests prueban
+ * NAVEGACIÓN, y una pantalla sin datos pinta su estado vacío en vez de reventar.
+ * Cuando lo que se prueba es el contenido, se pasan las respuestas en `extra`.
  */
-export function servirSesion(session: SessionState, profiles: SelectableProfile[] = []): void {
+export function servirSesion(
+  session: SessionState,
+  profiles: SelectableProfile[] = [],
+  extra: Respuestas = {},
+): void {
   vi.stubGlobal(
     "fetch",
     vi.fn((input: RequestInfo | URL) => {
@@ -85,6 +103,12 @@ export function servirSesion(session: SessionState, profiles: SelectableProfile[
       }
       if (url.startsWith(`${API_PREFIX}/auth/profiles`)) {
         return Promise.resolve(jsonResponse({ profiles }));
+      }
+
+      for (const [ruta, cuerpo] of Object.entries(extra)) {
+        if (url.startsWith(`${API_PREFIX}${ruta}`)) {
+          return Promise.resolve(jsonResponse(cuerpo));
+        }
       }
 
       return Promise.resolve(
@@ -116,8 +140,9 @@ export async function montarApp(
   inicial: string,
   session: SessionState,
   profiles: SelectableProfile[] = [],
+  extra: Respuestas = {},
 ): Promise<AppMontada> {
-  servirSesion(session, profiles);
+  servirSesion(session, profiles, extra);
 
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },

@@ -487,6 +487,30 @@ export const messages = {
      */
     homeGreeting: "Hola,",
     homeBalanceLabel: "Tus monedas",
+
+    /*
+     * Lo que Monedín dice al entrar, y por qué son TRES frases y no una con un
+     * número dentro.
+     *
+     * «Hoy te esperan N tareas» no se puede decir: una tarea no tiene concepto
+     * de jornada. Lo que sí es cierto es cuántas le quedan por hacer, y eso se
+     * compone en el punto de uso con la cifra — nunca escrita aquí.
+     */
+    homeGreetingLead: "¡Hola! Soy Monedín.",
+    homeNothingPending: "No te queda nada por hacer. ¡Disfruta!",
+    homeAllDone: "Ya hiciste todo lo tuyo. Te aviso cuando haya algo nuevo.",
+    homePendingOne: "tarea por hacer",
+    homePendingMany: "tareas por hacer",
+    /* Marcar NO paga: lo que sigue es que un adulto la mire. */
+    homeMarkExplains: "Cuando marques una, aviso a tu papá o a tu mamá.",
+
+    homeTasksTitle: "Tus tareas",
+    homeTasksAll: "Ver todas",
+
+    /* La meta: el premio más barato que todavía no alcanza. */
+    homeNextRewardTitle: "Tu próximo premio",
+    homeAllAffordableTitle: "¡Te alcanza para todo!",
+    homeAllAffordableBody: "Elige el que más te guste, que ya lo tienes.",
     myCoins: "Mis monedas",
     chooseAvatar: "Elige tu animal",
     avatarSaved: "¡Listo!",
