@@ -77,10 +77,14 @@
       campos en orden hasta «Crear mi cuenta» → rejilla, donde el perfil BLOQUEADO se salta solo
       porque no es un enlace → Enter en un perfil → PIN con el teclado físico, con su borrado. Y la
       vuelta: «¿Olvidaste tu PIN?» → contraseña, PIN nuevo, «Restablecer», «Volver».
-- [~] 6.4 `pnpm verify`, y si muere con `allocation failure`, con `--concurrency=1`.
-      **Corrido en parte, y se dice cuál.** `lint`, `typecheck` y `build` pasan en los cuatro
-      paquetes, y la batería del front entera (571 tests) con `--no-file-parallelism`. Lo que NO se
-      ha corrido aquí es `test` de la API: necesita PostgreSQL y MinIO levantados, y este árbol de
-      trabajo no los tiene. Este change no toca una línea de `apps/api`, así que nada de lo que
-      queda por correr cubre código que haya cambiado — pero eso no es lo mismo que haberlo corrido,
-      y se deja escrito en vez de dar el paso por bueno.
+- [x] 6.4 `pnpm verify`, y si muere con `allocation failure`, con `--concurrency=1`.
+      **Corrido entero y en verde**: 13 tareas, 1.310 tests —645 de la API contra PostgreSQL y
+      MinIO de verdad, 573 del front, 92 del contrato—. Con `--concurrency=1`, como manda
+      `CLAUDE.md` para una máquina cargada.
+
+      Cerrarlo destapó TRES cosas que no eran de este change y lo bloqueaban, y se arreglaron:
+      `docker compose up` fallaba en una máquina limpia porque Docker Hub deniega hoy las imágenes
+      de MinIO; dos casos de `packages/contracts` afirmaban reglas que `polish-profile-and-reward-image`
+      había revertido, así que llevaban rotos en `main`; y un PostgreSQL nativo en 5432 gana la
+      conexión al del contenedor, que se presenta como un fallo de credenciales — avisado ya en
+      `.env.example`.
