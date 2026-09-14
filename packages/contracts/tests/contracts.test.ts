@@ -783,20 +783,60 @@ describe("contrato de la subida de imágenes", () => {
     ).toBe(false);
   });
 
-  it("el avatar del padre se confirma solo con la foto subida", () => {
+  /*
+   * EL PADRE ELIGE ANIMAL O SUBE FOTO, las dos formas y no una.
+   *
+   * Este caso decía «solo con la foto subida», que era la regla de
+   * `add-file-storage`. `polish-profile-and-reward-image` le dio al padre el
+   * catálogo de animales —el mismo que el hijo— y el esquema lo dice desde
+   * entonces: «las dos son EXCLUYENTES y hace falta una». El caso se quedó
+   * afirmando lo contrario, así que llevaba roto desde ese día.
+   *
+   * Lo que NO cambió es la exclusividad, y es la mitad que sigue haciendo falta
+   * comprobar: mandar las dos a la vez deja al servidor eligiendo por su cuenta
+   * cuál gana.
+   */
+  it("el avatar del padre admite animal o foto, nunca las dos, nunca ninguna", () => {
     expect(updateParentAvatarSchema.safeParse({ avatarUploadKey: "avatars/parents/p/a.jpg" }).success).toBe(
       true,
     );
-    expect(updateParentAvatarSchema.safeParse({ avatar: DEFAULT_AVATAR_KEY }).success).toBe(false);
+    expect(updateParentAvatarSchema.safeParse({ avatar: DEFAULT_AVATAR_KEY }).success).toBe(true);
+
+    expect(
+      updateParentAvatarSchema.safeParse({
+        avatar: DEFAULT_AVATAR_KEY,
+        avatarUploadKey: "avatars/parents/p/a.jpg",
+      }).success,
+    ).toBe(false);
     expect(updateParentAvatarSchema.safeParse({}).success).toBe(false);
   });
 
-  it("el alta de un premio NO acepta foto: se añade al editarlo", () => {
+  /*
+   * EL ALTA DE UN PREMIO SÍ ACEPTA FOTO, y este caso decía lo contrario.
+   *
+   * Estuvo prohibido desde `add-file-storage` «porque la clave lleva el
+   * rewardId», que todavía no existe al publicar. El argumento resultó ser
+   * falso: una clave para algo que aún no existe cuelga de QUIEN LA SUBE —el
+   * padre, que sí existe, porque publicar ya exige su perfil— y no de lo que se
+   * va a crear. `polish-profile-and-reward-image` cambió el esquema y dejó este
+   * caso afirmando la regla vieja, así que llevaba roto desde entonces.
+   *
+   * Sigue siendo OPCIONAL, que es lo que hay que comprobar: publicar sin foto es
+   * el camino normal y no puede pedir una.
+   */
+  it("el alta de un premio acepta foto, y también prescinde de ella", () => {
     const base = { title: "Ir al cine", childIds: ["hijo-1"], coins: 200 };
 
     expect(createRewardSchema.safeParse(base).success).toBe(true);
     expect(
-      createRewardSchema.safeParse({ ...base, imageUploadKey: "rewards/premio-1/a.jpg" }).success,
+      createRewardSchema.safeParse({ ...base, imageUploadKey: "rewards/pending/padre-1/a.jpg" })
+        .success,
+    ).toBe(true);
+
+    // Y lo que sigue prohibido: un campo que el esquema no conoce es 422, no un
+    // valor que se ignora en silencio, porque el objeto es estricto.
+    expect(
+      createRewardSchema.safeParse({ ...base, imagen: "rewards/pending/padre-1/a.jpg" }).success,
     ).toBe(false);
   });
 
