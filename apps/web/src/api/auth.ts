@@ -10,6 +10,7 @@ import {
   type SessionState,
   type SetChildPinInput,
   type UpdateParentAvatarInput,
+  type UpdateThemeInput,
   type UpdateTutorialInput,
   selectableProfilesSchema,
   sessionStateSchema,
@@ -140,6 +141,20 @@ export async function updateParentAvatar(input: UpdateParentAvatarInput): Promis
  */
 export async function updateTutorial(input: UpdateTutorialInput): Promise<void> {
   await apiFetch("/auth/tutorial", z.unknown(), {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+/**
+ * Guarda el tema del perfil activo.
+ *
+ * UNA ruta para los dos roles, igual que el recorrido: a quién se le guarda sale
+ * del actor, así que no hay identificador que mandar — y por eso un niño no
+ * puede cambiarle el tema a su hermano ni queriendo.
+ */
+export async function updateTheme(input: UpdateThemeInput): Promise<void> {
+  await apiFetch("/auth/theme", z.unknown(), {
     method: "PATCH",
     body: JSON.stringify(input),
   });

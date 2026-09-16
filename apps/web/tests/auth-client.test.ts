@@ -53,6 +53,7 @@ describe("cliente de sesión", () => {
           actor: {
             familyRole: "CHILD",
             tutorialSeen: false,
+            theme: "SYSTEM" as const,
             id: "c1",
             name: "Mateo",
             avatar: DEFAULT_AVATAR_KEY,
@@ -84,6 +85,7 @@ describe("cliente de sesión", () => {
             avatar: null,
             coins: 0,
             tutorialSeen: false,
+            theme: "SYSTEM" as const,
           },
           hasAccount: true,
         }),
@@ -136,6 +138,7 @@ describe("cliente de la rejilla", () => {
           actor: {
             familyRole: "PARENT",
             tutorialSeen: false,
+            theme: "SYSTEM" as const,
             id: "u1",
             name: "Lucía",
             email: "l@x.test",
@@ -236,6 +239,7 @@ describe("la guarda tiene tres estados, no dos", () => {
           email: "l@x.test",
           avatar: "nutria",
           tutorialSeen: true,
+          theme: "SYSTEM" as const,
         },
         hasAccount: true,
       }),

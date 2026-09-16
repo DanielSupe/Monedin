@@ -1,6 +1,9 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { useState } from "react";
+import type { ThemePreference } from "@monedin/contracts";
 import { messages } from "../lib/messages.js";
+import { ThemeToggle } from "./ThemeToggle.js";
+import { useTheme } from "./use-theme.js";
 import { Avatar, Drawer, Logo } from "../ui/index.js";
 import {
   MenuButton,
@@ -53,6 +56,7 @@ export function ChildShell({
   name,
   tutorialSeen,
   fullHeight,
+  theme,
 }: {
   avatar: string | null;
   name: string;
@@ -69,6 +73,8 @@ export function ChildShell({
    * camino que pueda separarse del primero.
    */
   tutorialSeen: boolean;
+  /** El tema que prefiere este perfil. Lo estampa el marco en la raíz. */
+  theme: ThemePreference;
   /**
    * Si la pantalla de dentro gestiona su propio alto y desplaza por dentro.
    *
@@ -83,6 +89,8 @@ export function ChildShell({
    */
   fullHeight: boolean;
 }): React.ReactElement {
+  useTheme(theme);
+
   const { open, setOpen } = useDrawer();
   const ancho = useIsWide();
   // Sobrevive a la navegación porque el marco no se desmonta; se pierde al
@@ -176,6 +184,8 @@ export function ChildShell({
           está usando esto, que la lista de destinos no responde. Es la única
           excepción declarada a «ningún destino dos veces».
         */}
+        <ThemeToggle theme={theme} />
+
         <HelpLink />
 
         <Link to="/me/settings" aria-label={messages.children.myProfileTitle}>

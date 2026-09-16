@@ -41,6 +41,12 @@ export function comoPadre(name = "Lucía", tutorialSeen = true): SessionState {
       // Nunca nulo: la API lo resuelve al del catálogo por defecto.
       avatar: DEFAULT_AVATAR_KEY,
       tutorialSeen,
+      /*
+       * SYSTEM por defecto, y no es un detalle: el caso común de un test es
+       * alguien que no ha tocado el tema. Con otro valor, cada test que monta un
+       * marco se encontraría un tema elegido encima de lo que iba a comprobar.
+       */
+      theme: "SYSTEM",
     },
   };
 }
@@ -56,6 +62,7 @@ export function comoNino(name = "Mateo", tutorialSeen = true): SessionState {
       avatar: "zorro",
       coins: 120,
       tutorialSeen,
+      theme: "SYSTEM",
     },
   };
 }

@@ -175,6 +175,32 @@ export const updateTutorialSchema = z.object({ seen: z.boolean() }).strict();
 
 export type UpdateTutorialInput = z.infer<typeof updateTutorialSchema>;
 
+/**
+ * Qué tema prefiere un perfil.
+ *
+ * TRES valores y no un booleano: «oscuro sí/no» no sabe decir «el que diga el
+ * sistema», y ese es el valor por defecto y el que más gente va a dejar puesto.
+ * Con un booleano haría falta además un nulo con significado, que es tener un
+ * enumerado sin decirlo.
+ */
+export const themePreferenceSchema = z.enum(["SYSTEM", "LIGHT", "DARK"]);
+
+export type ThemePreference = z.infer<typeof themePreferenceSchema>;
+
+/**
+ * Cambiar el tema del perfil activo.
+ *
+ * UNA sola entrada para los dos roles, por lo mismo que el recorrido de
+ * bienvenida: tener una por rol invita a proteger una y olvidarse de la otra.
+ * La rama por rol vive en el servicio.
+ *
+ * `.strict()`: un campo que el esquema no conoce es 422 y no un valor que se
+ * ignora en silencio.
+ */
+export const updateThemeSchema = z.object({ theme: themePreferenceSchema }).strict();
+
+export type UpdateThemeInput = z.infer<typeof updateThemeSchema>;
+
 // ---------------------------------------------------------------------------
 // Respuestas
 // ---------------------------------------------------------------------------
@@ -204,6 +230,15 @@ export const parentActorSchema = z.object({
    * Un booleano y no la fecha: quien pregunta decide con un sí o un no.
    */
   tutorialSeen: z.boolean(),
+
+  /**
+   * Qué tema prefiere este perfil.
+   *
+   * Viaja CON el actor por el mismo argumento que `tutorialSeen`: el cliente lo
+   * necesita para decidir qué pintar nada más cargar, y un segundo camino trae
+   * su propia caché que puede separarse de la del actor.
+   */
+  theme: themePreferenceSchema,
 });
 
 export const childActorSchema = z.object({
@@ -226,6 +261,15 @@ export const childActorSchema = z.object({
    * Un booleano y no la fecha: quien pregunta decide con un sí o un no.
    */
   tutorialSeen: z.boolean(),
+
+  /**
+   * Qué tema prefiere este perfil.
+   *
+   * Viaja CON el actor por el mismo argumento que `tutorialSeen`: el cliente lo
+   * necesita para decidir qué pintar nada más cargar, y un segundo camino trae
+   * su propia caché que puede separarse de la del actor.
+   */
+  theme: themePreferenceSchema,
 });
 
 /** Un perfil tal como se ofrece en la rejilla, antes de entrar. */

@@ -1,3 +1,4 @@
+import type { ThemePreference } from "@monedin/contracts";
 import { getPrisma, withTranslatedErrors } from "../../shared/database/index.js";
 import { hashSessionToken } from "../../shared/crypto/session-token.js";
 
@@ -77,11 +78,19 @@ export function findParentById(
   email: string;
   image: string | null;
   tutorialSeenAt: Date | null;
+  themePreference: ThemePreference;
 } | null> {
   return withTranslatedErrors(() =>
     getPrisma().user.findUnique({
       where: { id },
-      select: { id: true, name: true, email: true, image: true, tutorialSeenAt: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        tutorialSeenAt: true,
+        themePreference: true,
+      },
     }),
   );
 }
@@ -235,6 +244,7 @@ export function findChildForSession(
   coins: number;
   parentId: string;
   tutorialSeenAt: Date | null;
+  themePreference: ThemePreference;
 } | null> {
   return withTranslatedErrors(() =>
     getPrisma().childProfile.findUnique({
@@ -246,6 +256,7 @@ export function findChildForSession(
         coins: true,
         parentId: true,
         tutorialSeenAt: true,
+        themePreference: true,
       },
     }),
   );
@@ -267,6 +278,25 @@ export function setParentTutorialSeen(id: string, seenAt: Date | null): Promise<
 export function setChildTutorialSeen(id: string, seenAt: Date | null): Promise<void> {
   return withTranslatedErrors(async () => {
     await getPrisma().childProfile.update({ where: { id }, data: { tutorialSeenAt: seenAt } });
+  });
+}
+
+/**
+ * El tema de cada perfil, en su propia fila.
+ *
+ * Dos funciones y no una con un `if`, por lo mismo que el recorrido de
+ * bienvenida: el repositorio no adivina cuál toca. Quién es quién lo decide el
+ * servicio, que es donde vive la rama por rol.
+ */
+export function setParentTheme(id: string, theme: ThemePreference): Promise<void> {
+  return withTranslatedErrors(async () => {
+    await getPrisma().user.update({ where: { id }, data: { themePreference: theme } });
+  });
+}
+
+export function setChildTheme(id: string, theme: ThemePreference): Promise<void> {
+  return withTranslatedErrors(async () => {
+    await getPrisma().childProfile.update({ where: { id }, data: { themePreference: theme } });
   });
 }
 

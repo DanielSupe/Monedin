@@ -9,6 +9,7 @@ import {
   resetAdultPinSchema,
   setChildPinSchema,
   updateParentAvatarSchema,
+  updateThemeSchema,
   updateTutorialSchema,
 } from "@monedin/contracts";
 import type { Router as ExpressRouter } from "express";
@@ -125,6 +126,16 @@ auth.patch(
   validate({ body: updateTutorialSchema }),
   controller.handleUpdateTutorial,
 );
+
+// --- Tema del perfil ---------------------------------------------------------
+//
+// EXIGE ACTOR y no entra en la lista de rutas de solo cuenta: hay que saber a
+// QUIÉN se le guarda. Esa lista sigue en cinco.
+//
+// Una sola ruta para los dos roles, por lo mismo que el recorrido: tener una por
+// rol invita a proteger una y olvidarse de la otra.
+
+auth.patch("/auth/theme", validate({ body: updateThemeSchema }), controller.handleUpdateTheme);
 
 // --- Avatar propio del padre -------------------------------------------------
 //

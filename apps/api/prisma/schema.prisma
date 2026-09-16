@@ -41,6 +41,19 @@ enum RedemptionStatus {
 }
 
 /// De donde viene un movimiento de monedas.
+/// Que tema prefiere un perfil.
+///
+/// TRES valores y no un booleano: "oscuro si/no" no sabe decir "el que diga el
+/// sistema", y ese es el valor por defecto y el que mas gente va a dejar
+/// puesto. Con un booleano haria falta ademas un nulo con significado, que es
+/// tener un enumerado sin decirlo.
+enum ThemePreference {
+  /// Sigue la preferencia del dispositivo. Lo que el producto hacia siempre.
+  SYSTEM
+  LIGHT
+  DARK
+}
+
 enum CoinReason {
   TASK_APPROVED
   REDEMPTION_APPROVED
@@ -84,6 +97,14 @@ model User {
   /// FECHA y no booleano: no cuesta mas y responde una pregunta que un booleano
   /// no puede —cuando—, util el dia que el recorrido cambie y haya que saber
   /// quien vio cual. Lo que sale por la API es solo si lo vio, no cuando.
+  /// Que tema prefiere este perfil. SYSTEM es lo que el producto hacia siempre.
+  ///
+  /// Vive AQUI y no en el navegador a proposito: la tablet es compartida, y una
+  /// preferencia del dispositivo haria que un hijo heredase el tema de su padre
+  /// —o se lo cambiase sin querer—. Guardada en la fila, el mismo nino ve su
+  /// tema en la tablet y en el movil de su madre.
+  themePreference ThemePreference @default(SYSTEM)
+
   tutorialSeenAt DateTime?
 
   createdAt DateTime @default(now())
@@ -123,6 +144,14 @@ model ChildProfile {
   /// FECHA y no booleano: no cuesta mas y responde una pregunta que un booleano
   /// no puede —cuando—, util el dia que el recorrido cambie y haya que saber
   /// quien vio cual. Lo que sale por la API es solo si lo vio, no cuando.
+  /// Que tema prefiere este perfil. SYSTEM es lo que el producto hacia siempre.
+  ///
+  /// Vive AQUI y no en el navegador a proposito: la tablet es compartida, y una
+  /// preferencia del dispositivo haria que un hijo heredase el tema de su padre
+  /// —o se lo cambiase sin querer—. Guardada en la fila, el mismo nino ve su
+  /// tema en la tablet y en el movil de su madre.
+  themePreference ThemePreference @default(SYSTEM)
+
   tutorialSeenAt DateTime?
   /// Baja logica: oculta de los listados sin destruir historial.
   deletedAt DateTime?

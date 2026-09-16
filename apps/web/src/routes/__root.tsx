@@ -81,6 +81,7 @@ function AppFrame(): React.ReactElement {
         avatar={actor.avatar}
         name={actor.name}
         tutorialSeen={actor.tutorialSeen}
+        theme={actor.theme}
         fullHeight={altoCompleto}
       />
     );
@@ -94,6 +95,7 @@ function AppFrame(): React.ReactElement {
         avatar={actor.avatar}
         name={actor.name}
         tutorialSeen={actor.tutorialSeen}
+        theme={actor.theme}
         fullHeight={altoCompleto}
       />
     );

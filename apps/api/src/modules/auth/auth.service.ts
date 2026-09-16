@@ -12,6 +12,8 @@ import {
   type AvatarValue,
   type ImageContentType,
   type UpdateParentAvatarInput,
+  type ThemePreference,
+  type UpdateThemeInput,
   type UpdateTutorialInput,
   type UploadUrl,
 } from "@monedin/contracts";
@@ -96,6 +98,8 @@ export interface ParentProfileSummary extends ParentSummary {
   avatar: AvatarValue;
   /** Si a este perfil ya se le mostró el recorrido. El CUÁNDO no sale de aquí. */
   tutorialSeen: boolean;
+  /** Qué tema prefiere este perfil. `SYSTEM` es seguir al dispositivo. */
+  theme: ThemePreference;
 }
 
 export interface IssuedSession {
@@ -326,6 +330,8 @@ export interface ActiveProfile {
   email?: string;
   /** Si a este perfil ya se le mostró el recorrido de bienvenida. */
   tutorialSeen: boolean;
+  /** Qué tema prefiere este perfil. `SYSTEM` es seguir al dispositivo. */
+  theme: ThemePreference;
 }
 
 /**
@@ -391,6 +397,7 @@ async function enterParentProfile(
       email: found.email,
       avatar: await resolveAvatarForResponse(getStorageProvider(), profile?.image ?? null),
       tutorialSeen: profile?.tutorialSeenAt != null,
+      theme: profile?.themePreference ?? "SYSTEM",
     },
     session,
   };
@@ -449,6 +456,7 @@ async function enterChildProfile(
       avatar: resolveAvatarKey(child.avatar),
       coins: child.coins,
       tutorialSeen: child.tutorialSeenAt !== null,
+      theme: child.themePreference,
     },
     session,
   };
@@ -581,6 +589,7 @@ export async function describeParent(userId: string): Promise<ParentProfileSumma
     email: parent.email,
     avatar: await resolveAvatarForResponse(getStorageProvider(), parent.image),
     tutorialSeen: parent.tutorialSeenAt !== null,
+    theme: parent.themePreference,
   };
 }
 
@@ -608,6 +617,22 @@ export async function updateTutorialSeen(actor: Actor, input: UpdateTutorialInpu
   }
 
   await repository.setParentTutorialSeen(actor.userId, cuando);
+}
+
+/**
+ * Cambiar el tema del perfil activo.
+ *
+ * Qué perfil se toca sale del ACTOR y nunca de la petición, igual que el
+ * recorrido: es lo que hace imposible por construcción que un niño cambie el
+ * tema de su hermano.
+ */
+export async function updateTheme(actor: Actor, input: UpdateThemeInput): Promise<void> {
+  if (actor.familyRole === "CHILD") {
+    await repository.setChildTheme(actor.childProfileId, input.theme);
+    return;
+  }
+
+  await repository.setParentTheme(actor.userId, input.theme);
 }
 
 // ---------------------------------------------------------------------------
@@ -683,6 +708,8 @@ export interface ChildSummary {
   coins: number;
   /** Si a este perfil ya se le mostró el recorrido. El CUÁNDO no sale de aquí. */
   tutorialSeen: boolean;
+  /** Qué tema prefiere este perfil. `SYSTEM` es seguir al dispositivo. */
+  theme: ThemePreference;
 }
 
 export async function describeChild(childProfileId: string): Promise<ChildSummary | null> {
@@ -695,6 +722,7 @@ export async function describeChild(childProfileId: string): Promise<ChildSummar
     avatar: child.avatar,
     coins: child.coins,
     tutorialSeen: child.tutorialSeenAt !== null,
+    theme: child.themePreference,
   };
 }
 

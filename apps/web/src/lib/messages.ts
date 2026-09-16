@@ -133,6 +133,17 @@ export const messages = {
     parentRedemptions: "Canjes",
     parentChildren: "Hijos",
     parentAccount: "Mi cuenta",
+
+    /*
+     * Los tres estados del tema, dichos como ESTADO y no como acción.
+     *
+     * «Tema oscuro» y no «cambiar a claro»: lo que el control anuncia es dónde
+     * está, porque eso es lo que hace falta al llegar a él. A dónde lleva se
+     * descubre pulsando, y el nombre cambia entonces.
+     */
+    themeSystem: "Tema: el del sistema",
+    themeLight: "Tema: claro",
+    themeDark: "Tema: oscuro",
     /** Lo que encabeza la cuenta del padre, antes del título. */
     parentAccountLead: "Tu foto, tu PIN y tu sesión",
 

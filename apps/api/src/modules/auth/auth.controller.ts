@@ -11,6 +11,7 @@ import {
   resolveAvatarKey,
   setChildPinSchema,
   updateParentAvatarSchema,
+  updateThemeSchema,
   updateTutorialSchema,
 } from "@monedin/contracts";
 import type { Request, RequestHandler } from "express";
@@ -149,6 +150,7 @@ export const handleEnterProfile: RequestHandler = async (req, res) => {
             avatar: profile.avatar,
             coins: profile.coins ?? 0,
             tutorialSeen: profile.tutorialSeen,
+            theme: profile.theme,
           }
         : {
             familyRole: "PARENT" as const,
@@ -157,6 +159,7 @@ export const handleEnterProfile: RequestHandler = async (req, res) => {
             email: profile.email ?? "",
             avatar: profile.avatar,
             tutorialSeen: profile.tutorialSeen,
+            theme: profile.theme,
           },
     hasAccount: true,
   } satisfies SessionState);
@@ -238,6 +241,7 @@ async function buildSessionState(req: Request): Promise<SessionState> {
             avatar: resolveAvatarKey(child.avatar),
             coins: child.coins,
             tutorialSeen: child.tutorialSeen,
+            theme: child.theme,
           },
           hasAccount: true,
         };
@@ -255,6 +259,7 @@ async function buildSessionState(req: Request): Promise<SessionState> {
           email: parent.email,
           avatar: parent.avatar,
           tutorialSeen: parent.tutorialSeen,
+          theme: parent.theme,
         },
         hasAccount: true,
       };
@@ -279,6 +284,17 @@ export const handleUpdateTutorial: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", updateTutorialSchema);
 
   await service.updateTutorialSeen(actorOf(req), input);
+  res.status(204).send();
+};
+
+/**
+ * Cambiar el tema. Como el recorrido: el controlador no sabe de roles, y qué
+ * perfil se toca sale del actor.
+ */
+export const handleUpdateTheme: RequestHandler = async (req, res) => {
+  const input = validatedPart(req, "body", updateThemeSchema);
+
+  await service.updateTheme(actorOf(req), input);
   res.status(204).send();
 };
 

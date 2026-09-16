@@ -122,6 +122,22 @@ export function useUpdateTutorial() {
   });
 }
 
+/**
+ * Guarda el tema y refresca la sesión.
+ *
+ * Invalida por lo mismo que el recorrido: el valor vive DENTRO del actor, así
+ * que sin invalidarlo la interfaz seguiría pintando el tema anterior hasta la
+ * siguiente recarga.
+ */
+export function useUpdateTheme() {
+  const refresh = useRefreshSession();
+
+  return useMutation({
+    mutationFn: api.updateTheme,
+    onSuccess: refresh,
+  });
+}
+
 /** Cambia el PIN de adulto indicando el actual. Exige perfil de padre activo. */
 export function useChangeAdultPin() {
   return useMutation({ mutationFn: api.changeAdultPin });

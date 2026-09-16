@@ -28,6 +28,7 @@ function padre(name: string, email: string): SessionState {
       email,
       avatar: "https://almacen.ejemplo.dev/avatars/parents/p1/foto.jpg",
       tutorialSeen: true,
+      theme: "SYSTEM" as const,
     },
   };
 }
