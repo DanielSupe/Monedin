@@ -712,6 +712,10 @@
  * ------------------------------------------------------------------ */
 
 :root,
+/*
+ * Los pasos salen de CONTAR las maquetas del padre, no de mirarlas: su cuerpo
+ * son 14px porque aparece 261 veces, y su título 19 porque es el que domina.
+ */
 [data-scale="parent"] {
   /*
    * Siete pasos, nombrados por su PAPEL. Eran cuatro, y con cuatro cada pantalla
@@ -719,11 +723,34 @@
    * distintos dibujados a mano. Los tres nuevos —micro, lead y display— son los
    * que esas pantallas estaban inventando.
    */
+  /*
+   * EL REGISTRO TIPOGRÁFICO DE ESTE PRODUCTO, Y NO EL DE POR DEFECTO.
+   *
+   * En los 32 artboards de `design/ui/pantallas/` hay 900 en 545 declaraciones,
+   * 800 en 339 y 700 en 266. **Ni una sola de 400.** El texto normal de este
+   * diseño son 700; lo que el navegador trae por defecto no aparece en ninguna
+   * parte.
+   *
+   * Se declara AQUÍ y no se reescribe en cien puntos de uso: una pieza sigue
+   * pidiendo «semibold», y lo que cambia es a qué apunta esa palabra en este
+   * producto — exactamente lo mismo que hizo `--color-primary` al repintarse.
+   *
+   * LA CONSECUENCIA, dicha con todas las letras: en este proyecto
+   * `font-normal` NO son 400. Una palabra que significa otra cosa sin avisar es
+   * peor que un valor raro, así que queda avisado.
+   */
+  --font-weight-normal: 700;
+  --font-weight-medium: 700;
+  --font-weight-semibold: 800;
+  --font-weight-bold: 900;
+  --font-weight-extrabold: 900;
+  --font-weight-black: 900;
+
   --text-micro: 0.75rem;
   --text-small: 0.8125rem;
-  --text-body: 0.9375rem;
-  --text-lead: 1.0625rem;
-  --text-title: 1.3125rem;
+  --text-body: 0.875rem;
+  --text-lead: 1rem;
+  --text-title: 1.1875rem;
   --text-display: 1.625rem;
   --text-hero: 2.75rem;
 
@@ -756,14 +783,21 @@
 /* Se repite el bloque del padre porque una escala puede anidarse dentro de la
    otra: sin esto, un panel del padre dentro de uno del niño heredaría la suya. */
 [data-scale="child"] {
-  /* El saldo es el elemento más grande de la aplicación, y es a propósito:
-     es lo que el producto enseña. */
+  /*
+   * Los pasos salen de CONTAR sus maquetas: 14 y 15 se reparten el cuerpo, y el
+   * niño lee un paso por encima de su padre por decisión del sistema.
+   *
+   * EL `--text-hero` NO SALE DE LA MAQUETA, y se queda: allí el saldo es una
+   * píldora de la cabecera a 34px, y aquí es el elemento más grande del inicio
+   * porque lo exige un requisito vigente. Bajarlo aquí sería cambiar una
+   * decisión de producto por la puerta de atrás.
+   */
   --text-micro: 0.8125rem;
-  --text-small: 0.875rem;
-  --text-body: 1.0625rem;
-  --text-lead: 1.1875rem;
-  --text-title: 1.625rem;
-  --text-display: 2.125rem;
+  --text-small: 0.8125rem;
+  --text-body: 0.9375rem;
+  --text-lead: 1.125rem;
+  --text-title: 1.3125rem;
+  --text-display: 1.625rem;
   --text-hero: 4rem;
 
   --radius-control: 0.875rem;
@@ -786,11 +820,11 @@
  */
 [data-scale="public"] {
   --text-micro: 0.8125rem;
-  --text-small: 0.9375rem;
-  --text-body: 1.125rem;
-  --text-lead: 1.25rem;
-  --text-title: 1.875rem;
-  --text-display: 2.875rem;
+  --text-small: 0.875rem;
+  --text-body: 1rem;
+  --text-lead: 1.125rem;
+  --text-title: 1.5rem;
+  --text-display: 2rem;
   --text-hero: 3.625rem;
 }
 
@@ -948,18 +982,25 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: var(--text-body);
+    /*
+     * EL PESO BASE, y hace falta declararlo: los tokens de peso mueven las
+     * UTILIDADES, no el texto que no lleva ninguna. Sin esta línea, todo lo que
+     * no pide un peso se queda en el 400 del navegador — que es el único peso
+     * que no aparece ni una vez en las 32 maquetas.
+     */
+    font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
 
   h1 {
     font-size: var(--text-hero);
-    font-weight: 800;
+    font-weight: var(--font-weight-bold);
     line-height: 1.1;
   }
 
   h2 {
     font-size: var(--text-title);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     line-height: 1.25;
   }
 
@@ -968,7 +1009,7 @@
   h5,
   h6 {
     font-size: var(--text-body);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
   }
 
   a {
@@ -1008,7 +1049,7 @@
     border-radius: var(--radius-control);
     background-color: var(--color-surface-raised);
     color: var(--color-ink);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     cursor: pointer;
   }
 
