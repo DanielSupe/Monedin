@@ -22,7 +22,7 @@ export function FinalCta(): React.ReactElement {
   return (
     <section data-surface="brand" className="bg-brand text-ink">
       <div className="mx-auto flex w-full max-w-(--container-wide) flex-col items-start gap-4 px-4 py-12">
-        <h2 className="text-hero max-w-(--container-reading) font-extrabold">
+        <h2 className="text-display max-w-(--container-reading) font-extrabold">
           {messages.landing.closingTitle}
         </h2>
         <p className="text-body max-w-(--container-reading) text-ink-muted">
@@ -35,11 +35,18 @@ export function FinalCta(): React.ReactElement {
           nombra por el PAPEL —«destaca contra su superficie»— y aquí resuelve
           en ámbar, que además es lo que este producto entero enseña: dinero.
         */}
+        {/*
+          «Crear mi cuenta» y no «Empezar», que es lo que decían los otros dos.
+          Al final de la página ya no hace falta invitar a empezar —eso lo hizo
+          la cabecera y lo hizo el héroe— y lo que queda por decir es QUÉ va a
+          pasar al pulsar. Tres botones iguales en una página también son tres
+          oportunidades de no saber si llevan al mismo sitio.
+        */}
         <Link
           to="/sign-up"
           className={buttonClasses("contrast", false, "large")}
         >
-          {messages.landing.start}
+          {messages.landing.closingAction}
         </Link>
       </div>
     </section>

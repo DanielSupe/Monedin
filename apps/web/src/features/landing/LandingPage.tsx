@@ -72,9 +72,23 @@ export function LandingPage(): React.ReactElement {
         </div>
       </main>
 
-      <HowItWorks />
+      {/*
+        EL ORDEN ES EL DE LA MAQUETA, y estaba al revés: «así funciona» iba
+        antes que «dinero de mentira».
 
+        Importa por lo que un adulto piensa al llegar. Lee «monedas» y «premios»
+        en una aplicación para su hijo, y su primera pregunta no es cómo
+        funciona el ciclo sino si esto mueve dinero de verdad. Explicar el
+        mecanismo antes de contestar eso es explicarle cómo se usa algo de lo
+        que todavía desconfía.
+
+        La alternancia de fondos se conserva porque las dos secciones cambiaron
+        el suyo con el sitio: la que va primera queda hundida y la segunda sobre
+        la superficie, así que la página sigue respirando igual.
+      */}
       <About />
+
+      <HowItWorks />
 
       <AppPreview />
 
@@ -144,12 +158,13 @@ function Hero(): React.ReactElement {
  * simetría: dos franjas seguidas con el visual del mismo lado se leen como un
  * bloque repetido.
  *
- * Sobre `surface`, entre dos secciones hundidas: es el turno que le toca en la
- * alternancia que da ritmo a la página.
+ * HUNDIDA, porque al pasar a ser la primera le toca ese turno en la
+ * alternancia que da ritmo a la página. El fondo lo decide el SITIO y no la
+ * sección: intercambiar dos y dejarles el suyo deja dos iguales seguidas.
  */
 function About(): React.ReactElement {
   return (
-    <section className="bg-surface">
+    <section className="bg-surface-sunken">
       <div className="mx-auto flex w-full max-w-(--container-wide) flex-col items-center gap-8 px-4 py-12 lg:flex-row lg:gap-12">
         {/*
           DECORATIVA, y es lo contrario de `Orbits`.
@@ -168,7 +183,7 @@ function About(): React.ReactElement {
         <Mascota pose="explica" size="large" className="shrink-0" />
 
         <div className="flex min-w-0 flex-col gap-4">
-          <h2 className="text-title font-extrabold">{messages.landing.aboutTitle}</h2>
+          <h2 className="text-display font-extrabold">{messages.landing.aboutTitle}</h2>
           <p className="text-body max-w-(--container-reading) text-ink-muted">
             {messages.landing.aboutBody}
           </p>

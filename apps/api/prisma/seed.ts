@@ -25,8 +25,22 @@ export const CREDENCIALES_DE_EJEMPLO = {
   ninos: [
     { nombre: "Mateo", pin: "1234", avatar: "zorro" },
     { nombre: "Emma", pin: "5678", avatar: "koala" },
+    { nombre: "Lucas", pin: "4321", avatar: "panda" },
   ],
 } as const;
+
+/**
+ * EL TERCER HIJO ESTÁ AHÍ POR LOS ESTADOS QUE LOS DOS PRIMEROS NO PUEDEN DAR.
+ *
+ * Con dos hijos hay pantallas del producto que no se pueden mirar nunca: la
+ * tesela BLOQUEADA de la rejilla no aparece —bloquear a uno de los dos deja la
+ * aplicación sin el caso normal al lado— y una rejilla de tres caras no se
+ * compone igual que una de dos.
+ *
+ * Nace bloqueado a propósito, y se desbloquea entrando con el PIN del adulto.
+ * Es el caso que un desarrollador no vería jamás si tuviera que provocarlo.
+ */
+const BLOQUEO_DE_LUCAS_EN_MINUTOS = 30;
 
 const config = getConfig();
 
@@ -121,6 +135,20 @@ async function seed(): Promise<void> {
       parentId: padre.id,
     },
   });
+  // Bloqueado, y sin edad: los dos son estados válidos que los otros dos hijos
+  // no pueden dar a la vez. `age` es opcional en el modelo y una rejilla que
+  // nunca enseña una tesela sin edad esconde la mitad de su contrato.
+  const bloqueado = await prisma.childProfile.create({
+    data: {
+      name: CREDENCIALES_DE_EJEMPLO.ninos[2].nombre,
+      pinHash: await hashCredential(CREDENCIALES_DE_EJEMPLO.ninos[2].pin),
+      avatar: CREDENCIALES_DE_EJEMPLO.ninos[2].avatar,
+      coins: 0,
+      failedPinAttempts: 5,
+      lockedUntil: new Date(Date.now() + BLOQUEO_DE_LUCAS_EN_MINUTOS * 60 * 1000),
+      parentId: padre.id,
+    },
+  });
 
   // --- Tareas ---------------------------------------------------------------
   //
@@ -135,11 +163,46 @@ async function seed(): Promise<void> {
   // hace falta conocerlo antes de insertar.
   const ordenarElCuarto = randomUUID();
   const deberesDeCasa = randomUUID();
+  const regarLasPlantas = randomUUID();
+
+  const enDosDias = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+  const anteayer = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
 
   const tareas = [
     // Pendientes: lo que cada nino tiene por hacer.
+    //
+    // El reparto de tres es el que hace visible que `GET /tasks` pagina por
+    // REPARTO y no por fila, y con estados MEZCLADOS: filtrar por "Por aprobar"
+    // trae el reparto entero, que es la decision de producto que la pantalla
+    // tiene que explicar. Con repartos de uno eso no se puede ni mirar.
     { title: "Ordenar el cuarto", coins: 50, childId: mayor.id, batchId: ordenarElCuarto },
     { title: "Ordenar el cuarto", coins: 30, childId: menor.id, batchId: ordenarElCuarto },
+    {
+      title: "Ordenar el cuarto",
+      coins: 30,
+      childId: bloqueado.id,
+      batchId: ordenarElCuarto,
+      status: "COMPLETED" as const,
+    },
+
+    // Con FECHA LIMITE, una por vencer y otra ya pasada. `dueDate` es opcional,
+    // asi que sin estas dos la fecha no aparece en ninguna pantalla y el caso
+    // de una vencida no se ve nunca.
+    {
+      title: "Regar las plantas",
+      description: "Las del balcon, antes del fin de semana.",
+      coins: 25,
+      childId: mayor.id,
+      batchId: regarLasPlantas,
+      dueDate: enDosDias,
+    },
+    {
+      title: "Regar las plantas",
+      coins: 25,
+      childId: menor.id,
+      batchId: regarLasPlantas,
+      dueDate: anteayer,
+    },
 
     // Marcadas: esperando a que su padre las resuelva. Es la bandeja.
     { title: "Sacar la basura", coins: 20, childId: mayor.id, status: "COMPLETED" as const },
@@ -156,6 +219,9 @@ async function seed(): Promise<void> {
     { title: "Poner la mesa", coins: 50, childId: menor.id, batchId: deberesDeCasa, status: "APPROVED" as const },
     { title: "Hacer la cama", coins: 50, childId: mayor.id, status: "APPROVED" as const },
     { title: "Hacer la cama", coins: 30, childId: menor.id, status: "APPROVED" as const },
+    // Lucas tambien cobra: un hijo con saldo 0 y sin historial deja su pantalla
+    // de monedas vacia, y la lista vacia ya la ensena otro sitio.
+    { title: "Dar de comer al gato", coins: 40, childId: bloqueado.id, status: "APPROVED" as const },
   ];
 
   const creadas = [];
@@ -206,8 +272,10 @@ async function seed(): Promise<void> {
     data: [
       { rewardId: cine.id, childId: mayor.id, coins: 200 },
       { rewardId: cine.id, childId: menor.id, coins: 150 },
+      { rewardId: cine.id, childId: bloqueado.id, coins: 150 },
       { rewardId: helado.id, childId: mayor.id, coins: 60 },
       { rewardId: helado.id, childId: menor.id, coins: 40 },
+      { rewardId: helado.id, childId: bloqueado.id, coins: 40 },
     ],
   });
 
@@ -268,8 +336,10 @@ async function seed(): Promise<void> {
   });
 
   const resumen = [
-    `Sembrado: 1 padre, 2 hijos, ${creadas.length} tareas en los tres estados,`,
-    `  4 premios (uno retirado, uno sin ofertas) con 4 asignaciones, 3 canjes en`,
+    `Sembrado: 1 padre, 3 hijos (uno BLOQUEADO y sin edad), ${creadas.length} tareas en los tres`,
+    `  estados, con un reparto de tres hijos y estados mezclados y dos con fecha`,
+    `  limite —una por vencer y otra pasada—,`,
+    `  4 premios (uno retirado, uno sin ofertas) con 6 asignaciones, 3 canjes en`,
     `  los tres estados, y el saldo que sale de las tareas aprobadas y del canje`,
     `  aprobado.`,
     `  Padre: ${CREDENCIALES_DE_EJEMPLO.padre.correo} / ${CREDENCIALES_DE_EJEMPLO.padre.password} / PIN ${CREDENCIALES_DE_EJEMPLO.padre.pin}`,

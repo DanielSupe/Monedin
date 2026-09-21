@@ -127,6 +127,22 @@ export function ChildForm({
             />
           </Field>
 
+          <Field label={messages.children.ageOptional}>
+            <Input
+              type="number"
+              min={CHILD_AGE_MIN}
+              max={CHILD_AGE_MAX}
+              value={age}
+              onChange={(evento) => setAge(evento.target.value)}
+            />
+          </Field>
+
+          {/*
+            EL PIN VA DETRÁS DE LA EDAD, como en la maqueta, y el orden dice algo:
+            primero quién es —su nombre y su edad— y solo después su secreto. Al
+            revés, el campo que interrumpe para inventarse cuatro cifras se cuela
+            en medio de dos datos que ya se saben.
+          */}
           {!editing && (
             <Field label={PIN_LABEL} help={messages.children.pinHelp}>
               <Input
@@ -138,16 +154,6 @@ export function ChildForm({
               />
             </Field>
           )}
-
-          <Field label={messages.children.ageOptional}>
-            <Input
-              type="number"
-              min={CHILD_AGE_MIN}
-              max={CHILD_AGE_MAX}
-              value={age}
-              onChange={(evento) => setAge(evento.target.value)}
-            />
-          </Field>
 
           {/*
             Subir foto solo al EDITAR: la clave de subida lleva dentro el

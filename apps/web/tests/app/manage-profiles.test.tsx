@@ -200,4 +200,18 @@ describe("el modo de administración se anuncia en la pantalla", () => {
     await screen.findByText(messages.auth.whoIsPlaying);
     expect(screen.queryByText(messages.auth.manageProfilesLead)).toBeNull();
   });
+
+  /*
+   * LA RENDIJA EXISTE EN LAS DOS, con dos frases distintas, y hay que
+   * comprobarlo: los dos casos de arriba se cumplen igual con la rejilla normal
+   * MUDA, que es como estuvo hasta que se comparó con su maqueta. Lo que dicen
+   * es que el aviso del modo no se queda puesto, no que sin modo no se diga
+   * nada — y sin decir nada el título pregunta quién eres y calla que después
+   * viene un PIN.
+   */
+  it("y la rejilla normal dice la suya, que no es la misma", async () => {
+    await montarApp("/profiles", SOLO_CUENTA, PERFILES);
+
+    expect(await screen.findByText(messages.auth.whoIsPlayingLead)).toBeInTheDocument();
+  });
 });

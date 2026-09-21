@@ -68,17 +68,29 @@ describe("la puerta pública", () => {
   });
 
   /*
-   * El orden importa: la franja contesta una duda ANTES de que las tarjetas
-   * resuman el ciclo. Comprobar solo que existe dejaría pasar ponerla al final,
-   * que es lo contrario de lo que hace falta.
+   * EL ORDEN IMPORTA, Y ESTE TEST LO TENÍA AL REVÉS DE SU PROPIO COMENTARIO.
+   *
+   * Decía, palabra por palabra, «la franja contesta una duda ANTES de que las
+   * tarjetas resuman el ciclo» — y después comprobaba que iba DESPUÉS. Lo que
+   * estaba escrito era la intención; lo que se comprobaba era lo contrario, y
+   * así llegó a la aplicación.
+   *
+   * La intención es la correcta y es la que dibuja la maqueta. Un adulto lee
+   * «monedas» y «premios» en algo para su hijo y su primera pregunta no es cómo
+   * funciona el ciclo, sino si esto mueve dinero de verdad. Explicarle el
+   * mecanismo antes de contestar eso es explicarle cómo se usa algo de lo que
+   * todavía desconfía.
+   *
+   * Comprobar solo que la franja existe dejaría pasar cualquiera de los dos
+   * órdenes, que es justo lo que hay que distinguir aquí.
    */
-  it("y lo despeja DESPUÉS de contar el ciclo, no antes", async () => {
+  it("y lo despeja ANTES de contar el ciclo, no después", async () => {
     await montarApp("/welcome", SIN_SESION);
 
     const flujo = screen.getByText(messages.landing.howTitle);
     const franja = screen.getByText(messages.landing.aboutTitle);
 
-    expect(flujo.compareDocumentPosition(franja)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(franja.compareDocumentPosition(flujo)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   /*
@@ -195,17 +207,41 @@ describe("la página cierra con su acción", () => {
     }
   });
 
+  /*
+   * LA ACCIÓN DEL CIERRE TIENE SU PROPIO NOMBRE, y este test perseguía el otro.
+   *
+   * Buscaba la ÚLTIMA «Empezar» de la página y comprobaba que iba detrás del
+   * cierre. Dejó de valer en cuanto el cierre pasó a decir «Crear mi cuenta»:
+   * la última «Empezar» volvió a ser la del héroe, o sea una que está ARRIBA, y
+   * el test empezó a medir la distancia equivocada.
+   *
+   * Ahora nombra la del cierre, que es la que el requisito quiere: al final de
+   * la página ya no hace falta invitar a empezar —eso lo hicieron la cabecera y
+   * el héroe— y lo que queda por decir es qué va a pasar al pulsar.
+   */
   it("y el cierre no vuelve a argumentar", async () => {
     await montarApp("/welcome", SIN_SESION);
 
     const cierre = screen.getByText(messages.landing.closingTitle);
-    const ultimaAccion = screen.getAllByRole("link", { name: messages.landing.start }).at(-1);
+    const accion = screen.getByRole("link", { name: messages.landing.closingAction });
 
     // La acción va DESPUÉS del cierre: si estuviera antes, el cierre sería un
     // párrafo más y no un cierre.
-    expect(cierre.compareDocumentPosition(ultimaAccion as HTMLElement)).toBe(
-      Node.DOCUMENT_POSITION_FOLLOWING,
-    );
+    expect(cierre.compareDocumentPosition(accion)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  /*
+   * Y las tres acciones de la página llevan al MISMO sitio, aunque dos se
+   * llamen «Empezar» y la del cierre no. Lo que no puede pasar es que un nombre
+   * distinto sea además un destino distinto, que es el defecto que
+   * `redesign-access` ya arregló una vez en el héroe.
+   */
+  it("y aunque se llame distinto, lleva donde las otras", async () => {
+    await montarApp("/welcome", SIN_SESION);
+
+    expect(
+      screen.getByRole("link", { name: messages.landing.closingAction }),
+    ).toHaveAttribute("href", "/sign-up");
   });
 });
 

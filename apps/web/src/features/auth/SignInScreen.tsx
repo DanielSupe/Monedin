@@ -4,7 +4,7 @@ import { useState } from "react";
 import { messages } from "../../lib/messages.js";
 import { Alert, Button, Field, Input } from "../../ui/index.js";
 import { AccessLayout } from "./AccessLayout.js";
-import { AtSign, ArrowRight, Lock } from "./access-icons.js";
+import { AtSign, Lock } from "./access-icons.js";
 import { describeAuthError, useLogin } from "./use-session.js";
 
 /**
@@ -77,17 +77,21 @@ export function SignInScreen(): React.ReactElement {
 
         {error !== undefined && <Alert tone="danger">{error}</Alert>}
 
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            variant="contrast"
-            iconOnly
-            aria-label={messages.auth.submitSignIn}
-            pending={login.isPending}
-          >
-            <ArrowRight />
-          </Button>
-        </div>
+        {/*
+          LA ACCIÓN PRINCIPAL LLEVA SU NOMBRE ESCRITO, y antes era una flecha
+          redonda con el nombre solo en `aria-label`.
+
+          Su etiqueta existía —así que un lector de pantalla la oía— pero quien
+          mira la pantalla veía una flecha, y esta es la ÚNICA pantalla del
+          producto donde un adulto decide si esto es de fiar. Una flecha sin
+          palabra obliga a deducir qué va a pasar al pulsarla justo ahí.
+
+          La maqueta la dibuja ancha y con texto, y ancha es además lo que dice
+          que es LA acción de la pantalla y no una más.
+        */}
+        <Button type="submit" variant="contrast" block pending={login.isPending}>
+          {messages.auth.submitSignIn}
+        </Button>
       </form>
     </AccessLayout>
   );

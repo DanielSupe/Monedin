@@ -21,6 +21,11 @@ import { CycleDisc } from "./CycleDisc.js";
  * logo: `EntryShell` sirve para las pantallas que se conforman con el fondo de
  * siempre, y esta se pinta entera.
  *
+ * Y por eso mismo declara `data-scale="entry"` ELLA, como la portada declara la
+ * suya: al ir a sangre no pasa por `EntryShell`, así que el marco no se la puede
+ * poner. Sin esto se quedaba con la base —la escala del padre— y sus etiquetas
+ * salían a 13px donde la maqueta las escribe a 15.
+ *
  * Recibe el formulario como HIJO y **no decide cuál enseñar**. Si tuviera un
  * `if` sobre el modo, habríamos movido el problema que este change vino a
  * resolver. Ver la decisión 1 del design de `redesign-access`.
@@ -31,7 +36,11 @@ export function AccessLayout({
   children,
   footer,
 }: {
-  /** Qué se viene a hacer. Encabeza el panel del formulario. */
+  /**
+   * Qué se viene a hacer. Es el TÍTULO del panel del formulario, no una línea
+   * debajo del saludo: es lo que distingue entrar de registrarse, y por tanto
+   * lo que hay que leer primero.
+   */
   lead: string;
   /** La frase del panel de presentación. Es lo otro que distingue las dos pantallas. */
   tagline: string;
@@ -40,7 +49,7 @@ export function AccessLayout({
   footer: ReactNode;
 }): React.ReactElement {
   return (
-    <div className="relative min-h-dvh overflow-hidden bg-surface-raised">
+    <div data-scale="entry" className="relative min-h-dvh overflow-hidden bg-surface-raised">
       {/*
         El fondo partido. Un bloque a un lado y no un degradado: en la maqueta el
         color ocupa una franja entera y el resto queda en blanco.
@@ -88,9 +97,19 @@ export function AccessLayout({
             */
             className="flex flex-1 flex-col justify-center gap-6 bg-brand px-6 pt-10 pb-12 text-ink"
           >
+            {/*
+              EL SALUDO ES EL ANTETÍTULO Y LO QUE SE VIENE A HACER ES EL TÍTULO,
+              y estaba al revés.
+
+              «¡Bienvenido!» ocupaba el tamaño grande y «entra para continuar»
+              quedaba de letra pequeña debajo, o sea que lo más grande de la
+              pantalla era un saludo que no dice nada y lo que de verdad importa
+              —a cuál de los dos formularios se ha llegado— se leía de segundas.
+              La maqueta lo pone así en las dos pantallas de acceso.
+            */}
             <div className="flex flex-col gap-1">
-              <h2 className="text-hero font-extrabold">{messages.auth.accessGreeting}</h2>
-              <p className="text-body">{lead}</p>
+              <p className="text-small">{messages.auth.accessGreeting}</p>
+              <h2 className="text-display font-extrabold">{lead}</h2>
             </div>
 
             {children}
@@ -132,7 +151,18 @@ function PresentationPanel({ tagline }: { tagline: string }): React.ReactElement
 
       <CycleDisc />
 
-      <p className="text-title font-bold">{tagline}</p>
+      {/*
+        La frase de la pantalla y debajo la del PRODUCTO, como en la maqueta. Son
+        dos cosas distintas y por eso son dos: la de arriba cambia entre entrar y
+        registrarse —dice a qué se ha venido— y la de abajo no cambia nunca,
+        porque es lo que Monedín es. Se toma del catálogo donde ya vive, en la
+        puerta pública: la misma frase escrita dos veces acaba con una de las dos
+        desactualizada.
+      */}
+      <div className="flex flex-col gap-2">
+        <p className="text-display font-bold">{tagline}</p>
+        <p className="text-small text-ink-muted">{messages.landing.aboutTitle}</p>
+      </div>
     </section>
   );
 }

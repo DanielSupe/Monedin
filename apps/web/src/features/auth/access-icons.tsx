@@ -33,12 +33,3 @@ export function Person(): React.ReactElement {
 export function Keypad(): React.ReactElement {
   return <Trazo d="M7 4h10v16H7V4Zm3 4h.01M14 8h.01M10 12h.01M14 12h.01M10 16h.01M14 16h.01" />;
 }
-
-/** La flecha del envío. Su nombre lo pone quien la usa: sola no dice qué hace. */
-export function ArrowRight(): React.ReactElement {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-6">
-      <path d="M5 12h14m-6-6 6 6-6 6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}

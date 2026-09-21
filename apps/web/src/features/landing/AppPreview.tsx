@@ -41,14 +41,14 @@ export function AppPreview(): React.ReactElement {
     <section className="bg-surface-sunken">
       <div className="mx-auto flex w-full max-w-(--container-wide) flex-col gap-8 px-4 py-12">
         <div className="flex flex-col gap-3">
-          <h2 className="text-title font-extrabold">{messages.landing.previewTitle}</h2>
+          <h2 className="text-display font-extrabold">{messages.landing.previewTitle}</h2>
           <p className="text-body max-w-(--container-reading) text-ink-muted">
             {messages.landing.previewBody}
           </p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <Maqueta etiqueta={messages.landing.previewParentTag}>
+          <Maqueta etiqueta={messages.landing.previewParentTag} pie={messages.landing.previewParentLabel}>
             {/*
               La escala DE VERDAD, no una imitación: es lo que hace que la
               diferencia que se ve sea la que existe en el producto.
@@ -86,7 +86,7 @@ export function AppPreview(): React.ReactElement {
             </div>
           </Maqueta>
 
-          <Maqueta etiqueta={messages.landing.previewChildTag}>
+          <Maqueta etiqueta={messages.landing.previewChildTag} pie={messages.landing.previewChildLabel}>
             <div
               data-scale="child"
               role="img"
@@ -135,15 +135,31 @@ export function AppPreview(): React.ReactElement {
 /** El marco de una maqueta: su etiqueta encima y la pantalla debajo. */
 function Maqueta({
   etiqueta,
+  pie,
   children,
 }: {
   etiqueta: string;
+  /** Qué es lo que se está enseñando. Ver el comentario de abajo. */
+  pie: string;
   children: React.ReactNode;
 }): React.ReactElement {
   return (
     <div className="flex flex-col gap-3">
       <Badge tone="info">{etiqueta}</Badge>
       {children}
+      {/*
+        EL PIE DICE QUE ES UN EJEMPLO, y faltaba.
+
+        Estas dos maquetas están construidas con las piezas del producto y con la
+        escala de verdad, así que se parecen tanto a la aplicación que un saldo
+        de 340 monedas y un «te esperan 3 tareas» se leen como datos de alguien.
+        Lo eran de nadie, y decirlo cuesta una línea.
+
+        La frase sale de la MISMA clave que nombra la maqueta para el lector de
+        pantalla, compuesta aquí con el aviso: tenerla escrita dos veces acabaría
+        con una de las dos diciendo otra cosa.
+      */}
+      <p className="text-micro text-ink-muted">{`${pie} ${messages.landing.previewNotOurs}`}</p>
     </div>
   );
 }

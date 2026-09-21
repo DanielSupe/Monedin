@@ -89,8 +89,14 @@ export const messages = {
     previewBody:
       "Tú gestionas y apruebas; tu hijo ve lo suyo, en grande. Es la misma aplicación con dos " +
       "medidas distintas, porque un niño de seis años y tú no leéis una pantalla igual.",
-    previewParentLabel: "Ejemplo del panel del padre",
-    previewChildLabel: "Ejemplo del inicio del niño",
+    /*
+     * Nombra la maqueta para quien no la ve Y se pinta como su pie. Una sola
+     * clave para las dos cosas: es la misma afirmación, y escrita dos veces
+     * acabaría con una de las dos diciendo otra cosa.
+     */
+    previewParentLabel: "Ejemplo del panel del padre.",
+    previewChildLabel: "Ejemplo del inicio del niño.",
+    previewNotOurs: "Los datos no son de nadie.",
     previewParentTag: "Lo que ves tú",
     previewChildTag: "Lo que ve tu hijo",
 
@@ -113,6 +119,7 @@ export const messages = {
      */
     closingTitle: "Empieza esta semana",
     closingBody: "Crea tu cuenta, añade a tus hijos y pon la primera tarea. Se tarda menos que leer esto.",
+    closingAction: "Crear mi cuenta",
   },
 
   /**
@@ -378,8 +385,13 @@ export const messages = {
 
     /** El saludo del acceso, y la cinta que lo acompaña. */
     accessGreeting: "¡Bienvenido!",
-    accessSignInLead: "Entra para continuar",
-    accessSignUpLead: "Crea tu cuenta para empezar",
+    /*
+     * Son TÍTULOS y no líneas de apoyo, desde que la jerarquía del acceso se
+     * puso como la maqueta: se leen antes que el saludo, porque son lo que
+     * distingue una de las dos pantallas.
+     */
+    accessSignInLead: "Entra a tu cuenta",
+    accessSignUpLead: "Crea tu cuenta",
     /** La frase del panel de presentación, una por pantalla. */
     accessSignInTagline: "Tu casa, sus monedas. Entra y sigue el ciclo.",
     accessSignUpTagline: "Empieza a repartir tareas y a ver crecer sus monedas.",
@@ -391,6 +403,12 @@ export const messages = {
 
     /** Rejilla de perfiles. */
     whoIsPlaying: "¿Quién eres?",
+    /*
+     * La rejilla normal también lleva su línea, y no solo el modo administrar.
+     * La maqueta la tiene en las dos, y hacía falta: la pregunta del título no
+     * dice CÓMO se responde, y lo que sigue —un PIN— no se adivina tocando.
+     */
+    whoIsPlayingLead: "Toca tu cara y escribe tu PIN.",
     createProfile: "Crear perfil",
     /**
      * Distintivo de la tesela del adulto. Es su NOMBRE ACCESIBLE, no un adorno:
@@ -478,7 +496,9 @@ export const messages = {
     name: "Nombre",
     age: "Edad",
     ageOptional: "Edad (opcional)",
-    avatar: "Animal",
+    // «Elige tu animal», no «Animal»: es una rejilla de caras para tocar, no un
+    // campo que se rellena, y la maqueta la nombra por lo que hay que hacer.
+    avatar: "Elige tu animal",
 
     /*
      * DÓNDE SÍ SE PUEDE PONER LA FOTO.

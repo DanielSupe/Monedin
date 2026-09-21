@@ -5,7 +5,7 @@ import { PIN_LABEL, messages } from "../../lib/messages.js";
 import { Alert, Button, Field, Input } from "../../ui/index.js";
 import { AccessLayout } from "./AccessLayout.js";
 import { PillField } from "./SignInScreen.js";
-import { ArrowRight, AtSign, Keypad, Lock, Person } from "./access-icons.js";
+import { AtSign, Keypad, Lock, Person } from "./access-icons.js";
 import { describeAuthError, useRegister } from "./use-session.js";
 
 /**
@@ -121,17 +121,10 @@ export function SignUpScreen(): React.ReactElement {
 
         {error !== undefined && <Alert tone="danger">{error}</Alert>}
 
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            variant="contrast"
-            iconOnly
-            aria-label={messages.auth.submitSignUp}
-            pending={register.isPending}
-          >
-            <ArrowRight />
-          </Button>
-        </div>
+        {/* Por lo mismo que en la de entrar: la acción lleva su nombre. */}
+        <Button type="submit" variant="contrast" block pending={register.isPending}>
+          {messages.auth.submitSignUp}
+        </Button>
       </form>
     </AccessLayout>
   );

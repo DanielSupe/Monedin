@@ -28,7 +28,7 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
   return (
     <section className="flex w-full max-w-(--container-wide) flex-col items-center gap-8">
       <div className="flex flex-col items-center gap-2">
-        <h2 className="text-display text-center font-extrabold">
+        <h2 className="text-hero text-center font-extrabold">
           {manage ? messages.auth.manageProfilesTitle : messages.auth.whoIsPlaying}
         </h2>
 
@@ -36,12 +36,14 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
           El modo se anuncia con una FRASE, no solo con el lápiz de cada tesela.
           Lo que cambió es el modo y no cada perfil, y enterarse mirando un
           distintivo pequeño en doce sitios es el trabajo que esta línea ahorra.
+
+          Y la rejilla normal lleva la suya, que faltaba: el título pregunta
+          quién eres y no dice que después hay un PIN. La línea no era «el
+          adorno del modo administrar», era la de las dos.
         */}
-        {manage && (
-          <p className="text-body text-center text-ink-muted">
-            {messages.auth.manageProfilesLead}
-          </p>
-        )}
+        <p className="text-lead text-center text-ink-muted">
+          {manage ? messages.auth.manageProfilesLead : messages.auth.whoIsPlayingLead}
+        </p>
       </div>
 
       <ul className="flex list-none flex-wrap justify-center gap-6 p-0">
@@ -68,7 +70,7 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
                   {profile.familyRole === "PARENT" && <CrownBadge />}
                   {manage && <PencilBadge />}
                 </span>
-                <span className="text-body font-semibold">{profile.name}</span>
+                <span className="text-title font-semibold">{profile.name}</span>
               </Link>
             )}
           </li>
@@ -89,7 +91,7 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
             >
               +
             </span>
-            <span className="text-body font-semibold">{messages.auth.createProfile}</span>
+            <span className="text-lead font-semibold">{messages.auth.createProfile}</span>
           </Link>
         </li>
       </ul>
@@ -143,7 +145,7 @@ function LockedTile({
   return (
     <span className={cx(tileClasses, "opacity-55")}>
       <Avatar value={avatar} size="xlarge" shape="rounded" />
-      <span className="text-body font-semibold">{name}</span>
+      <span className="text-title font-semibold">{name}</span>
       <span className="text-small text-ink-muted">{messages.auth.profileLocked}</span>
     </span>
   );

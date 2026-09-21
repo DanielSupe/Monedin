@@ -65,9 +65,9 @@ const PASOS: Paso[] = [
 
 export function HowItWorks(): React.ReactElement {
   return (
-    <section className="bg-surface-sunken">
+    <section className="bg-surface">
       <div className="mx-auto flex w-full max-w-(--container-wide) flex-col gap-8 px-4 py-12">
-        <h2 className="text-title max-w-(--container-reading) font-extrabold">
+        <h2 className="text-display max-w-(--container-reading) font-extrabold">
           {messages.landing.howTitle}
         </h2>
 
