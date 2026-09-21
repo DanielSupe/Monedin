@@ -19,6 +19,7 @@ import {
   buttonClasses,
 } from "../../ui/index.js";
 import { useSetChildPin, useUnlockChildProfile } from "../auth/use-session.js";
+import { contar } from "../../lib/plural.js";
 import { describeChildrenError, useChildren, useDeactivateChild } from "./use-children.js";
 
 /**
@@ -49,6 +50,22 @@ export function ChildrenList({ page }: { page: number }): React.ReactElement {
           {messages.children.addChild}
         </Link>
       </div>
+
+      {/*
+        DOS PALABRAS PARECIDAS Y UNA SOLA IRREVERSIBLE, dicho en la pantalla.
+
+        Esta fila ofrece «Dar de baja» y, cuando toca, «Desbloquear». Suenan a lo
+        mismo y no lo son: una se deshace pulsándola otra vez y la otra se lleva
+        el saldo y el historial de un niño para siempre. Y bloquear no lo decide
+        nadie, pasa por fallar el PIN.
+
+        Va aquí y no dentro del diálogo de confirmación: allí llega quien YA
+        pulsó, y lo que hace falta es que no confunda las dos ANTES. Es la misma
+        razón por la que la bandeja de tareas explica su filtro en la pantalla —
+        una decisión de producto que no se explica es indistinguible de un
+        defecto.
+      */}
+      <Alert tone="info">{messages.children.deactivateVsLock}</Alert>
 
       {isPending ? (
         <Skeleton lines={4} />
@@ -135,9 +152,18 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
 
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <p className="truncate text-lead font-extrabold">{child.name}</p>
+              {/*
+                «10 años» y no «Edad: 10», que es lo que decía y lo que dibuja su
+                maqueta. El mismo dato se escribía de DOS maneras en el producto:
+                aquí con su etiqueta delante y en el perfil del propio niño con
+                `contar`, que es la forma que ya evita «1 años».
+
+                Y la etiqueta suelta sobraba: nadie necesita que le digan que un
+                número seguido de «años» es una edad.
+              */}
               {child.age !== null && (
                 <p className="text-small text-ink-muted">
-                  {messages.children.age}: {child.age}
+                  {contar(child.age, messages.children.yearsOne, messages.children.yearsMany)}
                 </p>
               )}
             </div>

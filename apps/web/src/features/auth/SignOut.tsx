@@ -18,8 +18,25 @@ export function SignOut(): React.ReactElement {
   const logout = useLogout();
 
   return (
-    <Button variant="danger" pending={logout.isPending} onClick={() => logout.mutate()}>
-      {messages.auth.signOut}
-    </Button>
+    <div className="flex flex-col items-start gap-2">
+      <Button variant="danger" pending={logout.isPending} onClick={() => logout.mutate()}>
+        {messages.auth.signOut}
+      </Button>
+
+      {/*
+        LA CONSECUENCIA, ESCRITA, que es lo que faltaba.
+
+        Que esto y salir del perfil no son lo mismo ya estaba decidido y ya
+        estaban en pantallas distintas — pero eso lo sabe quien leyó la decisión,
+        no quien mira el botón. La maqueta lo dice aquí, y dice lo único que hace
+        falta saber antes de pulsar: que para volver hay que teclear el correo y
+        la contraseña.
+
+        El asistente tenía una frase parecida —«salir del perfil y cerrar sesión
+        no son lo mismo»— y eso no contaba: una pista en un globo que hay que
+        abrir no es lo que un botón irreversible tiene al lado.
+      */}
+      <p className="text-small text-ink-muted">{messages.auth.signOutConsequence}</p>
+    </div>
   );
 }

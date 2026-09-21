@@ -12,7 +12,8 @@ import { type ReactNode, useState } from "react";
 import * as childrenApi from "../../api/children.js";
 import { alertToneFor } from "../../lib/alert-tone.js";
 import { PIN_LABEL, messages } from "../../lib/messages.js";
-import { Alert, Button, Card, Field, Input } from "../../ui/index.js";
+import { contar } from "../../lib/plural.js";
+import { Alert, Avatar, Badge, Button, Card, Coins, Field, Input } from "../../ui/index.js";
 import { AvatarPicker } from "../profiles/AvatarPicker.js";
 import { describeChildrenError, useCreateChild, useUpdateChild } from "./use-children.js";
 
@@ -113,9 +114,56 @@ export function ChildForm({
 
   return (
     <section className="flex w-full max-w-md flex-col gap-4">
-      <h2 className="text-display font-extrabold">
-        {editing ? messages.children.editChildTitle : messages.children.newChildTitle}
-      </h2>
+      {/*
+        EL TÍTULO DICE QUÉ SE HACE Y UN BLOQUE APARTE DICE A QUIÉN, que es como
+        lo compone la maqueta — y no lo que hice en el primer intento, que fue
+        poner el nombre del hijo DE TÍTULO.
+
+        Mirar el artboard lo corrigió: su `h1` es «Editar perfil», con un
+        antetítulo que dice qué se cambia aquí, y la identidad del hijo va debajo.
+        Tiene sentido: el título de una pantalla nombra la operación, no su
+        argumento, y con el nombre de título la pantalla dejaba de decir para qué
+        servía.
+
+        Lo que sí faltaba —y era el defecto de verdad— es a QUIÉN se está
+        editando: se llega desde una lista de caras y el formulario no lo decía en
+        ninguna parte. Su nombre identifica y las dos cifras confirman que es el
+        que se quería.
+
+        `Bloqueado` va aquí como ESTADO y no como acción: explica por qué alguien
+        puede haber acabado en esta pantalla. Desbloquear sigue en UN solo sitio,
+        su fila de la lista — informar en dos pantallas está bien, tener la
+        mutación en dos serían dos caminos.
+      */}
+      <div className="flex flex-col gap-1">
+        {editing && (
+          <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+            {messages.children.editChildLead}
+          </span>
+        )}
+
+        <h2 className="text-display font-extrabold">
+          {editing ? messages.children.editChildTitle : messages.children.newChildTitle}
+        </h2>
+      </div>
+
+      {editing && child !== undefined && (
+        <div className="flex flex-wrap items-center gap-3">
+          <Avatar value={child.avatar} size="small" />
+
+          <span className="text-lead font-extrabold">{child.name}</span>
+
+          {child.age !== null && (
+            <span className="text-small text-ink-muted">
+              {contar(child.age, messages.children.yearsOne, messages.children.yearsMany)}
+            </span>
+          )}
+
+          <Coins amount={child.coins} />
+
+          {child.locked && <Badge tone="conflict">{messages.children.locked}</Badge>}
+        </div>
+      )}
 
       <Card>
         <form onSubmit={submit} className="flex flex-col gap-4">

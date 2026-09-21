@@ -4,6 +4,7 @@ import { RouterProvider, createMemoryHistory, createRouter } from "@tanstack/rea
 import { render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { routeTree } from "../../src/routeTree.gen";
+import { fechaCorta, fechaLarga } from "../../src/lib/dates.js";
 import { messages } from "../../src/lib/messages.js";
 import { comoNino, comoPadre } from "../support/router.js";
 
@@ -245,5 +246,46 @@ describe("se llega al historial desde el saldo", () => {
     });
 
     expect(enlace).toHaveAttribute("href", expect.stringContaining("/children/h1/coins"));
+  });
+});
+
+/**
+ * CUÁNDO FUE CADA MOVIMIENTO, que la pantalla no decía.
+ *
+ * Este historial existe para contestar «este saldo no me cuadra». Sin fecha, una
+ * fila dice cuánto y por qué pero no cuándo, así que no se puede cruzar con nada
+ * de lo que pasó en casa — y el dato venía en la respuesta desde el principio.
+ *
+ * Los dos movimientos llevan fechas DISTINTAS a propósito: con la misma en las
+ * dos, una pantalla que pintara una sola fecha para todas pasaría igual.
+ */
+describe("cada movimiento dice cuándo fue", () => {
+  it("la fecha de cada fila es la suya", async () => {
+    const primero = { ...movimiento("m1", 20, 120), createdAt: "2026-09-08T10:00:00.000Z" };
+    const segundo = { ...movimiento("m2", -60, 60), createdAt: "2026-08-20T10:00:00.000Z" };
+
+    await montar("/me/coins?page=1", [primero, segundo]);
+
+    const filaGano = (await screen.findByText(dice(primero))).closest("li") as HTMLElement;
+    const filaGasto = (await screen.findByText(dice(segundo))).closest("li") as HTMLElement;
+
+    expect(within(filaGano).getByText(fechaCorta(primero.createdAt))).toBeInTheDocument();
+    expect(within(filaGasto).getByText(fechaCorta(segundo.createdAt))).toBeInTheDocument();
+  });
+
+  /*
+   * Y en la forma CORTA. Es una celda de una lista que se recorre, no una línea
+   * de texto — y en la escala del niño la fila ya lleva cuatro cosas. Se
+   * comprueba que la larga NO está, porque las dos contienen el día y buscar
+   * solo la corta pasaría con la larga puesta.
+   */
+  it("y en corto, no en la forma larga", async () => {
+    const uno = { ...movimiento("m1", 20, 120), createdAt: "2026-09-08T10:00:00.000Z" };
+
+    await montar("/me/coins?page=1", [uno]);
+
+    await screen.findByText(dice(uno));
+
+    expect(screen.queryByText(fechaLarga(uno.createdAt))).toBeNull();
   });
 });

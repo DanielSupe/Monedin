@@ -255,3 +255,51 @@ describe("dar de baja avisa, y ofrece la salida cuando la hay", () => {
     expect(within(dialogo).queryByText(messages.children.deactivateLockedHint)).toBeNull();
   });
 });
+
+/**
+ * DOS PALABRAS PARECIDAS Y UNA SOLA IRREVERSIBLE, dicho ANTES de pulsar.
+ *
+ * La fila ofrece «Dar de baja» y, cuando toca, «Desbloquear». La diferencia que
+ * importa no es de matiz: una se deshace pulsándola otra vez y la otra se lleva
+ * el saldo y el historial de un niño para siempre.
+ *
+ * Y el test exige que esté SIN ABRIR NADA, que es la mitad que distingue: el
+ * diálogo de confirmación ya lo explica, pero allí llega quien ya pulsó. Un caso
+ * que solo comprobara «la pantalla lo dice en algún momento» pasaría con la
+ * explicación escondida dentro del diálogo, o sea con el defecto puesto.
+ */
+describe("la pantalla distingue dar de baja de bloquear", () => {
+  it("lo dice sin abrir ningún diálogo", async () => {
+    await montar([hijo("h1", "Mateo", false)]);
+    await filaDe("Mateo");
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByText(messages.children.deactivateVsLock)).toBeInTheDocument();
+  });
+});
+
+/**
+ * LA EDAD SE ESCRIBE CON SU UNIDAD, y el caso es de UN año a propósito.
+ *
+ * Se escribía «Edad: 8» aquí y «8 años» en el perfil del propio niño: el mismo
+ * dato de dos maneras. Al unificarlo, el riesgo que queda es el clásico de
+ * componer una cifra con un texto — «1 años» —, y con una edad de 8 este test
+ * pasaría igual sin declinar. Con 1 solo pasa si de verdad se declina.
+ */
+describe("la edad de un hijo lleva su unidad", () => {
+  it("con un año, en singular", async () => {
+    await montar([{ ...hijo("h1", "Mateo", false), age: 1 }]);
+
+    const fila = await filaDe("Mateo");
+
+    expect(within(fila).getByText(`1 ${messages.children.yearsOne}`)).toBeInTheDocument();
+  });
+
+  it("y con más de uno, en plural", async () => {
+    await montar([{ ...hijo("h1", "Mateo", false), age: 8 }]);
+
+    const fila = await filaDe("Mateo");
+
+    expect(within(fila).getByText(`8 ${messages.children.yearsMany}`)).toBeInTheDocument();
+  });
+});

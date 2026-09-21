@@ -111,6 +111,16 @@ y producción.
 
 ## Open Questions
 
+Ninguna. La del coral se decidió, y queda abajo.
+
+## Decisión tomada: el coral se queda como está
+
+Preguntado y respondido: **se deja el naranja normal por ahora**.
+
+No es deuda pendiente ni un olvido, así que se escribe como decisión y no como
+una lista de pendientes que nadie va a mirar. Lo que se acepta, con las cifras
+delante:
+
 - **El contraste del coral.** Medido sobre la rampa entera: `--color-primary`
   #FF6B4B da **2.82** contra blanco y contra la tinta clara que va encima, y el
   paso más oscuro que existe, #F55439, da **3.38**. Un texto normal pide 4.5 y
@@ -140,5 +150,12 @@ y producción.
   relleno de la acción principal, y es la parte que de verdad cambia cómo se ve
   el producto.
 
-  No se toca aquí: cambiar el color principal del producto no es una decisión de
-  ajustar pantallas.
+**Por qué se deja, dicho sin adornos**: cualquier coral que llegue al mínimo es
+bastante más oscuro que el de la marca, y eso se nota en TODA la aplicación —es
+el color de cada acción principal—. Repintar la marca para ganar contraste es una
+decisión de marca, no de ajustar pantallas, y quien la toma prefiere el color.
+
+**Lo que esto NO autoriza**: usar el coral para texto pequeño nuevo. Lo que se
+acepta es lo que ya hay, no una licencia para repetirlo. Y el día que se quiera
+revisar, la salida medida ya está escrita aquí arriba, así que no hay que volver
+a medirla.

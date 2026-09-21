@@ -1,6 +1,7 @@
 import type { CoinReason, CoinTransaction, CoinTransactionsPage } from "@monedin/contracts";
 import type { ReactNode } from "react";
 import { alertToneFor } from "../../lib/alert-tone.js";
+import { fechaCorta } from "../../lib/dates.js";
 import { messages } from "../../lib/messages.js";
 import { Alert, Card, Coins, EmptyState, IconTile, Pagination, Skeleton } from "../../ui/index.js";
 import { describeCoinsError } from "./use-coins.js";
@@ -115,6 +116,22 @@ function MovementRow({ movement }: { movement: CoinTransaction }): React.ReactEl
         </p>
         <p className="text-small font-bold text-ink-muted">{RAZON[movement.reason]}</p>
       </div>
+
+      {/*
+        CUÁNDO FUE, que faltaba — y en un libro mayor es lo que se viene a mirar.
+
+        Esta pantalla existe para contestar «este saldo no me cuadra», y sin
+        fecha una fila dice cuánto y por qué pero no cuándo, o sea que no se
+        puede cruzar con nada de lo que pasó en casa. El dato estaba en la
+        respuesta desde el primer día; lo que faltaba era pintarlo.
+
+        Va en su propia columna entre la frase y el saldo, como en la maqueta, y
+        en la forma CORTA: es una celda de una lista que se recorre de arriba
+        abajo, no una línea de texto.
+      */}
+      <span className="shrink-0 text-small font-bold text-ink-muted">
+        {fechaCorta(movement.createdAt)}
+      </span>
 
       {/*
         El saldo viene GUARDADO en la fila y no se acumula aquí. La columna es

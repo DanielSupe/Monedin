@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { messages } from "../../lib/messages.js";
-import { Alert, Button, Card } from "../../ui/index.js";
+import { Alert, Button, Card, Mascota } from "../../ui/index.js";
 import { useUpdateTutorial } from "../auth/use-session.js";
 
 /**
@@ -41,7 +41,22 @@ export function ReplayTour(): React.ReactElement {
   return (
     <Card>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-body font-bold">{messages.tutorial.replay}</p>
+        {/*
+          QUÉ ES EL RECORRIDO, que no lo decía.
+
+          «Ver el recorrido otra vez» solo tiene sentido para quien lo vio; a
+          quien lo saltó —que es justo quien más ganaría volviendo— no le dice
+          qué se está ofreciendo. La maqueta pone la línea, y la mascota al lado,
+          porque es ella la que lo cuenta.
+        */}
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <Mascota pose="presenta" size="small" className="shrink-0" />
+
+          <div className="flex min-w-0 flex-col">
+            <p className="text-body font-bold">{messages.tutorial.replay}</p>
+            <p className="text-small text-ink-muted">{messages.tutorial.replayLead}</p>
+          </div>
+        </div>
 
         <Button
           variant="secondary"

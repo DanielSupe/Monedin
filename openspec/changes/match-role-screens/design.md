@@ -75,3 +75,54 @@ atrás.
 
 - Ninguna que bloquee. Las dos que hay —el coral y el saldo del niño— están
   fuera de alcance a conciencia y nombradas en el proposal.
+
+### 4. Cuando la aplicación y la maqueta discrepan, manda la FUNCIÓN; el aspecto se ajusta
+
+Decidido al comparar la lista de hijos: **la funcionalidad tiene prioridad sobre
+el diseño, y el diseño manda en todo lo demás**. Si la aplicación ofrece más
+controles que la maqueta, se quedan; lo que se ajusta es que la pantalla se vea
+como la maqueta.
+
+Y conviene dejar escrito cómo llegó esta decisión, porque la pregunta que la
+provocó estaba mal planteada. Yo leí que la maqueta movía las acciones de un hijo
+a su pantalla de edición, y era falso: `PadreHijos` dibuja «Editar», «Historial»
+y «Dar de baja» **en la fila**, igual que la aplicación. Lo único que la maqueta
+pone en la pantalla del hijo y la aplicación además en la fila es «Cambiar su
+PIN», o sea **un** control de diferencia.
+
+Es la lección de la precaución copiada de `polish-profile-and-reward-image` otra
+vez: una diferencia que se afirma hay que **mirarla en el artefacto**, no
+deducirla de otra pantalla del mismo. Aquí la deduje de `PadreEditarHijo`, que sí
+las lleva, y concluí que por tanto la lista no.
+
+Las diferencias reales de esa pantalla, ya arregladas:
+
+- **La edad se escribía «Edad: 8»** y la maqueta escribe «8 años». El mismo dato
+  se escribía de dos maneras en el producto: así aquí y con `contar` en el perfil
+  del propio niño. Ahora las dos usan `contar`, que es la forma que ya evita
+  «1 años». La etiqueta suelta sobraba: nadie necesita que le digan que un número
+  seguido de «años» es una edad.
+- **Faltaba la nota que distingue dar de baja de bloquear.** La maqueta la lleva y
+  hacía falta: la fila ofrece las dos, suenan a lo mismo, y una se deshace
+  pulsándola otra vez mientras la otra se lleva el saldo y el historial de un
+  niño para siempre. Va en la PANTALLA y no dentro del diálogo, porque al diálogo
+  llega quien ya pulsó.
+- **«Bloqueado» y «Desbloquear» no aparecían**, y no era un defecto de la
+  pantalla: la siembra bloqueaba treinta minutos. Arreglado en
+  `match-shared-screens`.
+
+### 5. Lo que la maqueta dibuja y la aplicación NO va a copiar: el paginador de una página
+
+`PadreHijos` dibuja «Anterior», «Página 1 de 1» y «Siguiente» sobre una lista de
+tres. La pieza de la aplicación se oculta con una sola página, y lleva su razón
+escrita desde `add-design-system`: «enseñar 1 / 1 y dos pasos apagados es ocupar
+sitio para no decir nada».
+
+Se queda oculta, y el argumento es sobre qué clase de artefacto es cada cosa: una
+maqueta estática **tiene que dibujar el control para enseñar cómo es**, y de ahí
+no se sigue que deba estar siempre. Copiarlo pediría además cambiar su texto
+—la aplicación escribe «1 / 2»—, o sea dos cambios para satisfacer un artboard
+que probablemente solo ilustraba la pieza.
+
+Queda dicho en vez de decidido en silencio, para que se pueda corregir si la
+intención era la contraria.

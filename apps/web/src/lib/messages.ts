@@ -152,7 +152,12 @@ export const messages = {
     themeLight: "Tema: claro",
     themeDark: "Tema: oscuro",
     /** Lo que encabeza la cuenta del padre, antes del título. */
-    parentAccountLead: "Tu foto, tu PIN y tu sesión",
+    /*
+     * Dice lo que esta pantalla NO es, que es la confusión real en una tablet
+     * compartida: aquí se cambia lo del adulto, no lo de un hijo. Decía «tu
+     * foto, tu PIN y tu sesión», que enumeraba el contenido sin avisar de eso.
+     */
+    parentAccountLead: "Lo tuyo, no lo de tus hijos",
 
     /*
      * Lo que la cifra de una insignia significa, para quien no ve la pantalla.
@@ -295,6 +300,11 @@ export const messages = {
     finish: "Empezar",
     skip: "Saltar",
     replay: "Ver el recorrido otra vez",
+    /*
+     * Qué se está ofreciendo. «Otra vez» solo tiene sentido para quien lo vio, y
+     * a quien lo saltó —que es quien más ganaría volviendo— no le dice nada.
+     */
+    replayLead: "Te enseño dónde está cada cosa de tu panel.",
     replayAction: "Verlo",
     replayFailed: "No pudimos volver a abrir el recorrido.",
     /** Se compone con el paso y el total en el punto de uso, nunca aquí. */
@@ -348,6 +358,18 @@ export const messages = {
     signIn: "Entrar",
     signUp: "Crear cuenta",
     signOut: "Cerrar sesión",
+    /*
+     * Lo que pasa al pulsar, no que sea distinto de salir del perfil. Decir «no
+     * es lo mismo» obliga a adivinar en qué; decir que habrá que teclear el
+     * correo y la contraseña lo contesta.
+     */
+    signOutConsequence:
+      "No es lo mismo que cambiar de perfil. Cerrar sesión desvincula este dispositivo: " +
+      "para volver habrá que teclear el correo y la contraseña.",
+    /* Por qué hay dos credenciales, junto a donde se cambia una. */
+    pinVsPassword:
+      "El PIN es lo que tecleas para entrar a tu perfil. La contraseña, solo al vincular un " +
+      "dispositivo nuevo.",
     /** Solo para quien escucha la pantalla: el correo se lee tal cual. */
     accountEmailLabel: "Correo de la cuenta:",
     toSignUp: "¿Todavía no tienes cuenta? Créala",
@@ -459,8 +481,9 @@ export const messages = {
     back: "Volver",
 
     /** Cambiar el PIN sabiendo el actual. Requiere perfil de padre activo. */
-    myAvatarTitle: "Mi foto",
-    changePinTitle: "Cambiar PIN",
+    /* En paralelo con el del PIN: las dos secciones hacen lo mismo con dos cosas. */
+    myAvatarTitle: "Cambiar mi foto",
+    changePinTitle: "Cambiar mi PIN",
     currentPin: "PIN actual",
     newPin: "PIN nuevo",
     changePinSubmit: "Guardar PIN",
@@ -493,8 +516,9 @@ export const messages = {
     addChild: "Añadir un perfil",
     newChildTitle: "Nuevo perfil",
     editChildTitle: "Editar perfil",
+    /** Qué se cambia aquí, encima del título. Solo al editar. */
+    editChildLead: "Su nombre, su cara y su clave",
     name: "Nombre",
-    age: "Edad",
     ageOptional: "Edad (opcional)",
     // «Elige tu animal», no «Animal»: es una rejilla de caras para tocar, no un
     // campo que se rellena, y la maqueta la nombra por lo que hay que hacer.
@@ -554,6 +578,14 @@ export const messages = {
       "Dar de baja no se puede deshacer. Bloqueado es otra cosa: pasa cuando alguien falla el PIN varias veces, y se quita desde aquí.",
     /** Lo que encabeza la pantalla, antes del título. */
     listLead: "Cada uno con su PIN y su saldo",
+    /*
+     * Lo que distingue las dos acciones que se parecen. Sin esta línea, «dar de
+     * baja» y «desbloquear» se leen como variantes de lo mismo, y una de las dos
+     * no se puede deshacer.
+     */
+    deactivateVsLock:
+      "Un perfil dado de baja NO se puede recuperar: su saldo y su historial se van con él. " +
+      "Bloquear es otra cosa —pasa solo si alguien falla el PIN varias veces— y se quita desde aquí.",
 
     /** La baja es definitiva: la interfaz tiene que decirlo antes, no después. */
     deactivate: "Dar de baja",
@@ -1015,7 +1047,20 @@ export const messages = {
     parentRedemptionsReject: "¿Rechazar devuelve monedas? Pregúntame.",
     parentChildrenPin: "¿Alguien olvidó su PIN? Te digo cómo reponerlo.",
     parentChildrenBalance: "¿Quieres repasar cómo va cada uno?",
-    parentAccountLeave: "Salir del perfil y cerrar sesión no son lo mismo.",
+    /*
+     * DEJÓ DE DECIR LO QUE LA PANTALLA YA DICE.
+     *
+     * Decía «salir del perfil y cerrar sesión no son lo mismo», y esa frase está
+     * ahora al lado del botón, con su consecuencia entera. Repetirla en el globo
+     * gastaba uno de los dos turnos del asistente en esta pantalla para no
+     * añadir nada — y el globo es lo que hay que ABRIR, así que era además el
+     * peor sitio de los dos para decirlo.
+     *
+     * Lo que ofrece ahora es lo que la pantalla no puede: que cambiar el PIN no
+     * echa a nadie del dispositivo, que es la duda que frena a quien va a
+     * tocarlo.
+     */
+    parentAccountLeave: "¿Cambiar el PIN te echa de aquí? Te lo cuento.",
     parentAccountAsk: "¿Alguna duda sobre tu cuenta?",
     parentHelp: "Si tu duda no está aquí, pregúntamela.",
   },

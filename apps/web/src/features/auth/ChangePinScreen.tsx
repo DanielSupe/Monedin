@@ -43,7 +43,19 @@ export function ChangePinScreen(): React.ReactElement {
   return (
     <Card>
       <div className="flex flex-col gap-4">
-        <h3 className="text-body font-bold">{messages.auth.changePinTitle}</h3>
+        <div className="flex flex-col gap-1">
+          <h3 className="text-body font-bold">{messages.auth.changePinTitle}</h3>
+
+          {/*
+            POR QUÉ HAY DOS CREDENCIALES, junto a donde se cambia una.
+
+            El registro ya lo explica, pero eso se leyó una vez hace meses. Aquí
+            es donde alguien está a punto de cambiar el PIN y necesita saber que
+            no es la contraseña — y que cambiarlo no le deja fuera del
+            dispositivo.
+          */}
+          <p className="text-small text-ink-muted">{messages.auth.pinVsPassword}</p>
+        </div>
 
         <form onSubmit={submit} className="flex max-w-sm flex-col gap-4">
           {/*
