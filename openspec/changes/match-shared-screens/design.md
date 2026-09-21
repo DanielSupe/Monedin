@@ -128,5 +128,17 @@ y producción.
   2. **Que el relleno de la acción principal se oscurezca** y el enlace coral
      sobre superficie clara deje de ser coral.
 
+
+  **Y medido en los dos temas, que es la mitad que decide**: en OSCURO el coral
+  sobre superficie ya pasa —#FF6B4B contra #322B3C da 4.82—, así que «Volver» y
+  «Cancelar» se leen bien ahí y mal en claro. O sea que no hay que buscar un
+  coral que sirva a los dos: **solo el tema claro necesita un paso más oscuro**,
+  que es exactamente la forma de la salida 1 y la razón de recomendarla.
+
+  Lo que NO arregla ninguna de las dos es la etiqueta blanca sobre el relleno
+  coral, porque ahí el fondo es el mismo en los dos temas. Eso pide oscurecer el
+  relleno de la acción principal, y es la parte que de verdad cambia cómo se ve
+  el producto.
+
   No se toca aquí: cambiar el color principal del producto no es una decisión de
   ajustar pantallas.

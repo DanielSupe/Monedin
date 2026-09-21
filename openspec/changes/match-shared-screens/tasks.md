@@ -50,5 +50,14 @@
 
 - [x] 6.1 Volver a comparar las ocho, texto y tamaños, y dejar escrito lo que sigue sin cuadrar y por
       qué.
-- [ ] 6.2 Mirarlo en los dos temas.
+- [x] 6.2 Mirarlo en los dos temas. **Comprobado** con una sonda que mide el contraste REAL de cada
+      texto contra el fondo que le toca —no pares de tokens—, en las ocho y en los dos temas. Todo lo
+      que sale por debajo de AA es el coral, y nada más: ni una diferencia propia del tema oscuro.
+      Y sale que en OSCURO el coral sobre superficie ya pasa (4.82), así que solo el claro necesita
+      un paso más oscuro. Va a la pregunta abierta del design.
+      **La sonda tenía su propio defecto y hay que decirlo**: leía los colores pintando en un lienzo
+      de 1×1 sin limpiarlo, así que un fondo transparente devolvía la lectura ANTERIOR con alfa
+      opaco. El fondo de cada texto salía siendo su propia tinta y el contraste daba 1.00 en TODO —un
+      informe entero de falsos positivos, y en la sonda de tamaños el mismo defecto estaba
+      falseando los recuentos de fondos.
 - [ ] 6.3 `pnpm verify` entero.
