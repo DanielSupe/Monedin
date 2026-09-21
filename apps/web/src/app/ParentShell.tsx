@@ -101,6 +101,7 @@ export function ParentShell({
 
   const lateral = (
     <Sidebar
+      help={<HelpLink />}
       collapsed={ancho && contraido}
       {...(ancho ? { onToggleCollapse: () => setContraido((v) => !v) } : {})}
       profile={
@@ -216,8 +217,6 @@ export function ParentShell({
           excepción declarada a «ningún destino dos veces».
         */}
         <ThemeToggle theme={theme} />
-
-        <HelpLink />
 
         <Link to="/account" aria-label={messages.nav.parentAccount}>
           <Avatar value={avatar} size="small" />

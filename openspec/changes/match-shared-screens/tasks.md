@@ -60,4 +60,9 @@
       opaco. El fondo de cada texto salía siendo su propia tinta y el contraste daba 1.00 en TODO —un
       informe entero de falsos positivos, y en la sonda de tamaños el mismo defecto estaba
       falseando los recuentos de fondos.
-- [ ] 6.3 `pnpm verify` entero.
+- [x] 6.3 `pnpm verify` entero. **12 de 13 en la primera pasada**, con dos fallos del front y los dos
+      ajenos a estas pantallas: el bloque que afirmaba que la ayuda vive en la cabecera —que cae con
+      el trabajo de `match-role-screens` y se reescribió allí— y «la tarea se envía con Enter», que
+      tardó 5150 ms en paralelo y 1202 ms solo. Es la contención que `CLAUDE.md` ya describe: falla
+      un test distinto en cada pasada y cada uno pasa aislado. Batería del front entera en verde:
+      59 archivos, 591 tests.

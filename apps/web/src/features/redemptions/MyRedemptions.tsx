@@ -3,6 +3,7 @@ import { messages } from "../../lib/messages.js";
 import { contar } from "../../lib/plural.js";
 import { Alert, Badge, Coins, DataTable, EmptyState, Skeleton } from "../../ui/index.js";
 import type { BadgeTone, DataColumn } from "../../ui/index.js";
+import { fechaCorta } from "../../lib/dates.js";
 import {
   describeRedemptionStatus,
   describeRedemptionsError,
@@ -114,7 +115,7 @@ export function MyRedemptions(): React.ReactElement {
                   {describeRedemptionStatus(canje.status)}
                 </Badge>
               ),
-              cuando: <span className="text-small text-ink-muted">{corta(canje.createdAt)}</span>,
+              cuando: <span className="text-small text-ink-muted">{fechaCorta(canje.createdAt)}</span>,
             },
           }))}
         />
@@ -143,15 +144,12 @@ const TONO: Record<OwnRedemption["status"], BadgeTone> = {
   REJECTED: "conflict",
 };
 
-/**
- * Día y mes, sin año.
- *
- * En un historial que el niño mira cada pocos días, el año no aporta nada y sí
- * ocupa la columna que hace que las cuatro quepan en su escala.
+/*
+ * El «día y mes, sin año» que esta pantalla decidía —y su razón, que las cuatro
+ * columnas quepan en la escala del niño— vive ahora en `lib/dates`, con las dos
+ * formas que el producto usa y con el idioma declarado. Aquí pasaba `undefined`
+ * como configuración regional, o sea la del dispositivo.
  */
-function corta(fecha: string): string {
-  return new Date(fecha).toLocaleDateString(undefined, { day: "numeric", month: "short" });
-}
 
 /**
  * La forma de cada estado, dentro de su insignia.

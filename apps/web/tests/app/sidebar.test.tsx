@@ -109,6 +109,44 @@ describe("dentro de un perfil hay una sola navegación, y está entera", () => {
 });
 
 /**
+ * LA AYUDA TENÍA NOMBRE PARA QUIEN NO VE LA PANTALLA Y NO PARA QUIEN LA MIRA.
+ *
+ * Era un interrogante en la cabecera, con su nombre en `aria-label` — y la
+ * cabecera de la pieza afirmaba, palabra por palabra, que «lleva nombre y no
+ * solo un símbolo». Por eso este test busca por ROL Y NOMBRE dentro del
+ * lateral: con el interrogante mudo de antes, `getByRole("link", { name })`
+ * también lo encontraba, así que no distinguía nada. Lo que lo distingue es
+ * pedir además que su nombre ESTÉ EN LA PANTALLA.
+ *
+ * Y se comprueba que sigue siendo UNO: el arreglo es moverla, no añadirla, y
+ * dejarla en los dos sitios sería un segundo destino duplicado cuando la única
+ * excepción declarada es el perfil.
+ */
+describe("la ayuda se encuentra, y está una sola vez", () => {
+  it.each([
+    ["el padre", comoPadre],
+    ["el niño", comoNino],
+  ])("%s la tiene al pie de su lateral, con su nombre escrito", async (_quien, sesion) => {
+    conPantallaAncha();
+    await montarApp("/", sesion());
+
+    const ayuda = await screen.findByRole("link", { name: messages.help.title });
+
+    expect(ayuda).toHaveAttribute("href", "/help");
+    // Su nombre, a la vista y dentro del enlace: es lo que el interrogante mudo
+    // no tenía y lo único que este caso no pasaría con el defecto puesto.
+    expect(within(ayuda).getByText(messages.help.title)).toBeInTheDocument();
+  });
+
+  it("y no está además en la cabecera", async () => {
+    conPantallaAncha();
+    await montarApp("/", comoPadre());
+
+    expect(screen.getAllByRole("link", { name: messages.help.title })).toHaveLength(1);
+  });
+});
+
+/**
  * Quién anuncia el destino vigente, y contra qué protege esto.
  *
  * Lo pone el `Link` del router: `aria-current="page"` y `data-status="active"`,

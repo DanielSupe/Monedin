@@ -40,7 +40,19 @@ export const CREDENCIALES_DE_EJEMPLO = {
  * Nace bloqueado a propósito, y se desbloquea entrando con el PIN del adulto.
  * Es el caso que un desarrollador no vería jamás si tuviera que provocarlo.
  */
-const BLOQUEO_DE_LUCAS_EN_MINUTOS = 30;
+/**
+ * MUY LARGO A PROPÓSITO, y la primera versión puso treinta minutos.
+ *
+ * Copiar la ventana de bloqueo de producción parecía lo correcto y era justo lo
+ * contrario: media hora después de sembrar, el perfil se desbloqueaba solo y la
+ * tesela que esta siembra existe para poder mirar dejaba de estar. Pasó, y se
+ * descubrió comparando la pantalla con su maqueta media hora después.
+ *
+ * Una siembra no imita el comportamiento del producto: prepara un ESTADO para
+ * verlo. El que se quiere ver aquí es «bloqueado», y tiene que seguir estándolo
+ * mañana.
+ */
+const BLOQUEO_DE_LUCAS_EN_MINUTOS = 365 * 24 * 60;
 
 const config = getConfig();
 

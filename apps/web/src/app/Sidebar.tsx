@@ -110,11 +110,14 @@ export function SidebarLabel({ children }: { children: ReactNode }): React.React
  */
 export function Sidebar({
   children,
+  help,
   profile,
   collapsed = false,
   onToggleCollapse,
 }: {
   children: ReactNode;
+  /** El pie, encima del perfil: la ayuda. Ver la cabecera de `HelpLink`. */
+  help: ReactNode;
   /** El pie: el enlace al perfil de quien está operando. */
   profile: ReactNode;
   collapsed?: boolean;
@@ -139,6 +142,14 @@ export function Sidebar({
       </nav>
 
       <div className="flex flex-col gap-2 border-t border-border p-3">
+        {/*
+          La ayuda va aquí y no entre los destinos: la lista de arriba enumera
+          dónde se HACEN cosas, y la ayuda responde cómo funciona esto. El borde
+          que la separa es el mismo que separa el perfil, y es lo que dibujan las
+          maquetas.
+        */}
+        {help}
+
         {profile}
 
         {onToggleCollapse !== undefined && (
@@ -214,23 +225,30 @@ export function SidebarProfile({
  * para las dos cosas y sería el mismo `if` mudado de sitio. Con un cuarto
  * elemento común valdrá la pena; con tres, no.
  *
- * LLEVA NOMBRE y no solo un símbolo: un interrogante suelto no dice a dónde va.
+ * DECÍA QUE LLEVABA NOMBRE, Y NO LO LLEVABA A LA VISTA. Esta cabecera afirmaba
+ * «lleva nombre y no solo un símbolo: un interrogante suelto no dice a dónde
+ * va», y lo que había era un interrogante suelto con el nombre en `aria-label`.
+ * O sea: existía para quien no ve la pantalla y no para quien la mira. Una
+ * afirmación falsa dentro de una pieza es peor que ninguna.
  *
- * Y no está además en el cajón. Un destino ofrecido dos veces es un defecto, y
- * la única excepción declarada es el perfil. La ayuda no entra en la lista
- * porque no es un destino de TRABAJO: el cajón enumera dónde se hacen cosas
- * —tareas, premios, canjes, hijos— y la ayuda es meta, responde «¿cómo funciona
- * esto?» en vez de «¿qué tengo que hacer hoy?». Es el precedente del avatar, que
- * está en la cabecera porque responde a otra pregunta.
+ * LO QUE SÍ SEGUÍA EN PIE, y por eso se conserva: la ayuda no es un destino de
+ * TRABAJO. La lista del lateral enumera dónde se hacen cosas —tareas, premios,
+ * canjes, hijos— y la ayuda es meta: responde «¿cómo funciona esto?» y no «¿qué
+ * tengo que hacer hoy?».
+ *
+ * Así que va al PIE del lateral, con su nombre, separada de la lista por el
+ * mismo borde que separa el perfil — que es exactamente donde la dibujan las
+ * maquetas. Ni entre los destinos de trabajo ni colgando de un icono mudo.
+ *
+ * Y sigue estando en UN solo sitio: se quitó de la cabecera al ponerla aquí.
+ * Dejarla en los dos sería un segundo destino duplicado, y la única excepción
+ * declarada a eso es el perfil.
  */
 export function HelpLink(): React.ReactElement {
   return (
-    <Link
-      to="/help"
-      aria-label={messages.help.title}
-      className="tap-target rounded-control flex items-center justify-center px-2 text-ink-muted no-underline transition-colors duration-quick hover:text-primary"
-    >
+    <Link to="/help" className={sidebarItemClasses()}>
       <IconHelp />
+      <SidebarLabel>{messages.help.title}</SidebarLabel>
     </Link>
   );
 }

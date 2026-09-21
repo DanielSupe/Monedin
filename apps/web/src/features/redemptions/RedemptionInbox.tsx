@@ -17,6 +17,7 @@ import {
   tabLinkClasses,
 } from "../../ui/index.js";
 import type { BadgeTone } from "../../ui/index.js";
+import { fechaLarga } from "../../lib/dates.js";
 import {
   describeRedemptionStatus,
   describeRedemptionsError,
@@ -185,7 +186,7 @@ function RedemptionRow({ redemption }: { redemption: Redemption }): React.ReactE
         <div className="flex min-w-0 flex-col gap-0.5">
           <p className="truncate text-body font-bold">{redemption.child.name}</p>
           <p className="truncate text-small font-bold text-ink-muted">
-            {messages.redemptions.requestedLabel} {formatearFecha(redemption.createdAt)}
+            {messages.redemptions.requestedLabel} {fechaLarga(redemption.createdAt)}
           </p>
         </div>
 
@@ -252,10 +253,11 @@ function RedemptionRow({ redemption }: { redemption: Redemption }): React.ReactE
   );
 }
 
-/** Cuándo se pidió. En corto: es contexto, no una cuenta atrás. */
-function formatearFecha(iso: string): string {
-  return new Date(iso).toLocaleDateString();
-}
+/*
+ * Cuándo se pidió. El formato lo decide `lib/dates` y no esta pantalla: aquí
+ * daba `21/9/2026` con la configuración del dispositivo, y las maquetas
+ * escriben «8 de septiembre».
+ */
 
 /**
  * «Aprobar: Helado, Mateo».

@@ -242,22 +242,26 @@ describe("al cambiar de área cambia lo que dice", () => {
   });
 });
 
-describe("el acceso a la ayuda vive en la cabecera", () => {
-  it.each([
-    ["un niño", comoNino],
-    ["un padre", comoPadre],
-  ])("%s lo encuentra sin abrir el cajón", async (_quien, sesion) => {
-    await montarApp("/", sesion());
-
-    const ayuda = screen.getByRole("link", { name: messages.help.title });
-
-    expect(ayuda.getAttribute("href")).toBe("/help");
-  });
-
+/**
+ * ESTE BLOQUE DECÍA «vive en la cabecera», Y ERA LA MITAD EQUIVOCADA.
+ *
+ * Lo comprobaba de dos maneras: que se encuentra sin abrir el cajón, y que NO
+ * está entre los destinos del cajón. La segunda es la que sostenía un argumento
+ * —la ayuda no es un destino de TRABAJO, responde «¿cómo funciona esto?» y no
+ * «¿qué tengo que hacer hoy?»—. La primera solo describía dónde estaba
+ * entonces, y donde estaba era un interrogante mudo con su nombre en un
+ * `aria-label`.
+ *
+ * Así que la segunda se queda tal cual y la primera se sustituye por lo que de
+ * verdad hay que garantizar: que la ayuda no se pierde entre los destinos de
+ * trabajo pero **está donde está el perfil**, que es el otro sitio del marco
+ * para lo que no es trabajo. Que además lleve su nombre a la vista lo comprueba
+ * `sidebar.test.tsx`.
+ */
+describe("el acceso a la ayuda no se mezcla con los destinos de trabajo", () => {
   /*
-   * Y NO está además en el cajón. Un destino ofrecido dos veces es un defecto y
-   * la única excepción declarada es el perfil; la ayuda no entra en la lista
-   * porque no es un destino de trabajo, es meta.
+   * Un destino ofrecido dos veces es un defecto y la única excepción declarada
+   * es el perfil; la ayuda no entra en la lista porque no es de trabajo.
    */
   it.each([
     ["un niño", comoNino],
@@ -271,5 +275,24 @@ describe("el acceso a la ayuda vive en la cabecera", () => {
     // Con el cajón abierto Radix marca el resto del documento como oculto, así
     // que se comprueba DENTRO de él y no con `getAllByRole`.
     expect(cajon.querySelector('a[href="/help"]')).toBeNull();
+  });
+
+  /*
+   * Y SÍ está en el pie del lateral, junto al perfil. Sin este caso el de arriba
+   * pasaría igual con la ayuda BORRADA del marco, que es el defecto opuesto y
+   * peor: dejar de mezclarla no puede significar dejar de ofrecerla.
+   */
+  it.each([
+    ["un niño", comoNino],
+    ["un padre", comoPadre],
+  ])("y para %s está en el pie, donde el perfil", async (_quien, sesion) => {
+    await montarApp("/", sesion());
+
+    await userEvent.click(screen.getByRole("button", { name: messages.nav.menu }));
+    const lateral = screen
+      .getByRole("navigation", { name: messages.nav.drawerLabel })
+      .closest("[data-collapsed]");
+
+    expect(lateral?.querySelector('a[href="/help"]')).not.toBeNull();
   });
 });

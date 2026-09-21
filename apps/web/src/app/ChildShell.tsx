@@ -100,6 +100,7 @@ export function ChildShell({
 
   const lateral = (
     <Sidebar
+      help={<HelpLink />}
       collapsed={ancho && contraido}
       {...(ancho ? { onToggleCollapse: () => setContraido((v) => !v) } : {})}
       profile={
@@ -185,8 +186,6 @@ export function ChildShell({
           excepción declarada a «ningún destino dos veces».
         */}
         <ThemeToggle theme={theme} />
-
-        <HelpLink />
 
         <Link to="/me/settings" aria-label={messages.children.myProfileTitle}>
           <Avatar value={avatar} size="small" />

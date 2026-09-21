@@ -8,6 +8,7 @@ import type { BadgeTone } from "../../ui/index.js";
 import { ImageUploadField } from "../uploads/ImageUploadField.js";
 import { avanceDeTareas, porEtapa, type Etapa } from "../children/home-data.js";
 import { ProgressRing, HeroPanel, Mascota, IconTile } from "../../ui/index.js";
+import { fechaLarga } from "../../lib/dates.js";
 import { describeTasksError, useCompleteTask, useOwnTasks } from "./use-tasks.js";
 
 /**
@@ -175,7 +176,7 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
             <Coins amount={task.coins} />
             {task.dueDate !== null && (
               <span className="text-small text-ink-muted">
-                {messages.tasks.dueLabel} {new Date(task.dueDate).toLocaleDateString()}
+                {messages.tasks.dueLabel} {fechaLarga(task.dueDate)}
               </span>
             )}
           </div>

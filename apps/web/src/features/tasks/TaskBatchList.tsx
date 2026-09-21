@@ -17,6 +17,7 @@ import {
   tabLinkClasses,
 } from "../../ui/index.js";
 import type { BadgeTone } from "../../ui/index.js";
+import { fechaLarga } from "../../lib/dates.js";
 import {
   describeTaskStatus,
   describeTasksError,
@@ -131,9 +132,9 @@ export function TaskBatchList({
                         <p className="text-small text-ink-muted">{reparto.description}</p>
                       )}
                       <p className="text-small font-bold text-ink-muted">
-                        {messages.tasks.handedOutLabel} {formatearFecha(reparto.createdAt)}
+                        {messages.tasks.handedOutLabel} {fechaLarga(reparto.createdAt)}
                         {reparto.dueDate !== null &&
-                          ` · ${messages.tasks.dueLabel} ${formatearFecha(reparto.dueDate)}`}
+                          ` · ${messages.tasks.dueLabel} ${fechaLarga(reparto.dueDate)}`}
                       </p>
                     </div>
 
@@ -328,10 +329,7 @@ function TaskRow({
   );
 }
 
-/** La fecha límite se enseña en corto: es informativa, no una cuenta atrás. */
-function formatearFecha(iso: string): string {
-  return new Date(iso).toLocaleDateString();
-}
+/* Como en la bandeja de canjes: el formato lo decide `lib/dates`. */
 
 /**
  * «Aprobar: Tender la cama, Mateo».
