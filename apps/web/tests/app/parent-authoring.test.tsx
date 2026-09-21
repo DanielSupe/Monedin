@@ -295,3 +295,49 @@ describe("los controles traídos siguen funcionando con el teclado", () => {
     expect(screen.getByLabelText(`${messages.tasks.coins} · Mateo`)).toBeInTheDocument();
   });
 });
+
+/**
+ * LO QUE UN NOMBRE SOLO EN `aria-label` NO HACE: verse.
+ *
+ * El grupo del valor se anunciaba —y se sigue anunciando— con «¿Cuánto vale?»,
+ * pero esa pregunta vivía solo en un `aria-label`. Quien mira la pantalla veía
+ * «el mismo valor para todos» y «uno para cada uno» sin saber el mismo valor DE
+ * QUÉ. Es el mismo defecto que el acceso a la ayuda tenía en la cabecera.
+ *
+ * El test pide las dos cosas a la vez, y hacen falta las dos: que el grupo siga
+ * NOMBRADO para quien no ve —un texto puesto al lado no nombra un
+ * `role=radiogroup` por estar cerca— y que ese nombre ESTÉ en la pantalla. Con
+ * el defecto puesto, el primero pasa solo.
+ */
+describe("el nombre del grupo del valor se ve y se oye", () => {
+  it("está en la pantalla y además nombra al grupo", async () => {
+    await montar("/tasks/new");
+
+    await userEvent.click(await screen.findByRole("checkbox", { name: /Mateo/ }));
+
+    expect(screen.getByRole("radiogroup", { name: messages.tasks.valueLegend })).toBeInTheDocument();
+    expect(screen.getByText(messages.tasks.valueLegend)).toBeInTheDocument();
+  });
+
+  /*
+   * Y LO QUE SE VA A REPARTIR, en vivo. La cifra sola no dice a cuántos, y ahí
+   * está la duda que cuesta dinero si se entiende al revés: si esos diez son
+   * diez en total o diez para cada uno.
+   *
+   * Se comprueba con un valor de UNO, que es el caso donde componer una cifra
+   * con un texto fijo produce «1 monedas».
+   */
+  it("y dice a cuántos va ese valor, declinado", async () => {
+    await montar("/tasks/new");
+
+    await userEvent.click(await screen.findByRole("checkbox", { name: /Mateo/ }));
+
+    const valor = screen.getByRole("spinbutton", { name: messages.tasks.coins });
+    await userEvent.clear(valor);
+    await userEvent.type(valor, "1");
+
+    expect(
+      screen.getByText(`${1} ${messages.ui.coinsUnitSingular} ${messages.children.coinsEachChosen}`),
+    ).toBeInTheDocument();
+  });
+});

@@ -66,3 +66,26 @@ en dos sitios son dos caminos.
 
 - **WHEN** se abre su edición
 - **THEN** la pantalla lo dice
+
+### Requirement: Las pantallas que reparten explican qué pasa después
+
+El alta de una tarea y el alta de un premio SHALL explicar, en la propia pantalla, qué ocurre con lo
+que se está creando.
+
+Son los dos mecanismos centrales del producto y los que más se malinterpretan. En una tarea: que un
+hijo la marque NO le paga nada, y las monedas salen solo al aprobarla. En un premio: que un hijo VE
+lo que todavía no puede pagar —con cuánto le falta, que es lo que convierte un saldo en una decisión
+de ahorro— y que el precio se CONGELA al pedirlo.
+
+Va donde se decide y no en la ayuda: es ahí donde alguien está poniendo un valor o un precio. Y una
+decisión de producto que no se explica en pantalla es indistinguible de un defecto.
+
+#### Scenario: Se reparte una tarea
+
+- **WHEN** se abre el alta de una tarea
+- **THEN** la pantalla dice que marcarla no paga nada y que aprobar es lo que acredita
+
+#### Scenario: Se publica un premio
+
+- **WHEN** se abre el alta de un premio
+- **THEN** la pantalla dice que un hijo lo ve aunque no le alcance, y que el precio se congela al pedirlo

@@ -9,7 +9,15 @@ export interface RadioOption {
 }
 
 export interface RadioGroupProps {
-  /** Qué se está eligiendo. Lo exige Radix y lo oye quien no ve la pantalla. */
+  /**
+   * Qué se está eligiendo. SE VE Y SE OYE.
+   *
+   * Era solo un `aria-label`, o sea que existía para quien no mira la pantalla y
+   * no para quien la mira — el mismo defecto que el acceso a la ayuda tenía en la
+   * cabecera. Y aquí se notaba más: las dos opciones son «el mismo valor para
+   * todos» y «uno para cada uno», que sin la pregunta delante no dicen el mismo
+   * valor DE QUÉ.
+   */
   label: string;
   options: RadioOption[];
   value: string;
@@ -42,48 +50,59 @@ export function RadioGroup({
   onValueChange,
   className,
 }: RadioGroupProps): React.ReactElement {
+  /*
+   * El nombre se dibuja Y se sigue atando con `aria-label`, que no es
+   * redundante: lo que Radix pinta es un `div[role=radiogroup]`, y un texto
+   * puesto al lado no lo nombra por estar cerca.
+   */
   return (
-    <RadixRadioGroup.Root
-      aria-label={label}
-      value={value}
-      onValueChange={onValueChange}
-      className={cx("flex flex-col gap-2 sm:flex-row", className)}
-    >
-      {options.map((opcion) => {
-        const elegida = opcion.value === value;
+    <div className="flex flex-col gap-2">
+      <span className="text-body font-bold text-ink">{label}</span>
 
-        return (
-          <label
-            key={opcion.value}
-            className={cx(
-              "rounded-control tap-target flex flex-1 cursor-pointer items-center gap-3 border-2 px-3 py-2 transition duration-quick",
-              elegida
-                ? "border-primary bg-primary-soft"
-                : "border-border bg-surface-raised hover:bg-surface-sunken",
-            )}
-          >
-            <RadixRadioGroup.Item
-              value={opcion.value}
-              aria-label={opcion.label}
+      <RadixRadioGroup.Root
+        aria-label={label}
+        value={value}
+        onValueChange={onValueChange}
+        className={cx("flex flex-col gap-2 sm:flex-row", className)}
+      >
+        {options.map((opcion) => {
+          const elegida = opcion.value === value;
+
+          return (
+            <label
+              key={opcion.value}
               className={cx(
-                "rounded-pill flex size-5 shrink-0 items-center justify-center border-2",
-                elegida ? "border-primary" : "border-border-strong",
+                "rounded-control tap-target flex flex-1 cursor-pointer items-center gap-3 border-2 px-3 py-2 transition duration-quick",
+                elegida
+                  ? "border-primary bg-primary-soft"
+                  : "border-border bg-surface-raised hover:bg-surface-sunken",
               )}
             >
-              {/* El punto va DENTRO del indicador de Radix: así solo existe
+              <RadixRadioGroup.Item
+                value={opcion.value}
+                aria-label={opcion.label}
+                className={cx(
+                  "rounded-pill flex size-5 shrink-0 items-center justify-center border-2",
+                  elegida ? "border-primary" : "border-border-strong",
+                )}
+              >
+                {/* El punto va DENTRO del indicador de Radix: así solo existe
                   cuando la opción está elegida, y no hace falta una rama. */}
-              <RadixRadioGroup.Indicator className="rounded-pill block size-2.5 bg-primary" />
-            </RadixRadioGroup.Item>
+                <RadixRadioGroup.Indicator className="rounded-pill block size-2.5 bg-primary" />
+              </RadixRadioGroup.Item>
 
-            <span className="flex min-w-0 flex-col">
-              <span className="text-body font-semibold">{opcion.label}</span>
-              {opcion.hint !== undefined && (
-                <span className="text-small text-ink-muted">{opcion.hint}</span>
-              )}
-            </span>
-          </label>
-        );
-      })}
-    </RadixRadioGroup.Root>
+              <span className="flex min-w-0 flex-col">
+                <span className="text-body font-semibold">{opcion.label}</span>
+                {opcion.hint !== undefined && (
+                  <span className="text-small text-ink-muted">
+                    {opcion.hint}
+                  </span>
+                )}
+              </span>
+            </label>
+          );
+        })}
+      </RadixRadioGroup.Root>
+    </div>
   );
 }

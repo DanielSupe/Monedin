@@ -82,7 +82,12 @@ export function TaskForm({ onSaved }: { onSaved: () => void }): React.ReactEleme
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-display font-extrabold">{messages.tasks.newTaskTitle}</h2>
+      <div className="flex flex-col gap-1">
+        <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+          {messages.tasks.newTaskLead}
+        </span>
+        <h2 className="text-display font-extrabold">{messages.tasks.newTaskTitle}</h2>
+      </div>
 
       <Card>
         <form onSubmit={enviar} className="flex max-w-2xl flex-col gap-4">
@@ -119,6 +124,7 @@ export function TaskForm({ onSaved }: { onSaved: () => void }): React.ReactEleme
               sameCoins: messages.tasks.sameCoins,
               coinsPerChild: messages.tasks.coinsPerChild,
               coins: messages.tasks.coins,
+              valueLegend: messages.tasks.valueLegend,
             }}
           />
 
@@ -138,6 +144,53 @@ export function TaskForm({ onSaved }: { onSaved: () => void }): React.ReactEleme
           </div>
         </form>
       </Card>
+
+      <ComoFunciona />
     </section>
+  );
+}
+
+/**
+ * EL CICLO DE UNA TAREA, DICHO DONDE SE REPARTE.
+ *
+ * Es el mecanismo central del producto y el que más se malinterpreta: que un
+ * hijo marque una tarea NO le paga nada, y las monedas salen solo al aprobarla.
+ * Un padre que no lo sepa cuenta con que ya cobró — o al revés, sospecha que el
+ * saldo no sube cuando debería.
+ *
+ * Va aquí y no en la ayuda, porque aquí es donde alguien está decidiendo cuánto
+ * vale algo. Es la misma razón por la que la bandeja explica su filtro en la
+ * pantalla: una decisión de producto que no se explica es indistinguible de un
+ * defecto.
+ *
+ * Y es una LISTA ORDENADA, no tres párrafos: los tres pasos ocurren en ese
+ * orden, y el orden es justo lo que hay que entender.
+ */
+function ComoFunciona(): React.ReactElement {
+  const pasos = [
+    messages.tasks.handOutEach,
+    `${messages.tasks.handOutMarkLead}${messages.tasks.filterCompleted}${messages.tasks.handOutMarkTail}`,
+    messages.tasks.handOutApprove,
+  ];
+
+  return (
+    <Card>
+      <div className="flex flex-col gap-3">
+        <h3 className="text-lead font-extrabold">{messages.tasks.handOutTitle}</h3>
+
+        <ol className="flex list-none flex-col gap-3 p-0">
+          {pasos.map((paso, indice) => (
+            <li key={paso} className="flex items-start gap-3">
+              <span className="rounded-pill text-small grid size-6 shrink-0 place-items-center bg-primary-soft font-extrabold text-primary-hover">
+                {indice + 1}
+              </span>
+              <span className="text-small text-ink">{paso}</span>
+            </li>
+          ))}
+        </ol>
+
+        <p className="text-small text-ink-muted">{messages.tasks.handOutEditable}</p>
+      </div>
+    </Card>
   );
 }

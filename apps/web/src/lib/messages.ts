@@ -610,6 +610,12 @@ export const messages = {
      * compartida que elige hijos, y esa pieza es una desde
      * `redesign-parent-authoring`.
      */
+    /*
+     * Lo que se va a repartir, en vivo. La cifra sola no dice A CUÁNTOS, y ahí
+     * está la duda de quien reparte: si esos ocho son ocho en total o ocho para
+     * cada uno.
+     */
+    coinsEachChosen: "a cada hijo elegido",
     pickAtLeastOne: "Elige al menos un hijo.",
 
     /** Lo que el niño ve y puede cambiar de lo suyo. */
@@ -680,6 +686,29 @@ export const messages = {
     empty: "Todavía no has repartido ninguna tarea.",
     newTask: "Repartir una tarea",
     newTaskTitle: "Nueva tarea",
+    /** Qué se decide en esta pantalla, encima del título. */
+    newTaskLead: "Tú decides lo que vale",
+
+    /*
+     * EL CICLO DE UNA TAREA, EXPLICADO DONDE SE REPARTE.
+     *
+     * Es el mecanismo central del producto y el que más se malinterpreta: que un
+     * hijo marque una tarea NO le paga nada, y las monedas salen solo al
+     * aprobarla. Un padre que no lo sepa cuenta con que ya cobró, o al revés
+     * sospecha que el saldo no sube.
+     *
+     * Va aquí y no en la ayuda, porque aquí es donde alguien está decidiendo
+     * cuánto vale algo. La frase de «Por aprobar» compone el nombre del filtro
+     * desde donde ya vive, para que renombrarlo no deje esta mintiendo.
+     */
+    handOutTitle: "Qué pasa al repartir",
+    handOutEach:
+      "Cada hijo elegido recibe SU tarea. Son independientes: que uno la marque no afecta a los otros.",
+    handOutMarkLead: "Cuando la marque, te aparecerá en «",
+    handOutMarkTail: "». Marcarla no le paga nada todavía.",
+    handOutApprove: "Las monedas se le acreditan cuando TÚ la apruebas, y solo entonces.",
+    handOutEditable:
+      "Una tarea solo se puede editar mientras esté pendiente. Rechazarla la devuelve a pendiente, no la borra.",
     taskTitle: "¿Qué hay que hacer?",
     description: "Detalles (opcional)",
     dueDate: "Fecha límite (opcional)",
@@ -694,6 +723,15 @@ export const messages = {
     sameCoins: "El mismo valor para todos",
     coinsPerChild: "Un valor para cada uno",
     coins: "Monedas",
+    /*
+     * EL NOMBRE DEL GRUPO DE MODOS, que no tenía el suyo.
+     *
+     * El grupo de «el mismo valor para todos / uno para cada uno» se anunciaba
+     * con el nombre del conjunto entero, «¿Para quién?», que es de lo que NO va:
+     * ese grupo decide cuánto. Quien lo recorre con un lector de pantalla oía la
+     * pregunta equivocada antes de las dos opciones.
+     */
+    valueLegend: "¿Cuánto vale?",
     create: "Repartir",
     working: "Guardando…",
     cancel: "Cancelar",
@@ -718,7 +756,15 @@ export const messages = {
      * pendientes se leía como un filtro roto: una decisión de producto que no se
      * explica es indistinguible de un defecto.
      */
-    wholeBatchNote: "Cada reparto se muestra completo, incluso las tareas que no casan con el filtro.",
+    /*
+     * LA SEGUNDA MITAD ES LA QUE EXPLICA, y faltaba. Decía solo que el reparto se
+     * muestra completo —el QUÉ—, y quien lo lee sigue sin saber por qué: porque
+     * lo que se filtra son los REPARTOS y no las filas. Sin eso, la frase se lee
+     * como una disculpa por un filtro que no funciona.
+     */
+    wholeBatchNote:
+      "Cada reparto se muestra completo, incluso las tareas que no casan con el filtro: " +
+      "lo que se filtra son los repartos, no las filas.",
 
     /** Estados, tal como los lee una persona. */
     /*
@@ -743,6 +789,23 @@ export const messages = {
     nothingPending: "Nada pendiente",
     myTasksEmpty: "No tienes tareas ahora mismo. ¡Disfruta!",
     markDone: "¡Ya la hice!",
+
+    /*
+     * EL CICLO, CONTADO AL NIÑO.
+     *
+     * Es lo mismo que explica el formulario del padre y por eso van los dos, no
+     * uno: el que reparte necesita saber que marcar no paga, y el que marca
+     * necesita saber que su papá o su mamá lo revisan antes. Contárselo a uno
+     * solo deja al otro suponiendo.
+     *
+     * El primer paso NOMBRA el botón desde donde ya vive, para que renombrarlo
+     * no deje esta frase señalando a un botón que no existe.
+     */
+    howTitle: "Cómo funciona",
+    howDoLead: "Haces la tarea y tocas «",
+    howDoTail: "».",
+    howReview: "Tu papá o tu mamá la revisan.",
+    howApproved: "Al aprobarla, las monedas ya son tuyas.",
     addEvidence: "Súbele una foto (opcional)",
     evidenceReady: "¡Foto lista! Ahora marca la tarea.",
     evidenceAlt: "La foto que subiste",
@@ -764,19 +827,57 @@ export const messages = {
 
   rewards: {
     /** Lo que encabeza el catálogo del padre, antes del título. */
-    catalogLead: "Lo que tus hijos pueden pedir",
+    /*
+     * Nombra también el PRECIO, que es la otra mitad de lo que hay en esta
+     * pantalla y la que cambia de un hijo a otro. Decía solo qué pueden pedir.
+     */
+    catalogLead: "Lo que pueden pedir, y a qué precio",
     /** Gestión del padre. */
     title: "Premios",
     empty: "Todavía no has publicado ningún premio.",
     newReward: "Publicar un premio",
     newRewardTitle: "Nuevo premio",
+    /** Qué se decide en esta pantalla, encima del título. */
+    newRewardLead: "Tú pones el precio",
     rewardTitle: "¿Qué premio es?",
     description: "Detalles (opcional)",
-    forWhom: "¿Para quién?",
+    /*
+     * Las DOS decisiones en una, porque en un premio van juntas: a quién se le
+     * ofrece y por cuánto. «¿Para quién?» dejaba la segunda sin anunciar, y es
+     * la que cambia de un hijo a otro.
+     */
+    forWhom: "¿A quién se lo ofreces, y por cuánto?",
     noChildren: "Primero crea un perfil de hijo.",
     sameCoins: "El mismo precio para todos",
     coinsPerChild: "Un precio para cada uno",
+    valueLegend: "¿Cuánto cuesta?",
+    /*
+     * Aquí se queda la UNIDAD y no la pregunta, al contrario que en una tarea.
+     * No es una incoherencia: allí el conjunto pregunta «¿Para quién?» y el
+     * precio necesita su propia pregunta; aquí el conjunto ya pregunta «¿a quién
+     * se lo ofreces, y por cuánto?», así que repetirla dentro sería decirlo dos
+     * veces seguidas.
+     */
     coins: "Monedas",
+
+    /*
+     * EL CICLO DE UN PREMIO, DICHO DONDE SE PUBLICA.
+     *
+     * Dos cosas que la API hace y la interfaz no contaba en ninguna parte: que
+     * un hijo VE lo que no puede pagar todavía —con cuánto le falta, que es lo
+     * que convierte un saldo en una decisión de ahorro— y que el precio se
+     * CONGELA al pedirlo. Lo segundo importa de verdad: si se sube el precio
+     * después, un canje pendiente mantiene el suyo, y sin saberlo eso parece un
+     * error de cuentas.
+     */
+    publishTitle: "Qué pasa al publicar",
+    publishShows:
+      "Aparece en el escaparate de los hijos a los que se lo ofreces, cada uno con SU precio.",
+    publishSaving:
+      "Si no le alcanza, lo ve igual: con una barra de cuánto le falta. Eso es lo que convierte " +
+      "un saldo en una decisión de ahorro.",
+    publishFrozen:
+      "Al pedirlo, el precio se CONGELA. Si luego lo subes, ese canje mantiene el que tenía.",
     create: "Publicar",
     working: "Guardando…",
     cancel: "Cancelar",
@@ -788,6 +889,8 @@ export const messages = {
     addImage: "Ponerle una foto",
     /** En el alta la foto es opcional, y decirlo evita que parezca obligatoria. */
     optionalImage: "Foto (opcional)",
+    /* Por qué el marco del recorte es cuadrado. La razón vive en otra pantalla. */
+    imageSquare: "Se recorta cuadrada: en el escaparate van en rejilla y si no, se dentea.",
     imageReady: "Foto lista. Se guardará al publicar el premio.",
     /** Decorativo: va con `aria-hidden`, así que nadie lo escucha. */
     imageFallbackGlyph: "🎁",

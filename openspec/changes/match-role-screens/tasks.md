@@ -31,9 +31,32 @@
 - [x] 2.1 Panel. **Cuadra**: con las fechas y la ayuda arregladas, lo único que difiere de su maqueta
       son las cifras de la siembra, el nombre partido en dos nodos, el singular que la aplicación
       declina bien, y la línea del asistente — que la maqueta no dibuja y es de la aplicación.
-- [ ] 2.2 Tareas, y su formulario de reparto
-- [ ] 2.3 Canjes
-- [ ] 2.4 Premios, y su formulario de alta
+- [x] 2.2 Tareas. **Cuadra**, y de paso deshizo una diferencia que no lo era: la nota del filtro
+      parecía faltar y lo que pasaba es que la maqueta está capturada CON el filtro «Por aprobar»
+      puesto y yo comparaba contra la aplicación sin filtrar. La regla de las dos coincide.
+      Lo que sí faltaba es la segunda mitad de esa nota: decía que el reparto se muestra completo
+      —el qué— y no que lo que se filtra son los REPARTOS y no las filas —el por qué—. Sin eso se
+      lee como una disculpa por un filtro roto.
+- [x] 2.2b El formulario de reparto. Le faltaba lo más importante que esa pantalla puede decir: **que
+      marcar una tarea NO paga nada y que aprobar es lo que acredita**. Es el mecanismo central del
+      producto y no estaba explicado en ninguna parte de la interfaz. Va como lista ORDENADA, porque
+      los tres pasos ocurren en ese orden y el orden es lo que hay que entender.
+      Y dos defectos de los controles, los dos de la misma familia —un nombre que solo existe para
+      quien no ve la pantalla—: el grupo del valor se anunciaba con «¿Para quién?», que es de lo que
+      NO va, y su pregunta real vivía solo en un `aria-label`; y el valor no decía a cuántos va, que
+      es la duda que cuesta dinero al entenderse al revés.
+- [x] 2.3 Canjes. **Cuadra.** Su explicación del precio congelado y del descuento al aprobar dice lo
+      mismo que la maqueta, repartida en tres frases en vez de un párrafo.
+- [x] 2.4 Premios (el catálogo). **Cuadra**, salvo su antetítulo: decía «lo que tus hijos pueden
+      pedir» y la maqueta nombra también el PRECIO, que es la otra mitad de esa pantalla y la que
+      cambia de un hijo a otro.
+- [x] 2.4b El formulario de alta. Mismo caso: la API congela el precio al pedir un premio y un hijo ve
+      lo que no puede pagar con cuánto le falta — las dos cosas de las que va el producto, y ninguna
+      dicha en pantalla. Además el conjunto pregunta ya «¿a quién se lo ofreces, y por cuánto?», así
+      que el precio no repite la pregunta dentro; y se explica por qué el recorte es cuadrado, cuya
+      razón vive en OTRA pantalla —el escaparate en rejilla—.
+      **Y un comentario que afirmaba lo contrario del código de debajo**: decía «sin `aspect`» encima
+      de un `aspect={1}`. Era cierto hasta `crop-reward-images`; se quedó mintiendo.
 - [x] 2.5 Hijos. **Cuadra**, y de paso corrigió mi propia lectura: la maqueta NO mueve las acciones a
       la pantalla del hijo —dibuja «Editar», «Historial» y «Dar de baja» en la FILA, igual que la
       aplicación—, así que la única diferencia de controles es «Cambiar su PIN», uno. Lo arreglado:
@@ -60,17 +83,40 @@
       lo de tus hijos» —enumeraba el contenido sin avisar de la confusión real en una tablet
       compartida— y la oferta de repetir el recorrido dice por fin qué es el recorrido.
 - [ ] 2.8 Chat
-- [ ] 2.9 Ayuda
+- [ ] 2.9 Ayuda — **BLOQUEADA por una decisión de producto**, en la pregunta abierta del design: la
+      aplicación tiene UNA lista de preguntas para los dos roles y las maquetas tienen dos, con
+      preguntas que un niño no puede ni hacer. Dividir no es cambiar un texto.
 - [ ] 2.10 Los tres diálogos: baja, retirar, recorte
 
 ## 3. Las nueve del niño
 
-- [ ] 3.1 Inicio
-- [ ] 3.2 Tareas
-- [ ] 3.3 Premios
-- [ ] 3.4 Canjes
-- [ ] 3.5 Monedas
-- [ ] 3.6 Perfil
+Comparadas las nueve, esto es lo que falta. Se anota antes de tocar nada porque cuatro de ellas
+piden lo MISMO —decirle al niño cuánto le falta para algo— y resolverlo pantalla por pantalla
+escribiría esa cuenta cuatro veces.
+
+- [ ] 3.1 Inicio. **ESTA NOTA ESTABA MAL Y SE CORRIGE**: la escribí leyendo solo la lista de
+      diferencias, donde el saludo, la cuenta de hechas y el panel de meta salían como «solo en la
+      maqueta» — y están las tres en la aplicación, dichas con otras palabras. Abrir la pantalla y
+      leerla entera es lo que lo destapó; comparar dos listas dice qué texto no coincide, no qué
+      falta. Lo que falta de verdad son tres cosas:
+      el botón **«¡Ya la hice!»** en cada fila de tarea —hoy hay que ir a «Tareas» para marcarla—,
+      el bloque de lo **recién ganado**, y que el panel de meta enseñe la **fracción** («128/300»)
+      además de la barra. El «hoy te esperan…» de la maqueta sigue sin poder decirse, porque el
+      modelo no tiene jornada; la cuenta sí está.
+- [x] 3.2 Tareas. **Cuadra.** Tenía ya lo que creí que le faltaba —el botón por fila, el aviso de lo
+      ganado, los grupos con su cuenta— y lo que sí faltaba era su «Cómo funciona»: el mismo ciclo
+      que ahora explica el formulario del padre, contado del lado del niño. Van los DOS a propósito:
+      el que reparte necesita saber que marcar no paga, y el que marca necesita saber que lo revisan
+      antes. Contárselo a uno solo deja al otro suponiendo, y es donde un niño se lleva el chasco:
+      marca, no ve subir sus monedas, y cree que se perdieron.
+      Va al FINAL y no arriba: lo primero que quiere ver es qué tiene por hacer.
+- [ ] 3.3 Premios. La barra de «te faltan N monedas» **ya está** —`ProgressBar` se estrenó ahí—. Lo
+      que falta es la otra mitad: **«¡Ya te alcanza!»** en lo que sí puede pagar. Hoy un premio
+      asequible se distingue solo por tener botón, que es la diferencia que menos se ve.
+- [ ] 3.4 Canjes. **Cuadra**: solo difieren las cifras y las fechas de la siembra.
+- [ ] 3.5 Monedas. **Cuadra** desde que el historial enseña fechas (tarea 2.6).
+- [ ] 3.6 Perfil. Le falta su antetítulo, su identidad —edad y saldo— y **la opción de ponerse una
+      foto**, que aquí SÍ se puede porque el perfil ya existe.
 - [ ] 3.7 Chat
 - [ ] 3.8 Ayuda
 - [ ] 3.9 Recorrido

@@ -94,7 +94,12 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
 
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="text-display font-extrabold">{messages.rewards.newRewardTitle}</h2>
+      <div className="flex flex-col gap-1">
+        <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+          {messages.rewards.newRewardLead}
+        </span>
+        <h2 className="text-display font-extrabold">{messages.rewards.newRewardTitle}</h2>
+      </div>
 
       <Card>
         <form onSubmit={enviar} className="flex max-w-2xl flex-col gap-4">
@@ -120,8 +125,13 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
             `ImageUploadField`, que ya existía. Aquí solo se guarda la clave
             hasta que se publica.
 
-            Sin `aspect`: recortar a cuadrado la foto de un premio quitaría justo
-            lo que hay que ver, que es el juguete entero.
+            ESTE COMENTARIO DECÍA «sin `aspect`», y debajo hay un `aspect={1}`.
+            Era cierto hasta `crop-reward-images`, que lo cambió con su razón
+            escrita —las fotos van en rejilla en el escaparate y sin recortar la
+            dentean, y el recortador es interactivo, así que quien sube encuadra
+            hasta que el juguete cabe—. La frase se quedó afirmando lo contrario
+            de la línea siguiente, que es la clase de comentario que manda al
+            próximo a «arreglar» algo que está bien.
           */}
           <ImageUploadField
             label={messages.rewards.optionalImage}
@@ -137,6 +147,16 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
             onUploaded={setImageUploadKey}
           />
 
+          {/*
+            POR QUÉ SE RECORTA CUADRADA, dicho donde se sube.
+
+            El recorte es interactivo, así que quien sube ve un marco cuadrado y
+            no sabe por qué. La razón está en el escaparate del niño, que es otra
+            pantalla: van en rejilla, y sin recortar la dentean. Sin esta línea,
+            el marco parece un capricho del subidor.
+          */}
+          <p className="text-small text-ink-muted">{messages.rewards.imageSquare}</p>
+
           {imageUploadKey !== null && (
             <Alert tone="done">{messages.rewards.imageReady}</Alert>
           )}
@@ -148,6 +168,7 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
               sameCoins: messages.rewards.sameCoins,
               coinsPerChild: messages.rewards.coinsPerChild,
               coins: messages.rewards.coins,
+              valueLegend: messages.rewards.valueLegend,
             }}
           />
 
@@ -167,6 +188,49 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
           </div>
         </form>
       </Card>
+
+      <ComoFunciona />
     </section>
+  );
+}
+
+/**
+ * EL CICLO DE UN PREMIO, DICHO DONDE SE PUBLICA.
+ *
+ * Dos cosas que la API hace desde el principio y la interfaz no contaba en
+ * ninguna parte. Que un hijo VE lo que todavía no puede pagar, con cuánto le
+ * falta — que es lo que convierte un saldo en una decisión de ahorro y es de lo
+ * que va el producto. Y que el precio se CONGELA al pedirlo: si se sube después,
+ * un canje pendiente mantiene el suyo, y sin saberlo eso parece un descuadre.
+ *
+ * Gemela de la del reparto de tareas y deliberadamente NO la misma pieza: lo que
+ * comparten es la forma —tres pasos y una nota—, no el contenido, y una pieza
+ * común con dos juegos de textos sería un contenedor con un nombre que no dice
+ * nada. Si aparece una tercera, entonces sí.
+ */
+function ComoFunciona(): React.ReactElement {
+  const pasos = [
+    messages.rewards.publishShows,
+    messages.rewards.publishSaving,
+    messages.rewards.publishFrozen,
+  ];
+
+  return (
+    <Card>
+      <div className="flex flex-col gap-3">
+        <h3 className="text-lead font-extrabold">{messages.rewards.publishTitle}</h3>
+
+        <ol className="flex list-none flex-col gap-3 p-0">
+          {pasos.map((paso, indice) => (
+            <li key={paso} className="flex items-start gap-3">
+              <span className="rounded-pill text-small grid size-6 shrink-0 place-items-center bg-brand-soft font-extrabold text-brand">
+                {indice + 1}
+              </span>
+              <span className="text-small text-ink">{paso}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </Card>
   );
 }

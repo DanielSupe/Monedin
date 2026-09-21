@@ -109,7 +109,49 @@ export function MyTasks(): React.ReactElement {
           ))}
         </div>
       )}
+
+      <ComoFunciona />
     </section>
+  );
+}
+
+/**
+ * EL CICLO, CONTADO AL NIÑO.
+ *
+ * Lo mismo que explica el formulario del padre, y van los DOS a propósito: el
+ * que reparte necesita saber que marcar no paga, y el que marca necesita saber
+ * que su papá o su mamá lo revisan antes. Contárselo a uno solo deja al otro
+ * suponiendo — y es justo donde un niño se lleva el chasco: marca, no ve subir
+ * sus monedas, y cree que se perdieron.
+ *
+ * Va al FINAL y no arriba: lo primero que quiere ver es qué tiene por hacer, no
+ * una explicación. Quien la necesita la encuentra después de mirar la lista, que
+ * es cuando aparece la duda.
+ */
+function ComoFunciona(): React.ReactElement {
+  const pasos = [
+    `${messages.tasks.howDoLead}${messages.tasks.markDone}${messages.tasks.howDoTail}`,
+    messages.tasks.howReview,
+    messages.tasks.howApproved,
+  ];
+
+  return (
+    <Card>
+      <div className="flex flex-col gap-3">
+        <h3 className="text-title font-extrabold">{messages.tasks.howTitle}</h3>
+
+        <ol className="flex list-none flex-col gap-3 p-0">
+          {pasos.map((paso, indice) => (
+            <li key={paso} className="flex items-center gap-3">
+              <span className="rounded-pill text-body grid size-8 shrink-0 place-items-center bg-primary-soft font-extrabold text-primary-hover">
+                {indice + 1}
+              </span>
+              <span className="text-body text-ink">{paso}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </Card>
   );
 }
 

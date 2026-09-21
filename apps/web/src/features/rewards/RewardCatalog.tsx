@@ -455,6 +455,7 @@ function OffersEditor({
           sameCoins: messages.rewards.sameCoins,
           coinsPerChild: messages.rewards.coinsPerChild,
           coins: messages.rewards.coins,
+          valueLegend: messages.rewards.valueLegend,
         }}
       />
 

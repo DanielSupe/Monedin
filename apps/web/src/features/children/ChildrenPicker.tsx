@@ -2,6 +2,7 @@ import { COINS_MAX, COINS_MIN, MAX_CHILDREN_PER_FAMILY } from "@monedin/contract
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
 import { Avatar, Checkbox, Field, Input, RadioGroup, Skeleton } from "../../ui/index.js";
+import { contar } from "../../lib/plural.js";
 import { useChildren } from "./use-children.js";
 
 /**
@@ -30,6 +31,8 @@ export type ChildrenSelection =
 
 export interface PickerLabels {
   legend: string;
+  /** El del grupo de modos. Decide CUÁNTO, así que no puede llevar el del conjunto. */
+  valueLegend: string;
   sameCoins: string;
   coinsPerChild: string;
   coins: string;
@@ -145,7 +148,15 @@ export function ChildrenPicker({
       */}
       {mode === "both" && (
         <RadioGroup
-          label={labels.legend}
+          /*
+            SU PROPIO NOMBRE, y antes llevaba el del conjunto entero.
+
+            Este grupo decide CUÁNTO —el mismo para todos o uno por hijo— y se
+            anunciaba como «¿Para quién?», que es de lo que no va. Quien lo
+            recorre con un lector de pantalla oía la pregunta equivocada justo
+            antes de sus dos opciones.
+          */
+          label={labels.valueLegend}
           value={mismoValor ? "same" : "perChild"}
           onValueChange={(valor) => picker.setMismoValor(valor === "same")}
           options={[
@@ -193,7 +204,20 @@ export function ChildrenPicker({
       </ul>
 
       {!porCadaUno && (
-        <Field label={labels.coins}>
+        /*
+          LA AYUDA DICE A CUÁNTOS, que es la duda de quien reparte: si esos ocho
+          son ocho en total o ocho para cada uno. La cifra sola no lo dice, y la
+          respuesta —cada uno— es la que cuesta dinero si se entiende al revés.
+
+          Se compone en vivo con el valor que se está escribiendo, y con `contar`
+          para que un valor de uno no diga «1 monedas».
+        */
+        <Field
+          label={labels.coins}
+          help={`${contar(Number(coins), messages.ui.coinsUnitSingular, messages.ui.coinsUnit)} ${
+            messages.children.coinsEachChosen
+          }`}
+        >
           <Input
             type="number"
             min={COINS_MIN}

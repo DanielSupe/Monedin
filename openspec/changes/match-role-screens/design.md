@@ -126,3 +126,53 @@ que probablemente solo ilustraba la pieza.
 
 Queda dicho en vez de decidido en silencio, para que se pueda corregir si la
 intención era la contraria.
+
+## Open Questions
+
+### La ayuda: ¿una lista para los dos roles, o una por rol?
+
+La aplicación tiene **una sola** pantalla de preguntas frecuentes con nueve
+entradas compartidas, y lo dice en su cabecera: «UNA SOLA PANTALLA para los dos
+roles». Las maquetas tienen **dos** artboards, `PadreAyuda` y `NinoAyuda`, con
+preguntas distintas.
+
+Y las del padre son del padre de verdad, no una variante de tono:
+
+- «Subí el precio de un premio que ya me habían pedido.»
+- «Alguien olvidó su PIN o bloqueó su perfil.»
+- «¿Retirar un premio es lo mismo que dejar de ofrecérselo a un hijo?»
+- «Si rechazo un canje, ¿se le devuelven las monedas?»
+
+Un niño no puede hacer ninguna de esas cuatro, y tiene que pasarlas por encima
+para llegar a la suya. Al revés también: «¿cómo consigo un premio?» no es la duda
+de quien los publica.
+
+**Lo que hay a favor de dividir**: es lo que dibuja el diseño, y el argumento se
+sostiene solo — una lista de preguntas sirve para encontrar la propia, y la mitad
+que no puede ser tuya estorba.
+
+**Lo que hay en contra**: la decisión de una sola pantalla está escrita, y
+dividir no es cambiar un texto — son seis respuestas nuevas que redactar, decidir
+cuáles siguen siendo comunes, y un segundo catálogo que mantener.
+
+**No se toca aquí**: cuántas listas de ayuda tiene el producto no es un ajuste de
+pantalla, y las nueve preguntas actuales son correctas para los dos aunque no
+sean las óptimas para ninguno. Queda planteado.
+
+### 6. Comparar dos listas dice qué texto NO COINCIDE, no qué falta
+
+Se pagó al anotar el inicio del niño: la lista de diferencias ponía su saludo, su
+cuenta de hechas y su panel de meta como «solo en la maqueta», y las tres cosas
+están en la aplicación — dichas con otras palabras. Escribí en las tareas que
+faltaban, y era falso.
+
+Lo destapó abrir la pantalla y leerla entera. Así que el método de este change se
+corrige: la comparación de textos sirve para **encontrar candidatos**, y cada
+candidato hay que mirarlo en la pantalla antes de llamarlo ausencia. Un renglón
+que solo aparece en la maqueta puede ser tres cosas distintas —algo que falta,
+algo que está con otras palabras, o algo que la maqueta enseña de un estado que
+la aplicación no está mostrando— y la lista no las distingue.
+
+Es la tercera vez en este trabajo que la misma clase de error se cobra: la
+precaución de las rutas copiada sin comprobar, las acciones del hijo deducidas de
+otro artboard, y esto. Todas por afirmar una diferencia sin ir a verla.
