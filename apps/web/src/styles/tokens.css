@@ -792,8 +792,8 @@
    * porque lo exige un requisito vigente. Bajarlo aquí sería cambiar una
    * decisión de producto por la puerta de atrás.
    */
-  --text-micro: 0.8125rem;
-  --text-small: 0.8125rem;
+  --text-micro: 0.75rem;
+  --text-small: 0.875rem;
   --text-body: 0.9375rem;
   --text-lead: 1.125rem;
   --text-title: 1.3125rem;
@@ -819,13 +819,60 @@
  * de la escala del padre, porque sus controles son los de un adulto.
  */
 [data-scale="public"] {
+  /*
+   * ESTOS PASOS ESTUVIERON UN ESCALÓN POR DEBAJO, y el error fue de AGRUPACIÓN
+   * y no de lectura.
+   *
+   * El primer recuento agrupó las maquetas por la página del lienzo, donde la
+   * portada comparte carpeta con las cinco pantallas del marco de entrada. Ésas
+   * escriben más pequeño, así que al promediarlas con la portada salió un cuerpo
+   * de 16 donde la portada usa 18 y un título de 24 donde usa 34.
+   *
+   * Contado sobre la portada SOLA, y elemento por elemento: el pie son 13, el
+   * texto secundario 16, los párrafos 18, la línea guía y los pasos 20, los tres
+   * `h2` de sección 34 y el titular 58.
+   *
+   * La lección, que vale más que las cifras: un recuento agrupa por lo que la
+   * APLICACIÓN reasigna —aquí, por `data-scale`—, no por cómo estén ordenados
+   * los archivos del diseño.
+   */
   --text-micro: 0.8125rem;
-  --text-small: 0.875rem;
+  --text-small: 1rem;
+  --text-body: 1.125rem;
+  --text-lead: 1.25rem;
+  --text-title: 1.5rem;
+  --text-display: 2.125rem;
+  --text-hero: 3.625rem;
+}
+
+/*
+ * EL CAMINO DE ENTRADA ES UNA AUDIENCIA PROPIA, igual que la puerta pública.
+ *
+ * Hasta `tune-scale-to-mockups` estas pantallas no declaraban escala, con el
+ * argumento de que la elige la audiencia y ahí todavía no se sabe quién está
+ * delante. El argumento era bueno y la consecuencia no: sin declarar nada se
+ * quedaban con la base, que es LA DEL PADRE —la más densa del producto, medida
+ * para un adulto repasando listas largas—. O sea que «no se sabe quién está
+ * delante» se resolvía eligiendo al padre en silencio, que es justo la clase de
+ * valor por defecto que este proyecto no admite en ningún otro sitio.
+ *
+ * Y se mide. Contando sus siete maquetas elemento por elemento: la ayuda al pie
+ * son 13, las etiquetas de campo 15, los botones y enlaces 16, el párrafo que
+ * encabeza 18, el nombre de un perfil 22, el titular 32 y el «¿Quién eres?» 46.
+ * Un paso entero por encima de lo que la escala del padre pone en cada uno.
+ *
+ * Lo que sigue siendo cierto de la decisión anterior: aquí NO se elige entre la
+ * escala del padre y la del niño. Lo que cambia es que tampoco se hereda una de
+ * las dos por descarte.
+ */
+[data-scale="entry"] {
+  --text-micro: 0.8125rem;
+  --text-small: 0.9375rem;
   --text-body: 1rem;
   --text-lead: 1.125rem;
   --text-title: 1.5rem;
-  --text-display: 2rem;
-  --text-hero: 3.625rem;
+  --text-display: 1.75rem;
+  --text-hero: 2.75rem;
 }
 
 /*

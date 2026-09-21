@@ -48,8 +48,16 @@ export function Field({ label, help, error, children }: FieldProps): React.React
 
         {children}
 
+        {/*
+          LA AYUDA BAJA UN PASO RESPECTO A LA ETIQUETA, y no es simetría rota: en
+          las maquetas la etiqueta son 15 y la ayuda 13. Son dos papeles, y el
+          primero que se lee es el nombre del campo.
+
+          El ERROR se queda al tamaño de la etiqueta a propósito: hay que leerlo,
+          y dejarlo como el texto más pequeño de la pantalla es lo contrario.
+        */}
         {help !== undefined && (
-          <p id={helpId} className="text-small text-ink-muted">
+          <p id={helpId} className="text-micro text-ink-muted">
             {help}
           </p>
         )}

@@ -1198,8 +1198,18 @@ arriba a la izquierda y contenido centrado en los dos ejes. Antes caían en un c
 **sin marca**, así que se entraba por una página con logo, se pasaba por cuatro pantallas anónimas y
 el logo volvía al final. Quiénes lo reciben **no se lista**: es la última rama de la raíz, o sea todo
 lo que llega sin actor y sin pedir ancho completo, y como toda ruta de la aplicación exige actor ese
-conjunto es exactamente el camino de entrada. No declara escala: la elige la audiencia, y ahí todavía
-no se sabe quién está delante.
+conjunto es exactamente el camino de entrada.
+
+**Y el camino de entrada es una audiencia PROPIA.** Esta frase decía que el marco no declara escala,
+«porque la elige la audiencia y ahí todavía no se sabe quién está delante». La mitad que sigue en
+pie: ahí no se elige entre la escala del padre y la del niño. La que no: sin declarar nada se quedaba
+con la base, que es **la del padre** —la más densa del producto, medida para un adulto repasando
+listas largas—, así que «no se sabe quién está delante» se resolvía eligiendo al padre en silencio.
+Desde `tune-scale-to-mockups` declara `data-scale="entry"`, con los pasos contados en sus siete
+maquetas: la ayuda de un campo son 13, su etiqueta 15, los botones 16, el nombre de un perfil 22 y el
+«¿Quién eres?» 46 — un paso entero por encima del padre en cada uno. Lo declaran **dos** sitios y
+hacen falta los dos: el marco para las que van dentro, y `AccessLayout` para entrar y registrarse,
+que van a sangre y no pasan por él — igual que la portada declara la suya.
 
 **Un marco centra; el ancho lo declara cada pantalla.** `EntryShell` lo intentó imponer y partía la
 rejilla en dos filas. Solo la pantalla sabe si es un formulario de 22rem o una fila de caras.

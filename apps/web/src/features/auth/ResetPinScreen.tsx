@@ -56,7 +56,7 @@ export function ResetPinScreen(): React.ReactElement {
 
   return (
     <section className="flex w-full max-w-sm flex-col gap-4">
-      <h2 className="text-title font-bold">{messages.auth.resetPinTitle}</h2>
+      <h2 className="text-display font-bold">{messages.auth.resetPinTitle}</h2>
       <p className="text-body text-ink-muted">{messages.auth.resetPinLead}</p>
 
       <Card>

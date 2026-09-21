@@ -211,7 +211,7 @@ function Keypad({
             <Avatar value={profile.avatar} size="large" />
           </span>
 
-          <p className="text-title font-extrabold text-ink-inverted">{profile.name}</p>
+          <p className="text-display font-extrabold text-ink-inverted">{profile.name}</p>
           <h2 className="text-body font-bold text-ink-inverted opacity-90">
             {manage ? messages.auth.pinPromptToEdit : messages.auth.pinPrompt}
           </h2>
@@ -235,9 +235,10 @@ function Keypad({
             key={digit}
             onClick={() => press(digit)}
             disabled={enter.isPending}
+            size="keypad"
             // El cero va centrado y el borrado a su derecha, como en cualquier
             // teclado numérico: la posición de una tecla también se aprende.
-            className={cx("text-title size-16", digit === "0" && "col-start-2")}
+            className={cx(digit === "0" && "col-start-2")}
           >
             {digit}
           </Button>
@@ -248,7 +249,7 @@ function Keypad({
           onClick={backspace}
           disabled={enter.isPending || pin.length === 0}
           aria-label={messages.auth.pinDelete}
-          className="size-16"
+          size="keypad"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-6">
             <path

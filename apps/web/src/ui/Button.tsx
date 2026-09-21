@@ -16,11 +16,24 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "cont
  * resolvería el orden del CSS generado y no el del código — un fallo que no se
  * ve leyendo y que no tiene por qué ser estable entre compilaciones.
  */
-export type ButtonSize = "default" | "large";
+/*
+ * Y la tercera talla es la prueba de que el aviso de arriba no era teórico: el
+ * teclado del PIN pasaba `text-title size-16` desde la pantalla, o sea
+ * exactamente el caso que este comentario nombra. Funcionaba por suerte —en el
+ * CSS generado `text-title` se declara DESPUÉS de `text-body`, así que ganaba—
+ * y con `text-display`, que se declara antes, habría perdido y las teclas
+ * habrían salido al tamaño de un botón normal sin que nada fallara.
+ *
+ * Se llama por lo que ES, una tecla de un teclado numérico, y no `xlarge`: lo
+ * que la distingue no es que sea más grande sino que es cuadrada y su contenido
+ * es una cifra que se mira de reojo mientras se teclea.
+ */
+export type ButtonSize = "default" | "large" | "keypad";
 
 const SIZES: Record<ButtonSize, string> = {
   default: "tap-target text-body px-4",
   large: "tap-target-large text-title px-6",
+  keypad: "text-display size-16",
 };
 
 /**

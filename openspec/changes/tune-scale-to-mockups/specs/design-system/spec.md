@@ -35,3 +35,56 @@ valor raro.
 
 - **WHEN** un paso de la escala se aparta de lo que la maqueta usa por una decisión de producto
 - **THEN** esa decisión queda escrita donde vive el token, en lugar de corregirse en silencio
+
+### Requirement: El camino de entrada tiene su propia escala, y no hereda la del padre
+
+Las pantallas previas a tener un rol —acceso, registro, rejilla de perfiles, teclado de PIN, alta de
+perfil y restablecer PIN— SHALL declarar una escala propia, y NO SHALL quedarse con la escala base
+por no declarar ninguna.
+
+La escala base es la del padre, que es la más densa del producto. No declarar nada no significa «no
+elegir»: significa elegir la del padre en silencio, y un valor por defecto que tapa una decisión
+ausente es lo que este proyecto no admite en ninguna otra capa.
+
+El conjunto de pantallas que la reciben SHALL seguir sin enumerarse. Las que van dentro del marco de
+entrada la reciben del marco; las que van a sangre la declaran ellas, igual que la puerta pública
+declara la suya.
+
+#### Scenario: Se llega a una pantalla previa a tener un rol
+
+- **WHEN** se abre cualquiera de ellas, con o sin marco
+- **THEN** su texto se dibuja con la escala del camino de entrada, y no con la del padre ni con la
+  del niño
+
+#### Scenario: Se añade una pantalla al camino de entrada
+
+- **WHEN** se declara una ruta nueva que llega sin actor y se conforma con el marco
+- **THEN** recibe esa escala sin que nadie tenga que acordarse
+
+### Requirement: Un paso de la escala sirve a UN papel
+
+Cuando un mismo paso de la escala esté sirviendo a dos papeles que las maquetas dibujan a tamaños
+distintos, SHALL repartirse entre los pasos que ya existen en lugar de ajustar su valor.
+
+Un paso que sirve al encabezado de una sección, al logo y a un botón grande a la vez no se puede
+corregir cambiando su valor, porque no hay un valor que sirva a los tres. La escala tiene siete pasos
+nombrados por su papel precisamente para que cada papel tenga el suyo.
+
+#### Scenario: Un paso sirve a dos papeles de tamaño distinto
+
+- **WHEN** se corrige el valor de un paso y eso rompe otro papel que lo comparte
+- **THEN** los papeles se reparten entre los pasos existentes, sin inventar uno nuevo
+
+### Requirement: Una pieza declara sus tallas, y el CSS generado no decide ninguna
+
+Una pantalla NO SHALL imponer el tamaño de texto de una pieza pasándole una utilidad por `className`.
+Cuando una pieza necesite una talla que no tiene, SHALL declararla como opción de la pieza.
+
+`cx` no fusiona utilidades de Tailwind, así que dos del mismo grupo las resuelve el orden del CSS
+generado. Eso hace que una imposición desde fuera pueda funcionar hoy por el orden que tocó y dejar
+de funcionar al cambiar el token que se pide, sin que nada falle.
+
+#### Scenario: Una pantalla necesita una pieza a otro tamaño
+
+- **WHEN** ese tamaño no está entre las tallas de la pieza
+- **THEN** se añade como talla de la pieza, nombrada por su papel

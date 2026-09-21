@@ -9,9 +9,17 @@ import { Logo } from "../ui/index.js";
  * lectura de la raíz, pegadas arriba y SIN MARCA. Se entraba por una página con
  * logo, se pasaba por cuatro pantallas anónimas, y el logo volvía al final.
  *
- * No declara escala. La escala la elige la audiencia, y aquí todavía no se sabe
- * quién está delante: la rejilla la usan el padre y los hijos por igual. Se
- * queda con la base, que es la del padre.
+ * Declara `data-scale="entry"`, y eso CAMBIÓ en `tune-scale-to-mockups`. Antes
+ * no declaraba ninguna, con el argumento de que la escala la elige la audiencia
+ * y aquí todavía no se sabe quién está delante. La mitad que seguía en pie: aquí
+ * no se elige entre la del padre y la del niño. La que no: sin declarar nada se
+ * quedaba con la base, o sea con LA DEL PADRE —la más densa del producto—, así
+ * que «no se sabe» se resolvía eligiendo al padre en silencio.
+ *
+ * Y sus maquetas escriben un paso entero por encima: 15 en una etiqueta de
+ * campo, 22 en el nombre de un perfil, 46 en el «¿Quién eres?». Es una audiencia
+ * propia, por la misma razón que la puerta pública lo es: se lee de pie, de un
+ * vistazo, por alguien que todavía no es nadie en el producto.
  *
  * Quiénes lo reciben NO se lista en ninguna parte: es la última rama de la
  * raíz, o sea todo lo que llega sin actor y sin pedir ancho completo. Como
@@ -21,7 +29,7 @@ import { Logo } from "../ui/index.js";
  */
 export function EntryShell(): React.ReactElement {
   return (
-    <div className="flex min-h-dvh flex-col bg-surface text-ink">
+    <div data-scale="entry" className="flex min-h-dvh flex-col bg-surface text-ink">
       <header className="px-4 py-3">
         <Logo size="medium" />
       </header>

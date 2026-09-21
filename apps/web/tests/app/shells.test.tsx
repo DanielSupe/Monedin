@@ -46,17 +46,37 @@ describe("cada rol recibe su marco", () => {
   });
 
   /*
-   * Esta prueba decía «antes de tener un rol NO hay marco». Dejó de ser cierto
-   * en `add-entry-frame`: hay un tercer marco, el de entrada. Lo que sigue
-   * siendo cierto —y es lo que hay que sostener— es que no declara escala,
-   * porque la escala la elige la audiencia y aquí todavía no se sabe quién está
-   * delante.
+   * ESTA PRUEBA VA POR SU TERCERA REDACCIÓN, y las tres veces por lo mismo: se
+   * escribía con la forma de la respuesta de entonces en vez de con lo que se
+   * quiere garantizar.
+   *
+   * Decía «antes de tener un rol NO hay marco» —falso desde `add-entry-frame`,
+   * que añadió el tercero—. Después decía «no declara escala» —falso desde
+   * `tune-scale-to-mockups`, que le dio la suya al medir que sus maquetas
+   * escriben un paso por encima de las del padre—.
+   *
+   * Lo que se quiere garantizar no ha cambiado nunca: por el camino de entrada
+   * no se cuela NI el marco del padre NI el del niño. Así que eso es lo que
+   * afirma, y por eso nombra las dos escalas en vez de esperar un valor
+   * concreto: una escala nueva no la vuelve a romper.
    */
-  it("antes de tener un rol hay marco de entrada, pero sin escala", async () => {
+  it("antes de tener un rol no se cuela el marco de ninguno de los dos", async () => {
     await montarApp("/profiles", SOLO_CUENTA);
 
-    expect(escala()).toBeNull();
+    expect(escala()).not.toBe("parent");
+    expect(escala()).not.toBe("child");
     expect(screen.queryByRole("button", { name: messages.nav.menu })).toBeNull();
+  });
+
+  /*
+   * Y la escala que sí declara, comprobada aparte: si no, la prueba de arriba
+   * pasaría igual con el atributo borrado, que es exactamente el defecto que
+   * este change vino a arreglar.
+   */
+  it("y el de entrada declara la suya", async () => {
+    await montarApp("/profiles", SOLO_CUENTA);
+
+    expect(escala()).toBe("entry");
   });
 });
 
