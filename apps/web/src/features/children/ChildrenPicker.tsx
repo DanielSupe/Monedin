@@ -1,7 +1,18 @@
-import { COINS_MAX, COINS_MIN, MAX_CHILDREN_PER_FAMILY } from "@monedin/contracts";
+import {
+  COINS_MAX,
+  COINS_MIN,
+  MAX_CHILDREN_PER_FAMILY,
+} from "@monedin/contracts";
 import { useState } from "react";
 import { messages } from "../../lib/messages.js";
-import { Avatar, Checkbox, Field, Input, RadioGroup, Skeleton } from "../../ui/index.js";
+import {
+  Avatar,
+  Checkbox,
+  Field,
+  Input,
+  RadioGroup,
+  Skeleton,
+} from "../../ui/index.js";
 import { contar } from "../../lib/plural.js";
 import { useChildren } from "./use-children.js";
 
@@ -123,7 +134,8 @@ export function ChildrenPicker({
   picker: Picker;
   labels: PickerLabels;
 }): React.ReactElement {
-  const { hijos, isPending, elegidos, mismoValor, coins, porHijo, mode } = picker;
+  const { hijos, isPending, elegidos, mismoValor, coins, porHijo, mode } =
+    picker;
 
   if (isPending) {
     return <Skeleton lines={3} />;
@@ -135,6 +147,61 @@ export function ChildrenPicker({
     <fieldset className="flex min-w-0 flex-col gap-3 border-0 p-0">
       <legend className="text-body font-bold">{labels.legend}</legend>
 
+      <ul className="flex list-none flex-col gap-2 p-0">
+        {hijos.map((hijo) => (
+          <li
+            key={hijo.id}
+            className="flex min-w-0 flex-wrap items-center gap-3"
+          >
+            {/*
+              SOBRE `Checkbox`, y lo que se gana es el área tocable: la etiqueta
+              envuelve al control, así que se marca pulsando la fila entera y no
+              un cuadrado de 20px. En una tablet que un padre usa con el pulgar,
+              esa es la diferencia entre acertar a la primera o a la tercera.
+            */}
+            <Checkbox
+              className="min-w-0 flex-1"
+              checked={elegidos.includes(hijo.id)}
+              onCheckedChange={() => picker.alternar(hijo.id)}
+            >
+              <span className="flex min-w-0 items-center gap-3">
+                <Avatar value={hijo.avatar} size="small" />
+                <span className="truncate">{hijo.name}</span>
+              </span>
+            </Checkbox>
+
+            {porCadaUno && elegidos.includes(hijo.id) && (
+              <Input
+                type="number"
+                min={COINS_MIN}
+                max={COINS_MAX}
+                value={porHijo[hijo.id] ?? ""}
+                onChange={(evento) =>
+                  picker.setPorHijo((previos) => ({
+                    ...previos,
+                    [hijo.id]: evento.target.value,
+                  }))
+                }
+                className="w-28"
+                aria-label={`${labels.coins} · ${hijo.name}`}
+              />
+            )}
+          </li>
+        ))}
+      </ul>
+
+      {/*
+        EL GRUPO DE MODOS VA DESPUÉS DE LOS HIJOS, y estaba antes.
+
+        Con el orden de antes, su pregunta —«¿cuánto vale?»— quedaba pegada a la
+        del conjunto —«¿para quién?»—, dos renglones seguidos preguntando cosas
+        distintas y leyéndose como un solo encabezado partido. Es lo que se ve al
+        abrir la pantalla y lo que la maqueta pone al revés.
+
+        Y el orden dice algo: primero a quién, después cuánto. Elegir el modo de
+        valor antes de saber cuántos hijos van es decidir sobre un conjunto que
+        todavía no existe.
+      */}
       {/*
         Los dos modos, solo cuando hay dos. Reasignar precios en el catálogo es
         siempre uno por hijo, y ofrecer ahí «el mismo para todos» sería ofrecer
@@ -165,43 +232,6 @@ export function ChildrenPicker({
           ]}
         />
       )}
-
-      <ul className="flex list-none flex-col gap-2 p-0">
-        {hijos.map((hijo) => (
-          <li key={hijo.id} className="flex min-w-0 flex-wrap items-center gap-3">
-            {/*
-              SOBRE `Checkbox`, y lo que se gana es el área tocable: la etiqueta
-              envuelve al control, así que se marca pulsando la fila entera y no
-              un cuadrado de 20px. En una tablet que un padre usa con el pulgar,
-              esa es la diferencia entre acertar a la primera o a la tercera.
-            */}
-            <Checkbox
-              className="min-w-0 flex-1"
-              checked={elegidos.includes(hijo.id)}
-              onCheckedChange={() => picker.alternar(hijo.id)}
-            >
-              <span className="flex min-w-0 items-center gap-3">
-                <Avatar value={hijo.avatar} size="small" />
-                <span className="truncate">{hijo.name}</span>
-              </span>
-            </Checkbox>
-
-            {porCadaUno && elegidos.includes(hijo.id) && (
-              <Input
-                type="number"
-                min={COINS_MIN}
-                max={COINS_MAX}
-                value={porHijo[hijo.id] ?? ""}
-                onChange={(evento) =>
-                  picker.setPorHijo((previos) => ({ ...previos, [hijo.id]: evento.target.value }))
-                }
-                className="w-28"
-                aria-label={`${labels.coins} · ${hijo.name}`}
-              />
-            )}
-          </li>
-        ))}
-      </ul>
 
       {!porCadaUno && (
         /*

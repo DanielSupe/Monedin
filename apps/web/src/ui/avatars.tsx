@@ -257,4 +257,16 @@ export function isAvatarUrl(value: string | null | undefined): boolean {
 }
 
 /** Todas las opciones, para el selector al crear o editar un perfil. */
-export const AVATAR_OPTIONS = AVATAR_KEYS.map((key) => ({ key, drawing: DIBUJOS[key] }));
+/*
+ * EL CATÁLOGO DE OPCIONES LLEVA SOLO LA CLAVE, y llevaba además el dibujo crudo.
+ *
+ * Ese `drawing` eran los `<path>` sueltos, SIN el `<svg>` que los hace visibles
+ * —quien lo pone es `avatarDrawing`—, así que quien lo pintara tal cual no
+ * dibujaba nada. Pasó: la rejilla de animales del alta de un perfil salía con
+ * doce cajas vacías, y ningún test lo dijo porque jsdom no pinta y los botones
+ * seguían teniendo su nombre.
+ *
+ * Exponer un fragmento a medio montar es la trampa. Quien necesite dibujar un
+ * avatar usa `Avatar`, que es la única forma que hay de hacerlo.
+ */
+export const AVATAR_OPTIONS = AVATAR_KEYS.map((key) => ({ key }));

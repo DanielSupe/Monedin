@@ -199,8 +199,15 @@ function PencilBadge(): React.ReactElement {
   return (
     <span
       aria-hidden="true"
-      // Mismo velo que el diálogo, que es el precedente del sistema.
-      className="rounded-card absolute inset-0 flex items-center justify-center bg-ink/40 text-ink-inverted"
+      /*
+        Mismo velo que el diálogo, que es el precedente del sistema.
+
+        REDONDO, y eso cambió con el avatar: mientras fue un cuadrado redondeado
+        el velo llevaba su mismo radio, y al pasar la cara a círculo se quedó con
+        cuatro esquinas asomando por fuera. Un velo que cubre algo tiene que
+        tener su forma, no la que tenía antes.
+      */
+      className="rounded-pill absolute inset-0 flex items-center justify-center bg-ink/40 text-ink-inverted"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-10">
         <path

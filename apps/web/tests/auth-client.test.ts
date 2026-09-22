@@ -301,18 +301,21 @@ describe("el catálogo de avatares", () => {
   });
 
   /*
-   * Que cada clave tenga DIBUJO, y que falle si falta uno. Sin la segunda mitad,
-   * añadir una clave al contrato sin dibujarla pasaría en verde y saldría un
-   * hueco en la rejilla.
+   * ESTE CASO COMPROBABA QUE CADA OPCIÓN TENÍA `drawing` DEFINIDO, Y PASABA CON
+   * LA REJILLA EN BLANCO.
    *
-   * Se comprueba que el dibujo existe y no su contenido: cómo se pinta un animal
-   * es del archivo que lo dibuja, y fijarlo aquí ataría el test a cada trazo.
+   * Su comentario decía que sin él «añadir una clave sin dibujarla saldría como
+   * un hueco en la rejilla». Lo que no podía ver es que TODAS salían como un
+   * hueco: `drawing` eran los `<path>` sueltos, sin el `<svg>` que los hace
+   * visibles, y quien los pintaba tal cual no dibujaba nada. Estaba definido, así
+   * que el test seguía en verde.
+   *
+   * La garantía que quería sigue haciendo falta y se comprueba **dibujando**, en
+   * `tests/ui/AvatarPicker.test.tsx`: se monta la rejilla y se cuenta que los
+   * doce botones tienen algo dentro. Aquí se queda lo que este archivo sí puede
+   * decir sin DOM — que el catálogo de opciones cubre las claves del contrato.
    */
-  it("cada opción tiene su dibujo, y ninguna se queda sin él", () => {
-    expect(AVATAR_OPTIONS.length).toBe(AVATAR_KEYS.length);
-
-    for (const option of AVATAR_OPTIONS) {
-      expect(option.drawing, `falta el dibujo de ${option.key}`).toBeDefined();
-    }
+  it("el catálogo de opciones cubre exactamente las claves del contrato", () => {
+    expect(AVATAR_OPTIONS.map((opcion) => opcion.key).sort()).toEqual([...AVATAR_KEYS].sort());
   });
 });

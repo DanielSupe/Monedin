@@ -1,6 +1,6 @@
 import { AVATAR_MAX_DIMENSION, type AvatarKey, type ImageContentType, type UploadUrl } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
-import { Card, cx } from "../../ui/index.js";
+import { Avatar, Card, cx } from "../../ui/index.js";
 import { AVATAR_OPTIONS } from "../../ui/avatars.js";
 import { ImageUploadField } from "../uploads/ImageUploadField.js";
 
@@ -76,7 +76,21 @@ export function AvatarPicker({
                   : "border-border-strong hover:bg-surface-sunken",
               )}
             >
-              {option.drawing}
+              {/*
+                LA MISMA PIEZA QUE DIBUJA UN AVATAR EN TODO EL PRODUCTO, y antes
+                era el fragmento crudo de `AVATAR_OPTIONS.drawing`.
+
+                Ese fragmento son los `<path>` sueltos, SIN su `<svg>` alrededor
+                —quien lo envuelve es `avatarDrawing`—, así que el navegador no
+                pintaba nada: la rejilla salía con doce cajas vacías. Se veía
+                abriendo la pantalla y ningún test lo decía, porque jsdom no
+                pinta y los doce botones seguían teniendo su nombre.
+
+                Se arregla usando `Avatar`, no envolviendo aquí: hay UNA forma de
+                dibujar un avatar en este proyecto y esta pantalla no tenía por
+                qué conocer otra.
+              */}
+              <Avatar value={option.key} size="small" />
             </button>
           ))}
         </div>
