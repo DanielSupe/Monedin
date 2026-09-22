@@ -55,4 +55,4 @@
       El atributo va en `<html>`, así que un portal al final del documento lo hereda por construcción.
       Verificado además inyectando la violación contraria —escribir `light` en vez de no escribir
       nada—, que el test caza.
-- [ ] 6.3 `pnpm verify` entero.
+- [x] 6.3 `pnpm verify` entero. 13 de 13 tareas, con las dos baterías.

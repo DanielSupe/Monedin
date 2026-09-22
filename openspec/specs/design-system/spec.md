@@ -1205,3 +1205,150 @@ código.
 - **WHEN** un componente traído necesitaría un estilo en línea o conocer el dominio para funcionar
 - **THEN** no se incorpora, y la necesidad se resuelve con una pieza propia
 
+### Requirement: La escala y el peso salen de las maquetas, y se pueden medir
+
+Los pasos de cada escala tipográfica y el registro de pesos del sistema SHALL corresponder a lo que
+las maquetas de referencia usan, y esa correspondencia SHALL ser verificable contando las
+declaraciones de los artboards en lugar de mirándolos.
+
+Los artboards son HTML con estilos en línea, así que cada tamaño y cada peso se puede contar. Eso
+convierte «se ve distinto» en una cifra, y es lo que permite distinguir un defecto de una pantalla de
+un defecto del sistema: si la aplicación escribe 30px donde la maqueta escribe 16 en dieciocho
+sitios, lo que está mal es el token.
+
+El registro de pesos SHALL declararse en la capa de tokens y NO SHALL reescribirse en cada pieza. Una
+pieza pide «semibold» y lo que cambia es a qué apunta esa palabra en este producto, igual que un
+color semántico cambia de valor sin que ninguna pieza se entere.
+
+Cuando el registro declarado haga que un nombre signifique algo distinto de su valor habitual, SHALL
+decirse en el propio archivo de tokens. Una palabra que significa otra cosa sin avisar es peor que un
+valor raro.
+
+#### Scenario: Se compara una pantalla con su maqueta
+
+- **WHEN** se cuentan los tamaños y pesos de una pantalla y los de su maqueta
+- **THEN** los pasos que domina cada una son los mismos
+
+#### Scenario: El diseño ajusta su registro tipográfico
+
+- **WHEN** las maquetas cambian el peso con el que se escribe el producto
+- **THEN** se ajusta en la capa de tokens, sin tocar ninguna pieza ni ninguna pantalla
+
+#### Scenario: Una cifra de la aplicación no sale de la maqueta
+
+- **WHEN** un paso de la escala se aparta de lo que la maqueta usa por una decisión de producto
+- **THEN** esa decisión queda escrita donde vive el token, en lugar de corregirse en silencio
+
+### Requirement: El camino de entrada tiene su propia escala, y no hereda la del padre
+
+Las pantallas previas a tener un rol —acceso, registro, rejilla de perfiles, teclado de PIN, alta de
+perfil y restablecer PIN— SHALL declarar una escala propia, y NO SHALL quedarse con la escala base
+por no declarar ninguna.
+
+La escala base es la del padre, que es la más densa del producto. No declarar nada no significa «no
+elegir»: significa elegir la del padre en silencio, y un valor por defecto que tapa una decisión
+ausente es lo que este proyecto no admite en ninguna otra capa.
+
+El conjunto de pantallas que la reciben SHALL seguir sin enumerarse. Las que van dentro del marco de
+entrada la reciben del marco; las que van a sangre la declaran ellas, igual que la puerta pública
+declara la suya.
+
+#### Scenario: Se llega a una pantalla previa a tener un rol
+
+- **WHEN** se abre cualquiera de ellas, con o sin marco
+- **THEN** su texto se dibuja con la escala del camino de entrada, y no con la del padre ni con la
+  del niño
+
+#### Scenario: Se añade una pantalla al camino de entrada
+
+- **WHEN** se declara una ruta nueva que llega sin actor y se conforma con el marco
+- **THEN** recibe esa escala sin que nadie tenga que acordarse
+
+### Requirement: Un paso de la escala sirve a UN papel
+
+Cuando un mismo paso de la escala esté sirviendo a dos papeles que las maquetas dibujan a tamaños
+distintos, SHALL repartirse entre los pasos que ya existen en lugar de ajustar su valor.
+
+Un paso que sirve al encabezado de una sección, al logo y a un botón grande a la vez no se puede
+corregir cambiando su valor, porque no hay un valor que sirva a los tres. La escala tiene siete pasos
+nombrados por su papel precisamente para que cada papel tenga el suyo.
+
+#### Scenario: Un paso sirve a dos papeles de tamaño distinto
+
+- **WHEN** se corrige el valor de un paso y eso rompe otro papel que lo comparte
+- **THEN** los papeles se reparten entre los pasos existentes, sin inventar uno nuevo
+
+### Requirement: Una pieza declara sus tallas, y el CSS generado no decide ninguna
+
+Una pantalla NO SHALL imponer el tamaño de texto de una pieza pasándole una utilidad por `className`.
+Cuando una pieza necesite una talla que no tiene, SHALL declararla como opción de la pieza.
+
+`cx` no fusiona utilidades de Tailwind, así que dos del mismo grupo las resuelve el orden del CSS
+generado. Eso hace que una imposición desde fuera pueda funcionar hoy por el orden que tocó y dejar
+de funcionar al cambiar el token que se pide, sin que nada falle.
+
+#### Scenario: Una pantalla necesita una pieza a otro tamaño
+
+- **WHEN** ese tamaño no está entre las tallas de la pieza
+- **THEN** se añade como talla de la pieza, nombrada por su papel
+
+### Requirement: Una fecha visible se escribe en un solo sitio, y en el idioma del producto
+
+El formato con el que el producto escribe una fecha SHALL decidirse en un solo sitio, y ninguna
+pantalla SHALL elegir el suyo.
+
+Es una decisión del producto, como el tamaño de un título o el mínimo de una contraseña. Escrita en
+cada pantalla, cuatro acabaron con tres formatos distintos y la quinta habría inventado el cuarto.
+
+La configuración regional SHALL declararse y NO SHALL heredarse del dispositivo. Un producto entero
+en español que deja la fecha al dispositivo imprime el mes antes del día en un teléfono en inglés, y
+quien desarrolla no lo ve nunca porque el suyo está en español.
+
+#### Scenario: Una pantalla enseña una fecha
+
+- **WHEN** cualquier pantalla escribe una fecha
+- **THEN** sale con el formato del producto, sea cual sea la configuración del dispositivo
+
+#### Scenario: Una pantalla nueva necesita escribir una fecha
+
+- **WHEN** se añade una pantalla que enseña fechas
+- **THEN** usa la del producto en vez de decidir un formato, y no hacerlo falla una verificación
+
+### Requirement: El nombre de un grupo de opciones se ve, no solo se oye
+
+Un grupo de opciones excluyentes SHALL mostrar en pantalla qué se está eligiendo, y NO SHALL dejar
+ese nombre únicamente en su etiqueta accesible.
+
+Existe para que dos opciones se COMPAREN sin abrir nada. Sin la pregunta delante, «el mismo valor
+para todos» y «uno para cada uno» no dicen el mismo valor de qué.
+
+El nombre SHALL seguir atado al grupo además de dibujarse: un texto colocado al lado no nombra un
+grupo por estar cerca.
+
+#### Scenario: Se mira un grupo de opciones
+
+- **WHEN** se abre una pantalla que ofrece elegir entre dos modos
+- **THEN** la pregunta que los distingue está en la pantalla
+- **AND** el grupo sigue anunciándose con ella
+
+### Requirement: Un valor que se reparte dice a cuántos va
+
+Cuando un valor se aplique a varios destinatarios a la vez, la pantalla SHALL decir a cuántos va, y
+NO SHALL dejarlo a deducir de la cifra.
+
+Es la duda que cuesta dinero si se entiende al revés: si ocho monedas son ocho en total o ocho para
+cada hijo elegido.
+
+La cifra y su unidad SHALL componerse donde se usan y declinar con el número, para que un valor de
+uno no diga «1 monedas».
+
+#### Scenario: Se escribe un valor para todos
+
+- **WHEN** se pone un valor que reciben todos los elegidos
+- **THEN** la pantalla dice que es para cada uno
+
+#### Scenario: El valor es uno
+
+- **WHEN** se escribe uno
+- **THEN** la unidad va en singular
+

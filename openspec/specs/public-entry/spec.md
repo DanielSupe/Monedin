@@ -145,6 +145,9 @@ respuesta se va antes de registrarse.
 SHALL decir además **qué aprende el niño** con ellas —cuánto tiene, cuánto le falta para lo que
 quiere y qué pasó con lo que gastó—, que es lo que distingue esto de un contador de puntos.
 
+Y SHALL decirlo **antes** de contar cómo funciona el ciclo. Explicar el mecanismo a alguien que
+todavía no sabe si esto mueve dinero de verdad es explicarle cómo se usa algo de lo que desconfía.
+
 NO SHALL apoyarse en cifras, testimonios ni respaldos de terceros: no los hay, e inventarlos en una
 página pública es poner un aval falso.
 
@@ -159,6 +162,11 @@ página pública es poner un aval falso.
 - **WHEN** se revisa lo que la página afirma
 - **THEN** todo lo que dice es cierto de lo construido
 - **AND** no hay cifras, testimonios ni logos de terceros
+
+#### Scenario: Se recorre la página en orden
+
+- **WHEN** alguien lee la puerta pública de arriba abajo
+- **THEN** encuentra la respuesta sobre el dinero antes de la explicación del ciclo
 
 ### Requirement: Lo que solo ilustra no se anuncia
 
@@ -193,8 +201,9 @@ Las maquetas SHALL rendirse **con las piezas y la escala reales del producto**, 
 diferencia entre las dos audiencias que se ve en la página sea la que existe. NO SHALL ser imágenes
 capturadas: una captura envejece en silencio cuando el sistema de diseño cambia.
 
-Las maquetas SHALL anunciarse como ejemplos, para que quien no ve la página no las confunda con datos
-de alguien.
+Las maquetas SHALL anunciarse como ejemplos **y SHALL decirlo también a la vista**, con que los datos
+no son de nadie. Anunciarlo solo para quien no ve la página deja a quien la ve leyendo un saldo y un
+recuento de tareas que, por estar hechos con las piezas de verdad, se parecen a los de alguien.
 
 #### Scenario: Alguien mira cómo es la aplicación
 
@@ -210,6 +219,11 @@ de alguien.
 
 - **WHEN** alguien recorre la página sin verla
 - **THEN** las maquetas se anuncian como ejemplos
+
+#### Scenario: Quien mira la página lee que es un ejemplo
+
+- **WHEN** alguien mira una de las dos maquetas
+- **THEN** debajo lee que es un ejemplo y que los datos no son de nadie
 
 ### Requirement: La página cierra con su acción
 
@@ -272,4 +286,25 @@ un rol.
 - **WHEN** la página muestra una maqueta del panel del padre y otra del inicio del niño
 - **THEN** cada maqueta declara la escala de su audiencia
 - **AND** la raíz de la página no declara ninguna de las dos
+
+### Requirement: La acción del cierre dice qué va a pasar, no vuelve a invitar
+
+La acción del final de la puerta pública SHALL nombrarse por lo que hace y NO SHALL repetir el
+nombre de la acción de la cabecera y del titular.
+
+Al final de la página ya no hace falta invitar a empezar: eso lo hicieron las dos de arriba. Lo que
+queda por decir es qué ocurre al pulsar. Y tres controles con el mismo nombre en una misma página son
+además tres oportunidades de dudar si llevan al mismo sitio.
+
+Aunque se llame distinto, SHALL llevar al mismo destino que las otras.
+
+#### Scenario: Alguien llega al final de la página
+
+- **WHEN** lee el cierre
+- **THEN** la acción dice qué va a pasar al pulsarla, y no repite el nombre de las de arriba
+
+#### Scenario: Se comparan los destinos
+
+- **WHEN** se miran las acciones principales de la página
+- **THEN** todas llevan al registro, incluida la que se llama distinto
 

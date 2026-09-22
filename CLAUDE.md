@@ -961,6 +961,73 @@ tocar su nombre ni un solo punto de uso.
 **Al tocar tokens hay que abrir pantallas del padre y del niño para confirmar que no se enteraron**,
 porque eso no lo cubre ningún test.
 
+**Comparar dos listas de texto dice qué NO COINCIDE, no qué falta.** Es el método con el que se
+cuadraron las treinta y dos pantallas contra sus maquetas, y se pagó tres veces por usarlo mal: un
+renglón que solo aparece en la maqueta puede ser algo ausente, algo dicho con otras palabras, o un
+estado que la aplicación no está mostrando — y la lista no los distingue. Afirmé que faltaban las
+acciones de un hijo (están en la fila, igual que en su artboard), el saludo y la meta del inicio del
+niño (están, con otras palabras) y la insignia de «¡Ya te alcanza!» (estaba, pero ningún dato de la
+siembra la alcanzaba). **Cada candidato se abre en el navegador antes de llamarlo ausencia.**
+
+**Una maqueta manda en el ASPECTO, no en los hechos del modelo de datos.** Su diálogo de dar de baja
+dice que el saldo y el historial «se van con el perfil»; lo copié y es falso —la baja es lógica y el
+historial no se puede ni borrar, lo impide un disparador—. Llegó a estar escrito en dos sitios de la
+interfaz. Si el texto de una maqueta afirma algo del producto, se comprueba antes de copiarlo.
+
+**Un defecto de la SIEMBRA se distingue de uno del código, y se arregla en la siembra.** La insignia
+de «ya te alcanza» parecía no existir y llevaba implementada desde siempre: el único premio que el
+hijo de ejemplo podía pagar ya estaba canjeado. Antes de escribir que algo falta, hay que comprobar
+que el ESTADO que lo enseñaría es alcanzable con los datos que hay. Y una siembra no imita el
+comportamiento del producto: prepara un estado para verlo — bloquear un perfil treinta minutos, como
+en producción, lo desbloquea solo antes de que a nadie le dé tiempo a mirarlo.
+
+**Un nombre que solo vive en `aria-label` no es un nombre.** Existe para quien no ve la pantalla y no
+para quien la mira. Ya van tres: el acceso a la ayuda —cuya pieza AFIRMABA en su cabecera que «lleva
+nombre y no solo un símbolo»—, el grupo de opciones de `RadioGroup`, que se anunciaba con el nombre
+del conjunto entero y no con su pregunta, y el envío de las dos pantallas de acceso, que era una
+flecha redonda. Un test que lo persiga tiene que pedir las DOS cosas: que el control siga nombrado, y
+que su nombre esté EN LA PANTALLA — con el defecto puesto, lo primero pasa solo.
+
+**El formato de una fecha visible se decide en un sitio, y su idioma se DECLARA.** Lo decidían cuatro
+pantallas de tres maneras, y las cuatro pasaban `undefined` como configuración regional: un producto
+entero en español imprimía `9/21/2026` en un teléfono en inglés, y quien desarrolla no lo ve nunca
+porque el suyo está en español. Vive en `lib/dates.ts`, con dos formas nombradas por su papel —la
+larga para una línea de texto, la corta para una celda— y un test que falla si una pantalla vuelve a
+elegir el suyo.
+
+**Las dos pantallas que reparten EXPLICAN el ciclo, y son dos a propósito.** Que marcar una tarea no
+paga nada —lo paga aprobar— y que el precio de un premio se congela al pedirlo son los dos mecanismos
+centrales del producto, los que la API implementa con más cuidado, y la interfaz no los decía en
+ninguna parte. Ahora lo dice el alta de una tarea, el alta de un premio y las tareas del niño:
+contárselo solo a quien reparte deja suponiendo a quien marca, y es donde un niño se lleva el chasco.
+
+**La ayuda son DOS listas, una por rol.** Revierte la decisión de «una sola pantalla para los dos»,
+que sigue siendo cierta de la PANTALLA y no lo es del contenido: «subí el precio de un premio que ya
+me habían pedido» no es una duda que un niño pueda tener, y las nueve preguntas estaban en tercera
+persona —un manual para quien administra—. Una lista de preguntas sirve para encontrar la propia, y
+la mitad que no puede ser tuya estorba.
+
+**El color de la rejilla de perfiles sigue una REGLA, no un reparto**: el tono de la marca para el
+adulto, el de la acción para los hijos. Su maqueta alterna los dos entre hijos, y alternar hay que
+volver a decidirlo cada vez que se añade uno. Y su pregunta va en un panel de marca con Monedín: es
+la pantalla por la que se pasa cada vez que alguien coge la tablet, y era la más plana del producto.
+
+**DECISIÓN TOMADA: el coral se queda como está.** Medido: `--color-primary` da **2.82** contra blanco
+y contra la tinta clara que va encima, el paso más oscuro de la rampa llega a 3.38, y un texto normal
+pide 4.5 — así que hoy la etiqueta de cada botón principal y los enlaces corales sobre superficie
+clara están por debajo de AA en tema claro. En oscuro ya pasa (4.82). Cualquier coral que llegue al
+mínimo es bastante más oscuro que el de la marca y se nota en toda la aplicación, y esa es una
+decisión de marca. **Lo que esto NO autoriza es usar el coral para texto pequeño nuevo**: se acepta
+lo que ya hay, no una licencia para repetirlo.
+
+**Lo que NO se copió de las maquetas, y por qué.** El teclado del PIN de colores, porque pide
+imponerle color a `Button` desde fuera —lo que su propia cabecera prohíbe, y ya se cobró una vez en
+ese mismo teclado— o nombrar una variante por su color en vez de por su papel. El «hoy» de «hoy te
+esperan dos tareas», porque el modelo no tiene jornada y sería un dato inventado; la CUENTA sí se
+dice. Y la edad en la rejilla, que un requisito vigente de `profile-selection` prohíbe. Las manchas
+difusas del fondo del camino de entrada se probaron y se retiraron: sobre el crema no se leen como
+ambiente sino como una mancha sucia, y media decoración es peor que ninguna.
+
 **Un dato del perfil viaja DENTRO del actor, no por un camino aparte.** El avatar del padre lo
 aprendió por las malas —estaba fuera y `add-file-storage` lo metió dentro porque era «el mismo dato
 en dos sitios comportándose distinto»— y `add-onboarding-tour` lo aplicó de entrada con «ya vio el
