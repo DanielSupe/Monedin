@@ -969,6 +969,15 @@ acciones de un hijo (están en la fila, igual que en su artboard), el saludo y l
 niño (están, con otras palabras) y la insignia de «¡Ya te alcanza!» (estaba, pero ningún dato de la
 siembra la alcanzaba). **Cada candidato se abre en el navegador antes de llamarlo ausencia.**
 
+**Y MEDIR NO VE LA FORMA, que es el punto ciego del mismo método.** Comparar el texto visible y los
+pasos de escala de una pantalla contra su maqueta encuentra casi todo, y por construcción no puede
+encontrar nada de esto: una tarjeta vertical y una horizontal llevan el mismo texto y la misma
+escala. De las treinta y dos pantallas, dieciocho se habían medido sin abrirlas, y abrirlas dio
+cuatro diferencias más —una tarjeta en vertical con 300px de imagen vacía, unas ofertas en renglones
+en vez de píldoras, un historial que no decía de quién era y un pie con los dos controles
+estirados—. **Una pantalla no está cuadrada hasta que se abre**, y una medida que coincide entera es
+motivo para abrirla, no para saltársela.
+
 **Una maqueta manda en el ASPECTO, no en los hechos del modelo de datos.** Su diálogo de dar de baja
 dice que el saldo y el historial «se van con el perfil»; lo copié y es falso —la baja es lógica y el
 historial no se puede ni borrar, lo impide un disparador—. Llegó a estar escrito en dos sitios de la
