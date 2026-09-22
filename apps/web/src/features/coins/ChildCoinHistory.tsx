@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { messages } from "../../lib/messages.js";
-import { buttonClasses } from "../../ui/index.js";
+import { Avatar, Coins, buttonClasses } from "../../ui/index.js";
+import { useChild } from "../children/use-children.js";
 import { CoinHistory } from "./CoinHistory.js";
 import { useChildCoinHistory } from "./use-coins.js";
 
@@ -21,11 +22,29 @@ export function ChildCoinHistory({
   page: number;
 }): React.ReactElement {
   const { data, isPending, error } = useChildCoinHistory(childId, { page });
+  const { data: hijo } = useChild(childId);
 
   return (
     <div className="flex flex-col gap-4">
+      {/*
+        DE QUIÉN ES ESTE HISTORIAL, que la pantalla no decía.
+
+        Es el mismo defecto que tenía la edición de un hijo: se llega desde una
+        lista de tres y el título era «Historial de monedas» a secas. Su nombre
+        identifica y su saldo confirma que es el que se quería — que además es el
+        número que trajo a nadie hasta aquí.
+      */}
+      {hijo !== undefined && (
+        <div className="flex flex-wrap items-center gap-3">
+          <Avatar value={hijo.avatar} size="small" />
+          <span className="text-lead font-extrabold">{hijo.name}</span>
+          <Coins amount={hijo.coins} />
+        </div>
+      )}
+
       <CoinHistory
         title={messages.coins.parentTitle}
+        note={messages.coins.ledgerNote}
         page={data}
         isPending={isPending}
         error={error}

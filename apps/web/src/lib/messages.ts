@@ -270,6 +270,18 @@ export const messages = {
   coins: {
     title: "De dónde salieron tus monedas",
     parentTitle: "Historial de monedas",
+    /*
+     * QUÉ HACER CON UN MOVIMIENTO EQUIVOCADO, que es la pregunta que trae a
+     * alguien a esta pantalla después de encontrar uno.
+     *
+     * El libro es append-only y lo impone un disparador de PostgreSQL, no la
+     * buena voluntad del código: aquí no hay botón de borrar y no lo va a haber.
+     * Sin decirlo, la pantalla parece incompleta; diciéndolo, explica además la
+     * salida — registrar otro movimiento que lo compense.
+     */
+    ledgerNote:
+      "El historial no se edita ni se borra, ni siquiera desde aquí: lo impide la base de datos. " +
+      "Un movimiento equivocado se corrige registrando otro que lo compense.",
     empty: "Todavía no hay movimientos.",
     seeHistory: "Ver de dónde salieron",
     seeChildHistory: "Ver su historial",

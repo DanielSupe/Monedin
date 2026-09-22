@@ -270,10 +270,28 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
               </div>
             </form>
           ) : (
-            <>
-              <RewardImage image={reward.image} title={reward.title} />
+            /*
+              LA TARJETA ES HORIZONTAL: foto pequeña a un lado y todo lo demás al
+              otro. Era vertical, con la foto arriba a todo el ancho.
 
-              <div className="flex flex-wrap items-start justify-between gap-2">
+              El defecto solo se ve con el catálogo lleno y SIN fotos, que es el
+              estado normal de una familia que acaba de empezar: cada premio se
+              comía trescientos píxeles de alto para enseñar un cuadro vacío, así
+              que cuatro premios no cabían en una pantalla. Con la foto pequeña
+              caben en dos filas, que es lo que dibuja la maqueta.
+
+              El escaparate del niño NO cambia: allí la tesela es cuadrada a
+              propósito —se comparan dos precios de un vistazo— y la foto es lo
+              que se mira. Aquí lo que se mira es a quién y por cuánto.
+            */
+            <div className="flex min-w-0 gap-3">
+              <RewardImage
+                image={reward.image}
+                title={reward.title}
+                size="thumb"
+              />
+
+              <div className="flex min-w-0 flex-1 flex-wrap items-start justify-between gap-2">
                 <div className="flex min-w-0 flex-col gap-1">
                   <p className="text-lead font-extrabold">{reward.title}</p>
                   {reward.description !== null && (
@@ -286,7 +304,7 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
                   <Badge tone="neutral">{messages.rewards.filterRetired}</Badge>
                 )}
               </div>
-            </>
+            </div>
           )}
 
           {update.error !== null && (
@@ -295,32 +313,41 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
             </Alert>
           )}
 
-          <div className="flex flex-col gap-2">
-            <p className="text-small font-semibold text-ink-muted">
-              {messages.rewards.offeredTo}
-            </p>
+          {/*
+            LAS OFERTAS SON PÍLDORAS EN LÍNEA, y eran una columna de filas.
 
-            {reward.offers.length === 0 ? (
-              <p className="text-small text-ink-muted">
-                {messages.rewards.noOffers}
-              </p>
-            ) : (
-              <ul className="flex list-none flex-col gap-2 p-0">
-                {reward.offers.map((offer) => (
-                  <li
-                    key={offer.child.id}
-                    className="flex min-w-0 items-center gap-3"
-                  >
-                    <Avatar value={offer.child.avatar} size="small" />
-                    <span className="min-w-0 flex-1 truncate text-body">
-                      {offer.child.name}
-                    </span>
-                    <Coins amount={offer.coins} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+            Es lo que la maqueta dibuja y lo que la pantalla pide: aquí lo que se
+            mira es a quién se le ofrece y por cuánto, y en columna cada nombre
+            ocupaba un renglón entero para dos datos cortos. En línea, los tres
+            hijos caben en el ancho de la tarjeta y se comparan sin recorrer.
+
+            EL RÓTULO «Ofrecido a» DESAPARECE DE LA VISTA Y NO DEL SENTIDO: la
+            maqueta no lo dibuja —las píldoras dicen ya un nombre y un precio—
+            pero una lista sin nombre, leída en voz alta detrás del título del
+            premio, deja «Mateo 300» sin decir de qué. Se queda como nombre de la
+            lista.
+          */}
+          {reward.offers.length === 0 ? (
+            <p className="text-small text-ink-muted">{messages.rewards.noOffers}</p>
+          ) : (
+            <ul
+              aria-label={messages.rewards.offeredTo}
+              className="flex list-none flex-wrap gap-2 p-0"
+            >
+              {reward.offers.map((offer) => (
+                <li
+                  key={offer.child.id}
+                  className="rounded-pill flex min-w-0 items-center gap-2 bg-surface-sunken py-1 pr-3 pl-1"
+                >
+                  <Avatar value={offer.child.avatar} size="small" />
+                  <span className="text-small min-w-0 truncate font-bold">
+                    {offer.child.name}
+                  </span>
+                  <Coins amount={offer.coins} />
+                </li>
+              ))}
+            </ul>
+          )}
 
           {editandoOfertas && (
             <OffersEditor reward={reward} onOpenChange={setEditandoOfertas} />

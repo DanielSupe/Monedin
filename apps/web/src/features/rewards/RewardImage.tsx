@@ -41,16 +41,42 @@ import { messages } from "../../lib/messages.js";
  * defecto solo asomó en el otro sitio. Con el tope dentro, la pieza no puede
  * reventar en el siguiente sitio donde alguien la use.
  */
-// `mx-auto`: la caja está topada, así que en una tarjeta más ancha que ella
-// —la del catálogo del padre— se quedaba pegada a la izquierda.
-const CAJA = "rounded-card mx-auto aspect-square w-full max-w-tile";
+/**
+ * DOS TALLAS, Y LAS DECLARA LA PIEZA.
+ *
+ * `tile` es la de siempre: el cuadrado topado del escaparate del niño, donde la
+ * foto es lo que se mira y dos precios se comparan de un vistazo.
+ *
+ * `thumb` nació del catálogo del padre. Allí la tarjeta es horizontal y lo que
+ * se mira es a quién se ofrece y por cuánto; con la talla grande, cada premio
+ * SIN foto —el estado normal de una familia que empieza— se comía trescientos
+ * píxeles de alto para enseñar un cuadro vacío, y cuatro premios no cabían en
+ * una pantalla.
+ *
+ * Es una TALLA de la pieza y no una clase pasada desde fuera, por lo mismo que
+ * el tope de ancho vive aquí: quien la coloca no decide su caja. `cx` no fusiona
+ * utilidades, así que un `size-24` de fuera contra el `w-full` de dentro lo
+ * resolvería el orden del CSS generado.
+ */
+export type RewardImageSize = "tile" | "thumb";
+
+const CAJAS: Record<RewardImageSize, string> = {
+  // `mx-auto`: la caja está topada, así que en una tarjeta más ancha que ella
+  // —la del catálogo del padre— se quedaba pegada a la izquierda.
+  tile: "rounded-card mx-auto aspect-square w-full max-w-tile",
+  thumb: "rounded-card aspect-square size-24 shrink-0",
+};
+
 export function RewardImage({
   image,
   title,
+  size = "tile",
 }: {
   image: string | null;
   title: string;
+  size?: RewardImageSize;
 }): React.ReactElement {
+  const CAJA = CAJAS[size];
   if (image !== null) {
     return <img src={image} alt={title} className={`${CAJA} object-cover`} />;
   }

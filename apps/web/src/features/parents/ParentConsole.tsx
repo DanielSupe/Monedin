@@ -140,7 +140,17 @@ export function ParentConsole({ name }: { name: string }): React.ReactElement {
           )}
         </Card>
 
-        <Link to="/children" search={{ page: 1 }} className={buttonClasses("secondary")}>
+        {/*
+          `self-start`: el contenedor es una columna, así que sin esto el botón se
+          estiraba a todo el ancho del panel. Dos controles a ancho completo y
+          apilados dicen que las dos cosas pesan lo mismo, y no lo pesan — la
+          maqueta pone este compacto y el de abajo como un enlace.
+        */}
+        <Link
+          to="/children"
+          search={{ page: 1 }}
+          className={`${buttonClasses("secondary")} self-start`}
+        >
           {messages.parents.childrenLink}
         </Link>
       </section>

@@ -25,6 +25,7 @@ const RAZON: Record<CoinReason, string> = {
 
 export function CoinHistory({
   title,
+  note,
   page,
   isPending,
   error,
@@ -32,6 +33,8 @@ export function CoinHistory({
   next,
 }: {
   title: string;
+  /** Lo que hay que saber de este libro. Solo la vista del adulto la pasa. */
+  note?: string;
   page: CoinTransactionsPage | undefined;
   isPending: boolean;
   error: unknown;
@@ -43,6 +46,10 @@ export function CoinHistory({
   return (
     <section className="flex flex-col gap-5">
       <h2 className="text-display font-extrabold">{title}</h2>
+
+      {/* Solo cuando lo mira un adulto: es él quien puede querer corregir algo,
+          y a un niño «lo impide la base de datos» no le dice nada. */}
+      {note !== undefined && <p className="text-small text-ink-muted">{note}</p>}
 
       {isPending ? (
         <Skeleton lines={4} />

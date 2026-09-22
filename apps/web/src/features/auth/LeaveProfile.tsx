@@ -18,7 +18,21 @@ export function LeaveProfile(): React.ReactElement {
   const leave = useLeaveProfile();
 
   return (
-    <Button variant="secondary" pending={leave.isPending} onClick={() => leave.mutate()}>
+    /*
+      `ghost` y no `secondary`: es lo más ligero de esta pantalla, no su segunda
+      acción. Junto a «Gestionar perfiles» con el mismo peso, las dos se leían
+      como una pareja de botones — el mismo error, en pequeño, que ya se arregló
+      separando cambiar de perfil de cerrar sesión.
+
+      Sigue siendo un BOTÓN aunque lo parezca menos: salir del perfil es una
+      mutación, no una dirección.
+    */
+    <Button
+      variant="ghost"
+      className="self-start"
+      pending={leave.isPending}
+      onClick={() => leave.mutate()}
+    >
       {messages.auth.changeProfile}
     </Button>
   );
