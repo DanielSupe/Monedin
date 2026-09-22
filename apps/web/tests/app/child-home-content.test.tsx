@@ -81,25 +81,50 @@ describe("el saldo sigue mandando en el inicio", () => {
  * que dar un paso más para averiguarlo.
  */
 describe("el inicio contesta «¿qué hago ahora?»", () => {
-  it("enseña lo que le queda por hacer, y no lo que ya hizo", async () => {
+  /*
+   * ESTE CASO DECÍA «y no lo que ya hizo», Y ESO CAMBIÓ A PROPÓSITO.
+   *
+   * El inicio enseñaba solo las pendientes, con el argumento de que una lista con
+   * lo aprobado dentro contesta «qué hice» y no «qué hago ahora». Es un buen
+   * argumento para una lista de TRABAJO y el equivocado para esta pantalla, que
+   * es donde el ciclo se cierra: hice la tarea, la marqué, me la aprobaron, aquí
+   * están mis monedas. Con solo las pendientes, el paso que da sentido a los
+   * otros tres no se ve en ninguna parte del inicio.
+   *
+   * Lo que el argumento sí acertaba —y es lo que este caso pasa a garantizar— es
+   * el ORDEN: lo que se puede hacer ahora va primero. Se comprueba con las tres
+   * posiciones y no solo con la primera, porque «la pendiente está arriba» se
+   * cumple igual con las otras dos en cualquier orden entre ellas.
+   */
+  it("enseña las tres etapas, y lo que se puede hacer ahora va primero", async () => {
     await montar(
       [
-        tarea("t1", "Tender la cama", "PENDING"),
-        tarea("t2", "Leer 15 minutos", "COMPLETED"),
         tarea("t3", "Sacar la basura", "APPROVED"),
+        tarea("t2", "Leer 15 minutos", "COMPLETED"),
+        tarea("t1", "Tender la cama", "PENDING"),
       ],
       [],
     );
 
-    expect(await screen.findByText("Tender la cama")).toBeInTheDocument();
-    expect(screen.queryByText("Sacar la basura")).toBeNull();
+    const pendiente = await screen.findByText("Tender la cama");
+    const marcada = screen.getByText("Leer 15 minutos");
+    const aprobada = screen.getByText("Sacar la basura");
+
+    expect(pendiente.compareDocumentPosition(marcada)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(marcada.compareDocumentPosition(aprobada)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it("sin nada pendiente lo dice, en vez de enseñar una lista vacía", async () => {
+  /*
+   * Y sin nada pendiente se dicen LAS DOS cosas: que no le queda nada —lo dice
+   * Monedín, arriba— y lo que sí hizo, que es lo que esa lista enseña ahora.
+   * Antes se escondía la lista entera, así que quien lo tenía todo hecho veía el
+   * inicio más vacío cuanto más había trabajado.
+   */
+  it("sin nada pendiente lo dice, y aun así enseña lo que hizo", async () => {
     await montar([tarea("t1", "Sacar la basura", "APPROVED")], []);
 
     expect(await screen.findByText(messages.children.homeAllDone)).toBeInTheDocument();
-    expect(screen.queryByText(messages.children.homeTasksTitle)).toBeNull();
+    expect(screen.getByText("Sacar la basura")).toBeInTheDocument();
   });
 
   /*

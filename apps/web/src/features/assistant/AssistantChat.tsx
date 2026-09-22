@@ -6,6 +6,10 @@ import { alertToneFor } from "../../lib/alert-tone.js";
 import { messages } from "../../lib/messages.js";
 import { Alert, Button, Card, HeroPanel, Input, Mascota, Skeleton } from "../../ui/index.js";
 import { cx } from "../../ui/cx.js";
+import { contar } from "../../lib/plural.js";
+import { useSession } from "../auth/use-session.js";
+import { usePendingCounts } from "../parents/use-parent-console.js";
+import { useOwnTasks } from "../tasks/use-tasks.js";
 import { describeAssistantError, useAskAssistant } from "./use-assistant.js";
 
 /**
@@ -118,6 +122,7 @@ export function AssistantChat(): React.ReactElement {
    */
   const ultima = turnos.at(-1);
   const puedeReintentar = error !== null && ultima?.role === "user";
+  const esPadre = useSession().session?.actor?.familyRole === "PARENT";
 
   function enviarDeNuevo(pregunta: string): void {
     preguntar.mutate(
@@ -160,7 +165,9 @@ export function AssistantChat(): React.ReactElement {
         <h2 className="text-title m-0 font-extrabold text-ink-inverted">
           {messages.assistant.title}
         </h2>
-        <p className="text-body m-0 text-ink-inverted opacity-90">{messages.assistant.lead}</p>
+        <p className="text-body m-0 text-ink-inverted opacity-90">
+          {esPadre ? messages.assistant.leadParent : messages.assistant.leadChild}
+        </p>
       </HeroPanel>
 
       <div className="flex min-h-0 flex-1 gap-4">
@@ -169,15 +176,17 @@ export function AssistantChat(): React.ReactElement {
           <div ref={hilo} className="min-h-0 flex-1 overflow-y-auto">
             {vacio ? (
               /*
-                El hueco no se queda en blanco: dice para qué sirve.
+                EL HILO VACÍO EMPIEZA CON MONEDÍN SALUDANDO, y antes era una frase
+                gris centrada que decía para qué sirve la pantalla.
 
-                En tinta atenuada y sin acción — no es un aviso ni un error, y
-                darle un botón lo convertiría en algo que hay que atender. Las
-                sugerencias, que sí son acciones, están al lado.
+                Aquella no estaba mal —explicaba— pero dejaba el hilo vacío de
+                verdad: se entraba a un chat sin nada dentro. La maqueta lo abre
+                con un turno suyo, y eso hace dos cosas que la frase no hacía:
+                enseña cómo se ve un turno antes de escribir ninguno, y saluda con
+                LO QUE HAY —el saldo, lo que espera— así que la primera pregunta
+                ya tiene de dónde salir.
               */
-              <p className="text-body flex h-full items-center justify-center px-6 text-center text-ink-muted opacity-70">
-                {messages.assistant.emptyHint}
-              </p>
+              <SaludoDeMonedin />
             ) : (
               <Conversacion turnos={turnos} esperando={preguntar.isPending} />
             )}
@@ -388,11 +397,25 @@ function Sugerencias({
 }): React.ReactElement {
   const a = messages.assistant;
 
-  const ideas = [
-    { glifo: a.ideaBalanceGlyph, texto: a.ideaBalance },
-    { glifo: a.ideaTasksGlyph, texto: a.ideaTasks },
-    { glifo: a.ideaRewardsGlyph, texto: a.ideaRewards },
-  ];
+  /*
+   * LAS IDEAS SON DE QUIEN PREGUNTA, y antes eran las del niño para los dos: a
+   * un padre se le ofrecía «¿qué me falta por hacer?» y «¿para qué premio me
+   * alcanza?», que no son preguntas suyas. Las que se le ofrecen ahora son las
+   * que solo él puede hacer.
+   */
+  const esPadre = useSession().session?.actor?.familyRole === "PARENT";
+
+  const ideas = esPadre
+    ? [
+        { glifo: a.ideaPriceGlyph, texto: a.ideaPrice },
+        { glifo: a.ideaRetireGlyph, texto: a.ideaRetire },
+        { glifo: a.ideaCreditedGlyph, texto: a.ideaCredited },
+      ]
+    : [
+        { glifo: a.ideaBalanceGlyph, texto: a.ideaBalance },
+        { glifo: a.ideaTasksGlyph, texto: a.ideaTasks },
+        { glifo: a.ideaRewardsGlyph, texto: a.ideaRewards },
+      ];
 
   return (
     <Card className="flex flex-col gap-3">
@@ -415,5 +438,73 @@ function Sugerencias({
         ))}
       </div>
     </Card>
+  );
+}
+
+/**
+ * EL SALUDO CON LO QUE HAY, que es lo que abre la conversación.
+ *
+ * Dos componentes y no un `if` dentro de uno, porque cada rol necesita SUS datos
+ * y un hook no se puede llamar condicionalmente. Lo que se bifurca son las
+ * fuentes, no la forma: los dos pintan el mismo turno de Monedín.
+ *
+ * Si los datos aún no están, saluda igual sin cifras. Un chat que tarda en poder
+ * saludar es peor que uno que saluda corto.
+ */
+function SaludoDeMonedin(): React.ReactElement {
+  const actor = useSession().session?.actor;
+
+  return (
+    <ul className="flex list-none flex-col gap-3 p-0">
+      {actor?.familyRole === "CHILD" ? <SaludoAlNino name={actor.name} coins={actor.coins} /> : null}
+      {actor?.familyRole === "PARENT" ? <SaludoAlPadre name={actor.name} /> : null}
+    </ul>
+  );
+}
+
+function SaludoAlNino({ name, coins }: { name: string; coins: number }): React.ReactElement {
+  const { data } = useOwnTasks();
+  const pendientes = (data?.items ?? []).filter((tarea) => tarea.status === "PENDING").length;
+
+  const saldo = contar(coins, messages.ui.coinsUnitSingular, messages.ui.coinsUnit);
+  const tareas = contar(
+    pendientes,
+    messages.children.homePendingOne,
+    messages.children.homePendingMany,
+  );
+
+  return (
+    <Turno
+      turno={{
+        key: "saludo",
+        role: "assistant",
+        text: `${messages.children.homeGreeting} ${name}. ${messages.assistant.greetHave} ${saldo} ${messages.assistant.greetAnd} ${tareas}. ${messages.assistant.greetAskChild}`,
+      }}
+    />
+  );
+}
+
+function SaludoAlPadre({ name }: { name: string }): React.ReactElement {
+  const { tasksToApprove, redemptionsWaiting } = usePendingCounts();
+
+  const tareas = contar(
+    tasksToApprove.value,
+    messages.parents.taskToApprove,
+    messages.parents.tasksToApprove,
+  );
+  const canjes = contar(
+    redemptionsWaiting.value,
+    messages.parents.redemptionWaiting,
+    messages.parents.redemptionsWaiting,
+  );
+
+  return (
+    <Turno
+      turno={{
+        key: "saludo",
+        role: "assistant",
+        text: `${messages.parents.greeting} ${name}. ${messages.assistant.greetHave} ${tareas} ${messages.assistant.greetAnd} ${canjes}. ${messages.assistant.greetAskParent}`,
+      }}
+    />
   );
 }

@@ -47,3 +47,22 @@ export function fechaLarga(iso: string): string {
 export function fechaCorta(iso: string): string {
   return new Date(iso).toLocaleDateString(IDIOMA, { day: "numeric", month: "short" });
 }
+
+/**
+ * El día de HOY, con su nombre: «miércoles, 8 de septiembre».
+ *
+ * Es la única de las tres que no fecha un dato sino que sitúa a quien mira, y
+ * por eso lleva el día de la semana: a un niño «miércoles» le dice más que «8».
+ *
+ * NO afirma nada sobre las tareas. La maqueta escribía encima «hoy te esperan 2
+ * tareas» y eso sí habría sido falso —el modelo no tiene jornada, así que una
+ * tarea repartida hace un mes sigue pendiente hoy—; poner la fecha no dice que
+ * lo de debajo sea de hoy, dice qué día es.
+ */
+export function hoyConDia(): string {
+  return new Date().toLocaleDateString(IDIOMA, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+}

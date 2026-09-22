@@ -262,6 +262,13 @@ async function seed(): Promise<void> {
   const helado = await prisma.reward.create({
     data: { title: "Helado", parentId: padre.id },
   });
+  // Barato y SIN canjear: es el único que deja ver «¡Ya te alcanza!» en el
+  // escaparate. Con los otros dos, al mayor le alcanza el helado pero ya lo
+  // pidió —así que sale su aviso de espera— y del cine está lejos, de modo que
+  // la insignia de «puedes pedirlo» no aparecía en ninguna parte.
+  const postre = await prisma.reward.create({
+    data: { title: "Elegir el postre", description: "El de toda la familia.", parentId: padre.id },
+  });
   // Retirado: sigue en el catálogo del padre bajo el filtro de retirados, y ya
   // no aparece en ningún escaparate. Sin este caso, un desarrollador que
   // arranca por primera vez no vería nunca ese filtro con algo dentro.
@@ -288,6 +295,9 @@ async function seed(): Promise<void> {
       { rewardId: helado.id, childId: mayor.id, coins: 60 },
       { rewardId: helado.id, childId: menor.id, coins: 40 },
       { rewardId: helado.id, childId: bloqueado.id, coins: 40 },
+      { rewardId: postre.id, childId: mayor.id, coins: 30 },
+      { rewardId: postre.id, childId: menor.id, coins: 25 },
+      { rewardId: postre.id, childId: bloqueado.id, coins: 25 },
     ],
   });
 
@@ -351,7 +361,7 @@ async function seed(): Promise<void> {
     `Sembrado: 1 padre, 3 hijos (uno BLOQUEADO y sin edad), ${creadas.length} tareas en los tres`,
     `  estados, con un reparto de tres hijos y estados mezclados y dos con fecha`,
     `  limite —una por vencer y otra pasada—,`,
-    `  4 premios (uno retirado, uno sin ofertas) con 6 asignaciones, 3 canjes en`,
+    `  5 premios (uno retirado, uno sin ofertas) con 9 asignaciones, 3 canjes en`,
     `  los tres estados, y el saldo que sale de las tareas aprobadas y del canje`,
     `  aprobado.`,
     `  Padre: ${CREDENCIALES_DE_EJEMPLO.padre.correo} / ${CREDENCIALES_DE_EJEMPLO.padre.password} / PIN ${CREDENCIALES_DE_EJEMPLO.padre.pin}`,

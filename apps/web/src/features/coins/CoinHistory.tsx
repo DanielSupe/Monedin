@@ -82,7 +82,12 @@ export function CoinHistory({
   );
 }
 
-function MovementRow({ movement }: { movement: CoinTransaction }): React.ReactElement {
+/*
+ * EXPORTADA para que el inicio del niño enseñe sus tres últimos movimientos con
+ * la MISMA fila. Escribirla allí otra vez sería la copia que se queda atrás al
+ * cambiar algo — y ya hay dos pantallas que la usan a través de `CoinHistory`.
+ */
+export function MovementRow({ movement }: { movement: CoinTransaction }): React.ReactElement {
   /*
    * Que sume o reste es la información MÁS importante de la fila, y `-60` frente
    * a `60` la deja colgando de un solo carácter. Se dice con palabra y con tono.

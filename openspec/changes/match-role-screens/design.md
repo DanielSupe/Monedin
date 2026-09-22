@@ -176,3 +176,72 @@ la aplicación no está mostrando— y la lista no las distingue.
 Es la tercera vez en este trabajo que la misma clase de error se cobra: la
 precaución de las rutas copiada sin comprobar, las acciones del hijo deducidas de
 otro artboard, y esto. Todas por afirmar una diferencia sin ir a verla.
+
+### 7. La ayuda se divide por rol, y esto revierte una decisión escrita
+
+`HelpScreen` decía en su cabecera «UNA SOLA PANTALLA para los dos roles», con el
+argumento de que el marco ya reasigna la escala. **Eso sigue siendo cierto de la
+pantalla y no lo es del contenido.**
+
+«Subí el precio de un premio que ya me habían pedido» no es una duda que un niño
+pueda tener, y las nueve preguntas estaban redactadas en tercera persona —«el
+niño lo pide y un adulto lo aprueba»—, que es un manual para quien administra.
+Una lista de preguntas sirve para encontrar la propia; la mitad que no puede ser
+tuya no es neutral, estorba — y a los siete años estorba el doble.
+
+Once para el padre, con las dos que faltaban y son las que más se preguntan
+—subir el precio de un premio ya pedido, y retirar frente a dejar de ofrecer—.
+Seis para el niño, en su voz.
+
+### 8. Lo que las maquetas NO deciden: los hechos del modelo de datos
+
+El diálogo de dar de baja dice en la maqueta que el saldo y el historial «se van
+con el perfil». Lo copié tal cual y es **falso**: la baja de un hijo es lógica, y
+su historial de monedas ni siquiera podría borrarse porque un disparador de
+PostgreSQL lo impide.
+
+Una maqueta manda en el aspecto. Cuando su texto afirma algo del producto, se
+comprueba antes de copiarlo — y esto llegó a estar escrito en dos sitios de la
+interfaz antes de que lo mirara.
+
+### 9. Un defecto de la SIEMBRA se distingue de uno del código
+
+La insignia «¡Ya te alcanza!» salía como ausente al comparar el escaparate del
+niño, y estaba implementada desde siempre. Lo que pasaba es que el único premio
+que el hijo de ejemplo podía pagar ya estaba canjeado, así que el caso no se
+alcanzaba desde ninguna pantalla.
+
+Es exactamente lo que la siembra existe para evitar, así que el arreglo va ahí y
+no en el código: un premio barato y sin canjear. La regla que deja: antes de
+escribir que algo falta, hay que comprobar que el ESTADO que lo enseñaría es
+alcanzable con los datos que hay.
+
+### 10. El color del camino de entrada: lo que se hizo y lo que se descartó
+
+Las cinco pantallas de entrada salían monocromas comparadas con sus maquetas, y
+el color de éstas no está en los controles sino en dos sitios: formas grandes al
+fondo, y las propias teselas.
+
+**Lo que funcionó**: la rejilla. Su pregunta pasa a un panel de marca con Monedín
+—es la pantalla por la que se pasa cada vez que alguien coge la tablet, y era la
+más sosa del producto— y cada perfil a una tarjeta con borde: violeta para el
+adulto, coral para los hijos. El color sigue una REGLA y no un reparto: son los
+dos tonos de la paleta con su significado puesto, así que la rejilla se lee sin
+aprenderse nada. La maqueta alterna los dos entre los hijos, y alternar es una
+decisión que hay que volver a tomar cada vez que se añade uno.
+
+**Lo que se descartó**: los dos círculos difusos del fondo. Sobre el crema de
+estas pantallas, desenfocados y a baja opacidad, no se leen como ambiente sino
+como una mancha sucia en una esquina. Se vio abriendo la pantalla, que es lo
+único que lo podía decir. Media decoración es peor que ninguna.
+
+**Y lo que la regla impidió**: el segundo círculo iba a ser ámbar, como en la
+maqueta, y el test de la reserva del color de la moneda lo rechazó antes de que
+llegara a pantalla. También rechazó su medida, que era un valor arbitrario. Las
+dos veces la verificación llegó antes que la revisión.
+
+**El teclado del PIN se queda como está.** Su maqueta pinta las teclas con tres
+tintes suaves alternados, y copiarlo exigiría o imponer colores a `Button` desde
+fuera —lo que su propia cabecera prohíbe, y ya se cobró una vez en este mismo
+teclado— o inventar una variante nombrada por su color en vez de por su papel. La
+gracia no vale ninguna de las dos.

@@ -143,6 +143,7 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
             */
             aspect={1}
             maxDimension={PHOTO_MAX_DIMENSION}
+            cropNote={messages.uploads.cropLead}
             requestUploadUrl={rewardsApi.requestPendingRewardImageUploadUrl}
             onUploaded={setImageUploadKey}
           />

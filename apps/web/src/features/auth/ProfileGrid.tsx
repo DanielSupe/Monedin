@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { messages } from "../../lib/messages.js";
-import { Avatar, buttonClasses, cx } from "../../ui/index.js";
+import { Avatar, Badge, HeroPanel, Mascota, buttonClasses, cx } from "../../ui/index.js";
 import { useProfiles } from "./use-session.js";
 
 /**
@@ -27,8 +27,17 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
 
   return (
     <section className="flex w-full max-w-(--container-wide) flex-col items-center gap-8">
-      <div className="flex flex-col items-center gap-2">
-        <h2 className="text-hero text-center font-extrabold">
+      {/*
+        LA PREGUNTA VA EN UN PANEL DE MARCA Y CON MONEDÍN, no como un titular
+        suelto sobre el fondo.
+
+        Es la pantalla por la que se pasa cada vez que alguien coge la tablet, y
+        era la más sosa del producto: un texto negro centrado y cinco huecos
+        grises. La maqueta la abre con Monedín preguntando desde el color de la
+        acción, que es exactamente lo que esta pantalla pide — hay que elegir.
+      */}
+      <HeroPanel className="w-full max-w-reading" mascot={<Mascota pose="saluda" size="medium" />}>
+        <h2 className="text-hero font-extrabold text-ink-inverted">
           {manage ? messages.auth.manageProfilesTitle : messages.auth.whoIsPlaying}
         </h2>
 
@@ -41,10 +50,10 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
           quién eres y no dice que después hay un PIN. La línea no era «el
           adorno del modo administrar», era la de las dos.
         */}
-        <p className="text-lead text-center text-ink-muted">
+        <p className="text-lead text-ink-inverted opacity-90">
           {manage ? messages.auth.manageProfilesLead : messages.auth.whoIsPlayingLead}
         </p>
-      </div>
+      </HeroPanel>
 
       <ul className="flex list-none flex-wrap justify-center gap-6 p-0">
         {profiles.map((profile) => (
@@ -63,10 +72,10 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
                  * paradas para una sola cosa. Ver la decisión 3 del design.
                  */
                 aria-label={manage ? `${messages.auth.editProfile} ${profile.name}` : undefined}
-                className={tileClasses}
+                className={tileClasses(profile.familyRole === "PARENT" ? "brand" : "primary")}
               >
                 <span className="relative">
-                  <Avatar value={profile.avatar} size="xlarge" shape="rounded" />
+                  <Avatar value={profile.avatar} size="xlarge" />
                   {profile.familyRole === "PARENT" && <CrownBadge />}
                   {manage && <PencilBadge />}
                 </span>
@@ -82,12 +91,22 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
             crear el primer hijo es lo que hace que el producto haga algo, y
             enterrarlo bajo la rejilla lo escondía.
           */}
-          <Link to="/profiles/new" className={tileClasses}>
+          <Link
+            to="/profiles/new"
+            /*
+              DE TRAZO DISCONTINUO, como en la maqueta: no es un perfil, es el
+              hueco donde cabría uno. Con el mismo borde que los demás se lee
+              como una quinta cara.
+            */
+            className={cx(tileClasses("muted"), "border-dashed hover:bg-surface-sunken")}
+          >
             <span
               aria-hidden="true"
               // `size-36` es la misma medida que `Avatar size="xlarge"`: son la misma
               // fila, y una tesela más baja que las demás se lee como un error.
-              className="rounded-card text-hero flex size-36 items-center justify-center bg-surface-sunken text-ink-muted leading-none"
+              // Un círculo, como los avatares que acompaña: la fila es de caras
+              // redondas y un cuadrado en medio rompe la lectura.
+              className="rounded-pill text-hero flex size-36 items-center justify-center bg-surface-sunken text-primary leading-none"
             >
               +
             </span>
@@ -124,8 +143,30 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
  * ver movimiento, no mejor. Así, con movimiento reducido la tesela sigue
  * respondiendo por color y no se mueve. Ver la decisión 3 del design.
  */
-const tileClasses =
-  "rounded-card flex w-36 flex-col items-center gap-2 px-0 py-2 text-center no-underline text-ink transition duration-normal hover:bg-surface-sunken motion-safe:hover:scale-105";
+/**
+ * UNA TESELA ES UNA TARJETA CON SU BORDE, y antes era un hueco sin nada.
+ *
+ * Comparada con su maqueta, la rejilla salía plana: cinco rectángulos del mismo
+ * gris sobre el mismo fondo, sin borde, sin tarjeta y sin nada que separara a un
+ * perfil del siguiente. Es la pantalla que más se mira de todo el producto —se
+ * pasa por ella cada vez que alguien coge la tablet— y era la más sosa.
+ *
+ * EL COLOR DEL BORDE SIGUE UNA REGLA y no un reparto: violeta para el adulto,
+ * coral para los hijos. Son los dos tonos de la paleta con su significado
+ * puesto —el violeta de lo guardado y lo adulto, el coral de quien hace—, así
+ * que la rejilla se lee de un vistazo sin tener que aprenderse nada. La maqueta
+ * alterna los dos entre los hijos; alternar es una decisión que hay que volver a
+ * tomar cada vez que se añade uno, y esto no.
+ */
+function tileClasses(tono: "brand" | "primary" | "muted"): string {
+  return cx(
+    "rounded-card flex h-60 w-36 flex-col items-center justify-start gap-2 border-2 bg-surface-raised px-0 py-3 text-center no-underline text-ink shadow-card transition duration-normal",
+    tono === "brand" && "border-brand",
+    tono === "primary" && "border-primary",
+    tono === "muted" && "border-border",
+    tono !== "muted" && "hover:bg-surface-sunken motion-safe:hover:scale-105",
+  );
+}
 
 /**
  * Un perfil bloqueado NO es un enlace y NO lleva lápiz.
@@ -143,10 +184,12 @@ function LockedTile({
   avatar: string | null;
 }): React.ReactElement {
   return (
-    <span className={cx(tileClasses, "opacity-55")}>
-      <Avatar value={avatar} size="xlarge" shape="rounded" />
+    <span className={cx(tileClasses("muted"), "opacity-70")}>
+      <Avatar value={avatar} size="xlarge" />
       <span className="text-title font-semibold">{name}</span>
-      <span className="text-small text-ink-muted">{messages.auth.profileLocked}</span>
+      {/* Una INSIGNIA y no letra gris: es un estado, y el producto los dibuja
+          así en todas partes. En gris se leía como parte del nombre. */}
+      <Badge tone="conflict">{messages.auth.profileLocked}</Badge>
     </span>
   );
 }

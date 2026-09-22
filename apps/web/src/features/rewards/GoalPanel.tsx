@@ -1,5 +1,6 @@
 import type { OwnReward } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
+import { contar } from "../../lib/plural.js";
 import { HeroPanel, Mascota, ProgressBar } from "../../ui/index.js";
 import { metaMasCercana } from "../children/home-data.js";
 
@@ -52,12 +53,43 @@ export function GoalPanel({ rewards, balance }: GoalPanelProps): React.ReactElem
         {messages.rewards.nextRewardTitle}
       </p>
       <p className="text-title font-extrabold text-ink-inverted">{meta.title}</p>
+
       {/*
-        La barra dice «estás por aquí» y su cifra cuánto exactamente. Las dos, y
-        no una: sin la cifra, una barra al 80% de un premio de 300 no dice si
-        faltan 60 monedas o seis.
+        SU PRECIO Y LO QUE FALTA, las dos cifras que la barra no dice. Es lo mismo
+        que ya enseña cada premio del escaparate, y aquí hacía falta igual: este
+        panel es la única vez que ese premio aparece en el inicio.
       */}
-      <ProgressBar value={balance} max={meta.coins} label={meta.title} />
+      <p className="text-body font-bold text-ink-inverted opacity-90">
+        {contar(meta.coins, messages.ui.coinsUnitSingular, messages.ui.coinsUnit)}
+      </p>
+      <p className="text-body text-ink-inverted opacity-90">
+        {messages.rewards.missingPrefix}{" "}
+        {contar(
+          Math.max(meta.coins - balance, 0),
+          messages.ui.coinsUnitSingular,
+          messages.ui.coinsUnit,
+        )}
+      </p>
+
+      {/*
+        LA CIFRA FALTABA, y este comentario afirmaba que estaba: decía «la barra
+        dice ‹estás por aquí› y su cifra cuánto exactamente, las dos y no una», y
+        debajo solo había la barra. `ProgressBar` no dibuja números — es una barra
+        y su papel accesible—, así que la cifra tiene que ponerla quien la usa.
+
+        Y hace falta por lo que el propio comentario decía: una barra al 80% de un
+        premio de 300 no distingue si faltan 60 monedas o seis. La maqueta escribe
+        la fracción entera, «128/300», que es lo que deja leer las dos cosas —lo
+        que tiene y lo que cuesta— sin hacer ninguna cuenta.
+      */}
+      <div className="flex flex-col gap-1">
+        <ProgressBar value={balance} max={meta.coins} label={meta.title} />
+        <p className="text-small font-bold text-ink-inverted opacity-90 tabular-nums">
+          {balance}
+          {messages.rewards.goalOf}
+          {meta.coins}
+        </p>
+      </div>
     </HeroPanel>
   );
 }

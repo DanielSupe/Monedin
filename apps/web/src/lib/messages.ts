@@ -304,7 +304,13 @@ export const messages = {
      * Qué se está ofreciendo. «Otra vez» solo tiene sentido para quien lo vio, y
      * a quien lo saltó —que es quien más ganaría volviendo— no le dice nada.
      */
-    replayLead: "Te enseño dónde está cada cosa de tu panel.",
+    /*
+     * SIN «tu panel», que es lo que puse primero copiando la maqueta del padre —y
+     * esta tarjeta la monta TAMBIÉN el perfil del niño, que no tiene panel—. Una
+     * frase tomada de una maqueta hay que leerla en las dos pantallas que la van
+     * a usar antes de darla por buena.
+     */
+    replayLead: "Te enseño dónde está cada cosa.",
     replayAction: "Verlo",
     replayFailed: "No pudimos volver a abrir el recorrido.",
     /** Se compone con el paso y el total en el punto de uso, nunca aquí. */
@@ -583,9 +589,21 @@ export const messages = {
      * baja» y «desbloquear» se leen como variantes de lo mismo, y una de las dos
      * no se puede deshacer.
      */
+    /*
+     * LA MAQUETA DICE AQUÍ QUE EL HISTORIAL «SE VA CON EL PERFIL», Y ES FALSO.
+     *
+     * La copié tal cual y hubo que corregirla: la baja de un hijo es LÓGICA
+     * —una marca de borrado—, así que la fila no se destruye, y su historial de
+     * monedas ni siquiera podría borrarse: un disparador de PostgreSQL impide
+     * tocar esa tabla. Lo que sí es cierto, y es lo que hay que avisar, es que
+     * desde la aplicación no hay forma de traerlo de vuelta.
+     *
+     * Una maqueta manda en el ASPECTO y no en los hechos del modelo de datos. Si
+     * su texto afirma algo del producto, se comprueba antes de copiarlo.
+     */
     deactivateVsLock:
-      "Un perfil dado de baja NO se puede recuperar: su saldo y su historial se van con él. " +
-      "Bloquear es otra cosa —pasa solo si alguien falla el PIN varias veces— y se quita desde aquí.",
+      "Dar de baja un perfil NO se deshace desde aquí: desaparece de tus listas con su saldo. " +
+      "Bloquear es otra cosa —pasa solo si alguien falla el PIN varias veces— y se quita en un toque.",
 
     /** La baja es definitiva: la interfaz tiene que decirlo antes, no después. */
     deactivate: "Dar de baja",
@@ -620,6 +638,7 @@ export const messages = {
 
     /** Lo que el niño ve y puede cambiar de lo suyo. */
     myProfileTitle: "Mi perfil",
+    myProfileLead: "Tu cara y tu clave",
 
     /**
      * El inicio del niño.
@@ -630,7 +649,13 @@ export const messages = {
      * QUIÉN es ese número.
      */
     homeGreeting: "Hola,",
-    homeBalanceLabel: "Tus monedas",
+    /*
+     * SOLO LA UNIDAD, como en la maqueta. Decía «tus monedas» y el inicio pasó a
+     * tener ese mismo texto DOS veces: aquí bajo la cifra, y encabezando el
+     * bloque de los últimos movimientos. Bajo un número que ya es suyo, el
+     * posesivo no añade nada.
+     */
+    homeBalanceLabel: "monedas",
 
     /*
      * Lo que Monedín dice al entrar, y por qué son TRES frases y no una con un
@@ -649,6 +674,9 @@ export const messages = {
     homeMarkExplains: "Cuando marques una, aviso a tu papá o a tu mamá.",
 
     homeTasksTitle: "Tus tareas",
+    /* El bloque de las últimas monedas, en el inicio. */
+    homeCoinsTitle: "Tus monedas",
+    homeCoinsAll: "Ver todo",
     homeTasksAll: "Ver todas",
 
 
@@ -912,6 +940,7 @@ export const messages = {
      */
     retireConfirm:
       "Dejará de poder pedirse y desaparecerá del escaparate de tus hijos. " +
+      "Los canjes que ya te hayan pedido siguen su curso. " +
       "Sigue en tu catálogo: publicándolo otra vez vuelve. ¿Seguro?",
     retireSubmit: "Sí, retirar",
 
@@ -922,11 +951,18 @@ export const messages = {
 
     /** Lo que ve el niño. */
     myRewardsTitle: "Mis premios",
+    myRewardsLead: "Canjea lo que ganaste",
 
     /*
      * La meta más cercana. Va en `rewards` y no en `children` porque habla de
      * premios, y la usan DOS pantallas: el inicio y el escaparate.
      */
+    /*
+     * El separador de la fracción, SOLO el separador: la cifra que tiene y la que
+     * cuesta se componen en el punto de uso, porque ninguna cadena del catálogo
+     * lleva un número dentro.
+     */
+    goalOf: "/",
     nextRewardTitle: "Tu próximo premio",
     allAffordableTitle: "¡Te alcanza para todo!",
     allAffordableBody: "Elige el que más te guste, que ya lo tienes.",
@@ -1027,9 +1063,13 @@ export const messages = {
   uploads: {
     /** Selector y recorte. */
     choose: "Elegir una foto",
+    /* La otra opción, nombrada: encima hay animales y esto es lo que sigue. */
+    orYourOwnPhoto: "O ponte una foto tuya",
     change: "Cambiar la foto",
     remove: "Quitar la foto",
     crop: "Ajusta el encuadre",
+    /* Por qué el marco es cuadrado. La razón vive en otra pantalla. */
+    cropLead: "La foto de un premio va cuadrada, para que la rejilla no se dentee.",
     cropConfirm: "Usar esta foto",
     cancel: "Cancelar",
     preparing: "Preparando la foto…",
@@ -1057,7 +1097,8 @@ export const messages = {
    */
   help: {
     title: "Preguntas frecuentes",
-    lead: "Lo que más se pregunta sobre Monedín.",
+    /* Antetítulo, como en las demás pantallas: dice qué es esta lista. */
+    lead: "Lo que más se pregunta",
 
     coinsQ: "¿Qué son las monedas?",
     coinsA:
@@ -1107,7 +1148,66 @@ export const messages = {
       "Un adulto puede reponer el PIN de un hijo desde su perfil. Y si el que se olvida es el " +
       "del adulto, se restablece con el correo y la contraseña de la cuenta.",
 
-    moreDoubts: "¿Más dudas?",
+    /*
+     * DOS LISTAS Y NO UNA, y esto revierte una decisión escrita.
+     *
+     * Aquí había NUEVE preguntas para los dos roles, con la cabecera de la
+     * pantalla diciendo «una sola para los dos». El argumento de entonces era que
+     * el marco ya reasigna la escala, así que la misma pantalla sirve — y eso
+     * sigue siendo cierto de la PANTALLA. Lo que no es cierto es del CONTENIDO:
+     * «subí el precio de un premio que ya me habían pedido» no es una duda que un
+     * niño pueda tener, y las nueve estaban escritas en tercera persona —«el niño
+     * lo pide y un adulto lo aprueba»—, que es un manual para el padre.
+     *
+     * Una lista de preguntas sirve para encontrar la propia. La mitad que no
+     * puede ser tuya no es neutral: estorba, y a los siete años estorba el doble.
+     *
+     * Las de abajo son las del NIÑO, en su voz y sobre lo que él hace. Las de
+     * arriba se quedan como las del padre, que es para quien estaban escritas.
+     */
+    childCoinsQ: "¿Qué son las monedas?",
+    childCoinsA:
+      "Son de mentira: no se compran ni se cambian por dinero de verdad. Sirven para pedir los " +
+      "premios que tu papá o tu mamá publican.",
+
+    childEarnQ: "¿Cómo consigo más?",
+    childEarnA:
+      "Haciendo tus tareas y marcándolas. Las monedas llegan cuando un adulto la aprueba, no " +
+      "cuando tú la marcas.",
+
+    childWaitQ: "Marqué una tarea y no me pagaron. ¿Por qué?",
+    childWaitA:
+      "Porque falta que la revisen. Mientras tanto la verás en «Esperando revisión».",
+
+    childRejectQ: "Si me dicen que no a un premio, ¿pierdo monedas?",
+    childRejectA:
+      "No. Las monedas solo se descuentan cuando te aprueban el canje. Un «no» no te cuesta nada.",
+
+    childSiblingQ: "¿Puedo ver las monedas de mi hermano?",
+    childSiblingA: "No. Cada uno ve solo las suyas, y eso no se puede cambiar.",
+
+    childPinQ: "Se me olvidó mi PIN.",
+    childPinA: "Pídele ayuda a un adulto: desde su perfil puede ponerte uno nuevo.",
+
+    /* Las dos del padre que faltaban, y las dos sobre dinero ya movido. */
+    frozenQ: "Subí el precio de un premio que ya me habían pedido.",
+    frozenA:
+      "Ese canje mantiene el precio del día en que se pidió. El precio nuevo vale para los " +
+      "siguientes.",
+
+    retireQ: "¿Retirar un premio es lo mismo que dejar de ofrecérselo a un hijo?",
+    retireA:
+      "No. Retirar lo quita del escaparate de todos; cambiar ofertas decide a quién se le ofrece " +
+      "y a qué precio.",
+
+    /*
+     * EL PIE LO DICE MONEDÍN EN PRIMERA PERSONA, y antes era un «¿más dudas?»
+     * con el nombre del destino al lado. La diferencia no es de tono: lo que
+     * convence de pulsar ahí es que quien va a contestar CONOCE tus tareas, tus
+     * premios y tus monedas, y eso no lo decía en ninguna parte.
+     */
+    moreDoubts: "¿Tu duda no está aquí?",
+    moreDoubtsLead: "Pregúntamela a mí: conozco tus tareas, tus premios y tus monedas.",
     askMonedin: "Pregúntale a Monedín",
   },
 
@@ -1182,7 +1282,14 @@ export const messages = {
    */
   assistant: {
     title: "Pregúntale a Monedín",
-    lead: "Monedín conoce tus tareas, tus premios y tus monedas. Pregúntale lo que quieras.",
+    /*
+     * DOS FRASES, una por rol, y antes había UNA escrita en segunda persona de
+     * niño: a un padre le decía que Monedín conoce «tus tareas» y «tus monedas»,
+     * cuando las tareas las reparte él y las monedas son de sus hijos.
+     */
+    leadChild: "Monedín conoce tus tareas, tus premios y tus monedas. Pregúntale lo que quieras.",
+    leadParent:
+      "Monedín conoce las tareas, los premios y las monedas de tu familia. Pregúntale lo que quieras.",
 
     /** Marca de quién habla en cada turno. No basta con distinguirlos por color. */
     you: "Tú",
@@ -1195,7 +1302,15 @@ export const messages = {
      * diciendo para que sirve el hueco que se ve. Antes ese espacio estaba en
      * blanco y el campo de abajo era lo unico que sugeria que se podia escribir.
      */
-    emptyHint: "Pregúntame lo que quieras sobre tus tareas, tus premios o tus monedas.",
+
+    /*
+     * EL SALUDO CON LO QUE HAY. En trozos porque las cifras se componen donde se
+     * usan: ninguna cadena del catálogo lleva un número dentro.
+     */
+    greetHave: "Tienes",
+    greetAnd: "y",
+    greetAskChild: "¿Te cuento algo?",
+    greetAskParent: "¿Te cuento por dónde empezar?",
 
     inputLabel: "Tu pregunta",
     placeholder: "Escribe tu pregunta…",
@@ -1213,6 +1328,17 @@ export const messages = {
      */
     ideasTitle: "Explora con Monedín",
     ideaBalance: "¿Cómo consigo más monedas?",
+    /*
+     * Y LAS IDEAS TAMBIÉN VAN POR ROL. Las tres de arriba son preguntas de niño
+     * —«¿qué me falta por hacer?», «¿para qué premio me alcanza?»— y a un padre
+     * se le ofrecían tal cual. Las suyas son las que solo él puede hacer.
+     */
+    ideaPriceGlyph: "🎁",
+    ideaPrice: "¿Qué precio le pongo a un premio?",
+    ideaRetireGlyph: "📦",
+    ideaRetire: "¿Retirar un premio o dejar de ofrecerlo?",
+    ideaCreditedGlyph: "🪙",
+    ideaCredited: "¿Cuánto le he acreditado a cada hijo?",
     /** Los tres glifos de las sugerencias. Decorativos: lo que dice es el texto. */
     ideaBalanceGlyph: "🪙",
     ideaTasksGlyph: "🧹",

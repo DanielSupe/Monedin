@@ -1,7 +1,7 @@
 import { API_PREFIX, ERROR_CODES } from "@monedin/contracts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createMemoryHistory, createRouter } from "@tanstack/react-router";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { messages } from "../../src/lib/messages.js";
@@ -504,17 +504,72 @@ describe("el hilo baja al mensaje nuevo", () => {
   });
 });
 
-describe("con el hilo vacío la pantalla invita", () => {
-  it("aparece la invitación, y se va al primer mensaje", async () => {
+/**
+ * EL HILO VACÍO YA NO ES UNA FRASE GRIS: es Monedín saludando.
+ *
+ * Este caso buscaba una invitación centrada que decía para qué sirve la
+ * pantalla. Explicaba, sí, pero dejaba el chat vacío de verdad. Ahora se abre
+ * con un turno suyo, que enseña cómo se ve un turno antes de escribir ninguno y
+ * saluda con LO QUE HAY, así que la primera pregunta tiene de dónde salir.
+ *
+ * Se comprueban las dos mitades, igual que antes: que el saludo está, y que se
+ * va al primer mensaje — si se quedara, competiría con la conversación.
+ */
+describe("con el hilo vacío Monedín saluda", () => {
+  it("saluda al entrar, y deja sitio al primer mensaje", async () => {
     const usuario = userEvent.setup();
     await montarChat("nino", respondeSiempre("Claro."));
 
-    expect(screen.getByText(messages.assistant.emptyHint)).toBeTruthy();
+    const saludo = await screen.findByText(new RegExp(messages.assistant.greetAskChild));
+    expect(saludo).toBeTruthy();
 
     await preguntar(usuario, "hola");
     await screen.findByText("Claro.");
 
-    // Las dos mitades: si se quedara, competiría con la conversación.
-    expect(screen.queryByText(messages.assistant.emptyHint)).toBeNull();
+    expect(screen.queryByText(new RegExp(messages.assistant.greetAskChild))).toBeNull();
+  });
+
+  /*
+   * Y saluda con lo que HAY, que es la mitad que lo distingue de un texto fijo:
+   * con otro saldo, el saludo dice otra cosa. Sin este caso, un saludo escrito a
+   * mano pasaría igual.
+   */
+  it("y lo que dice depende del saldo de quien entra", async () => {
+    await montarChat("nino", respondeSiempre("Claro."));
+
+    const saludo = await screen.findByText(new RegExp(messages.assistant.greetAskChild));
+
+    // El saldo del actor de prueba, tomado de donde vive y no escrito otra vez.
+    expect(saludo.textContent).toContain(String(comoNino().actor?.coins));
+  });
+});
+
+/**
+ * LAS IDEAS SON DE QUIEN PREGUNTA, y eran las del niño para los dos.
+ *
+ * A un padre se le ofrecía «¿qué me falta por hacer?» y «¿para qué premio me
+ * alcanza?». No son preguntas suyas: él reparte tareas y pone precios, no las
+ * hace ni ahorra. El mismo defecto tenía la frase de la cabecera, que le decía
+ * que Monedín conoce «tus monedas» cuando las monedas son de sus hijos.
+ *
+ * El test monta LOS DOS y compara: con un solo rol, cualquiera de los dos juegos
+ * pasaría — que es exactamente cómo estaba antes.
+ */
+describe("cada rol recibe sus propias ideas", () => {
+  it("al niño se le ofrecen las suyas y al padre las suyas", async () => {
+    // Las sugerencias viven en la columna de la derecha, que solo se monta con
+    // ancho: en estrecho la pantalla es el chat y nada más.
+    conPantallaAncha();
+
+    await montarChat("nino", respondeSiempre("Claro."));
+    expect(await screen.findByRole("button", { name: messages.assistant.ideaRewards })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: messages.assistant.ideaPrice })).toBeNull();
+
+    cleanup();
+    conPantallaAncha();
+
+    await montarChat("padre", respondeSiempre("Claro."));
+    expect(await screen.findByRole("button", { name: messages.assistant.ideaPrice })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: messages.assistant.ideaRewards })).toBeNull();
   });
 });

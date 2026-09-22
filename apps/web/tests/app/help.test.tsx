@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { cleanup, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { HELP_AGE_QUESTION, HELP_PIN_QUESTION, messages } from "../../src/lib/messages.js";
@@ -20,34 +20,49 @@ describe("se leen las preguntas, no las respuestas", () => {
   it("arranca con todo plegado", async () => {
     await montarApp("/help", comoNino());
 
-    expect(screen.getByRole("button", { name: messages.help.coinsQ })).toBeTruthy();
-    expect(screen.queryByText(messages.help.coinsA)).toBeNull();
+    expect(screen.getByRole("button", { name: messages.help.childCoinsQ })).toBeTruthy();
+    expect(screen.queryByText(messages.help.childCoinsA)).toBeNull();
   });
 
   it("se abre la que interesa y aparece su respuesta", async () => {
     await montarApp("/help", comoNino());
 
-    await userEvent.click(screen.getByRole("button", { name: messages.help.approveQ }));
+    await userEvent.click(screen.getByRole("button", { name: messages.help.childEarnQ }));
 
-    expect(screen.getByText(messages.help.approveA)).toBeTruthy();
+    expect(screen.getByText(messages.help.childEarnA)).toBeTruthy();
     // Y las demás siguen guardadas: abrir una no abre todas.
-    expect(screen.queryByText(messages.help.coinsA)).toBeNull();
+    expect(screen.queryByText(messages.help.childCoinsA)).toBeNull();
   });
 });
 
-describe("los dos roles leen la misma lista", () => {
-  it("un padre y un niño ven las mismas preguntas", async () => {
+/**
+ * CADA ROL LEE SUS PREGUNTAS, y este bloque decía lo contrario.
+ *
+ * Comprobaba que las del niño estaban TODAS entre las del padre, «es la misma
+ * lista, y una decisión declarada del change». La decisión se revierte con su
+ * motivo escrito: «subí el precio de un premio que ya me habían pedido» no es
+ * una duda que un niño pueda tener, y las nueve estaban redactadas en tercera
+ * persona —un manual para quien administra—.
+ *
+ * Una lista de preguntas sirve para encontrar la propia; la mitad que no puede
+ * ser tuya estorba, y a los siete años estorba el doble.
+ *
+ * El caso monta LOS DOS y comprueba las dos direcciones: sin la segunda mitad,
+ * una lista de niño que fuera un subconjunto de la del padre pasaría igual.
+ */
+describe("cada rol lee sus propias preguntas", () => {
+  it("lo del padre no aparece en la del niño, ni al revés", async () => {
     await montarApp("/help", comoNino());
-    const delNino = screen.getAllByRole("button").map((b) => b.textContent);
+
+    expect(screen.getByRole("button", { name: messages.help.childPinQ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: messages.help.frozenQ })).toBeNull();
+
+    cleanup();
 
     await montarApp("/help", comoPadre());
-    const todos = screen.getAllByRole("button").map((b) => b.textContent);
 
-    // Se comprueba que las del niño están TODAS entre las del padre: es la misma
-    // lista, y una decisión declarada del change.
-    for (const pregunta of delNino) {
-      expect(todos).toContain(pregunta);
-    }
+    expect(screen.getByRole("button", { name: messages.help.frozenQ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: messages.help.childPinQ })).toBeNull();
   });
 });
 

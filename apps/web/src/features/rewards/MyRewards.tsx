@@ -67,9 +67,16 @@ export function MyRewards(): React.ReactElement {
   return (
     <section className="flex flex-col gap-5">
       <div className="flex flex-wrap items-baseline gap-3">
-        <h2 className="text-display font-extrabold">
-          {messages.rewards.myRewardsTitle}
-        </h2>
+        <div className="flex flex-col gap-1">
+          {/* Para qué sirve esta pantalla, encima de su nombre. La maqueta la
+              encabeza así, y es lo que ata el escaparate a lo que ya ganó. */}
+          <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+            {messages.rewards.myRewardsLead}
+          </span>
+          <h2 className="text-display font-extrabold">
+            {messages.rewards.myRewardsTitle}
+          </h2>
+        </div>
 
         {/*
           En una rejilla, «cuántos hay» deja de leerse solo: una columna se
@@ -236,6 +243,17 @@ function MyRewardRow({
                 <p className="text-small text-ink-muted">
                   {messages.rewards.missingPrefix} {faltan}{" "}
                   {messages.rewards.coins.toLowerCase()}
+                </p>
+                {/*
+                  Y la fracción, como en la maqueta y como en el panel de meta del
+                  inicio: «te faltan 172» dice cuánto queda y «128/300» dice
+                  además dónde está. Las dos cifras juntas son las que dejan
+                  decidir si ahorrar para este o pedir otro.
+                */}
+                <p className="text-small font-bold text-ink-muted tabular-nums">
+                  {balance}
+                  {messages.rewards.goalOf}
+                  {reward.coins}
                 </p>
               </div>
             )}

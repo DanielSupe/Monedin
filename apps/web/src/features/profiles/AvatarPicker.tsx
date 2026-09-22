@@ -88,6 +88,16 @@ export function AvatarPicker({
         {puedeSubir && (
           <div className="flex min-w-0 flex-col gap-3 border-t border-border pt-3">
             {/*
+              LA ALTERNATIVA SE NOMBRA, y antes solo había un botón de archivo.
+
+              Encima hay una rejilla de animales y debajo un «elegir una foto»,
+              separados por una línea: sin una frase en medio, la segunda parece
+              otro paso del primero en vez de la otra opción. La maqueta lo dice
+              con un «o» delante, que es exactamente la relación entre las dos.
+            */}
+            <p className="text-small font-semibold">{messages.uploads.orYourOwnPhoto}</p>
+
+            {/*
               Sin repetir la foto actual debajo: las dos pantallas que montan
               esto tienen ya su tarjeta de identidad encima, con el avatar
               puesto. Enseñarlo otra vez aquí lo sacaba dos veces.

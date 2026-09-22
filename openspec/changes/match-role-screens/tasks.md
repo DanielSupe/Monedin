@@ -82,11 +82,19 @@
       se cambió por lo que la pantalla no puede contestar. Además el antetítulo pasa a «Lo tuyo, no
       lo de tus hijos» —enumeraba el contenido sin avisar de la confusión real en una tablet
       compartida— y la oferta de repetir el recorrido dice por fin qué es el recorrido.
-- [ ] 2.8 Chat
-- [ ] 2.9 Ayuda — **BLOQUEADA por una decisión de producto**, en la pregunta abierta del design: la
-      aplicación tiene UNA lista de preguntas para los dos roles y las maquetas tienen dos, con
-      preguntas que un niño no puede ni hacer. Dividir no es cambiar un texto.
-- [ ] 2.10 Los tres diálogos: baja, retirar, recorte
+- [x] 2.8 Chat. Tres cosas, y las tres del mismo defecto: la pantalla es UNA para los dos roles y su CONTENIDO no puede serlo. Al padre se le ofrecían las preguntas del niño —«¿qué me falta por hacer?»— y se le decía que Monedín conoce «tus monedas», cuando son de sus hijos. Y el hilo vacío era una frase gris; ahora abre con Monedín saludando **con lo que hay**, que es lo que la maqueta hace y lo que da de dónde sacar la primera pregunta.
+- [x] 2.9 Ayuda. **Se dividió**, con el argumento escrito: «subí el precio de un premio que ya me
+      habían pedido» no es una duda que un niño pueda tener, y las nueve estaban redactadas en
+      tercera persona —un manual para quien administra—. Una lista de preguntas sirve para encontrar
+      la propia; la mitad que no puede ser tuya estorba, y a los siete años estorba el doble.
+      Once para el padre —con las dos que faltaban, sobre dinero ya movido— y seis para el niño, en
+      su voz. El test que decía «los dos roles leen la misma lista» ahora comprueba las dos
+      direcciones: sin la segunda, una lista de niño que fuera un subconjunto pasaría igual.
+- [x] 2.10 Los tres diálogos. El de retirar no decía que **los canjes ya pedidos siguen su curso**, y
+      el del recorte no decía por qué el marco es cuadrado —su razón vive en otra pantalla—.
+      **Y el de la baja decía algo FALSO que copié de la maqueta**: que el saldo y el historial «se
+      van con el perfil». La baja es lógica y el historial ni siquiera se puede borrar —lo impide un
+      disparador—. Una maqueta manda en el aspecto, no en los hechos del modelo de datos.
 
 ## 3. Las nueve del niño
 
@@ -94,15 +102,18 @@ Comparadas las nueve, esto es lo que falta. Se anota antes de tocar nada porque 
 piden lo MISMO —decirle al niño cuánto le falta para algo— y resolverlo pantalla por pantalla
 escribiría esa cuenta cuatro veces.
 
-- [ ] 3.1 Inicio. **ESTA NOTA ESTABA MAL Y SE CORRIGE**: la escribí leyendo solo la lista de
+- [x] 3.1 Inicio. **LA NOTA ANTERIOR ESTABA MAL Y SE CORRIGIÓ**: la escribí leyendo solo la lista de
       diferencias, donde el saludo, la cuenta de hechas y el panel de meta salían como «solo en la
       maqueta» — y están las tres en la aplicación, dichas con otras palabras. Abrir la pantalla y
       leerla entera es lo que lo destapó; comparar dos listas dice qué texto no coincide, no qué
       falta. Lo que falta de verdad son tres cosas:
       el botón **«¡Ya la hice!»** en cada fila de tarea —hoy hay que ir a «Tareas» para marcarla—,
       el bloque de lo **recién ganado**, y que el panel de meta enseñe la **fracción** («128/300»)
-      además de la barra. El «hoy te esperan…» de la maqueta sigue sin poder decirse, porque el
-      modelo no tiene jornada; la cuenta sí está.
+      además de la barra. **Hechas las tres**, y una cuarta que la comparación destapó: la lista
+      enseñaba solo las pendientes, así que el paso que da sentido a los otros tres —cobrar— no se
+      veía en el inicio. Ahora van los tres estados en el orden del ciclo, cada uno con lo suyo.
+      Además la fecha de hoy encabeza —que sí se puede decir, al contrario que «hoy te esperan dos
+      tareas»— y el bloque de los tres últimos movimientos cierra la pantalla.
 - [x] 3.2 Tareas. **Cuadra.** Tenía ya lo que creí que le faltaba —el botón por fila, el aviso de lo
       ganado, los grupos con su cuenta— y lo que sí faltaba era su «Cómo funciona»: el mismo ciclo
       que ahora explica el formulario del padre, contado del lado del niño. Van los DOS a propósito:
@@ -110,19 +121,35 @@ escribiría esa cuenta cuatro veces.
       antes. Contárselo a uno solo deja al otro suponiendo, y es donde un niño se lleva el chasco:
       marca, no ve subir sus monedas, y cree que se perdieron.
       Va al FINAL y no arriba: lo primero que quiere ver es qué tiene por hacer.
-- [ ] 3.3 Premios. La barra de «te faltan N monedas» **ya está** —`ProgressBar` se estrenó ahí—. Lo
-      que falta es la otra mitad: **«¡Ya te alcanza!»** en lo que sí puede pagar. Hoy un premio
-      asequible se distingue solo por tener botón, que es la diferencia que menos se ve.
-- [ ] 3.4 Canjes. **Cuadra**: solo difieren las cifras y las fechas de la siembra.
-- [ ] 3.5 Monedas. **Cuadra** desde que el historial enseña fechas (tarea 2.6).
-- [ ] 3.6 Perfil. Le falta su antetítulo, su identidad —edad y saldo— y **la opción de ponerse una
-      foto**, que aquí SÍ se puede porque el perfil ya existe.
-- [ ] 3.7 Chat
-- [ ] 3.8 Ayuda
-- [ ] 3.9 Recorrido
+- [x] 3.3 Premios. La barra de «te faltan N monedas» **ya estaba** —`ProgressBar` se estrenó ahí—. Lo
+      que faltaba era verlo: el único premio que el hijo de ejemplo podía pagar ya estaba pedido, así
+      que la insignia no salía en ninguna pantalla. **Es un defecto de la SIEMBRA y no del código** —y
+      es justo lo que la siembra existe para evitar—: ahora hay un premio barato sin canjear. Y su
+      antetítulo, que faltaba.
+- [x] 3.4 Canjes. **Cuadra**: solo difieren las cifras y las fechas de la siembra.
+- [x] 3.5 Monedas. **Cuadra** desde que el historial enseña fechas (tarea 2.6).
+- [x] 3.6 Perfil. La identidad y el subidor ya estaban; faltaba su antetítulo y, sobre todo, que la
+      foto se ofreciera como LO QUE ES: encima hay una rejilla de animales y debajo un botón de
+      archivo, separados por una línea, y sin una frase en medio el segundo parecía otro paso del
+      primero en vez de la otra opción.
+- [x] 3.7 Chat. Cubierto con el del padre: la pantalla es una y lo que se separó —la frase de la cabecera, las ideas y el saludo— es justo lo que cada rol necesita distinto.
+- [x] 3.8 Ayuda. Sus seis preguntas, en su voz. Y el pie pasa a decir QUIÉN va a contestar —«conozco tus tareas, tus premios y tus monedas»—, que es lo que convence de pulsar ahí; decía el nombre del destino y nada más.
+- [x] 3.9 Recorrido. **Cuadra**: lo único que difiere de su maqueta son las cifras de la siembra y el «hoy», que no se puede decir.
 
 ## 4. Cierre
 
-- [ ] 4.1 Volver a comparar las veinticuatro y dejar escrito lo que sigue sin cuadrar.
-- [ ] 4.2 Los dos temas.
-- [ ] 4.3 `pnpm verify` entero.
+- [x] 4.1 Volver a comparar las veinticuatro y dejar escrito lo que sigue sin cuadrar. Lo que queda,
+      y en los tres casos por una razón y no por un olvido:
+      **Las cifras y las fechas** de cada maqueta, que son sus datos de ejemplo y no los de la
+      siembra.
+      **El «hoy»** de «hoy te esperan 2 tareas» y «2/5 hechas hoy»: el modelo no tiene jornada, así
+      que sería un dato inventado. La cuenta sí se dice; la jornada no.
+      **El teclado del PIN de colores**, que pide imponerle color a `Button` desde fuera o nombrar
+      una variante por su color. Ver la decisión 10.
+- [x] 4.2 Los dos temas. Comprobado en el navegador sobre la rejilla rehecha —el panel de marca, los
+      bordes por rol y la insignia de bloqueado se reasignan solos— y antes con la sonda de
+      contraste en las ocho compartidas. Lo único por debajo de AA sigue siendo el coral, que es
+      **decisión tomada** y no deuda.
+- [x] 4.3 `pnpm verify` entero. **13 de 13 tareas**, con las dos baterías: 48 archivos de API y 59
+      del front. Es la primera pasada completa desde que el sistema mató la anterior por falta de
+      memoria, y esta vez no hizo falta el `--concurrency=1` de emergencia — se lanzó así de entrada.

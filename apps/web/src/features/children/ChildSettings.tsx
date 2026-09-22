@@ -36,7 +36,13 @@ export function ChildSettings(): React.ReactElement {
 
   return (
     <section className="flex w-full flex-col gap-5">
-      <h2 className="text-display font-extrabold">{messages.children.myProfileTitle}</h2>
+      <div className="flex flex-col gap-1">
+        {/* Qué se cambia aquí, como en las demás pantallas de ajustes. */}
+        <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+          {messages.children.myProfileLead}
+        </span>
+        <h2 className="text-display font-extrabold">{messages.children.myProfileTitle}</h2>
+      </div>
 
       {/*
         Dos columnas donde hay ancho, y una debajo de la otra donde no.

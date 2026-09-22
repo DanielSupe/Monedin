@@ -230,6 +230,7 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
                   })
                 }
                 aspect={1}
+                cropNote={messages.uploads.cropLead}
                 maxDimension={PHOTO_MAX_DIMENSION}
                 label={messages.rewards.addImage}
               />

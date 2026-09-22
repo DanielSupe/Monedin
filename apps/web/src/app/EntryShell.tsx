@@ -29,8 +29,32 @@ import { Logo } from "../ui/index.js";
  */
 export function EntryShell(): React.ReactElement {
   return (
-    <div data-scale="entry" className="flex min-h-dvh flex-col bg-surface text-ink">
-      <header className="px-4 py-3">
+    <div
+      data-scale="entry"
+      className="relative flex min-h-dvh flex-col overflow-hidden bg-surface text-ink"
+    >
+      {/*
+        AQUÍ HUBO DOS MANCHAS DIFUSAS Y SE QUITARON, que es lo que hay que contar.
+
+        Las cinco pantallas del camino de entrada salían monocromas comparadas
+        con sus maquetas, y el color de éstas no está en los controles sino en
+        formas grandes al fondo. La copia obvia era un par de círculos enormes y
+        desenfocados, como los que ya hay detrás de las órbitas de la portada.
+
+        Sobre el crema de estas pantallas no funcionó: desenfocado y a baja
+        opacidad, el violeta no se lee como ambiente sino como una mancha sucia
+        en una esquina. Se vio abriendo la pantalla, que es lo único que lo podía
+        decir — ningún test mira eso.
+
+        Lo que sí arregló la pantalla fue lo de delante: el rótulo con Monedín y
+        las teselas con su borde. El fondo se queda limpio a conciencia, y no como
+        un olvido: media decoración es peor que ninguna.
+
+        Y de paso quedó comprobado que la reserva del ámbar se hace cumplir. El
+        segundo círculo iba a ser ámbar, como en la maqueta, y su test lo rechazó
+        antes de que llegara a pantalla.
+      */}
+      <header className="relative px-4 py-3">
         <Logo size="medium" />
       </header>
 
@@ -46,7 +70,7 @@ export function EntryShell(): React.ReactElement {
         declara el suyo, porque solo ella sabe si es un formulario de 22rem o una
         fila de caras. Ver la corrección de la decisión 3 del design.
       */}
-      <main className="flex w-full flex-1 items-center justify-center px-4 py-8">
+      <main className="relative flex w-full flex-1 items-center justify-center px-4 py-8">
         <Outlet />
       </main>
     </div>

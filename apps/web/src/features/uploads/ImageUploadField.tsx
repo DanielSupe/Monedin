@@ -54,6 +54,8 @@ interface ImageUploadFieldProps {
    */
   maxDimension: number;
   label?: string;
+  /** Por qué se recorta así, si quien la usa tiene algo que contar. */
+  cropNote?: string;
 }
 
 /**
@@ -76,6 +78,7 @@ export function ImageUploadField({
   aspect,
   maxDimension,
   label,
+  cropNote,
 }: ImageUploadFieldProps): React.ReactElement {
   const [estado, setEstado] = useState<Estado>({ name: "idle" });
   const [error, setError] = useState<string | null>(null);
@@ -152,6 +155,17 @@ export function ImageUploadField({
     return (
       <div className="flex flex-col gap-3">
         <p className="text-small font-semibold">{messages.uploads.crop}</p>
+        {/*
+          POR QUÉ EL MARCO ES CUADRADO, cuando quien la usa tiene una razón que
+          contar. La recibe y no la deduce: el primer intento la sacaba de
+          comparar `maxDimension` con un 512 escrito a mano, que es un número de
+          negocio disfrazado Y un dato decidiendo por otro. La razón de un premio
+          —«la rejilla no se dentea»— vive en OTRA pantalla, y esta pieza no
+          puede conocerla.
+        */}
+        {cropNote !== undefined && (
+          <p className="text-small text-ink-muted">{cropNote}</p>
+        )}
 
         {/*
           ESTILO EN LÍNEA, y es la TERCERA excepción del proyecto tras
