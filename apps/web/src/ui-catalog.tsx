@@ -120,7 +120,10 @@ function Piezas(): React.ReactElement {
         </Fila>
         {/* `contrast` se enseña SOBRE la superficie de marca, que es donde vive:
             fuera de ella no se entiende para qué existe. */}
-        <div data-surface="brand" className="rounded-card flex gap-3 bg-brand p-4">
+        <div
+          data-surface="brand"
+          className="rounded-card flex gap-3 bg-brand p-4"
+        >
           <Button variant="contrast">Entrar</Button>
           <Button variant="primary">Primario, para comparar</Button>
         </div>
@@ -139,7 +142,12 @@ function Piezas(): React.ReactElement {
           {/* Redondo y sin texto. El tipo EXIGE `aria-label`: una flecha sola no
               dice si envía, avanza o vuelve. */}
           <Button variant="primary" iconOnly aria-label="Entrar a mi cuenta">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-6">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              className="size-6"
+            >
               <path
                 d="M5 12h14m-6-6 6 6-6 6"
                 strokeWidth="2"
@@ -157,6 +165,9 @@ function Piezas(): React.ReactElement {
           <Coins amount={1} />
           <Coins amount={1250} />
         </Fila>
+        {/* Las tres tallas juntas: lo que hay que mirar es que la moneda crezca
+            con la cifra y no se despegue de ella. */}
+        <Coins amount={128} size="large" />
         <Coins amount={340} size="hero" />
       </Seccion>
 
@@ -215,9 +226,24 @@ function Piezas(): React.ReactElement {
           <Avatar value="koala" size="xlarge" alt={EJEMPLO.hija} />
         </Fila>
         <Fila>
-          <Avatar value="nutria" size="medium" shape="rounded" alt={EJEMPLO.hija} />
-          <Avatar value="zorro" size="large" shape="rounded" alt={EJEMPLO.hija} />
-          <Avatar value="pulpo" size="xlarge" shape="rounded" alt={EJEMPLO.hija} />
+          <Avatar
+            value="nutria"
+            size="medium"
+            shape="rounded"
+            alt={EJEMPLO.hija}
+          />
+          <Avatar
+            value="zorro"
+            size="large"
+            shape="rounded"
+            alt={EJEMPLO.hija}
+          />
+          <Avatar
+            value="pulpo"
+            size="xlarge"
+            shape="rounded"
+            alt={EJEMPLO.hija}
+          />
         </Fila>
 
         {/*
@@ -235,7 +261,12 @@ function Piezas(): React.ReactElement {
         */}
         <Fila>
           {AVATAR_OPTIONS.map((opcion) => (
-            <Avatar key={opcion.key} value={opcion.key} size="large" alt={opcion.key} />
+            <Avatar
+              key={opcion.key}
+              value={opcion.key}
+              size="large"
+              alt={opcion.key}
+            />
           ))}
         </Fila>
       </Seccion>
@@ -276,10 +307,16 @@ function Piezas(): React.ReactElement {
           trigger={<Button variant="secondary">Abrir el cajón</Button>}
         >
           <nav className="flex flex-col gap-1 p-3">
-            <a href="#uno" className="rounded-control bg-primary-soft px-3 py-2 text-primary no-underline">
+            <a
+              href="#uno"
+              className="rounded-control bg-primary-soft px-3 py-2 text-primary no-underline"
+            >
               Inicio
             </a>
-            <a href="#dos" className="rounded-control px-3 py-2 text-ink no-underline">
+            <a
+              href="#dos"
+              className="rounded-control px-3 py-2 text-ink no-underline"
+            >
               Tareas
             </a>
           </nav>
@@ -358,7 +395,11 @@ function Piezas(): React.ReactElement {
         />
 
         {/* Sin filas no dibuja nada: aquí debajo no hay tabla. */}
-        <DataTable caption="Historial vacío" columns={[{ key: "a", header: "A" }]} rows={[]} />
+        <DataTable
+          caption="Historial vacío"
+          columns={[{ key: "a", header: "A" }]}
+          rows={[]}
+        />
       </Seccion>
 
       <Seccion titulo="Accordion">
@@ -367,7 +408,9 @@ function Piezas(): React.ReactElement {
             {
               value: "monedas",
               label: "¿Qué son las monedas?",
-              content: <p>Las gana haciendo tareas y las gasta pidiendo premios.</p>,
+              content: (
+                <p>Las gana haciendo tareas y las gasta pidiendo premios.</p>
+              ),
             },
             {
               value: "aprobar",
@@ -389,9 +432,21 @@ function Piezas(): React.ReactElement {
           value={pestana}
           onValueChange={setPestana}
           items={[
-            { value: "pendientes", label: "Pendientes", content: <p>Nada pendiente.</p> },
-            { value: "completadas", label: "Completadas", content: <p>Una esperando.</p> },
-            { value: "aprobadas", label: "Aprobadas", content: <p>Dos aprobadas.</p> },
+            {
+              value: "pendientes",
+              label: "Pendientes",
+              content: <p>Nada pendiente.</p>,
+            },
+            {
+              value: "completadas",
+              label: "Completadas",
+              content: <p>Una esperando.</p>,
+            },
+            {
+              value: "aprobadas",
+              label: "Aprobadas",
+              content: <p>Dos aprobadas.</p>,
+            },
           ]}
         />
       </Seccion>
@@ -406,8 +461,12 @@ function Piezas(): React.ReactElement {
           por eso se monta aquí sin proveedores.
         */}
         <Fila>
-          <Button onClick={() => setFocoAbierto(true)}>Con algo destacado</Button>
-          <Button onClick={() => setFocoCentrado(true)}>Sin nada destacado</Button>
+          <Button onClick={() => setFocoAbierto(true)}>
+            Con algo destacado
+          </Button>
+          <Button onClick={() => setFocoCentrado(true)}>
+            Sin nada destacado
+          </Button>
         </Fila>
 
         <Spotlight
@@ -458,7 +517,10 @@ function Piezas(): React.ReactElement {
           description="Es definitivo y no se puede deshacer. Su historial se conserva."
           footer={
             <>
-              <Button variant="secondary" onClick={() => setDialogoAbierto(false)}>
+              <Button
+                variant="secondary"
+                onClick={() => setDialogoAbierto(false)}
+              >
                 Cancelar
               </Button>
               <Button variant="danger" onClick={() => setDialogoAbierto(false)}>
@@ -493,17 +555,25 @@ function Piezas(): React.ReactElement {
           mascot={<Mascota pose="saluda" size="large" />}
           aside={<ProgressRing done={2} total={5} className="size-28" />}
         >
-          <p className="text-display font-extrabold text-ink-inverted">Hola, {EJEMPLO.hija}</p>
+          <p className="text-display font-extrabold text-ink-inverted">
+            Hola, {EJEMPLO.hija}
+          </p>
           <p className="text-body text-ink-inverted opacity-90">
-            Hoy te esperan dos tareas. Cuando termines una, aviso a tu papá o a tu mamá.
+            Hoy te esperan dos tareas. Cuando termines una, aviso a tu papá o a
+            tu mamá.
           </p>
         </HeroPanel>
 
-        <HeroPanel tone="saving" mascot={<Mascota pose="elige" size="medium" />}>
+        <HeroPanel
+          tone="saving"
+          mascot={<Mascota pose="elige" size="medium" />}
+        >
           <p className="text-micro font-extrabold uppercase text-ink-inverted opacity-80">
             Tu próximo premio
           </p>
-          <p className="text-title font-extrabold text-ink-inverted">{EJEMPLO.premio}</p>
+          <p className="text-title font-extrabold text-ink-inverted">
+            {EJEMPLO.premio}
+          </p>
           <ProgressBar value={128} max={300} label="Lo que llevas ahorrado" />
         </HeroPanel>
       </Seccion>
@@ -532,7 +602,9 @@ function Piezas(): React.ReactElement {
           <Mascota pose="duda" size="large" />
         </Fila>
         <Mascota pose="explica">
-          <p className="text-body font-bold">Las monedas se van cuando lo aprueban.</p>
+          <p className="text-body font-bold">
+            Las monedas se van cuando lo aprueban.
+          </p>
           <p className="text-small text-ink-muted">No cuando lo pides.</p>
         </Mascota>
       </Seccion>
@@ -587,11 +659,19 @@ function Piezas(): React.ReactElement {
           onValueChange={setReparto}
           options={[
             { value: "igual", label: "El mismo valor para todos" },
-            { value: "propio", label: "Un valor para cada uno", hint: "Se pide uno por hijo" },
+            {
+              value: "propio",
+              label: "Un valor para cada uno",
+              hint: "Se pide uno por hijo",
+            },
           ]}
         />
 
-        <Slider label="Acercar" value={acercamiento} onValueChange={setAcercamiento} />
+        <Slider
+          label="Acercar"
+          value={acercamiento}
+          onValueChange={setAcercamiento}
+        />
       </Seccion>
     </div>
   );
@@ -690,7 +770,9 @@ function Catalogo(): React.ReactElement {
       <div className="mx-auto flex max-w-(--container-reading) flex-col gap-4 p-4 lg:max-w-none lg:flex-row lg:items-start">
         <div data-scale="parent" className="flex-1">
           <h1>Escala del padre</h1>
-          <p className="text-body text-ink-muted">Densidad alta, escaneo rápido.</p>
+          <p className="text-body text-ink-muted">
+            Densidad alta, escaneo rápido.
+          </p>
           <div className="pt-4">
             <Piezas />
           </div>
@@ -698,7 +780,9 @@ function Catalogo(): React.ReactElement {
 
         <div data-scale="child" className="flex-1">
           <h1>Escala del niño</h1>
-          <p className="text-body text-ink-muted">Cifras grandes, toque amplio.</p>
+          <p className="text-body text-ink-muted">
+            Cifras grandes, toque amplio.
+          </p>
           <div className="pt-4">
             <Piezas />
           </div>

@@ -4,6 +4,13 @@ import { cx } from "./cx.js";
 
 const format = new Intl.NumberFormat(messages.app.locale);
 
+/** La cifra y su moneda crecen juntas: una moneda que no acompaña se despega. */
+const TALLAS = {
+  normal: { texto: "text-body", moneda: "size-4" },
+  large: { texto: "text-title", moneda: "size-7" },
+  hero: { texto: "text-hero", moneda: "size-12" },
+} as const;
+
 export interface CoinsProps {
   /**
    * La cantidad, SIEMPRE como número.
@@ -12,8 +19,17 @@ export interface CoinsProps {
    * mismo saldo se escribe de dos formas distintas en dos sitios de la app.
    */
   amount: number;
-  /** `hero` es el saldo del niño, el elemento más grande de la aplicación. */
-  size?: "normal" | "hero";
+  /**
+   * `normal` es el precio de una fila; `large`, el saldo en la cabecera del
+   * inicio del niño; `hero`, media pantalla.
+   *
+   * `large` llegó en `match-child-home-header`, cuando el saldo pasó de
+   * tarjeta centrada a píldora: entre una y otra no había nada. Se nombra por
+   * su TAMAÑO y no por su caso de uso — nombrar una opción por su primer punto
+   * de uso es cómo se acaba escribiendo `forAvatar: true` para algo que no es
+   * un avatar.
+   */
+  size?: "normal" | "large" | "hero";
   className?: string;
 }
 
@@ -35,14 +51,21 @@ export interface CoinsProps {
  * de eso. SF Pro Rounded —el respaldo en Apple— tiene cifras proporcionales, y
  * una familia futura puede tenerlas igual.
  */
-export function Coins({ amount, size = "normal", className }: CoinsProps): React.ReactElement {
-  const unidad = Math.abs(amount) === 1 ? messages.ui.coinsUnitSingular : messages.ui.coinsUnit;
+export function Coins({
+  amount,
+  size = "normal",
+  className,
+}: CoinsProps): React.ReactElement {
+  const unidad =
+    Math.abs(amount) === 1
+      ? messages.ui.coinsUnitSingular
+      : messages.ui.coinsUnit;
 
   return (
     <span
       className={cx(
         "inline-flex items-center gap-1 font-extrabold text-coin-ink tabular-nums",
-        size === "hero" ? "text-hero" : "text-body",
+        TALLAS[size].texto,
         className,
       )}
     >
@@ -55,8 +78,10 @@ export function Coins({ amount, size = "normal", className }: CoinsProps): React
         `add-brand-typography` ya pagó con la tipografía — aquí pesa más, porque
         la moneda es el objeto que más se repite del producto.
       */}
-      <CoinMark className={size === "hero" ? "size-12" : "size-4"} />
-      <span aria-label={`${format.format(amount)} ${unidad}`}>{format.format(amount)}</span>
+      <CoinMark className={TALLAS[size].moneda} />
+      <span aria-label={`${format.format(amount)} ${unidad}`}>
+        {format.format(amount)}
+      </span>
     </span>
   );
 }

@@ -362,8 +362,21 @@
      más ancha porque lleva tres controles y la lista de a quién se le ofrece. */
   --container-card: 24rem;
   --container-wide: 72rem;
-  /* El lateral de navegación. `max-w-full` detrás, para que a 320px no desborde. */
-  --container-sidebar: 17rem;
+  /*
+   * El lateral de navegación, en DOS medidas. `max-w-full` detrás, para que a
+   * 320px no desborde.
+   *
+   * Era una sola de 17rem, la de su maqueta —264px, medidos— y por eso el ancho
+   * nunca estuvo mal en un monitor de 1440. Lo que estaba mal es que fuera FIJA:
+   * el lateral se monta a partir de `lg`, y en una ventana de 1024 esos 272px son
+   * el 27% de la pantalla, mientras que en la maqueta son el 18%. La misma medida
+   * pesa distinto según lo que haya alrededor.
+   *
+   * Así que la base es la estrecha —la que se usa donde el sitio escasea— y la
+   * ancha entra en `xl`, que es donde la maqueta está dibujada.
+   */
+  --container-sidebar: 15rem;
+  --container-sidebar-wide: 17rem;
   /* Contraído: cabe un icono con su área de toque y nada más. */
   --container-sidebar-collapsed: 4.5rem;
 

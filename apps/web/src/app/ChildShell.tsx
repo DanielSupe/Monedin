@@ -224,7 +224,9 @@ export function ChildShell({
           <aside
             className={cx(
               "flex shrink-0 flex-col border-r border-border bg-surface-raised transition-all duration-normal",
-              contraido ? "w-sidebar-collapsed" : "w-sidebar",
+              // Estrecha donde el sitio escasea y ancha desde `xl`, que es donde
+              // está dibujada su maqueta. Ver el token en `tokens.css`.
+              contraido ? "w-sidebar-collapsed" : "w-sidebar xl:w-sidebar-wide",
             )}
           >
             {lateral}

@@ -130,39 +130,63 @@ export function ChildHome({
       {/* Igual que en el panel del padre: decide la pantalla, no el recorrido. */}
       {actor?.tutorialSeen === false && <Tutorial steps={CHILD_STEPS} />}
 
-      {/* `data-tutorial`: lo que ilumina el recorrido de bienvenida. */}
-      <div data-tutorial="child-balance" className="flex flex-col gap-5">
-        <Card>
-          <div className="flex flex-col items-center gap-1 py-2">
-            {/*
-              QUÉ DÍA ES, encima del saludo y como lo pone la maqueta. No afirma
-              nada sobre las tareas de debajo — eso sería falso, porque el modelo
-              no tiene jornada— : sitúa a quien mira, que en una tablet que se usa
-              a ratos no es poco.
-            */}
-            <p className="text-small text-ink-muted first-letter:uppercase">
-              {hoyConDia()}
-            </p>
-            <p className="text-body text-ink-muted">
-              {messages.children.homeGreeting} {name}
-            </p>
-            <Coins amount={coins} size="hero" />
-            <p className="text-small text-ink-muted">
-              {messages.children.homeBalanceLabel}
-            </p>
+      {/*
+        LA CABECERA: quién eres a la izquierda, cuánto tienes a la derecha.
 
-            {/*
-              Desde el SALDO y no desde un quinto destino en la barra: tocar el
-              número y preguntar de dónde viene es el gesto natural, y añadirle un
-              destino más a una navegación de cuatro le cuesta a alguien de seis
-              años. Ver la decisión 6 del design de `add-coin-history`.
-            */}
-            <Link to="/me/coins" search={{ page: 1 }} className="text-small">
-              {messages.coins.seeHistory}
-            </Link>
-          </div>
-        </Card>
+        Era una tarjeta centrada con la cifra a tamaño `hero`, que gastaba el
+        tercio superior de la pantalla: en 950 px de alto empujaba las tareas por
+        debajo del pliegue, así que lo primero que veía un niño al entrar era
+        cuánto tiene y lo que venía a hacer había que buscarlo.
 
+        El requisito decía que el saldo tenía que ser el elemento MÁS GRANDE, y se
+        revirtió a conciencia en `match-child-home-header`. Lo que sustituye al
+        tamaño es el SITIO: siempre la misma esquina, con su moneda al lado. La
+        mitad del requisito que NO se cae sigue en pie — no va dentro de una frase,
+        lo dibuja la pieza del sistema y se anuncia con su unidad.
+      */}
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          {/*
+            QUÉ DÍA ES, encima del saludo y como lo pone la maqueta. No afirma
+            nada sobre las tareas de debajo — eso sería falso, porque el modelo no
+            tiene jornada—: sitúa a quien mira, que en una tablet que se usa a
+            ratos no es poco.
+          */}
+          <p className="text-small text-ink-muted first-letter:uppercase">
+            {hoyConDia()}
+          </p>
+          <h2 className="text-display font-extrabold">
+            {messages.children.homeGreeting} {name}
+          </h2>
+        </div>
+
+        {/*
+          LA PÍLDORA ES UN ENLACE, y la maqueta la dibuja estática.
+
+          Aquí manda el requisito: el historial de un niño no tiene destino propio
+          en su navegación —se llega desde aquí—, y hay un escenario vigente que
+          dice que desde el inicio se abre de dónde salió cada moneda. Estática,
+          ese camino se pierde para quien recorre con teclado. Una maqueta manda en
+          el ASPECTO, no en los caminos que el producto garantiza.
+
+          `data-tutorial` se muda con ella: el recorrido ilumina el saldo, y en la
+          tarjeta que desaparece apuntaría a un hueco.
+        */}
+        <Link
+          to="/me/coins"
+          search={{ page: 1 }}
+          data-tutorial="child-balance"
+          aria-label={messages.coins.seeHistory}
+          className="rounded-pill flex shrink-0 items-center gap-2 border border-border bg-surface-raised px-4 py-2 no-underline shadow-card"
+        >
+          <Coins amount={coins} size="large" />
+          <span className="text-small text-ink-muted">
+            {messages.children.homeBalanceLabel}
+          </span>
+        </Link>
+      </div>
+
+      <div className="flex flex-col gap-5">
         {/*
           Monedín dice qué le queda, y el aro cuánto lleva. Las dos cosas juntas
           porque son la misma pregunta: «¿qué hago ahora?».
@@ -231,9 +255,9 @@ export function ChildHome({
             */}
             <UltimasMonedas />
 
-            <div className="flex justify-center">
-              <LeaveProfile />
-            </div>
+            {/* Cierra la columna de apoyo, de ancho completo y como segunda
+                acción: es lo que dibuja su maqueta, y aquí no compite con nada. */}
+            <LeaveProfile variant="secondary" block />
           </>
         }
       >
@@ -419,7 +443,7 @@ function UltimasMonedas(): React.ReactElement | null {
       <Card>
         <ul className="flex list-none flex-col p-0">
           {ultimos.map((movimiento) => (
-            <MovementRow key={movimiento.id} movement={movimiento} />
+            <MovementRow key={movimiento.id} movement={movimiento} compact />
           ))}
         </ul>
       </Card>

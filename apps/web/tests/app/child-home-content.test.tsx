@@ -45,25 +45,41 @@ async function montar(tareas: OwnTask[], premios: OwnReward[]): Promise<void> {
 }
 
 /**
- * El requisito que este change CASI rompe, y por eso es el primero.
+ * EL SALDO, DESPUÉS DE REVERTIR LA MITAD DE SU REQUISITO.
  *
- * «El saldo es lo principal del inicio del niño» está escrito desde
- * `redesign-child-home`, y las referencias visuales del rediseño lo movían a una
- * píldora en la cabecera. Al añadirle contenido a esta pantalla, lo que hay que
- * fijar no es que el saldo esté: es que SIGA siendo lo más grande.
+ * Este bloque decía «se pinta en la talla mayor, y ninguna otra cifra la usa»:
+ * el requisito exigía que el saldo fuera el elemento MÁS GRANDE de la pantalla.
+ * `match-child-home-header` lo revierte con las dos pantallas delante — la
+ * tarjeta gastaba el tercio superior y empujaba las tareas por debajo del
+ * pliegue, así que lo primero que veía un niño al entrar era cuánto tiene.
+ *
+ * Lo que sustituye al tamaño es el SITIO, y eso no se puede probar aquí: jsdom no
+ * aplica CSS. Lo que SÍ se prueba es la mitad del requisito que no se cae, y que
+ * es justo la que un rediseño se llevaría por delante sin enterarse: que el saldo
+ * sigue siendo el camino al historial —que no tiene destino propio en la
+ * navegación del niño— y que se anuncia con su unidad.
  */
-describe("el saldo sigue mandando en el inicio", () => {
-  it("se pinta en la talla mayor, y ninguna otra cifra la usa", async () => {
+describe("el saldo sigue siendo el camino a su historial", () => {
+  it("se toca y lleva a de dónde salieron", async () => {
     await montar([tarea("t1", "Tender la cama", "PENDING")], []);
 
     const saldo = await screen.findByText(String(SALDO));
+    const enlace = saldo.closest("a");
 
-    // La talla la lleva la pieza de cantidades, que es quien la declara.
-    expect(saldo.closest(".text-hero")).not.toBeNull();
+    expect(enlace, "el saldo dejó de ser un enlace").not.toBeNull();
+    expect(enlace).toHaveAttribute("href", expect.stringContaining("/me/coins"));
+  });
 
-    // Y nada más de la pantalla compite en tamaño con él: si otra cosa usara la
-    // talla mayor, el saldo dejaría de ser «lo primero que se lee».
-    expect(document.querySelectorAll(".text-hero")).toHaveLength(1);
+  /*
+   * La cifra sola diría «120» a quien no ve la pantalla, que no dice de qué. La
+   * unidad la pone la pieza de cantidades, que es quien sabe qué dibuja.
+   */
+  it("se anuncia con su unidad y no como un número suelto", async () => {
+    await montar([], []);
+
+    expect(
+      await screen.findByLabelText(`${SALDO} ${messages.ui.coinsUnit}`),
+    ).toBeInTheDocument();
   });
 
   it("el marco no lo repite: el saldo vive aquí y en su historial", async () => {

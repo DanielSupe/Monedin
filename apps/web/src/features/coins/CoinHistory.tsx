@@ -1,9 +1,21 @@
-import type { CoinReason, CoinTransaction, CoinTransactionsPage } from "@monedin/contracts";
+import type {
+  CoinReason,
+  CoinTransaction,
+  CoinTransactionsPage,
+} from "@monedin/contracts";
 import type { ReactNode } from "react";
 import { alertToneFor } from "../../lib/alert-tone.js";
 import { fechaCorta } from "../../lib/dates.js";
 import { messages } from "../../lib/messages.js";
-import { Alert, Card, Coins, EmptyState, IconTile, Pagination, Skeleton } from "../../ui/index.js";
+import {
+  Alert,
+  Card,
+  Coins,
+  EmptyState,
+  IconTile,
+  Pagination,
+  Skeleton,
+} from "../../ui/index.js";
 import { describeCoinsError } from "./use-coins.js";
 
 /**
@@ -49,7 +61,9 @@ export function CoinHistory({
 
       {/* Solo cuando lo mira un adulto: es él quien puede querer corregir algo,
           y a un niño «lo impide la base de datos» no le dice nada. */}
-      {note !== undefined && <p className="text-small text-ink-muted">{note}</p>}
+      {note !== undefined && (
+        <p className="text-small text-ink-muted">{note}</p>
+      )}
 
       {isPending ? (
         <Skeleton lines={4} />
@@ -94,7 +108,22 @@ export function CoinHistory({
  * la MISMA fila. Escribirla allí otra vez sería la copia que se queda atrás al
  * cambiar algo — y ya hay dos pantallas que la usan a través de `CoinHistory`.
  */
-export function MovementRow({ movement }: { movement: CoinTransaction }): React.ReactElement {
+export function MovementRow({
+  movement,
+  compact = false,
+}: {
+  movement: CoinTransaction;
+  /**
+   * Sin fecha y sin el rótulo del saldo: la forma del RESUMEN.
+   *
+   * En el historial la fecha es lo que se viene a mirar —esa pantalla contesta
+   * «este saldo no me cuadra»—; en las tres últimas del inicio son tres líneas
+   * que solo dicen qué pasó, y su maqueta no la pone. Es una opción de la fila y
+   * no una copia: copiarla para quitarle un dato es cómo acaban existiendo dos
+   * filas que se separan.
+   */
+  compact?: boolean;
+}): React.ReactElement {
   /*
    * Que sume o reste es la información MÁS importante de la fila, y `-60` frente
    * a `60` la deja colgando de un solo carácter. Se dice con palabra y con tono.
@@ -126,7 +155,9 @@ export function MovementRow({ movement }: { movement: CoinTransaction }): React.
           {acredita ? messages.coins.earned : messages.coins.spent}{" "}
           {Math.abs(movement.amount)}
         </p>
-        <p className="text-small font-bold text-ink-muted">{RAZON[movement.reason]}</p>
+        <p className="text-small font-bold text-ink-muted">
+          {RAZON[movement.reason]}
+        </p>
       </div>
 
       {/*
@@ -141,9 +172,11 @@ export function MovementRow({ movement }: { movement: CoinTransaction }): React.
         en la forma CORTA: es una celda de una lista que se recorre de arriba
         abajo, no una línea de texto.
       */}
-      <span className="shrink-0 text-small font-bold text-ink-muted">
-        {fechaCorta(movement.createdAt)}
-      </span>
+      {!compact && (
+        <span className="shrink-0 text-small font-bold text-ink-muted">
+          {fechaCorta(movement.createdAt)}
+        </span>
+      )}
 
       {/*
         El saldo viene GUARDADO en la fila y no se acumula aquí. La columna es
@@ -152,9 +185,11 @@ export function MovementRow({ movement }: { movement: CoinTransaction }): React.
         página no sabe con qué saldo empezó.
       */}
       <div className="flex shrink-0 flex-col items-end">
-        <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
-          {messages.coins.balanceAfter}
-        </span>
+        {!compact && (
+          <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+            {messages.coins.balanceAfter}
+          </span>
+        )}
         <Coins amount={movement.balanceAfter} />
       </div>
     </li>
