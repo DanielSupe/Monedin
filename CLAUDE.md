@@ -978,6 +978,28 @@ en vez de píldoras, un historial que no decía de quién era y un pie con los d
 estirados—. **Una pantalla no está cuadrada hasta que se abre**, y una medida que coincide entera es
 motivo para abrirla, no para saltársela.
 
+Y la factura de ese punto ciego fue MÁS LARGA. Al abrir una pantalla en un monitor se vio que **cinco
+llevaban una columna estrecha donde su maqueta reparte en dos**: el inicio del niño, sus tareas, sus
+canjes y las dos altas del padre. En cuatro de las cinco el panel de la derecha **ya existía** y se
+dibujaba debajo — o sea que el texto coincidía entero, que es justo lo que el método comparaba.
+
+Dos cosas que conviene llevarse de ahí. La primera: **no todo lo que está en una columna es un
+defecto**. Las tareas del padre, sus canjes y sus hijos tienen maqueta de una columna, y comprobarlo
+una a una es lo que evitó «arreglar» tres pantallas que estaban bien. La segunda: el reparto lo
+declara **una** pieza, `SplitLayout`, y no cada pantalla — cinco rejillas escritas por separado es
+exactamente cómo estas cinco volverían a dejar de parecerse.
+
+**Una proporción de una maqueta no se copia al píxel si la escala no la tiene.** Las maquetas reparten
+con `1.5fr` en tres pantallas y `1.55fr` en dos: dos números para la misma intención. Escribirlos pide
+un valor arbitrario de Tailwind, que un test prohíbe con razón. Cinco columnas con tres y dos dan 1,5
+exacto y salen de la escala; la diferencia con 1,55 son seis píxeles en un monitor de 1600.
+
+**Una cuenta que se hace en el cliente dice de qué CONJUNTO habla.** Los contadores por estado de los
+canjes del niño cuentan las filas de la página, porque ese listado pagina por fila y su `total` cuenta
+canjes y no estados. Decir «3 aprobados» sobre un total mayor sería afirmar algo que no se ha contado,
+así que el rótulo lo acota. Pedirle el desglose a la API sería un cambio de contrato para tres números
+que se pueden contar donde ya están.
+
 **Una maqueta manda en el ASPECTO, no en los hechos del modelo de datos.** Su diálogo de dar de baja
 dice que el saldo y el historial «se van con el perfil»; lo copié y es falso —la baja es lógica y el
 historial no se puede ni borrar, lo impide un disparador—. Llegó a estar escrito en dos sitios de la
