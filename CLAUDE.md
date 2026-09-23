@@ -1000,6 +1000,34 @@ canjes y no estados. Decir «3 aprobados» sobre un total mayor sería afirmar a
 así que el rótulo lo acota. Pedirle el desglose a la API sería un cambio de contrato para tres números
 que se pueden contar donde ya están.
 
+**Una medida FIJA pesa distinto según lo que tenga alrededor.** El lateral mide 272 px y su maqueta
+264 —ocho de diferencia, y con la letra más pequeña—, así que no estaba mal dibujado. Lo que estaba
+mal es que fuera una sola medida: la columna se monta a partir de 1024 px, y ahí esos 272 son el 27 %
+de la pantalla, mientras que en la maqueta, dibujada a 1440, son el 18 %. Ahora son dos —240 de base
+y 272 desde `xl`— con el límite escrito de que no puede estrecharse hasta que el nombre de un destino
+deje de caber en una línea. **Antes de mover una medida que «se ve mal», medirla contra su maqueta**:
+aquí la medida era correcta y el defecto estaba en que no se adaptara.
+
+**El saldo del inicio del niño YA NO es el elemento más grande, y esa reversión tiene dueño.** El
+requisito lo exigía desde `redesign-child-home`, y nació de un defecto real: la cifra iba en negrita
+dentro de un párrafo, al tamaño de los enlaces de al lado. La cura fue el extremo contrario — una
+tarjeta que gastaba el tercio superior y empujaba las tareas por debajo del pliegue, de modo que lo
+primero que veía un niño al entrar era cuánto tiene y lo que venía a hacer había que buscarlo. Desde
+`match-child-home-header` el saldo es una píldora en la cabecera: **lo que sustituye al tamaño es el
+SITIO**, siempre la misma esquina y con su moneda al lado.
+
+Las dos mitades de esto valen igual. La que se cae es el tamaño. La que NO se cae, y sigue escrita
+palabra por palabra en el requisito, es lo que aquello existía para impedir: que el saldo no va dentro
+de una frase, que lo dibuja la pieza del sistema y que se anuncia con su unidad. **Revertir medio
+requisito se hace cambiando el requisito**, no dejándolo mintiendo en la spec.
+
+**Y una maqueta no manda en los CAMINOS que el producto garantiza.** La suya dibuja esa píldora
+estática; aquí es un enlace, porque el historial de un niño no tiene destino propio en su navegación
+—se llega desde el saldo— y hay un escenario vigente que lo exige. Es el mismo argumento que «una
+maqueta manda en el aspecto, no en los hechos del modelo de datos», aplicado a lo alcanzable: estática,
+ese camino se pierde para quien recorre la pantalla con teclado. El test que lo sostiene no comprueba
+el aspecto, comprueba el enlace — que es justo lo que un rediseño se llevaría por delante sin enterarse.
+
 **Una maqueta manda en el ASPECTO, no en los hechos del modelo de datos.** Su diálogo de dar de baja
 dice que el saldo y el historial «se van con el perfil»; lo copié y es falso —la baja es lógica y el
 historial no se puede ni borrar, lo impide un disparador—. Llegó a estar escrito en dos sitios de la
