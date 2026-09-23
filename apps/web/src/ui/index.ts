@@ -44,6 +44,8 @@ export { POSES, type Pose } from "./mascot-poses.js";
 export { Pagination, type PaginationProps } from "./Pagination.js";
 export { ProgressBar, type ProgressBarProps } from "./ProgressBar.js";
 export { ProgressRing, type ProgressRingProps } from "./ProgressRing.js";
+
+export { SplitLayout, type SplitLayoutProps } from "./SplitLayout.js";
 export { RadioGroup, type RadioGroupProps, type RadioOption } from "./RadioGroup.js";
 export { Select, type SelectProps } from "./Select.js";
 export { Skeleton, type SkeletonProps } from "./Skeleton.js";

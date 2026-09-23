@@ -1,5 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { type ButtonHTMLAttributes, type ReactNode, forwardRef } from "react";
+import {
+  type ButtonHTMLAttributes,
+  type ReactNode,
+  createContext,
+  forwardRef,
+  useContext,
+} from "react";
 import { messages } from "../lib/messages.js";
 import { Avatar } from "../ui/index.js";
 import { cx } from "../ui/cx.js";
@@ -19,28 +25,64 @@ import { IconHelp } from "./nav-icons.js";
  * más no dice qué hace. Es la misma regla que ya obliga a `Button` a exigir
  * nombre cuando es `iconOnly`.
  */
-export const MenuButton = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement>>(
-  function MenuButton(props, ref) {
-    return (
-      <button
-        {...props}
-        ref={ref}
-        type="button"
-        aria-label={messages.nav.menu}
-        className="tap-target rounded-control flex items-center justify-center border border-border bg-surface-raised px-2 text-ink"
+export const MenuButton = forwardRef<
+  HTMLButtonElement,
+  ButtonHTMLAttributes<HTMLButtonElement>
+>(function MenuButton(props, ref) {
+  return (
+    <button
+      {...props}
+      ref={ref}
+      type="button"
+      aria-label={messages.nav.menu}
+      className="tap-target rounded-control flex items-center justify-center border border-border bg-surface-raised px-2 text-ink"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        className="size-6"
+        aria-hidden="true"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-6" aria-hidden="true">
-          <path d="M4 7h16M4 12h16M4 17h16" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
-      </button>
-    );
-  },
-);
+        <path
+          d="M4 7h16M4 12h16M4 17h16"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        />
+      </svg>
+    </button>
+  );
+});
+
+/**
+ * Si la columna está contraída, para lo que se QUITA y no solo se oculta.
+ *
+ * El atributo `data-collapsed` del contenedor sigue siendo el camino por defecto:
+ * cada destino reacciona por CSS y el marco no tiene que pasarle el mismo booleano
+ * a diez enlaces. Esto es para el caso que el CSS no puede resolver bien — lo
+ * DECORATIVO, que contraído no debe quedarse ni en el árbol de accesibilidad.
+ *
+ * Es el mismo argumento por el que el marco monta UNA de las dos formas de la
+ * navegación en vez de esconder una con estilos: lo que se esconde con CSS sigue
+ * ahí para quien recorre el documento, y ningún test puede verlo — jsdom no aplica
+ * CSS.
+ */
+const Contraido = createContext(false);
 
 /** La flecha del botón de contraer. Decorativa: el nombre lo pone su `aria-label`. */
-function Chevron({ pointing }: { pointing: "left" | "right" }): React.ReactElement {
+function Chevron({
+  pointing,
+}: {
+  pointing: "left" | "right";
+}): React.ReactElement {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-5" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      className="size-5"
+      aria-hidden="true"
+    >
       <path
         d={pointing === "left" ? "M15 6l-6 6 6 6" : "M9 6l6 6-6 6"}
         strokeWidth="1.8"
@@ -79,8 +121,62 @@ export function sidebarItemClasses(): string {
     "hover:bg-surface-sunken",
     "data-[status=active]:bg-primary-soft data-[status=active]:text-primary",
     // Contraído, el texto sale del flujo con `sr-only` y solo queda el icono.
-    "group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:px-0",
+    // `relative` es de quién cuelga la insignia cuando se convierte en punto.
+    "group-data-[collapsed=true]:relative group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:px-0",
   );
+}
+
+/**
+ * El aspecto de una INSIGNIA de cuenta del lateral.
+ *
+ * Cuarta vez que el proyecto exporta el aspecto de una pieza desde donde vive
+ * —después de `buttonClasses`, `tabLinkClasses` y `sidebarItemClasses`— y aquí
+ * hay una razón más: lo que cambia con `collapsed` lo tiene que declarar quien
+ * SABE de `collapsed`. Estaba escrito dentro de `PendingBadge`, que vive en
+ * `features/parents/` y no sabe que existe una columna que se contrae; con el
+ * aspecto ahí, la siguiente insignia que alguien añada se vuelve a salir.
+ *
+ * CONTRAÍDA SE CONVIERTE EN UN PUNTO, y las dos mitades importan:
+ *
+ * - **El número se va.** En 71 px no cabe, y al ocupar sitio en la fila empujaba
+ *   al icono contra el borde contrario. Y el culpable no era el tamaño sino
+ *   `ml-auto`: un margen automático reparte el sobrante y GANA a
+ *   `justify-content`, así que la regla de centrar que ya estaba escrita no podía
+ *   cumplirse. Fuera del flujo no hay nada que empujar.
+ * - **El aviso se queda.** Un padre contrae la columna y la deja contraída; si la
+ *   señal se fuera con la cifra, contraer significaría dejar de enterarse de que
+ *   hay tres tareas por aprobar. El punto dice lo único que cabe decir ahí: hay
+ *   algo. Cuántos se ve al expandir.
+ *
+ * Y para quien no ve la pantalla no cambia nada: la cuenta va en un texto
+ * `sr-only` que se queda entero. Lo que se quita es el dibujo, no el dato.
+ */
+export function sidebarBadgeClasses(): string {
+  return cx(
+    "rounded-pill text-micro ml-auto inline-flex min-w-6 shrink-0 items-center justify-center bg-conflict-soft px-2 py-0.5 font-extrabold text-conflict",
+    // Fuera del flujo y posada en la esquina del enlace, que por eso se declara
+    // `relative` al contraerse en `sidebarItemClasses`.
+    "group-data-[collapsed=true]:absolute group-data-[collapsed=true]:right-2 group-data-[collapsed=true]:top-2",
+    // Un punto: sin cifra, sin relleno y con el tamaño de un punto.
+    "group-data-[collapsed=true]:size-2 group-data-[collapsed=true]:min-w-0 group-data-[collapsed=true]:bg-conflict group-data-[collapsed=true]:p-0",
+  );
+}
+
+/**
+ * La cifra de una insignia, que desaparece al contraer.
+ *
+ * Es el hueco visible; el texto accesible lo pone quien la usa, y se queda.
+ */
+export function SidebarBadgeCount({
+  children,
+}: {
+  children: ReactNode;
+}): React.ReactElement | null {
+  if (useContext(Contraido)) {
+    return null;
+  }
+
+  return <span aria-hidden="true">{children}</span>;
 }
 
 /**
@@ -90,8 +186,37 @@ export function sidebarItemClasses(): string {
  * propósito —lo que nombra al destino es su texto—, así que quitarlo dejaría los
  * cinco destinos sin nombre de golpe para quien usa un lector de pantalla.
  */
-export function SidebarLabel({ children }: { children: ReactNode }): React.ReactElement {
-  return <span className="group-data-[collapsed=true]:sr-only">{children}</span>;
+export function SidebarLabel({
+  children,
+}: {
+  children: ReactNode;
+}): React.ReactElement {
+  return (
+    <span className="group-data-[collapsed=true]:sr-only">{children}</span>
+  );
+}
+
+/**
+ * El glifo del final de una fila, que al contraer se va DEL TODO.
+ *
+ * Hermano de `SidebarLabel` y con la regla contraria, que es justo lo que hay que
+ * declarar en una pieza en vez de dejarlo a que cada marco se acuerde: el nombre
+ * se oculta a la VISTA y se conserva para quien no mira, porque nombra el
+ * destino; este glifo es decorativo y no nombra nada, así que se quita entero.
+ *
+ * Y hace falta: en la fila del perfil comparte 47 px con el avatar, uno pegado al
+ * otro. En ancho aclara a dónde lleva la fila; contraído solo compite con la cara.
+ */
+export function SidebarTrailing({
+  children,
+}: {
+  children: ReactNode;
+}): React.ReactElement | null {
+  if (useContext(Contraido)) {
+    return null;
+  }
+
+  return <span className="flex shrink-0">{children}</span>;
 }
 
 /**
@@ -130,54 +255,71 @@ export function Sidebar({
       botón— queda fuera del `<nav>`, así que su texto no se enteraba de que
       había que ocultarlo y desbordaba la columna contraída.
     */
-    <div
-      data-collapsed={collapsed ? "true" : "false"}
-      className="group flex min-h-0 flex-1 flex-col"
-    >
-      <nav
-        aria-label={messages.nav.drawerLabel}
-        className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3"
+    <Contraido.Provider value={collapsed}>
+      <div
+        data-collapsed={collapsed ? "true" : "false"}
+        className="group flex min-h-0 flex-1 flex-col"
       >
-        {children}
-      </nav>
+        {onToggleCollapse !== undefined && (
+          /*
+          LA CABECERA DEL LATERAL, y el control de contraer vive aquí.
 
-      <div className="flex flex-col gap-2 border-t border-border p-3">
-        {/*
+          Estaba al final del pie, debajo del perfil: el último sitio donde se
+          busca el control que gobierna la columna. Arriba es donde se busca, y
+          donde lo ponen las bibliotecas de las que este marco copia su forma.
+
+          Va DENTRO del lateral y no en la cabecera de la aplicación, que es la
+          otra lectura posible. La razón es la misma que ya se aplicó al botón de
+          menú: un control que gobierna la columna solo existe cuando la columna
+          está delante, y la cabecera de la aplicación se dibuja también en
+          estrecho, donde no hay nada que contraer. Allí habría que esconderlo por
+          ancho — y esconder por ancho es lo que este marco no hace.
+
+          Sin título ni logo: el logo está en la cabecera de la aplicación, justo
+          encima, y repetirlo sería un segundo sitio para el mismo hecho.
+
+          SOLO la flecha, sin texto visible: «Expandir» no cabe en el ancho de un
+          icono, y un control cuya única razón de ser es una dirección no necesita
+          palabra. El nombre NO se pierde —va en `aria-label`— y cambia con el
+          estado, porque lo que el botón hace cambia.
+        */
+          <div className="flex items-center justify-end border-b border-border p-3 group-data-[collapsed=true]:justify-center">
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              aria-expanded={!collapsed}
+              aria-label={
+                collapsed
+                  ? messages.nav.expandSidebar
+                  : messages.nav.collapseSidebar
+              }
+              className="tap-target rounded-control flex items-center justify-center border-transparent bg-transparent px-2 text-ink-muted hover:bg-surface-sunken"
+            >
+              <Chevron pointing={collapsed ? "right" : "left"} />
+            </button>
+          </div>
+        )}
+
+        <nav
+          aria-label={messages.nav.drawerLabel}
+          className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-3"
+        >
+          {children}
+        </nav>
+
+        <div className="flex flex-col gap-2 border-t border-border p-3">
+          {/*
           La ayuda va aquí y no entre los destinos: la lista de arriba enumera
           dónde se HACEN cosas, y la ayuda responde cómo funciona esto. El borde
           que la separa es el mismo que separa el perfil, y es lo que dibujan las
           maquetas.
         */}
-        {help}
+          {help}
 
-        {profile}
-
-        {onToggleCollapse !== undefined && (
-          /*
-            SOLO la flecha, sin texto visible.
-            
-            Con texto, la etiqueta desbordaba la columna contraída: es el ancho
-            de un icono, y «Expandir» no cabe. Ocultarlo con `sr-only` habría
-            servido, pero un control cuya única razón de ser es una dirección no
-            necesita palabra — la flecha ya dice a dónde va, y así el pie mide lo
-            mismo en los dos modos.
-
-            El nombre NO se pierde: va en `aria-label`, y cambia con el estado
-            porque lo que el botón hace cambia. Es la misma regla que obliga a
-            `Button` a exigir nombre cuando es `iconOnly`.
-          */
-          <button
-            type="button"
-            onClick={onToggleCollapse}
-            aria-expanded={!collapsed}
-            aria-label={collapsed ? messages.nav.expandSidebar : messages.nav.collapseSidebar}
-            className="tap-target rounded-control flex items-center justify-center self-end border-transparent bg-transparent px-2 text-ink-muted group-data-[collapsed=true]:self-center hover:bg-surface-sunken"
-          >
-            <Chevron pointing={collapsed ? "right" : "left"} />
-          </button>
-        )}
+          {profile}
+        </div>
       </div>
-    </div>
+    </Contraido.Provider>
   );
 }
 

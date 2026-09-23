@@ -1054,6 +1054,29 @@ export const messages = {
     countOne: "canje",
     countMany: "canjes",
     myRedemptionsEmpty: "No has pedido ningún premio todavía.",
+    /**
+     * LO QUE UNA TABLA DE ESTADOS NO DICE, y un niño no puede deducir.
+     *
+     * Los dos hechos son los que la API implementa con más cuidado: el descuento
+     * ocurre al APROBAR, y el precio se congela al pedir. El producto ya se los
+     * cuenta a quien reparte, en las dos altas del padre; contárselo solo a él
+     * deja suponiendo a quien pide, que es donde se lleva el chasco.
+     */
+    myRedemptionsExplainTitle: "Las monedas se van cuando lo aprueban, no cuando lo pides.",
+    myRedemptionsExplainBody:
+      "Y si dicen que no, no pierdes nada: el precio se guarda tal como estaba el día que lo pediste.",
+    /**
+     * Los rótulos del resumen por estado.
+     *
+     * Dicen que es de ESTA PÁGINA porque eso es lo que cuentan: las filas que la
+     * pantalla tiene delante. El listado pagina por fila, así que su total cuenta
+     * canjes y no estados — un resumen que dijera «3 aprobados» sobre un total
+     * mayor estaría afirmando algo que no ha contado.
+     */
+    summaryPending: "esperando",
+    summaryApproved: "aprobados",
+    summaryRejected: "rechazados",
+    summaryScope: "En esta página",
     myRedemptions: "Ver mis canjes",
     request: "Pedirlo",
     requesting: "Pidiendo…",

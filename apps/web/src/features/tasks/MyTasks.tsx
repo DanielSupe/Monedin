@@ -3,13 +3,31 @@ import { useState } from "react";
 import * as api from "../../api/tasks.js";
 import { messages } from "../../lib/messages.js";
 import { contar } from "../../lib/plural.js";
-import { Alert, Badge, Button, Card, Coins, EmptyState, Skeleton } from "../../ui/index.js";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Coins,
+  EmptyState,
+  Skeleton,
+} from "../../ui/index.js";
 import type { BadgeTone } from "../../ui/index.js";
 import { ImageUploadField } from "../uploads/ImageUploadField.js";
 import { avanceDeTareas, porEtapa, type Etapa } from "../children/home-data.js";
-import { ProgressRing, HeroPanel, Mascota, IconTile } from "../../ui/index.js";
+import {
+  ProgressRing,
+  HeroPanel,
+  Mascota,
+  IconTile,
+  SplitLayout,
+} from "../../ui/index.js";
 import { fechaLarga } from "../../lib/dates.js";
-import { describeTasksError, useCompleteTask, useOwnTasks } from "./use-tasks.js";
+import {
+  describeTasksError,
+  useCompleteTask,
+  useOwnTasks,
+} from "./use-tasks.js";
 
 /**
  * Las tareas de un niño.
@@ -30,14 +48,17 @@ export function MyTasks(): React.ReactElement {
   }
 
   const tareas = data?.items ?? [];
-  const pendientes = tareas.filter((tarea) => tarea.status === "PENDING").length;
+  const pendientes = tareas.filter(
+    (tarea) => tarea.status === "PENDING",
+  ).length;
   const grupos = porEtapa(tareas);
-  const avance = avanceDeTareas(tareas);
 
   return (
     <section className="flex flex-col gap-5">
       <div className="flex flex-wrap items-baseline gap-3">
-        <h2 className="text-display font-extrabold">{messages.tasks.myTasksTitle}</h2>
+        <h2 className="text-display font-extrabold">
+          {messages.tasks.myTasksTitle}
+        </h2>
 
         {/*
           Se cuentan las PENDIENTES, no las tareas.
@@ -60,32 +81,34 @@ export function MyTasks(): React.ReactElement {
       </div>
 
       {/*
-        Cuánto lleva, sin contar las filas. Y sin la palabra «hoy»: una tarea no
-        tiene concepto de jornada, así que decirlo sería enseñar como dato algo
-        que el modelo no sabe. Ver `design/ui/datos-derivados.md`.
-      */}
-      {tareas.length > 0 && (
-        <HeroPanel
-          mascot={<Mascota pose={pendientes === 0 ? "celebra" : "corre"} size="medium" />}
-          aside={<ProgressRing done={avance.done} total={avance.total} className="size-24" />}
-        >
-          {/*
-            UNA frase, y la que la cabecera no dice. El título ya está en el
-            `h2` y la cuenta de pendientes justo al lado: repetir cualquiera de
-            las dos aquí sería decir lo mismo dos veces en la misma pantalla.
-          */}
-          <p className="text-lead font-extrabold text-ink-inverted">
-            {pendientes === 0
-              ? messages.children.homeAllDone
-              : messages.children.homeMarkExplains}
-          </p>
-        </HeroPanel>
-      )}
+        LA BANDA: la lista a la izquierda y, a la derecha, cuánto lleva y cómo
+        funciona el ciclo. Es el reparto de su maqueta.
 
-      {tareas.length === 0 ? (
-        <EmptyState glyph="🧹" title={messages.tasks.myTasksEmpty} />
-      ) : (
-        /*
+        El orden del DOCUMENTO no cambia con esto: el `aside` va después, así que
+        quien recorre la pantalla con teclado sigue encontrando primero lo que
+        tiene por hacer y después lo que lo explica — que es lo que ya decía la
+        cabecera de `ComoFunciona` y sigue valiendo.
+      */}
+      <SplitLayout
+        aside={
+          <>
+            {/*
+              Cuánto lleva, sin contar las filas. Y sin la palabra «hoy»: una tarea
+              no tiene concepto de jornada, así que decirlo sería enseñar como dato
+              algo que el modelo no sabe. Ver `design/ui/datos-derivados.md`.
+            */}
+            {tareas.length > 0 && (
+              <AvanceDelCiclo tareas={tareas} pendientes={pendientes} />
+            )}
+
+            <ComoFunciona />
+          </>
+        }
+      >
+        {tareas.length === 0 ? (
+          <EmptyState glyph="🧹" title={messages.tasks.myTasksEmpty} />
+        ) : (
+          /*
           Agrupadas por ETAPA, que es lo que decide qué se puede hacer con cada
           una. Antes eran una columna con una insignia por fila, así que la
           máquina de estados que el producto protege con transiciones
@@ -93,25 +116,67 @@ export function MyTasks(): React.ReactElement {
 
           Un grupo vacío no llega hasta aquí: `porEtapa` no lo devuelve.
         */
-        <div className="flex flex-col gap-6">
-          {grupos.map((grupo) => (
-            <section key={grupo.etapa} className="flex flex-col gap-3">
-              <h3 className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
-                {TITULO_GRUPO[grupo.etapa]} · {grupo.tasks.length}
-              </h3>
+          <div className="flex flex-col gap-6">
+            {grupos.map((grupo) => (
+              <section key={grupo.etapa} className="flex flex-col gap-3">
+                <h3 className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+                  {TITULO_GRUPO[grupo.etapa]} · {grupo.tasks.length}
+                </h3>
 
-              <ul className="flex list-none flex-col gap-3 p-0">
-                {grupo.tasks.map((tarea) => (
-                  <MyTaskRow key={tarea.id} task={tarea} />
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-      )}
-
-      <ComoFunciona />
+                <ul className="flex list-none flex-col gap-3 p-0">
+                  {grupo.tasks.map((tarea) => (
+                    <MyTaskRow key={tarea.id} task={tarea} />
+                  ))}
+                </ul>
+              </section>
+            ))}
+          </div>
+        )}
+      </SplitLayout>
     </section>
+  );
+}
+
+/**
+ * Cuánto lleva del ciclo, en la columna de apoyo.
+ *
+ * Se extrae porque el cuerpo de la pantalla ya no lo puede llevar en línea: va
+ * dentro del hueco `aside`, y un bloque de veinte líneas ahí dentro esconde el
+ * reparto, que es lo único que esa llamada tiene que dejar ver.
+ */
+function AvanceDelCiclo({
+  tareas,
+  pendientes,
+}: {
+  tareas: OwnTask[];
+  pendientes: number;
+}): React.ReactElement {
+  const avance = avanceDeTareas(tareas);
+
+  return (
+    <HeroPanel
+      mascot={
+        <Mascota pose={pendientes === 0 ? "celebra" : "corre"} size="medium" />
+      }
+      aside={
+        <ProgressRing
+          done={avance.done}
+          total={avance.total}
+          className="size-24"
+        />
+      }
+    >
+      {/*
+            UNA frase, y la que la cabecera no dice. El título ya está en el
+            `h2` y la cuenta de pendientes justo al lado: repetir cualquiera de
+            las dos aquí sería decir lo mismo dos veces en la misma pantalla.
+          */}
+      <p className="text-lead font-extrabold text-ink-inverted">
+        {pendientes === 0
+          ? messages.children.homeAllDone
+          : messages.children.homeMarkExplains}
+      </p>
+    </HeroPanel>
   );
 }
 
@@ -248,7 +313,9 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
                 label={messages.tasks.addEvidence}
               />
               {evidencia !== undefined && (
-                <p className="text-small text-done">{messages.tasks.evidenceReady}</p>
+                <p className="text-small text-done">
+                  {messages.tasks.evidenceReady}
+                </p>
               )}
 
               <Button
@@ -258,7 +325,9 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
                 onClick={() =>
                   complete.mutate({
                     taskId: task.id,
-                    ...(evidencia === undefined ? {} : { evidenceUploadKey: evidencia }),
+                    ...(evidencia === undefined
+                      ? {}
+                      : { evidenceUploadKey: evidencia }),
                   })
                 }
               >
@@ -277,11 +346,15 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
 
           {/* Marcarla no paga: lo que sigue es que su padre la revise. */}
           {task.status === "COMPLETED" && (
-            <p className="text-small text-ink-muted">{messages.tasks.waitingReview}</p>
+            <p className="text-small text-ink-muted">
+              {messages.tasks.waitingReview}
+            </p>
           )}
 
           {task.status === "APPROVED" && (
-            <p className="text-small font-semibold text-done">{messages.tasks.earned}</p>
+            <p className="text-small font-semibold text-done">
+              {messages.tasks.earned}
+            </p>
           )}
 
           {complete.error !== null && (
@@ -294,17 +367,22 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
 }
 
 /** El tinte de la tesela sigue a la etapa, con los tonos del sistema. */
-const TONO_TESELA: Record<OwnTask["status"], "action" | "waiting" | "saving"> = {
-  PENDING: "action",
-  COMPLETED: "waiting",
-  APPROVED: "saving",
-};
+const TONO_TESELA: Record<OwnTask["status"], "action" | "waiting" | "saving"> =
+  {
+    PENDING: "action",
+    COMPLETED: "waiting",
+    APPROVED: "saving",
+  };
 
 /**
  * El icono de una etapa. Decorativo: lo que dice en qué punto está la tarea es
  * su insignia, que se queda.
  */
-function IconoEtapa({ status }: { status: OwnTask["status"] }): React.ReactElement {
+function IconoEtapa({
+  status,
+}: {
+  status: OwnTask["status"];
+}): React.ReactElement {
   return (
     <svg
       viewBox="0 0 24 24"

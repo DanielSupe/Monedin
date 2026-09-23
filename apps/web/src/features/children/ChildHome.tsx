@@ -16,6 +16,7 @@ import {
   Mascota,
   ProgressRing,
   Skeleton,
+  SplitLayout,
 } from "../../ui/index.js";
 import { LeaveProfile } from "../auth/LeaveProfile.js";
 import { useCompleteTask, useOwnTasks } from "../tasks/use-tasks.js";
@@ -63,7 +64,12 @@ import {
 
 /** Los cuatro destinos, con su icono. Los mismos que el cajón lateral. */
 const DESTINOS = [
-  { to: "/me/tasks", Icono: IconTasks, texto: messages.tasks.myTasksTitle, ancla: "child-tasks" },
+  {
+    to: "/me/tasks",
+    Icono: IconTasks,
+    texto: messages.tasks.myTasksTitle,
+    ancla: "child-tasks",
+  },
   {
     to: "/me/rewards",
     Icono: IconRewards,
@@ -84,7 +90,13 @@ const DESTINOS = [
   },
 ] as const;
 
-export function ChildHome({ name, coins }: { name: string; coins: number }): React.ReactElement {
+export function ChildHome({
+  name,
+  coins,
+}: {
+  name: string;
+  coins: number;
+}): React.ReactElement {
   const actor = useSession().session?.actor;
   const tareas = useOwnTasks();
   const premios = useOwnRewards();
@@ -109,7 +121,12 @@ export function ChildHome({ name, coins }: { name: string; coins: number }): Rea
   ].slice(0, 5);
 
   return (
-    <section className="mx-auto flex w-full max-w-reading flex-col gap-5">
+    /*
+      SIN TOPE DE ANCHO DE LECTURA. Eran 640 px, razonables para una columna y una
+      jaula para dos: dejaban la mitad del monitor vacía y las dos columnas a 300.
+      El tope lo pone el marco, como en las otras cuatro pantallas de esta banda.
+    */
+    <section className="flex w-full flex-col gap-5">
       {/* Igual que en el panel del padre: decide la pantalla, no el recorrido. */}
       {actor?.tutorialSeen === false && <Tutorial steps={CHILD_STEPS} />}
 
@@ -123,12 +140,16 @@ export function ChildHome({ name, coins }: { name: string; coins: number }): Rea
               no tiene jornada— : sitúa a quien mira, que en una tablet que se usa
               a ratos no es poco.
             */}
-            <p className="text-small text-ink-muted first-letter:uppercase">{hoyConDia()}</p>
+            <p className="text-small text-ink-muted first-letter:uppercase">
+              {hoyConDia()}
+            </p>
             <p className="text-body text-ink-muted">
               {messages.children.homeGreeting} {name}
             </p>
             <Coins amount={coins} size="hero" />
-            <p className="text-small text-ink-muted">{messages.children.homeBalanceLabel}</p>
+            <p className="text-small text-ink-muted">
+              {messages.children.homeBalanceLabel}
+            </p>
 
             {/*
               Desde el SALDO y no desde un quinto destino en la barra: tocar el
@@ -154,7 +175,11 @@ export function ChildHome({ name, coins }: { name: string; coins: number }): Rea
             mascot={<Mascota pose="saluda" size="large" />}
             aside={
               avance.total > 0 ? (
-                <ProgressRing done={avance.done} total={avance.total} className="size-28" />
+                <ProgressRing
+                  done={avance.done}
+                  total={avance.total}
+                  className="size-28"
+                />
               ) : undefined
             }
           >
@@ -175,6 +200,44 @@ export function ChildHome({ name, coins }: { name: string; coins: number }): Rea
       </div>
 
       {/*
+        LA BANDA: lo que hay que hacer a la izquierda, y a la derecha para qué
+        sirve. Es el reparto de su maqueta, y el mismo que usan las otras cuatro
+        pantallas de este change.
+
+        El saldo y Monedín se quedan ARRIBA y a lo ancho, fuera de la banda: el
+        saldo es el elemento más grande del inicio del niño por requisito vigente,
+        y meterlo en una columna lo encogería a la mitad.
+      */}
+      <SplitLayout
+        aside={
+          <>
+            {/*
+              La otra mitad del ciclo: para qué sirven las monedas.
+
+              Los dos casos sin meta se distinguen a propósito. Que le alcancen
+              TODOS se celebra; no tener NINGÚN premio ofrecido no se dibuja,
+              porque son situaciones contrarias y tratarlas igual diría que no hay
+              nada que conseguir cuando lo que pasa es lo opuesto.
+            */}
+            {!premios.isPending && (
+              <GoalPanel rewards={ofrecidos} balance={coins} />
+            )}
+
+            {/*
+              LAS ÚLTIMAS MONEDAS. La tarjeta de arriba dice CUÁNTAS tiene y ofrece
+              ir a ver de dónde salieron; esto enseña las tres últimas sin ir a
+              ninguna parte, que es lo que cierra el ciclo en la pantalla donde
+              empieza. La maqueta lo pone así, y en esta columna.
+            */}
+            <UltimasMonedas />
+
+            <div className="flex justify-center">
+              <LeaveProfile />
+            </div>
+          </>
+        }
+      >
+        {/*
         LO QUE PASA CON SUS TAREAS, no solo lo que le queda por hacer.
 
         Aquí decía «solo las pendientes: una lista con lo aprobado dentro contesta
@@ -189,38 +252,30 @@ export function ChildHome({ name, coins }: { name: string; coins: number }): Rea
         estado trae además lo suyo —un botón, una espera o unas monedas—, que es
         lo que impide que la mezcla se lea como una lista plana.
       */}
-      {tareas.isPending ? (
-        <Skeleton lines={3} />
-      ) : (
-        enPortada.length > 0 && (
-          <section className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-baseline gap-3">
-              <h2 className="text-lead font-extrabold">{messages.children.homeTasksTitle}</h2>
-              <Link to="/me/tasks" className="text-small ml-auto font-bold">
-                {messages.children.homeTasksAll}
-              </Link>
-            </div>
+        {tareas.isPending ? (
+          <Skeleton lines={3} />
+        ) : (
+          enPortada.length > 0 && (
+            <section className="flex flex-col gap-3">
+              <div className="flex flex-wrap items-baseline gap-3">
+                <h2 className="text-lead font-extrabold">
+                  {messages.children.homeTasksTitle}
+                </h2>
+                <Link to="/me/tasks" className="text-small ml-auto font-bold">
+                  {messages.children.homeTasksAll}
+                </Link>
+              </div>
 
-            <ul className="flex list-none flex-col gap-2 p-0">
-              {enPortada.map((tarea) => (
-                <FilaDelInicio key={tarea.id} task={tarea} />
-              ))}
-            </ul>
-          </section>
-        )
-      )}
+              <ul className="flex list-none flex-col gap-2 p-0">
+                {enPortada.map((tarea) => (
+                  <FilaDelInicio key={tarea.id} task={tarea} />
+                ))}
+              </ul>
+            </section>
+          )
+        )}
 
-      {/*
-        La otra mitad del ciclo: para qué sirven las monedas.
-
-        Los dos casos sin meta se distinguen a propósito. Que le alcancen TODOS se
-        celebra; no tener NINGÚN premio ofrecido no se dibuja, porque son
-        situaciones contrarias y tratarlas igual diría que no hay nada que
-        conseguir cuando lo que pasa es lo opuesto.
-      */}
-      {!premios.isPending && <GoalPanel rewards={ofrecidos} balance={coins} />}
-
-      {/*
+        {/*
         Tarjetas y no una lista de enlaces subrayados: quien usa esta pantalla
         tiene entre seis y once años y la abre en una tablet compartida, donde
         un enlace de una línea es un objetivo de la altura de una letra.
@@ -228,33 +283,22 @@ export function ChildHome({ name, coins }: { name: string; coins: number }): Rea
         Cada tarjeta es UN solo elemento interactivo, como las teselas de la
         rejilla de perfiles.
       */}
-      {/*
-        LAS ÚLTIMAS MONEDAS, en el inicio. La tarjeta de arriba dice CUÁNTAS
-        tiene y ofrece ir a ver de dónde salieron; esto enseña las tres últimas
-        sin ir a ninguna parte, que es lo que cierra el ciclo en la pantalla donde
-        empieza. La maqueta lo pone así.
-      */}
-      <UltimasMonedas />
-
-      <ul className="grid list-none grid-cols-2 gap-3 p-0">
-        {DESTINOS.map((destino) => (
-          <li key={destino.to} data-tutorial={destino.ancla}>
-            <Link
-              to={destino.to}
-              className="rounded-card flex h-full flex-col items-center justify-center gap-2 border border-border bg-surface-raised p-4 text-center text-body font-semibold text-ink no-underline shadow-card transition duration-normal hover:bg-surface-sunken motion-safe:hover:scale-105"
-            >
-              <IconTile tone="waiting">
-                <destino.Icono />
-              </IconTile>
-              {destino.texto}
-            </Link>
-          </li>
-        ))}
-      </ul>
-
-      <div className="flex justify-center">
-        <LeaveProfile />
-      </div>
+        <ul className="grid list-none grid-cols-2 gap-3 p-0">
+          {DESTINOS.map((destino) => (
+            <li key={destino.to} data-tutorial={destino.ancla}>
+              <Link
+                to={destino.to}
+                className="rounded-card flex h-full flex-col items-center justify-center gap-2 border border-border bg-surface-raised p-4 text-center text-body font-semibold text-ink no-underline shadow-card transition duration-normal hover:bg-surface-sunken motion-safe:hover:scale-105"
+              >
+                <IconTile tone="waiting">
+                  <destino.Icono />
+                </IconTile>
+                {destino.texto}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </SplitLayout>
     </section>
   );
 }
@@ -297,17 +341,23 @@ function FilaDelInicio({ task }: { task: OwnTask }): React.ReactElement {
         {/* Lo que la tarea pide, cuando lo trae: «tender la cama» y «antes de ir
             al colegio» no son la misma instrucción. La maqueta la enseña aquí. */}
         {task.description !== null && task.status === "PENDING" && (
-          <span className="text-small truncate text-ink-muted">{task.description}</span>
+          <span className="text-small truncate text-ink-muted">
+            {task.description}
+          </span>
         )}
 
         {task.status === "COMPLETED" && (
-          <span className="text-small text-ink-muted">{messages.tasks.waitingReview}</span>
+          <span className="text-small text-ink-muted">
+            {messages.tasks.waitingReview}
+          </span>
         )}
         {/* Tono «hecho» y no el de la moneda, que es lo que usa la misma frase en
             «Tareas». La reserva del ámbar sigue en pie —la cazó su test— y dos
             pantallas que dicen lo mismo lo dicen igual. */}
         {task.status === "APPROVED" && (
-          <span className="text-small font-bold text-done">{messages.tasks.earned}</span>
+          <span className="text-small font-bold text-done">
+            {messages.tasks.earned}
+          </span>
         )}
       </span>
 
@@ -354,8 +404,14 @@ function UltimasMonedas(): React.ReactElement | null {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex flex-wrap items-baseline gap-3">
-        <h2 className="text-lead font-extrabold">{messages.children.homeCoinsTitle}</h2>
-        <Link to="/me/coins" search={{ page: 1 }} className="text-small ml-auto font-bold">
+        <h2 className="text-lead font-extrabold">
+          {messages.children.homeCoinsTitle}
+        </h2>
+        <Link
+          to="/me/coins"
+          search={{ page: 1 }}
+          className="text-small ml-auto font-bold"
+        >
           {messages.children.homeCoinsAll}
         </Link>
       </div>

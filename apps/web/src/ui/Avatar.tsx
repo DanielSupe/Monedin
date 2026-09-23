@@ -22,12 +22,18 @@ const SHAPES: Record<AvatarShape, string> = {
 /**
  * Las medidas del sistema. Ninguna pantalla pide píxeles.
  *
- * `xlarge` la trajo `add-entry-frame` para la rejilla de perfiles y subió a
- * 9 rem en `polish-profile-tiles`. Es la rejilla, que se toca
- * con el dedo de un niño de seis años. Es la respuesta que el design de
- * `redesign-profile-grid` dejó escrita: si a `large` la tesela queda pequeña,
- * la talla se le añade a la pieza y NO se escribe una medida suelta en la
- * pantalla que la usa.
+ * `xlarge` la trajo `add-entry-frame` para la rejilla de perfiles, subió a 9 rem
+ * en `polish-profile-tiles` y baja a 7 en `widen-profile-tiles`. La parte que no
+ * cambia es POR DÓNDE se toca: si a una pantalla la talla le queda pequeña o
+ * grande, se le añade o se le corrige a la pieza y NO se escribe una medida
+ * suelta donde se usa. Es lo que dejó escrito el design de `redesign-profile-grid`.
+ *
+ * Lo que cambia es el número, y conviene saber por qué subió: se buscaba una cara
+ * grande «para el dedo de un niño de seis años». Pero el objetivo de toque es la
+ * TESELA entera, no el círculo, y a 9 rem la cara medía exactamente lo que su
+ * tesela — llegaba al borde, lo pisaba por dentro y sacaba fuera la corona del
+ * adulto. Agrandar el dibujo hasta el borde no compraba nada de lo que buscaba y
+ * costaba el aire de la tarjeta.
  */
 /*
  * Sin tamaño de texto: desde que el avatar es un dibujo y no un glifo, lo que
@@ -38,7 +44,7 @@ const SIZES: Record<AvatarSize, string> = {
   small: "size-8",
   medium: "size-12",
   large: "size-24",
-  xlarge: "size-36",
+  xlarge: "size-28",
 };
 
 export interface AvatarProps {

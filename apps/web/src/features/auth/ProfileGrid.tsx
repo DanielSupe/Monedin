@@ -55,9 +55,16 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
         </p>
       </HeroPanel>
 
+      {/*
+        Los `li` son CONTENEDORES FLEXIBLES, y no es adorno: es lo que hace que
+        la tarjeta de dentro llene la altura de su fila. Con eso la tesela puede
+        declarar un MÍNIMO en vez de un alto fijo, y las de una misma fila se
+        igualan solas — crezca lo que crezca la más alta. Ver la decisión 3 del
+        design de `widen-profile-tiles`.
+      */}
       <ul className="flex list-none flex-wrap justify-center gap-6 p-0">
         {profiles.map((profile) => (
-          <li key={profile.id}>
+          <li key={profile.id} className="flex">
             {profile.locked ? (
               <LockedTile name={profile.name} avatar={profile.avatar} />
             ) : (
@@ -79,13 +86,15 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
                   {profile.familyRole === "PARENT" && <CrownBadge />}
                   {manage && <PencilBadge />}
                 </span>
-                <span className="text-title font-semibold">{profile.name}</span>
+                {/* El relleno lateral es del NOMBRE y no de la tarjeta: puesto en
+                    la tarjeta se lo quitaría al círculo, que es lo que no sobra. */}
+                <span className="text-title px-2 font-semibold">{profile.name}</span>
               </Link>
             )}
           </li>
         ))}
 
-        <li>
+        <li className="flex">
           {/*
             «Agregar perfil» es una tesela más y no un enlace de texto debajo:
             crear el primer hijo es lo que hace que el producto haga algo, y
@@ -102,15 +111,15 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
           >
             <span
               aria-hidden="true"
-              // `size-36` es la misma medida que `Avatar size="xlarge"`: son la misma
+              // `size-28` es la misma medida que `Avatar size="xlarge"`: son la misma
               // fila, y una tesela más baja que las demás se lee como un error.
               // Un círculo, como los avatares que acompaña: la fila es de caras
               // redondas y un cuadrado en medio rompe la lectura.
-              className="rounded-pill text-hero flex size-36 items-center justify-center bg-surface-sunken text-primary leading-none"
+              className="rounded-pill text-hero flex size-28 items-center justify-center bg-surface-sunken text-primary leading-none"
             >
               +
             </span>
-            <span className="text-lead font-semibold">{messages.auth.createProfile}</span>
+            <span className="text-lead px-2 font-semibold">{messages.auth.createProfile}</span>
           </Link>
         </li>
       </ul>
@@ -129,13 +138,27 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
 /*
  * La caja de una tesela. Misma forma para un perfil y para «agregar».
  *
- * `w-36` y sin relleno lateral: la tesela mide EXACTAMENTE lo que el avatar.
- *
- * Se midió mal la primera vez. Con `w-40` hacían falta 344 px para dos teselas
- * y su hueco, y en una pantalla de 390 hay 343 en cuanto aparece la barra de
- * desplazamiento — que aparece justo cuando hay perfiles de sobra—. Fallaba por
+ * EL TELÉFONO FIJA EL MÍNIMO Y NADA MÁS. Con `w-40` hacían falta 344 px para dos
+ * teselas y su hueco, y en una pantalla de 390 hay 343 en cuanto aparece la barra
+ * de desplazamiento — que aparece justo cuando hay perfiles de sobra—. Fallaba por
  * UN píxel, y al caer a una columna la página se alargaba y la barra se quedaba:
- * un bucle. Ahora hacen falta 312, con 31 de holgura.
+ * un bucle. Con `w-36` hacen falta 312, con 31 de holgura.
+ *
+ * Ese análisis vale entero, y lo que no valía es aplicarle ese techo a un monitor:
+ * a partir de `sm` no hay ninguna razón para quedarse en 144, así que la tesela
+ * sube a 176 y se acerca a los 186 de su maqueta. Los 186 exactos no, porque son
+ * un valor arbitrario y un test los prohíbe — la escala existe para que dos
+ * pantallas no elijan dos números parecidos.
+ *
+ * DECÍA que la tesela mide exactamente lo que el avatar, y era el defecto: la cara
+ * llegaba al borde, lo pisaba por dentro y sacaba fuera la corona del adulto. Ahora
+ * la cara son 112 y la tesela nunca baja de 144.
+ *
+ * Y el alto es un MÍNIMO, no una medida. Fijo hacía dos cosas mal: con la cara más
+ * pequeña sobraba hueco abajo, y se quedaba corto en la peor combinación que el
+ * producto produce —un nombre en dos renglones MÁS la insignia de bloqueado—. Con
+ * el mínimo, las teselas de una fila se igualan entre ellas y crecen solo lo que
+ * pida la más alta.
  *
  * El crecimiento va bajo `motion-safe`, y el realce de fondo NO. Bajo
  * movimiento reducido el sistema pone las duraciones a 1 ms, y eso convierte
@@ -160,7 +183,7 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
  */
 function tileClasses(tono: "brand" | "primary" | "muted"): string {
   return cx(
-    "rounded-card flex h-60 w-36 flex-col items-center justify-start gap-2 border-2 bg-surface-raised px-0 py-3 text-center no-underline text-ink shadow-card transition duration-normal",
+    "rounded-card flex min-h-52 w-36 flex-col items-center justify-start gap-3 border-2 bg-surface-raised px-0 py-5 text-center no-underline text-ink shadow-card transition duration-normal sm:w-44",
     tono === "brand" && "border-brand",
     tono === "primary" && "border-primary",
     tono === "muted" && "border-border",
@@ -186,7 +209,7 @@ function LockedTile({
   return (
     <span className={cx(tileClasses("muted"), "opacity-70")}>
       <Avatar value={avatar} size="xlarge" />
-      <span className="text-title font-semibold">{name}</span>
+      <span className="text-title px-2 font-semibold">{name}</span>
       {/* Una INSIGNIA y no letra gris: es un estado, y el producto los dibuja
           así en todas partes. En gris se leía como parte del nombre. */}
       <Badge tone="conflict">{messages.auth.profileLocked}</Badge>

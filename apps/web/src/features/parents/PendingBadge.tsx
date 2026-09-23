@@ -1,3 +1,4 @@
+import { SidebarBadgeCount, sidebarBadgeClasses } from "../../app/Sidebar.js";
 import { messages } from "../../lib/messages.js";
 import { usePendingCounts } from "./use-parent-console.js";
 
@@ -17,6 +18,12 @@ import { usePendingCounts } from "./use-parent-console.js";
  * Y NO SE ANUNCIA COMO SI FUERA EL DESTINO. Lo que nombra el enlace es su texto;
  * la cifra se añade con su unidad —«3 por aprobar»— para que quien no ve la
  * pantalla no oiga «Tareas 3».
+ *
+ * EL ASPECTO NO ES SUYO, y esto se corrigió tarde. Estaba escrito aquí dentro, y
+ * este archivo no sabe que existe una columna que se contrae: contraída, la cifra
+ * se salía de los 71 px y su `ml-auto` empujaba al icono contra el borde. Ahora lo
+ * declara `sidebarBadgeClasses()`, que vive con el lateral. Lo que sigue siendo
+ * suyo es la CUENTA: de dónde sale, el «+» de «al menos», y no pintarse con cero.
  */
 export function PendingBadge({ kind }: { kind: "tasks" | "redemptions" }): React.ReactElement | null {
   const { tasksToApprove, redemptionsWaiting } = usePendingCounts();
@@ -30,8 +37,10 @@ export function PendingBadge({ kind }: { kind: "tasks" | "redemptions" }): React
   const cifra = `${String(cuenta.value)}${cuenta.exact ? "" : "+"}`;
 
   return (
-    <span className="rounded-pill text-micro ml-auto inline-flex min-w-6 shrink-0 items-center justify-center bg-conflict-soft px-2 py-0.5 font-extrabold text-conflict">
-      <span aria-hidden="true">{cifra}</span>
+    <span className={sidebarBadgeClasses()}>
+      <SidebarBadgeCount>{cifra}</SidebarBadgeCount>
+      {/* La cuenta entera se queda SIEMPRE, contraído o no: lo que el punto
+          sustituye es el dibujo, no el dato. */}
       <span className="sr-only">
         {cifra} {messages.nav.pendingSuffix}
       </span>

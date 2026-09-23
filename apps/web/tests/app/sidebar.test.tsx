@@ -429,3 +429,148 @@ describe("el lateral dice cuánto espera en cada bandeja", () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+
+/**
+ * CONTRAÍDA, LA COLUMNA MIDE 71 px Y TIENE QUE CABER TODO DENTRO.
+ *
+ * Lo reportó una captura: la cifra de la insignia se salía por el borde y, de
+ * paso, descentraba su icono — y el culpable no era el tamaño sino `ml-auto`, que
+ * reparte el sobrante y GANA a `justify-content`. La fila del perfil tenía el
+ * mismo problema con dos glifos, el avatar y el del destino, pegados en 47 px.
+ *
+ * Lo que se quita se quita DEL DOCUMENTO y no con CSS, y por eso estos tests
+ * pueden existir: jsdom no aplica hojas de estilo, así que un `hidden` de Tailwind
+ * le parecería visible. Es el mismo argumento por el que el marco monta UNA de las
+ * dos formas de la navegación en vez de esconder una.
+ */
+describe("contraída, la navegación cabe en su columna", () => {
+  const CON_COSAS_ESPERANDO = {
+    "/tasks": pagina([
+      {
+        batchId: "b1",
+        title: "Recoger la mesa",
+        description: null,
+        dueDate: null,
+        createdAt: "2026-09-01T10:00:00.000Z",
+        tasks: [
+          {
+            id: "t1",
+            title: "Recoger la mesa",
+            description: null,
+            coins: 20,
+            dueDate: null,
+            status: "COMPLETED" as const,
+            evidence: null,
+            createdAt: "2026-09-01T10:00:00.000Z",
+            updatedAt: "2026-09-01T10:00:00.000Z",
+            child: { id: "hijo-1", name: "Ana", avatar: "zorro" },
+            batchId: "b1",
+          },
+        ],
+      },
+    ]),
+    "/redemptions": pagina([]),
+  };
+
+  /** El destino de las tareas, con su insignia ya pintada. */
+  async function destinoDeTareas(): Promise<HTMLElement> {
+    const cajon = screen.getByRole("navigation", { name: messages.nav.drawerLabel });
+    const tareas = within(cajon).getByRole("link", {
+      name: new RegExp(messages.nav.parentTasks),
+    });
+
+    await waitFor(() => {
+      expect(within(tareas).getByText(`1 ${messages.nav.pendingSuffix}`)).toBeInTheDocument();
+    });
+
+    return tareas;
+  }
+
+  it("extendida, la cifra se ve junto a su destino", async () => {
+    conPantallaAncha();
+    await montarApp("/", comoPadre(), [], CON_COSAS_ESPERANDO);
+
+    expect(within(await destinoDeTareas()).getByText("1")).toBeInTheDocument();
+  });
+
+  /*
+   * Las DOS mitades, y hacen falta las dos: quitar la insignia entera pasaría la
+   * primera y fallaría la segunda, que es justo el atajo que había que impedir.
+   * El número se va; el aviso y el dato, no.
+   */
+  it("contraída, la cifra no se dibuja y la cuenta sigue anunciándose", async () => {
+    conPantallaAncha();
+    await montarApp("/", comoPadre(), [], CON_COSAS_ESPERANDO);
+
+    await destinoDeTareas();
+    await userEvent.click(screen.getByRole("button", { name: messages.nav.collapseSidebar }));
+
+    const tareas = await destinoDeTareas();
+
+    expect(within(tareas).queryByText("1")).toBeNull();
+    expect(within(tareas).getByText(`1 ${messages.nav.pendingSuffix}`)).toBeInTheDocument();
+  });
+
+  /*
+   * Se cuentan los DIBUJOS y no se busca uno por su nombre, porque el glifo del
+   * destino es decorativo y no tiene: extendida son dos —la cara y él—, contraída
+   * queda la cara sola.
+   */
+  it("contraída, la fila del perfil se queda con su avatar", async () => {
+    conPantallaAncha();
+    await montarApp("/", comoPadre());
+
+    /*
+     * DENTRO DE LA COLUMNA, no por el documento entero: el avatar de la cabecera
+     * lleva al mismo sitio y con el mismo nombre. Es la única excepción declarada
+     * a «ningún destino dos veces», y aquí hay que mirar el de la columna.
+     */
+    const columna = () => within(screen.getByRole("complementary"));
+
+    expect(
+      columna()
+        .getByRole("link", { name: new RegExp(messages.nav.parentAccount) })
+        .querySelectorAll("svg"),
+    ).toHaveLength(2);
+
+    await userEvent.click(screen.getByRole("button", { name: messages.nav.collapseSidebar }));
+
+    expect(
+      columna()
+        .getByRole("link", { name: new RegExp(messages.nav.parentAccount) })
+        .querySelectorAll("svg"),
+    ).toHaveLength(1);
+  });
+});
+
+/**
+ * EL CONTROL DE CONTRAER ENCABEZA LA COLUMNA.
+ *
+ * Estaba al final del pie, debajo del perfil: el último sitio donde se busca el
+ * control que gobierna la columna, y la última parada de quien la recorre con
+ * teclado. Se comprueba por el ORDEN DEL DOCUMENTO y no por una clase, que es lo
+ * que de verdad decide en qué orden se alcanzan las cosas.
+ */
+describe("el control de contraer encabeza la navegación", () => {
+  it("se alcanza antes que el primer destino", async () => {
+    conPantallaAncha();
+    await montarApp("/", comoPadre());
+
+    const contraer = screen.getByRole("button", { name: messages.nav.collapseSidebar });
+    const cajon = screen.getByRole("navigation", { name: messages.nav.drawerLabel });
+    const primero = within(cajon).getByRole("link", { name: messages.nav.parentHome });
+
+    // `DOCUMENT_POSITION_FOLLOWING`: el primer destino viene DESPUÉS del control.
+    expect(contraer.compareDocumentPosition(primero) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("en pantalla estrecha no existe", async () => {
+    await montarApp("/", comoPadre());
+    await abrirCajon();
+
+    expect(screen.queryByRole("button", { name: messages.nav.collapseSidebar })).toBeNull();
+    expect(screen.queryByRole("button", { name: messages.nav.expandSidebar })).toBeNull();
+  });
+});

@@ -8,7 +8,16 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import * as rewardsApi from "../../api/rewards.js";
 import { messages } from "../../lib/messages.js";
-import { Alert, Button, Card, EmptyState, Field, Input, buttonClasses } from "../../ui/index.js";
+import {
+  Alert,
+  Button,
+  Card,
+  EmptyState,
+  Field,
+  Input,
+  SplitLayout,
+  buttonClasses,
+} from "../../ui/index.js";
 import {
   ChildrenPicker,
   PICKER_MISSING,
@@ -39,7 +48,11 @@ import { describeRewardsError, useCreateReward } from "./use-rewards.js";
  *
  * NAVEGA ella misma al cancelar, como su gemela.
  */
-export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactElement {
+export function RewardForm({
+  onSaved,
+}: {
+  onSaved: () => void;
+}): React.ReactElement {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [imageUploadKey, setImageUploadKey] = useState<string | null>(null);
@@ -71,7 +84,9 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
     const validado = createRewardSchema.safeParse(entrada);
 
     if (!validado.success) {
-      setProblema(validado.error.issues[0]?.message ?? messages.rewards.invalidData);
+      setProblema(
+        validado.error.issues[0]?.message ?? messages.rewards.invalidData,
+      );
       return;
     }
 
@@ -84,7 +99,11 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
         glyph="🧒"
         title={messages.rewards.noChildren}
         action={
-          <Link to="/children" search={{ page: 1 }} className={buttonClasses("primary")}>
+          <Link
+            to="/children"
+            search={{ page: 1 }}
+            className={buttonClasses("primary")}
+          >
             {messages.children.addChild}
           </Link>
         }
@@ -98,29 +117,37 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
         <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
           {messages.rewards.newRewardLead}
         </span>
-        <h2 className="text-display font-extrabold">{messages.rewards.newRewardTitle}</h2>
+        <h2 className="text-display font-extrabold">
+          {messages.rewards.newRewardTitle}
+        </h2>
       </div>
 
-      <Card>
-        <form onSubmit={enviar} className="flex max-w-2xl flex-col gap-4">
-          <Field label={messages.rewards.rewardTitle}>
-            <Input
-              type="text"
-              maxLength={TITLE_MAX_LENGTH}
-              value={title}
-              onChange={(evento) => setTitle(evento.target.value)}
-            />
-          </Field>
+      {/*
+        LA BANDA: el formulario a la izquierda y, a la derecha, lo que pasa al
+        enviarlo. Es el reparto de su maqueta, y el `aside` sigue yendo DESPUÉS en
+        el documento — quien lo recorre con teclado llega primero al formulario.
+      */}
+      <SplitLayout aside={<ComoFunciona />}>
+        <Card>
+          <form onSubmit={enviar} className="flex flex-col gap-4">
+            <Field label={messages.rewards.rewardTitle}>
+              <Input
+                type="text"
+                maxLength={TITLE_MAX_LENGTH}
+                value={title}
+                onChange={(evento) => setTitle(evento.target.value)}
+              />
+            </Field>
 
-          <Field label={messages.rewards.description}>
-            <textarea
-              value={description}
-              onChange={(evento) => setDescription(evento.target.value)}
-              className="rounded-control text-body min-h-24 w-full border border-border-strong bg-surface-raised px-3 py-2 text-ink"
-            />
-          </Field>
+            <Field label={messages.rewards.description}>
+              <textarea
+                value={description}
+                onChange={(evento) => setDescription(evento.target.value)}
+                className="rounded-control text-body min-h-24 w-full border border-border-strong bg-surface-raised px-3 py-2 text-ink"
+              />
+            </Field>
 
-          {/*
+            {/*
             Los tres estados de la subida —elegir, subiendo, error— los pone
             `ImageUploadField`, que ya existía. Aquí solo se guarda la clave
             hasta que se publica.
@@ -133,22 +160,22 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
             de la línea siguiente, que es la clase de comentario que manda al
             próximo a «arreglar» algo que está bien.
           */}
-          <ImageUploadField
-            label={messages.rewards.optionalImage}
-            /*
+            <ImageUploadField
+              label={messages.rewards.optionalImage}
+              /*
               RECORTA en cuadrado y guarda con detalle de FOTO, no de avatar.
               Las dos cosas por separado: atadas, pedir recorte le habría
               encogido la imagen a 512 px para una tesela que ocupa media
               tablet. Ver la decisión 2 del design de `crop-reward-images`.
             */
-            aspect={1}
-            maxDimension={PHOTO_MAX_DIMENSION}
-            cropNote={messages.uploads.cropLead}
-            requestUploadUrl={rewardsApi.requestPendingRewardImageUploadUrl}
-            onUploaded={setImageUploadKey}
-          />
+              aspect={1}
+              maxDimension={PHOTO_MAX_DIMENSION}
+              cropNote={messages.uploads.cropLead}
+              requestUploadUrl={rewardsApi.requestPendingRewardImageUploadUrl}
+              onUploaded={setImageUploadKey}
+            />
 
-          {/*
+            {/*
             POR QUÉ SE RECORTA CUADRADA, dicho donde se sube.
 
             El recorte es interactivo, así que quien sube ve un marco cuadrado y
@@ -156,41 +183,48 @@ export function RewardForm({ onSaved }: { onSaved: () => void }): React.ReactEle
             pantalla: van en rejilla, y sin recortar la dentean. Sin esta línea,
             el marco parece un capricho del subidor.
           */}
-          <p className="text-small text-ink-muted">{messages.rewards.imageSquare}</p>
+            <p className="text-small text-ink-muted">
+              {messages.rewards.imageSquare}
+            </p>
 
-          {imageUploadKey !== null && (
-            <Alert tone="done">{messages.rewards.imageReady}</Alert>
-          )}
+            {imageUploadKey !== null && (
+              <Alert tone="done">{messages.rewards.imageReady}</Alert>
+            )}
 
-          <ChildrenPicker
-            picker={picker}
-            labels={{
-              legend: messages.rewards.forWhom,
-              sameCoins: messages.rewards.sameCoins,
-              coinsPerChild: messages.rewards.coinsPerChild,
-              coins: messages.rewards.coins,
-              valueLegend: messages.rewards.valueLegend,
-            }}
-          />
+            <ChildrenPicker
+              picker={picker}
+              labels={{
+                legend: messages.rewards.forWhom,
+                sameCoins: messages.rewards.sameCoins,
+                coinsPerChild: messages.rewards.coinsPerChild,
+                coins: messages.rewards.coins,
+                valueLegend: messages.rewards.valueLegend,
+              }}
+            />
 
-          {problema !== null && <Alert tone="danger">{problema}</Alert>}
+            {problema !== null && <Alert tone="danger">{problema}</Alert>}
 
-          {create.error !== null && (
-            <Alert tone="danger">{describeRewardsError(create.error)}</Alert>
-          )}
+            {create.error !== null && (
+              <Alert tone="danger">{describeRewardsError(create.error)}</Alert>
+            )}
 
-          <div className="flex flex-wrap gap-2">
-            <Button type="submit" variant="primary" pending={create.isPending}>
-              {create.isPending ? messages.rewards.working : messages.rewards.create}
-            </Button>
-            <Button type="button" variant="secondary" onClick={alCatalogo}>
-              {messages.rewards.cancel}
-            </Button>
-          </div>
-        </form>
-      </Card>
-
-      <ComoFunciona />
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="submit"
+                variant="primary"
+                pending={create.isPending}
+              >
+                {create.isPending
+                  ? messages.rewards.working
+                  : messages.rewards.create}
+              </Button>
+              <Button type="button" variant="secondary" onClick={alCatalogo}>
+                {messages.rewards.cancel}
+              </Button>
+            </div>
+          </form>
+        </Card>
+      </SplitLayout>
     </section>
   );
 }
@@ -219,7 +253,9 @@ function ComoFunciona(): React.ReactElement {
   return (
     <Card>
       <div className="flex flex-col gap-3">
-        <h3 className="text-lead font-extrabold">{messages.rewards.publishTitle}</h3>
+        <h3 className="text-lead font-extrabold">
+          {messages.rewards.publishTitle}
+        </h3>
 
         <ol className="flex list-none flex-col gap-3 p-0">
           {pasos.map((paso, indice) => (

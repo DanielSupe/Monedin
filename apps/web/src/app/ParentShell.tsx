@@ -11,6 +11,7 @@ import {
   SidebarLabel,
   HelpLink,
   SidebarProfile,
+  SidebarTrailing,
   sidebarItemClasses,
 } from "./Sidebar.js";
 import { cx } from "../ui/cx.js";
@@ -111,8 +112,15 @@ export function ParentShell({
             </SidebarProfile>
             {/* El icono del destino va DETRÁS en esta fila y no delante como en
                 los demás: aquí quien encabeza es el avatar, y dos glifos
-                seguidos compiten por el mismo sitio. */}
-            <IconAccount />
+                seguidos compiten por el mismo sitio.
+
+                Y CONTRAÍDA se va del todo: ahí los dos glifos comparten 47 px,
+                uno pegado al otro. Lo declara `SidebarTrailing`, que es el
+                hermano de `SidebarLabel` con la regla contraria — el nombre se
+                oculta a la vista y se conserva; esto es decorativo y se quita. */}
+            <SidebarTrailing>
+              <IconAccount />
+            </SidebarTrailing>
           </Link>
         }
       >

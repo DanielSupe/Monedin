@@ -1,7 +1,18 @@
 import type { OwnRedemption } from "@monedin/contracts";
 import { messages } from "../../lib/messages.js";
 import { contar } from "../../lib/plural.js";
-import { Alert, Badge, Coins, DataTable, EmptyState, Skeleton } from "../../ui/index.js";
+import {
+  Alert,
+  Badge,
+  Card,
+  Coins,
+  DataTable,
+  EmptyState,
+  HeroPanel,
+  Mascota,
+  Skeleton,
+  SplitLayout,
+} from "../../ui/index.js";
 import type { BadgeTone, DataColumn } from "../../ui/index.js";
 import { fechaCorta } from "../../lib/dates.js";
 import {
@@ -75,8 +86,38 @@ export function MyRedemptions(): React.ReactElement {
         )}
       </div>
 
+      {/*
+        LA BANDA QUE FALTABA ENTERA, y no solo su forma.
+
+        Esta pantalla era un título y una tabla. Su maqueta abre con Monedín
+        explicando lo que la tabla no dice —cuándo se van las monedas— y tres
+        contadores por estado para repasar de un vistazo. Las dos cosas existen
+        en la maqueta desde el principio y no llegaron a implementarse.
+      */}
+      {canjes.length > 0 && (
+        <SplitLayout aside={<ResumenPorEstado canjes={canjes} />}>
+          {/* En VIOLETA, el tono de lo conseguido y lo ahorrado: aquí se habla de
+              monedas que salen, no de una acción que hacer. Es el color que la
+              maqueta le da a esta banda. */}
+          <HeroPanel
+            tone="saving"
+            mascot={<Mascota pose="explica" size="medium" />}
+          >
+            <p className="text-lead font-extrabold text-ink-inverted">
+              {messages.redemptions.myRedemptionsExplainTitle}
+            </p>
+            <p className="text-body text-ink-inverted opacity-90">
+              {messages.redemptions.myRedemptionsExplainBody}
+            </p>
+          </HeroPanel>
+        </SplitLayout>
+      )}
+
       {canjes.length === 0 ? (
-        <EmptyState glyph="🎟️" title={messages.redemptions.myRedemptionsEmpty} />
+        <EmptyState
+          glyph="🎟️"
+          title={messages.redemptions.myRedemptionsEmpty}
+        />
       ) : (
         <DataTable
           caption={messages.redemptions.historyCaption}
@@ -102,7 +143,11 @@ export function MyRedemptions(): React.ReactElement {
                 Lo cazó abrir la aplicación a 390px, que es exactamente para lo
                 que esa tarea existe: jsdom no aplica CSS y ningún test lo veía.
               */
-              premio: <span className="text-body font-bold">{canje.reward.title}</span>,
+              premio: (
+                <span className="text-body font-bold">
+                  {canje.reward.title}
+                </span>
+              ),
               monedas: <Coins amount={canje.coins} />,
               estado: (
                 <Badge tone={TONO[canje.status]}>
@@ -115,12 +160,77 @@ export function MyRedemptions(): React.ReactElement {
                   {describeRedemptionStatus(canje.status)}
                 </Badge>
               ),
-              cuando: <span className="text-small text-ink-muted">{fechaCorta(canje.createdAt)}</span>,
+              cuando: (
+                <span className="text-small text-ink-muted">
+                  {fechaCorta(canje.createdAt)}
+                </span>
+              ),
             },
           }))}
         />
       )}
     </section>
+  );
+}
+
+/**
+ * CUÁNTOS HAY DE CADA ESTADO, contados donde ya están.
+ *
+ * NO se le piden al servidor, y por eso cuentan lo de la PÁGINA:
+ * `GET /redemptions/mine` pagina por fila, así que su `total` es el número de
+ * canjes y no el de cada estado. Un contador que dijera «3 aprobados» sobre un
+ * total mayor estaría afirmando algo que no ha contado, así que el rótulo dice de
+ * qué página habla.
+ *
+ * Los tres se dibujan SIEMPRE, incluido el que vale cero. Un estado que
+ * desaparece al quedarse vacío convierte el resumen en tres cajas que cambian de
+ * sitio, y hay que volver a leer cuál es cuál en cada visita.
+ */
+function ResumenPorEstado({
+  canjes,
+}: {
+  canjes: OwnRedemption[];
+}): React.ReactElement {
+  const cuantos = (estado: OwnRedemption["status"]): number =>
+    canjes.filter((canje) => canje.status === estado).length;
+
+  const estados = [
+    { estado: "PENDING" as const, rotulo: messages.redemptions.summaryPending },
+    {
+      estado: "APPROVED" as const,
+      rotulo: messages.redemptions.summaryApproved,
+    },
+    {
+      estado: "REJECTED" as const,
+      rotulo: messages.redemptions.summaryRejected,
+    },
+  ];
+
+  return (
+    <Card>
+      <div className="flex flex-col gap-2">
+        <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+          {messages.redemptions.summaryScope}
+        </span>
+
+        <ul className="grid list-none grid-cols-3 gap-2 p-0">
+          {estados.map(({ estado, rotulo }) => (
+            <li
+              key={estado}
+              className="flex flex-col items-center gap-1 text-center"
+            >
+              {/* El icono y el tono son las dos maneras de leerlo sin color; el
+                  rótulo sigue ahí para quien no ve ninguno de los dos. */}
+              <Badge tone={TONO[estado]}>
+                <IconoEstado status={estado} />
+                {String(cuantos(estado))}
+              </Badge>
+              <span className="text-small text-ink-muted">{rotulo}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Card>
   );
 }
 
@@ -158,7 +268,11 @@ const TONO: Record<OwnRedemption["status"], BadgeTone> = {
  * cerró bien y la cruz cerró sin dar nada. Quien no distingue el coral del
  * violeta sigue viendo tres dibujos distintos.
  */
-function IconoEstado({ status }: { status: OwnRedemption["status"] }): React.ReactElement {
+function IconoEstado({
+  status,
+}: {
+  status: OwnRedemption["status"];
+}): React.ReactElement {
   return (
     <svg
       viewBox="0 0 24 24"

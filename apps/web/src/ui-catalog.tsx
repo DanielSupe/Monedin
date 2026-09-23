@@ -23,6 +23,7 @@ import {
   Pagination,
   ProgressBar,
   ProgressRing,
+  SplitLayout,
   RadioGroup,
   Select,
   Skeleton,
@@ -546,6 +547,28 @@ function Piezas(): React.ReactElement {
             <ProgressRing done={5} total={5} className="size-24" />
           </Fila>
         </HeroPanel>
+      </Seccion>
+
+      {/* Con contenido de dos alturas MUY distintas, que es donde se ve lo que
+          decide: el panel no se estira hasta el alto de la lista. */}
+      <Seccion titulo="SplitLayout">
+        <SplitLayout
+          aside={
+            <Card>
+              <p className="text-body">Lo que apoya, resume o explica.</p>
+            </Card>
+          }
+        >
+          <Card>
+            <p className="text-body">Lo que se viene a hacer.</p>
+          </Card>
+          <Card>
+            <p className="text-body">Y sigue.</p>
+          </Card>
+          <Card>
+            <p className="text-body">Y sigue.</p>
+          </Card>
+        </SplitLayout>
       </Seccion>
 
       <Seccion titulo="Checkbox · RadioGroup · Slider">
