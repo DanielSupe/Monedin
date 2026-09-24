@@ -18,8 +18,8 @@ describe("Alert", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("No se pudo aprobar.");
   });
 
-  it("un éxito no interrumpe: se anuncia como estado", () => {
-    render(<Alert tone="success">Tarea aprobada.</Alert>);
+  it("algo conseguido no interrumpe: se anuncia como estado", () => {
+    render(<Alert tone="done">Tarea aprobada.</Alert>);
 
     expect(screen.getByRole("status")).toHaveTextContent("Tarea aprobada.");
     expect(screen.queryByRole("alert")).toBeNull();
@@ -27,7 +27,7 @@ describe("Alert", () => {
 
   it("el conflicto es advertencia y no error, porque nadie hizo nada mal", () => {
     render(
-      <Alert tone="warning" title="Alguien se te adelantó">
+      <Alert tone="conflict" title="Alguien se te adelantó">
         Esa tarea ya la aprobaste.
       </Alert>,
     );
@@ -101,7 +101,6 @@ describe("Dialog", () => {
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).toBeNull();
 
-    // El foco vuelve tras desmontar, no en el mismo tick.
     await waitFor(() => {
       expect(abridor).toHaveFocus();
     });

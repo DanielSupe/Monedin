@@ -2,14 +2,13 @@ import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { messages } from "../../src/lib/messages.js";
-import { SOLO_CUENTA, comoNino, comoPadre, montarApp } from "../support/router.js";
+import { SOLO_CUENTA, comoNino, comoPadre, montarApp, pagina } from "../support/router.js";
 import { conPantallaAncha } from "../setup.js";
 
 afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/** Abre el cajón y devuelve su navegación. */
 async function abrirCajon(): Promise<HTMLElement> {
   await userEvent.click(screen.getByRole("button", { name: messages.nav.menu }));
 
@@ -31,13 +30,6 @@ const DEL_NINO = [
   messages.nav.childRedemptions,
 ];
 
-/**
- * Lo que este change existe para arreglar.
- *
- * Cada rol tenía su propia barra —arriba el padre, abajo el niño— y en los dos
- * casos un destino que NO estaba en ella y colgaba del avatar de la cabecera.
- * Dos maneras de moverse y ninguna completa.
- */
 describe("dentro de un perfil hay una sola navegación, y está entera", () => {
   it("el padre tiene sus cinco destinos dentro del cajón", async () => {
     await montarApp("/", comoPadre());
@@ -47,7 +39,6 @@ describe("dentro de un perfil hay una sola navegación, y está entera", () => {
       expect(within(cajon).getByRole("link", { name: destino })).toBeInTheDocument();
     }
 
-    // Y su cuenta, que antes solo se encontraba pulsando el avatar.
     expect(screen.getByRole("link", { name: new RegExp(messages.nav.parentAccount) })).toBeInTheDocument();
   });
 
@@ -68,32 +59,19 @@ describe("dentro de un perfil hay una sola navegación, y está entera", () => {
     await montarApp("/", comoPadre());
     await abrirCajon();
 
-    // Con la barra vieja todavía puesta, cada uno de estos saldría dos veces.
-    // Es lo que impide que vuelvan las dos navegaciones.
     for (const destino of DEL_PADRE) {
       expect(screen.getAllByRole("link", { name: destino })).toHaveLength(1);
     }
-
   });
 
-  /*
-   * La excepción se comprueba en ANCHO y no en estrecho, y la razón es buena:
-   * con el cajón abierto, Radix marca el resto del documento como oculto para
-   * las tecnologías de asistencia, así que el avatar de la cabecera NO está en
-   * el árbol de accesibilidad. Los dos caminos al perfil solo coexisten cuando
-   * la columna está fija, que es justo donde la excepción importa.
-   */
   it("el perfil SÍ está dos veces, y es la única excepción", async () => {
     conPantallaAncha();
     await montarApp("/", comoPadre());
 
-    // Por su NOMBRE y con cifra exacta, no tapándolo: así la excepción es una y
-    // no una puerta abierta. Un tercer camino al perfil hace fallar esto.
     expect(
       screen.getAllByRole("link", { name: new RegExp(messages.nav.parentAccount) }),
     ).toHaveLength(2);
 
-    // Y ningún otro destino la aprovecha.
     for (const destino of DEL_PADRE) {
       expect(screen.getAllByRole("link", { name: destino })).toHaveLength(1);
     }
@@ -108,19 +86,29 @@ describe("dentro de un perfil hay una sola navegación, y está entera", () => {
   });
 });
 
-/**
- * Quién anuncia el destino vigente, y contra qué protege esto.
- *
- * Lo pone el `Link` del router: `aria-current="page"` y `data-status="active"`,
- * según su `activeOptions`. La primera versión de este archivo lo ponía ADEMÁS
- * a mano, calculando la ruta activa por su cuenta — dos fuentes para el mismo
- * hecho, y la de fuera podía separarse de la del router sin que nada fallara.
- *
- * Se descubrió inyectando la violación: al quitar el `aria-current` escrito a
- * mano, el test SEGUÍA EN VERDE, porque quien lo ponía de verdad era el enlace.
- * La violación que este test sí caza es la que importa: sustituir el `Link` por
- * un `<a>` a mano. Comprobado — con anclas sueltas, cae.
- */
+describe("la ayuda se encuentra, y está una sola vez", () => {
+  it.each([
+    ["el padre", comoPadre],
+    ["el niño", comoNino],
+  ])("%s la tiene al pie de su lateral, con su nombre escrito", async (_quien, sesion) => {
+    conPantallaAncha();
+    await montarApp("/", sesion());
+
+    const ayuda = await screen.findByRole("link", { name: messages.help.title });
+
+    expect(ayuda).toHaveAttribute("href", "/help");
+
+    expect(within(ayuda).getByText(messages.help.title)).toBeInTheDocument();
+  });
+
+  it("y no está además en la cabecera", async () => {
+    conPantallaAncha();
+    await montarApp("/", comoPadre());
+
+    expect(screen.getAllByRole("link", { name: messages.help.title })).toHaveLength(1);
+  });
+});
+
 describe("el destino vigente se anuncia", () => {
   it("el que corresponde a la dirección es la página actual, y los demás no", async () => {
     await montarApp("/me/tasks", comoNino());
@@ -139,21 +127,12 @@ describe("el destino vigente se anuncia", () => {
     await montarApp("/me/rewards", comoNino());
     const cajon = await abrirCajon();
 
-    // Sin coincidencia exacta, `/` prefija a todo y el inicio saldría siempre
-    // marcado.
     expect(within(cajon).getByRole("link", { name: messages.nav.childHome })).not.toHaveAttribute(
       "aria-current",
     );
   });
 });
 
-/**
- * El fallo más probable de esta pieza.
- *
- * Se cierra al cambiar la DIRECCIÓN y no en el `onClick` de cada enlace, porque
- * el botón atrás también cambia la dirección: un panel abierto tapando la
- * pantalla a la que se acaba de volver es peor que no tenerlo.
- */
 describe("el cajón se cierra al llegar", () => {
   it("al elegir un destino", async () => {
     await montarApp("/", comoNino());
@@ -175,8 +154,6 @@ describe("el cajón se cierra al llegar", () => {
     app.router.history.back();
     await app.router.invalidate();
 
-    // `waitFor` y no una comprobación seca: el cierre es un efecto sobre el
-    // cambio de dirección, así que ocurre en el render siguiente.
     await waitFor(() =>
       expect(screen.queryByRole("navigation", { name: messages.nav.drawerLabel })).toBeNull(),
     );
@@ -191,13 +168,6 @@ describe("antes de tener un perfil no hay navegación", () => {
   });
 });
 
-/**
- * Lo que `pin-sidebar-on-desktop` corrige.
- *
- * `add-sidebar-nav` dejó la navegación detrás de un botón en TODOS los tamaños y
- * lo declaró como consecuencia aceptada. Al verlo no lo era: en escritorio
- * sobra ancho, y esconderla cuesta un toque cada vez sin comprar nada.
- */
 describe("cuando hay ancho, la navegación está delante", () => {
   it("los destinos se ven sin abrir nada, y no hay botón de menú", async () => {
     conPantallaAncha();
@@ -209,8 +179,6 @@ describe("cuando hay ancho, la navegación está delante", () => {
       expect(within(cajon).getByRole("link", { name: destino })).toBeInTheDocument();
     }
 
-    // El botón y la forma estrecha van juntos: con la columna delante no tiene
-    // qué abrir.
     expect(screen.queryByRole("button", { name: messages.nav.menu })).toBeNull();
   });
 
@@ -221,12 +189,6 @@ describe("cuando hay ancho, la navegación está delante", () => {
     expect(screen.getByRole("button", { name: messages.nav.menu })).toBeInTheDocument();
   });
 
-  /*
-   * La regla que obliga a montar UNA forma y no las dos con una escondida por
-   * CSS. Dos listas de destinos son dos para quien recorre el documento con
-   * teclado, aunque una no se vea — y `display:none` dejaría la garantía
-   * dependiendo de una utilidad que nadie comprueba.
-   */
   it.each([
     ["ancho", true],
     ["estrecho", false],
@@ -249,18 +211,6 @@ describe("contraído, los destinos conservan su nombre", () => {
 
     await userEvent.click(screen.getByRole("button", { name: messages.nav.collapseSidebar }));
 
-    /*
-     * El texto se oculta A LA VISTA y no se borra. Estos iconos son decorativos
-     * a propósito —lo que nombra al destino es su texto—, así que borrarlo
-     * dejaría los cinco destinos sin nombre de golpe para quien usa un lector de
-     * pantalla.
-     *
-     * LÍMITE de este test, dicho para que nadie le pida más de lo que da: en
-     * jsdom no hay CSS, así que no puede distinguir `sr-only` de `hidden`. Lo
-     * que caza es que el texto se BORRE del documento — comprobado inyectando
-     * esa violación exacta, y cae. Que `sr-only` oculte a la vista y `hidden` no
-     * sirva hay que verlo en el navegador.
-     */
     const cajon = screen.getByRole("navigation", { name: messages.nav.drawerLabel });
 
     for (const destino of DEL_PADRE) {
@@ -277,8 +227,190 @@ describe("contraído, los destinos conservan su nombre", () => {
 
     await userEvent.click(contraer);
 
-    // Solo dibuja una flecha, así que sin nombre no diría nada.
     const expandir = screen.getByRole("button", { name: messages.nav.expandSidebar });
     expect(expandir).toHaveAttribute("aria-expanded", "false");
+  });
+});
+
+describe("el lateral dice cuánto espera en cada bandeja", () => {
+  function tarea(id: string, status: "PENDING" | "COMPLETED") {
+    return {
+      id,
+      title: "Recoger la mesa",
+      description: null,
+      coins: 20,
+      dueDate: null,
+      status,
+      evidence: null,
+      createdAt: "2026-09-01T10:00:00.000Z",
+      updatedAt: "2026-09-01T10:00:00.000Z",
+      child: { id: `hijo-${id}`, name: "Ana", avatar: "zorro" },
+      batchId: "b1",
+    };
+  }
+
+  const REPARTO_MEZCLADO = {
+    batchId: "b1",
+    title: "Recoger la mesa",
+    description: null,
+    dueDate: null,
+    createdAt: "2026-09-01T10:00:00.000Z",
+    tasks: [tarea("t1", "COMPLETED"), tarea("t2", "COMPLETED"), tarea("t3", "PENDING")],
+  };
+
+  function destino(cajon: HTMLElement, nombre: string): HTMLElement {
+    return within(cajon).getByRole("link", { name: new RegExp(nombre) });
+  }
+
+  it("las tareas por aprobar se cuentan por FILA y no por reparto", async () => {
+    await montarApp("/", comoPadre(), [], {
+      "/tasks": pagina([REPARTO_MEZCLADO]),
+      "/redemptions": pagina([]),
+    });
+
+    const cajon = await abrirCajon();
+    const tareas = destino(cajon, messages.nav.parentTasks);
+
+    await waitFor(() => {
+      expect(within(tareas).getByText("2")).toBeInTheDocument();
+    });
+
+    expect(within(tareas).queryByText("1")).toBeNull();
+    expect(within(tareas).queryByText("3")).toBeNull();
+  });
+
+  it("y sin nada esperando no dibuja ninguna insignia", async () => {
+    await montarApp("/", comoPadre(), [], {
+      "/tasks": pagina([]),
+      "/redemptions": pagina([]),
+    });
+
+    const cajon = await abrirCajon();
+
+    await waitFor(() => {
+      expect(within(cajon).queryByText("0")).toBeNull();
+    });
+  });
+
+  it("la cifra se anuncia con su unidad", async () => {
+    await montarApp("/", comoPadre(), [], {
+      "/tasks": pagina([REPARTO_MEZCLADO]),
+      "/redemptions": pagina([]),
+    });
+
+    const cajon = await abrirCajon();
+
+    await waitFor(() => {
+      expect(
+        within(destino(cajon, messages.nav.parentTasks)).getByText(
+          `2 ${messages.nav.pendingSuffix}`,
+        ),
+      ).toBeInTheDocument();
+    });
+  });
+});
+
+describe("contraída, la navegación cabe en su columna", () => {
+  const CON_COSAS_ESPERANDO = {
+    "/tasks": pagina([
+      {
+        batchId: "b1",
+        title: "Recoger la mesa",
+        description: null,
+        dueDate: null,
+        createdAt: "2026-09-01T10:00:00.000Z",
+        tasks: [
+          {
+            id: "t1",
+            title: "Recoger la mesa",
+            description: null,
+            coins: 20,
+            dueDate: null,
+            status: "COMPLETED" as const,
+            evidence: null,
+            createdAt: "2026-09-01T10:00:00.000Z",
+            updatedAt: "2026-09-01T10:00:00.000Z",
+            child: { id: "hijo-1", name: "Ana", avatar: "zorro" },
+            batchId: "b1",
+          },
+        ],
+      },
+    ]),
+    "/redemptions": pagina([]),
+  };
+
+  async function destinoDeTareas(): Promise<HTMLElement> {
+    const cajon = screen.getByRole("navigation", { name: messages.nav.drawerLabel });
+    const tareas = within(cajon).getByRole("link", {
+      name: new RegExp(messages.nav.parentTasks),
+    });
+
+    await waitFor(() => {
+      expect(within(tareas).getByText(`1 ${messages.nav.pendingSuffix}`)).toBeInTheDocument();
+    });
+
+    return tareas;
+  }
+
+  it("extendida, la cifra se ve junto a su destino", async () => {
+    conPantallaAncha();
+    await montarApp("/", comoPadre(), [], CON_COSAS_ESPERANDO);
+
+    expect(within(await destinoDeTareas()).getByText("1")).toBeInTheDocument();
+  });
+
+  it("contraída, la cifra no se dibuja y la cuenta sigue anunciándose", async () => {
+    conPantallaAncha();
+    await montarApp("/", comoPadre(), [], CON_COSAS_ESPERANDO);
+
+    await destinoDeTareas();
+    await userEvent.click(screen.getByRole("button", { name: messages.nav.collapseSidebar }));
+
+    const tareas = await destinoDeTareas();
+
+    expect(within(tareas).queryByText("1")).toBeNull();
+    expect(within(tareas).getByText(`1 ${messages.nav.pendingSuffix}`)).toBeInTheDocument();
+  });
+
+  it("contraída, la fila del perfil se queda con su avatar", async () => {
+    conPantallaAncha();
+    await montarApp("/", comoPadre());
+
+    const columna = () => within(screen.getByRole("complementary"));
+
+    expect(
+      columna()
+        .getByRole("link", { name: new RegExp(messages.nav.parentAccount) })
+        .querySelectorAll("svg"),
+    ).toHaveLength(2);
+
+    await userEvent.click(screen.getByRole("button", { name: messages.nav.collapseSidebar }));
+
+    expect(
+      columna()
+        .getByRole("link", { name: new RegExp(messages.nav.parentAccount) })
+        .querySelectorAll("svg"),
+    ).toHaveLength(1);
+  });
+});
+
+describe("el control de contraer encabeza la navegación", () => {
+  it("se alcanza antes que el primer destino", async () => {
+    conPantallaAncha();
+    await montarApp("/", comoPadre());
+
+    const contraer = screen.getByRole("button", { name: messages.nav.collapseSidebar });
+    const cajon = screen.getByRole("navigation", { name: messages.nav.drawerLabel });
+    const primero = within(cajon).getByRole("link", { name: messages.nav.parentHome });
+
+    expect(contraer.compareDocumentPosition(primero) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("en pantalla estrecha no existe", async () => {
+    await montarApp("/", comoPadre());
+    await abrirCajon();
+
+    expect(screen.queryByRole("button", { name: messages.nav.collapseSidebar })).toBeNull();
+    expect(screen.queryByRole("button", { name: messages.nav.expandSidebar })).toBeNull();
   });
 });

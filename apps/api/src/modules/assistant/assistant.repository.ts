@@ -1,35 +1,5 @@
 import { getPrisma, withTranslatedErrors } from "../../shared/database/index.js";
 
-/**
- * Acceso a datos del contexto que se le entrega al modelo.
- *
- * ÚNICO archivo del módulo que toca Prisma, y solo LEE. Un asistente que
- * escribiera algo sería otro producto: no hay `create`, `update` ni `delete`
- * aquí, y esa ausencia es lo que hace cierto que una inyección de prompt lograda
- * no puede mover una moneda — no existe camino de código, no es que el guion lo
- * prohíba.
- *
- * POR QUÉ NO SE DELEGA EN LOS SERVICIOS AJENOS. La regla del proyecto ya lo dice
- * —la autorización se delega, los datos los lee el repositorio propio— y aquí
- * hay además dos razones concretas:
- *
- * 1. Los serializadores de `children`, `rewards` y `redemptions` son ASÍNCRONOS
- *    porque firman URLs de S3. Delegar sería hacer una decena de peticiones de
- *    firma contra la red para componer un prompt de TEXTO, donde una imagen no
- *    sirve absolutamente de nada.
- * 2. Devuelven `Page<T>`. Habría que pedir páginas y recomponer para conseguir
- *    «las últimas N», que es lo único que un prompt necesita.
- *
- * Y todo lo de un contexto va en la MISMA transacción, por la razón que
- * `coins.repository.ts` ya declara: una tarea aprobada entre dos consultas
- * dejaría un prompt donde el saldo y la lista se contradicen, y el modelo
- * redactaría esa incoherencia con total seguridad.
- *
- * Los `select` son estrechos a conciencia: nada de avatares, claves de imagen ni
- * identificadores. Lo que sale de aquí viaja a un tercero.
- */
-
-/** Cuántas filas de cada cosa caben. Lo decide el servicio, no este archivo. */
 export interface ContextLimits {
   tasks: number;
   rewards: number;
@@ -70,15 +40,6 @@ export interface ChildContextRow {
   movements: ChildMovementRow[];
 }
 
-/**
- * Todo lo que Monedín sabe de UN niño: el que pregunta.
- *
- * Recibe `childProfileId` y no existe ningún camino que acepte otro parámetro.
- * Ahí está la garantía de que no ve a sus hermanos: no es una comprobación que
- * alguien pueda olvidarse de escribir, es que el dato de otro no puede entrar
- * en la ventana. Mismo mecanismo que `GET /children/me/coins`, y aquí importa
- * por lo mismo: los hermanos comparten la tablet.
- */
 export function findChildContext(
   childProfileId: string,
   limits: ContextLimits,
@@ -97,22 +58,13 @@ export function findChildContext(
       }
 
       const [tareas, ofertas, canjes, movimientos] = await Promise.all([
-        /*
-         * Las NO aprobadas primero: son sobre las que se puede hacer algo, y
-         * son las que motivan la pregunta. Una tarea ya pagada solo explica de
-         * dónde salieron las monedas, y para eso están los movimientos.
-         */
         tx.task.findMany({
           where: { childId: childProfileId },
           select: { title: true, coins: true, status: true },
           orderBy: [{ status: "asc" }, { createdAt: "desc" }, { id: "desc" }],
           take: limits.tasks,
         }),
-        /*
-         * Su escaparate: solo premios ACTIVOS ofrecidos a él, con SU precio.
-         * El precio vive en la asignación y no en el premio, así que sale de
-         * aquí y nunca de `Reward`.
-         */
+
         tx.rewardAssignment.findMany({
           where: { childId: childProfileId, reward: { isActive: true } },
           select: {
@@ -132,7 +84,7 @@ export function findChildContext(
           orderBy: [{ createdAt: "desc" }, { id: "desc" }],
           take: limits.redemptions,
         }),
-        /* Responde «¿por qué tengo 120 y no 140?», que es la pregunta real. */
+
         tx.coinTransaction.findMany({
           where: { childId: childProfileId },
           select: { amount: true, reason: true },
@@ -194,14 +146,6 @@ export interface ParentContextRow {
   pendingRedemptions: ParentRedemptionRow[];
 }
 
-/**
- * Todo lo que Monedín sabe de una familia: la del padre que pregunta.
- *
- * El nombre del padre se LEE aquí y no viene en el actor: el `Actor` de la API
- * lleva solo identificadores, a diferencia del que ve el front.
- *
- * Los hijos no llevan tope propio: `MAX_CHILDREN_PER_FAMILY` ya lo es.
- */
 export function findParentContext(
   parentId: string,
   limits: ContextLimits,
@@ -225,7 +169,7 @@ export function findParentContext(
           select: { id: true, name: true, age: true, coins: true },
           orderBy: [{ createdAt: "asc" }, { id: "asc" }],
         }),
-        /* La bandeja de aprobación: lo único del panel que pide una acción. */
+
         tx.task.findMany({
           where: { parentId, status: "COMPLETED" },
           select: { title: true, coins: true, child: { select: { name: true } } },

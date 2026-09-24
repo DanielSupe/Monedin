@@ -21,8 +21,6 @@ describe("el filtro y la página viajan en la dirección", () => {
     app.router.history.back();
     await app.router.invalidate();
 
-    // Un padre que filtra por «esperando mi aprobación», entra a resolver una y
-    // vuelve, no debería tener que volver a filtrar.
     expect(app.direccion()).toBe("/tasks");
     expect(app.router.state.location.search).toMatchObject({ status: "COMPLETED" });
   });

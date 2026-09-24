@@ -29,7 +29,7 @@ describe("GET /api/v1/health", () => {
     const cuerpos = new Set(respuestas.map((response) => JSON.stringify(response.body)));
 
     expect(respuestas.every((response) => response.status === 200)).toBe(true);
-    // Un solo cuerpo distinto: la respuesta es determinista y sin efectos.
+
     expect(cuerpos.size).toBe(1);
   });
 

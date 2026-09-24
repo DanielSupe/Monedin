@@ -34,10 +34,8 @@ describe("el niño puede cambiar su propio PIN sabiendo el actual", () => {
 
     await cambiarSuPin(cookies, { currentPin: "1234", newPin: "8765" }).expect(204);
 
-    // El nuevo abre el perfil.
     await enterProfile(app, accountCookies, childId, "8765");
 
-    // Y el viejo ya no.
     const conElViejo = await request(app)
       .post(`${API_PREFIX}/auth/profiles/enter`)
       .set("Cookie", accountCookies)
@@ -46,8 +44,6 @@ describe("el niño puede cambiar su propio PIN sabiendo el actual", () => {
   }, 120_000);
 
   it("su perfil sigue activo en el dispositivo desde el que lo cambió", async () => {
-    // Cambiar un PIN no desactiva ningún perfil: un perfil ya abierto sigue
-    // siendo el mismo perfil de la misma persona. Ver la decisión 10 del design.
     const { cookies } = await asChild(app, { childPin: "1234" });
 
     await cambiarSuPin(cookies, { currentPin: "1234", newPin: "8765" }).expect(204);
@@ -63,7 +59,6 @@ describe("el niño puede cambiar su propio PIN sabiendo el actual", () => {
     expect(response.status).toBe(401);
     expect(response.body.code).toBe(ERROR_CODES.UNAUTHORIZED);
 
-    // El de siempre sigue abriendo el perfil.
     await enterProfile(app, accountCookies, childId, "1234");
   }, 120_000);
 
@@ -139,7 +134,6 @@ describe("el cambio alcanza solo al perfil de la sesión", () => {
   }, 120_000);
 
   it("no admite un identificador de perfil en la petición", async () => {
-    // Si lo admitiera, un niño podría desviar el cambio al perfil de un hermano.
     const { cookies, parentId } = await asChild(app, { childPin: "1234" });
     const hermano = await createChildProfile(parentId, { name: "Emma", pin: "5678" });
 
@@ -149,13 +143,12 @@ describe("el cambio alcanza solo al perfil de la sesión", () => {
       childProfileId: hermano.id,
     });
 
-    // El campo sobrante se ignora y el cambio va al perfil de la sesión.
     expect(response.status).toBe(204);
     const fila = await testPrisma().childProfile.findUniqueOrThrow({
       where: { id: hermano.id },
       select: { pinHash: true },
     });
-    // El hermano conserva el suyo: su PIN original sigue abriendo su perfil.
+
     expect(fila.pinHash).toEqual(expect.any(String));
   }, 120_000);
 });
@@ -179,8 +172,6 @@ describe("la vía del niño es solo del niño", () => {
   }, 120_000);
 
   it("un niño sigue sin poder usar la vía de rescate del padre", async () => {
-    // Aquella no exige el PIN anterior: si un niño pudiera entrar por ahí, el
-    // requisito de «sabiendo el actual» no valdría nada.
     const { cookies, childId } = await asChild(app);
 
     const response = await request(app)

@@ -52,7 +52,12 @@ services:
       ADMINER_DEFAULT_SERVER: postgres
 
   minio:
-    image: minio/minio:latest
+    # QUAY Y NO DOCKER HUB, y no es una preferencia: `minio/minio` y `minio/mc`
+    # responden hoy "pull access denied" sin credenciales, asi que
+    # `docker compose up` -el primer paso documentado del proyecto- fallaba de
+    # entrada en una maquina limpia. La imagen es la misma y la publica el mismo
+    # equipo; lo unico que cambia es de donde se baja.
+    image: quay.io/minio/minio:latest
     container_name: monedin-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
@@ -81,7 +86,7 @@ services:
   # borraria las fotos con las que se esta trabajando.
   # ---------------------------------------------------------------------------
   minio-init:
-    image: minio/mc:latest
+    image: quay.io/minio/mc:latest
     container_name: monedin-minio-init
     restart: "no"
     depends_on:

@@ -1,14 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createChild, createParent, createTask, withRollback } from "../support/database.js";
 
-/**
- * Las restricciones viven en el motor, no solo en el código.
- *
- * Estos tests escriben directamente contra la base de datos, saltándose
- * cualquier validación de entrada: es la única forma de comprobar que un dato
- * imposible es imposible de almacenar y no solo difícil de escribir por
- * accidente. Ver la spec `family-data-model` y la decisión 3 del design.
- */
 describe("restricciones de rango del motor", () => {
   it("rechaza un saldo negativo", () =>
     withRollback(async (db) => {
@@ -185,7 +177,6 @@ describe("estados de tarea", () => {
 
       expect(tarea.status).toBe("PENDING");
 
-      // Rechazar devuelve a PENDING; no existe ningún valor de rechazo.
       await db.task.update({ where: { id: tarea.id }, data: { status: "COMPLETED" } });
       const devuelta = await db.task.update({
         where: { id: tarea.id },

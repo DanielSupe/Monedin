@@ -4,11 +4,6 @@ import * as api from "../../api/coins.js";
 import { ApiRequestError } from "../../lib/http-client.js";
 import { messages } from "../../lib/messages.js";
 
-/**
- * Datos del historial de monedas. Solo consultas: no hay ninguna mutación que
- * escriba en él desde aquí, y es a propósito.
- */
-
 export function useOwnCoinHistory(query: Partial<PaginationQuery> = {}) {
   return useQuery({
     queryKey: api.ownCoinHistoryQueryKey(query),
@@ -23,7 +18,6 @@ export function useChildCoinHistory(childId: string, query: Partial<PaginationQu
   });
 }
 
-/** Cómo se lee el fallo, por el CÓDIGO del error y nunca por su texto. */
 export function describeCoinsError(error: unknown): string {
   if (!(error instanceof ApiRequestError)) {
     return messages.errors.network;

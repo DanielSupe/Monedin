@@ -114,9 +114,6 @@ describe("cliente de canjes", () => {
   });
 
   it("la lista propia no lleva identificador de hijo", async () => {
-    // Si lo llevara, un niño podría pedir los canjes de su hermano. La API lo
-    // rechazaría con 422 porque su esquema es estricto, pero la garantía buena
-    // es que aquí no hay ningún parámetro que ponerlo.
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, unaPaginaPropia()));
     vi.stubGlobal("fetch", fetchMock);
 

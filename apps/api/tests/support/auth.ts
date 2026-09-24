@@ -3,25 +3,6 @@ import type { Express } from "express";
 import request from "supertest";
 import { testPrisma } from "./database.js";
 
-/**
- * Soporte para los tests de autenticación y rejilla.
- *
- * Estos tests NO pueden usar `withRollback`: llaman a la app con supertest, y
- * la app abre sus propias transacciones. Así que limpian por truncado, que
- * además no dispara los triggers de fila y por tanto no choca con la
- * inmutabilidad del historial.
- *
- * OJO con la diferencia entre los dos ayudantes de acceso:
- *
- *   `registerParent`  deja la CUENTA acreditada y ningún perfil activo.
- *                     Es el estado de la rejilla.
- *   `asParent`        deja además el perfil del padre activo.
- *                     Es lo que hace falta para operar.
- *
- * Antes de `add-profile-selection` bastaba lo primero; ahora no, y esa es
- * exactamente la frontera que el change añade.
- */
-
 export async function resetAuthData(): Promise<void> {
   await testPrisma().$executeRawUnsafe(
     `TRUNCATE TABLE users, child_profiles, sessions, tasks, rewards,
@@ -46,14 +27,6 @@ export function cookiesOf(response: request.Response): string[] {
   return Array.isArray(raw) ? raw : [raw];
 }
 
-/**
- * Las cookies que la respuesta deja PUESTAS, descartando las que borra.
- *
- * Importa más de lo que parece: acceder emite a la vez `monedin_session=<token>`
- * y un borrado de `monedin_profile`. Si se concatena la lista cruda y luego se
- * añade una cookie de perfil, el navegador simulado ve dos entradas con el
- * mismo nombre y se queda con la vacía.
- */
 export function liveCookies(response: request.Response): string[] {
   return cookiesOf(response).filter((cookie) => {
     const [pair] = cookie.split(";");
@@ -62,7 +35,6 @@ export function liveCookies(response: request.Response): string[] {
   });
 }
 
-/** Valor de una cookie concreta, o undefined si se está borrando. */
 export function cookieValue(response: request.Response, name: string): string | undefined {
   for (const cookie of cookiesOf(response)) {
     const [pair] = cookie.split(";");
@@ -74,18 +46,12 @@ export function cookieValue(response: request.Response, name: string): string | 
   return undefined;
 }
 
-/** Si la respuesta pide al navegador borrar esa cookie. */
 export function clearsCookie(response: request.Response, name: string): boolean {
   return cookiesOf(response).some(
     (cookie) => cookie.startsWith(`${name}=;`) || cookie.startsWith(`${name}=Thu, 01 Jan 1970`),
   );
 }
 
-/**
- * Registra un padre. Deja la CUENTA acreditada y NINGÚN perfil activo.
- *
- * Con estas cookies se llega a la rejilla, no se opera.
- */
 export async function registerParent(
   app: Express,
   overrides: { name?: string; email?: string; password?: string; pin?: string } = {},
@@ -106,7 +72,6 @@ export async function registerParent(
   return { cookies: liveCookies(response), body: response.body as Record<string, unknown> };
 }
 
-/** Activa un perfil sobre unas cookies de cuenta. Devuelve las dos cookies. */
 export async function enterProfile(
   app: Express,
   accountCookies: string[],
@@ -130,12 +95,6 @@ export async function enterProfile(
   return [...accountCookies, `${PROFILE_COOKIE}=${profileCookie}`];
 }
 
-/**
- * Registra un padre Y activa su perfil. Lo que hace falta para operar.
- *
- * Devuelve también las cookies de solo cuenta, porque muchos tests necesitan
- * comprobar justo la diferencia entre tener cuenta y tener perfil.
- */
 export async function asParent(
   app: Express,
   overrides: { name?: string; email?: string; password?: string; pin?: string } = {},
@@ -150,7 +109,6 @@ export async function asParent(
   };
 }
 
-/** Accede con correo y contraseña. Acredita la cuenta, sin perfil. */
 export function login(
   app: Express,
   credentials: { email: string; password: string },
@@ -158,7 +116,6 @@ export function login(
   return request(app).post(`${API_PREFIX}/auth/login`).send(credentials);
 }
 
-/** Crea un perfil de hijo directamente en la base, con su PIN ya hasheado. */
 export async function createChildProfile(
   parentId: string,
   options: { name?: string; pin?: string; coins?: number; avatar?: string; age?: number } = {},
@@ -181,13 +138,6 @@ export async function createChildProfile(
   return { ...child, pin };
 }
 
-/**
- * Registra un padre, le crea un hijo y ENTRA al perfil de ese hijo.
- *
- * Es el equivalente de `asParent` para el otro rol. Devuelve también las
- * cookies de solo cuenta y las del padre, porque casi todo test de niño acaba
- * comprobando la frontera contra uno de esos dos estados.
- */
 export async function asChild(
   app: Express,
   options: {
@@ -205,11 +155,6 @@ export async function asChild(
   childId: string;
   childPin: string;
 }> {
-  // NO se devuelven las cookies del padre a propósito: entrar al perfil del
-  // niño revoca el perfil activo de esa misma sesión de cuenta, porque nunca
-  // hay dos a la vez. Devolverlas sería entregar unas cookies muertas. Un test
-  // que necesite al padre Y al niño a la vez tiene que simular DOS dispositivos,
-  // es decir, dos sesiones de cuenta distintas con `login`.
   const { accountCookies, parentId } = await asParent(app, {
     ...(options.email === undefined ? {} : { email: options.email }),
   });
@@ -231,14 +176,6 @@ export async function asChild(
   };
 }
 
-/**
- * Un segundo dispositivo para la misma cuenta, con el perfil del padre activo.
- *
- * Accede otra vez con correo y contraseña, lo que abre una sesión de CUENTA
- * nueva e independiente. Es lo que hace falta para probar escenarios donde un
- * perfil sigue abierto en un sitio mientras se opera desde otro: dentro de una
- * misma sesión de cuenta eso es imposible por diseño.
- */
 export async function parentOnSecondDevice(
   app: Express,
   credentials: { email?: string; password?: string; pin?: string } = {},
@@ -260,14 +197,6 @@ export async function parentOnSecondDevice(
   );
 }
 
-/**
- * Una familia con varios hijos ya creados, para los tests de listado,
- * paginación y aislamiento entre hermanos.
- *
- * Los hijos se crean EN SERIE y no con `Promise.all`, para que su `createdAt`
- * respete el orden de los nombres. Los tests de orden estable que necesitan lo
- * contrario —varias filas en el mismo instante— fuerzan la fecha a mano.
- */
 export async function familiaConHijos(
   app: Express,
   nombres: string[],

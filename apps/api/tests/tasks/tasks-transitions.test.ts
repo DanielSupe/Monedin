@@ -44,8 +44,6 @@ describe("el niño marca su tarea como hecha", () => {
     expect(response.status).toBe(200);
     expect(response.body.status).toBe("COMPLETED");
 
-    // Marcarla no paga: es lo que hace que la aprobación del padre signifique
-    // algo.
     expect(await saldoDe(ana.id)).toBe(0);
     expect(await movimientosDe(tarea.id)).toHaveLength(0);
   }, 120_000);
@@ -181,7 +179,6 @@ describe("rechazar devuelve la tarea a pendiente", () => {
     expect(response.body.status).toBe("PENDING");
     expect(await saldoDe(ana.id)).toBe(0);
 
-    // Y el niño la reintenta.
     await completar(ana.cookies, tarea.id).expect(200);
     expect(await estadoDe(tarea.id)).toBe("COMPLETED");
   }, 120_000);
@@ -262,7 +259,6 @@ describe("editar y borrar, solo mientras está pendiente", () => {
     expect((await editar(cookies, tarea.id, { coins: 999 })).status).toBe(409);
     expect((await borrar(cookies, tarea.id)).status).toBe(409);
 
-    // Y sigue igual que estaba.
     const detalle = await request(app)
       .get(`${API_PREFIX}/tasks/${tarea.id}`)
       .set("Cookie", cookies);
@@ -360,7 +356,7 @@ describe("qué no sale en las respuestas", () => {
       const cuerpo = JSON.stringify(response.body);
       expect(cuerpo).not.toContain("parentId");
       expect(cuerpo).not.toContain(parentId);
-      // Ni rastro del hermano en la tarea de Ana.
+
       expect(cuerpo).not.toContain(hijos[1]!.id);
     }
   }, 240_000);

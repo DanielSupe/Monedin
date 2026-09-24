@@ -1,288 +1,145 @@
 @import "tailwindcss";
 
-/*
- * La tipografía de la marca, AUTOALOJADA. No es un CDN: el paquete trae los
- * archivos y los sirve nuestro propio origen, así que en tiempo de ejecución no
- * sale nada a la red. Ni una IP de una familia llega a un tercero.
- *
- * `wght.css` y no un subconjunto suelto: declara cada subconjunto con su
- * `unicode-range`, así que el navegador descarga SOLO el que necesita —para el
- * español, `latin`, 38 KB— y nunca el cirílico ni el vietnamita. Sin la variante
- * itálica, que este producto no usa.
- *
- * El import va aquí y no en cada punto de entrada porque `main.tsx` y
- * `ui-catalog.tsx` ya importan este archivo. Si estuviera solo en el primero, el
- * catálogo vivo enseñaría las piezas con otra tipografía que la aplicación.
- */
 @import "@fontsource-variable/nunito/wght.css";
 
-/**
- * Tokens de Monedín. Fuente ÚNICA de todo valor visual del front.
- *
- * Mismo criterio que `constants/domain.ts` con los límites de negocio: si un
- * valor tiene significado, vive aquí y en ningún otro sitio. Ningún componente
- * escribe un color, un radio, un espaciado ni una duración literal.
- *
- * Tres capas, y un componente SOLO puede usar la de en medio:
- *
- *   CAPA 1  primitivos     --mnd-amber-400      la paleta cruda
- *   CAPA 2  semánticos     --color-coin         lo ÚNICO que usa un componente
- *   CAPA 3  escala         --text-hero          lo mismo, con otro valor por audiencia
- *
- * La capa 1 vive en `:root` a propósito y NO en `@theme`: así Tailwind no genera
- * ninguna utilidad para ella y `bg-mnd-amber-400` sencillamente no existe. La
- * regla «solo la capa 2» no depende de que nadie se despiste.
- *
- * Por qué importa: el modo oscuro será después reasignar la capa 2 y nada más.
- * Si un componente apuntara a la paleta, habría que visitarlos todos. Es la
- * misma razón por la que la API guarda la CLAVE de una imagen y nunca su URL.
- */
-
-/* ------------------------------------------------------------------ *
- * CAPA 1 — Primitivos. No se usan en un componente. No generan utilidad.
- * ------------------------------------------------------------------ */
-
 :root {
-  /* Neutros, con una pizca de azul para que el gris no sea sucio. */
-  --mnd-slate-0: oklch(100% 0 0);
-  --mnd-slate-50: oklch(98.5% 0.003 265);
-  --mnd-slate-100: oklch(96.5% 0.005 265);
-  --mnd-slate-200: oklch(92% 0.008 265);
-  --mnd-slate-300: oklch(85% 0.012 265);
-  --mnd-slate-500: oklch(58% 0.018 265);
-  --mnd-slate-900: oklch(25% 0.024 265);
+  --mnd-arena-0: oklch(100% 0 0);
+  --mnd-arena-50: oklch(97.9% 0.017 76);
+  --mnd-arena-100: oklch(96% 0.018 81);
+  --mnd-arena-200: oklch(93.6% 0.022 83);
+  --mnd-arena-300: oklch(92.9% 0.022 77);
+  --mnd-arena-400: oklch(88.2% 0.028 76);
+  --mnd-arena-500: oklch(80.2% 0.024 70);
+  --mnd-arena-600: oklch(66.3% 0.024 50);
+  --mnd-arena-700: oklch(49.6% 0.025 72);
+  --mnd-arena-900: oklch(27.6% 0.037 298);
 
-  /*
-   * Índigo: la acción, y desde `polish-brand-surface` también la superficie del
-   * acceso.
-   *
-   * Los pasos oscuros son para pintar un panel entero; los claros, para lo que
-   * va ENCIMA de ese panel —texto secundario y trazas—, porque sobre un fondo
-   * oscuro la tinta se invierte en vez de templarse.
-   */
-  --mnd-indigo-100: oklch(94% 0.03 275);
-  --mnd-indigo-200: oklch(88% 0.05 275);
-  --mnd-indigo-300: oklch(80% 0.08 275);
-  --mnd-indigo-500: oklch(55% 0.19 275);
-  --mnd-indigo-600: oklch(48% 0.19 275);
-  --mnd-indigo-700: oklch(40% 0.15 273);
-  --mnd-indigo-800: oklch(31% 0.11 272);
+  --mnd-coral-100: oklch(95% 0.026 38);
+  --mnd-coral-200: oklch(93.4% 0.026 42);
+  --mnd-coral-300: oklch(91.4% 0.046 40);
+  --mnd-coral-400: oklch(84.4% 0.06 43);
+  --mnd-coral-500: oklch(83.5% 0.094 38);
+  --mnd-coral-600: oklch(73.2% 0.167 36);
+  --mnd-coral-700: oklch(70.7% 0.187 34);
+  --mnd-coral-800: oklch(66.1% 0.202 32);
+  --mnd-coral-900: oklch(56.8% 0.171 33);
+  --mnd-coral-apagado: oklch(56.1% 0.133 35);
 
-  /*
-   * Ámbar: la MONEDA y la MASCOTA. Nada más.
-   *
-   * Llegó a pintar el panel entero del acceso y ahí estuvo el error: un color
-   * que lo cubre todo deja de significar algo. Sobre el índigo profundo, un
-   * punto ámbar ES dinero. Tres pasos bastan porque ya no tiene que modelar
-   * ninguna superficie.
-   *
-   * DECÍA «la moneda, y SOLO la moneda», y `redesign-assistant-chat` lo
-   * reasignó a conciencia. La mascota entra y no lo diluye, porque Monedín ES
-   * una moneda: no son dos cosas que comparten color por casualidad, son la
-   * misma. Que su voz lleve el color del dinero apunta al mismo referente en vez
-   * de gastarlo.
-   *
-   * Lo que la reserva existía para impedir sigue prohibido palabra por palabra:
-   * un botón cualquiera, una tarjeta cualquiera, un aviso cualquiera. Y desde
-   * ese change lo comprueba un TEST con lista cerrada de archivos autorizados,
-   * en vez de este comentario — que es lo que hace que relajar la regla la haya
-   * dejado más fuerte que antes.
-   */
-  --mnd-amber-100: oklch(96% 0.05 85);
-  --mnd-amber-400: oklch(80% 0.16 80);
-  --mnd-amber-800: oklch(45% 0.11 70);
+  --mnd-violeta-100: oklch(94.1% 0.027 297);
+  --mnd-violeta-200: oklch(89.9% 0.048 296);
+  --mnd-violeta-300: oklch(89.2% 0.051 296);
+  --mnd-violeta-400: oklch(76.9% 0.109 295);
+  --mnd-violeta-500: oklch(60.1% 0.191 291);
+  --mnd-violeta-600: oklch(57.4% 0.193 290);
+  --mnd-violeta-700: oklch(52.8% 0.202 288);
+  --mnd-violeta-800: oklch(45.8% 0.197 288);
+  --mnd-violeta-900: oklch(39.1% 0.164 287);
+  --mnd-violeta-950: oklch(37% 0.164 286);
 
-  /*
-   * Los componentes sueltos del índigo profundo, sin envolver en `oklch()`.
-   *
-   * Una sombra necesita el color CON alfa, y la barra de alfa solo funciona
-   * dentro de la función: `var(--algo) / 0.3` no es CSS válido. Guardando los
-   * componentes se compone `oklch(var(--mnd-indigo-shadow) / 0.3)` sin repetir
-   * los números, que es como el bloque de sombras claras acabó duplicando el
-   * valor de `slate-900`.
-   */
-  --mnd-indigo-shadow: 20% 0.08 272;
+  --mnd-amber-100: oklch(97% 0.032 85);
+  --mnd-amber-400: oklch(82% 0.151 82);
+  --mnd-amber-600: oklch(62.3% 0.124 72);
+  --mnd-amber-800: oklch(50.8% 0.103 71);
 
-  /* Los cuatro tonos de aviso. */
-  --mnd-green-100: oklch(95% 0.04 150);
-  --mnd-green-600: oklch(52% 0.14 150);
-  --mnd-orange-100: oklch(96% 0.04 65);
-  --mnd-orange-700: oklch(52% 0.14 55);
   --mnd-red-100: oklch(95% 0.03 25);
   --mnd-red-600: oklch(52% 0.2 27);
-  --mnd-blue-100: oklch(95% 0.03 240);
-  --mnd-blue-600: oklch(52% 0.15 245);
+
+  --mnd-noche-0: oklch(21.2% 0.021 312);
+  --mnd-noche-100: oklch(24.2% 0.029 310);
+  --mnd-noche-200: oklch(25.8% 0.032 300);
+  --mnd-noche-300: oklch(30.4% 0.032 303);
+  --mnd-noche-400: oklch(30.7% 0.039 302);
+  --mnd-noche-500: oklch(37.2% 0.041 304);
+  --mnd-noche-tinta: oklch(95.7% 0.01 73);
+
+  --mnd-coral-noche: oklch(29.5% 0.037 35);
+  --mnd-violeta-noche: oklch(30.1% 0.056 295);
+  --mnd-amber-noche: oklch(32.4% 0.033 79);
+
+  --mnd-violeta-claro: oklch(62.4% 0.192 291);
+  --mnd-amber-claro: oklch(85.7% 0.111 82);
+  --mnd-coral-claro: oklch(72.9% 0.115 38);
+
+  --mnd-violeta-shadow: 24% 0.07 290;
+  --mnd-arena-shadow: 27.6% 0.037 298;
 }
 
-/* ------------------------------------------------------------------ *
- * CAPA 2 — Semánticos. Lo ÚNICO que un componente tiene permitido usar.
- * ------------------------------------------------------------------ */
-
 @theme {
-  /* Superficies y tinta. */
-  --color-surface: var(--mnd-slate-50);
-  --color-surface-raised: var(--mnd-slate-0);
-  --color-surface-sunken: var(--mnd-slate-100);
-  --color-ink: var(--mnd-slate-900);
-  --color-ink-muted: var(--mnd-slate-500);
-  --color-ink-inverted: var(--mnd-slate-0);
-  --color-border: var(--mnd-slate-200);
-  --color-border-strong: var(--mnd-slate-300);
+  --color-surface: var(--mnd-arena-50);
+  --color-surface-raised: var(--mnd-arena-0);
+  --color-surface-sunken: var(--mnd-arena-200);
+  --color-ink: var(--mnd-arena-900);
+  --color-ink-muted: var(--mnd-arena-700);
 
-  /* Acción. */
-  --color-primary: var(--mnd-indigo-500);
-  --color-primary-hover: var(--mnd-indigo-600);
-  --color-primary-soft: var(--mnd-indigo-100);
+  --color-ink-inverted: var(--mnd-arena-0);
+  --color-border: var(--mnd-arena-300);
+  --color-border-strong: var(--mnd-arena-400);
 
-  /*
-   * La moneda, y la voz de la mascota. RESERVADO: si el ámbar también pinta
-   * botones o tarjetas genéricos deja de significar «monedas», que es lo único
-   * que este color existe para decir.
-   *
-   * La reserva NO vive en este comentario. La comprueba
-   * `tests/ui/style-rules.test.ts` con una lista cerrada de archivos: uno que no
-   * esté en ella y use `bg-coin-soft` hace fallar la verificación. Añadirse a la
-   * lista es una decisión visible en una revisión; acordarse de un comentario,
-   * no lo era.
-   */
-  /*
-   * El color de la MARCA como superficie, para las pantallas que se pintan
-   * enteras con él —hoy el acceso y el registro—.
-   *
-   * Es índigo profundo y NO ámbar, y esa fue la corrección grande. El acceso es
-   * la única pantalla del producto que mira un adulto: la calidez le
-   * corresponde al niño —su inicio, sus tareas, sus premios— y en la puerta se
-   * lee como juguete justo donde alguien decide si esto es de fiar.
-   *
-   * El ámbar no desaparece, cambia de papel: deja de ser el fondo y pasa a ser
-   * el ACENTO. Pintando media pantalla no decía nada; sobre índigo, un punto
-   * ámbar es dinero.
-   */
-  --color-brand: var(--mnd-indigo-800);
-  /** El pie del degradado de un panel de marca: es lo que le da cuerpo. */
-  --color-brand-deep: var(--mnd-indigo-700);
-  /** Trazos y bordes DIBUJADOS sobre la marca, que tienen que distinguirse. */
-  --color-brand-line: var(--mnd-indigo-600);
-  /** Y el apagado, para lo que solo tiene que insinuarse: la traza de una órbita. */
-  --color-brand-soft: var(--mnd-indigo-300);
+  --color-primary: var(--mnd-coral-700);
+  --color-primary-hover: var(--mnd-coral-800);
+  --color-primary-soft: var(--mnd-coral-100);
 
-  /*
-   * El velo del recorrido de bienvenida: lo que atenúa la pantalla alrededor de
-   * lo que se está explicando. Va aquí y no en el punto de uso porque es un
-   * color, y ningún componente escribe un color.
-   */
-  --color-spotlight-veil: oklch(25% 0.024 265 / 0.72);
+  --color-brand: var(--mnd-violeta-800);
+
+  --color-brand-deep: var(--mnd-violeta-950);
+
+  --color-brand-line: var(--mnd-violeta-600);
+
+  --color-brand-soft: var(--mnd-violeta-400);
+
+  --color-spotlight-veil: oklch(var(--mnd-arena-shadow) / 0.72);
+
+  --color-on-coin: var(--mnd-amber-800);
+  --color-danger-solid: var(--mnd-red-600);
 
   --color-coin: var(--mnd-amber-400);
   --color-coin-soft: var(--mnd-amber-100);
   --color-coin-ink: var(--mnd-amber-800);
 
-  /* Los cuatro tonos de aviso, cada uno con su fondo suave y su tinta. */
-  --color-info: var(--mnd-blue-600);
-  --color-info-soft: var(--mnd-blue-100);
-  --color-success: var(--mnd-green-600);
-  --color-success-soft: var(--mnd-green-100);
-  --color-warning: var(--mnd-orange-700);
-  --color-warning-soft: var(--mnd-orange-100);
+  --color-done: var(--mnd-violeta-700);
+  --color-done-soft: var(--mnd-violeta-100);
+  --color-info: var(--mnd-arena-700);
+  --color-info-soft: var(--mnd-arena-200);
+  --color-conflict: var(--mnd-coral-apagado);
+  --color-conflict-soft: var(--mnd-coral-200);
   --color-danger: var(--mnd-red-600);
   --color-danger-soft: var(--mnd-red-100);
 
-  /*
-   * Familia de la marca. Redondeada, y AHORA en todos los dispositivos.
-   *
-   * Antes esto era solo una pila del sistema, y el resultado era que la marca se
-   * veía distinta en cada aparato de la familia: redondeada en Apple, y en
-   * Windows y Android lo que hubiera. Elegíamos una cosa y en la mitad de los
-   * casos se entregaba otra, incluida la tablet compartida, que es el escenario
-   * más probable del producto.
-   *
-   * La pila se queda DETRÁS y no es decorativa: si la fuente tarda o falla, lo
-   * peor que pasa es que se vea como se veía ayer. Sin ella, el navegador daría
-   * su serif por defecto — Times New Roman en una aplicación para niños.
-   */
   --font-sans: "Nunito Variable", ui-rounded, "SF Pro Rounded", "Segoe UI Variable", "Segoe UI",
     system-ui, sans-serif;
 
-  --shadow-card: 0 1px 2px oklch(25% 0.024 265 / 0.06), 0 4px 12px oklch(25% 0.024 265 / 0.05);
-  --shadow-raised: 0 2px 4px oklch(25% 0.024 265 / 0.08), 0 12px 28px oklch(25% 0.024 265 / 0.08);
+  --shadow-card:
+    0 1px 2px oklch(var(--mnd-arena-shadow) / 0.06), 0 4px 12px oklch(var(--mnd-arena-shadow) / 0.05);
+  --shadow-raised:
+    0 2px 4px oklch(var(--mnd-arena-shadow) / 0.08), 0 12px 28px oklch(var(--mnd-arena-shadow) / 0.08);
 
-  /*
-   * QUIÉN TAPA A QUIÉN. Dos capas flotantes, y el orden se lee aquí.
-   *
-   * Hasta `add-assistant-access` esto era un `z-50` escrito a mano dentro de
-   * `Toast.tsx`, el único número de apilado del proyecto. Con una sola capa
-   * flotante nadie lo notaba; en cuanto hay dos que ocupan el MISMO píxel —la
-   * esquina inferior derecha— dos números en dos archivos distintos son dos
-   * decisiones que nadie ha comparado.
-   *
-   * Se nombran por su PAPEL y no por su valor, igual que un color: el punto de
-   * uso pide «la capa del aviso», no un número.
-   *
-   * EL AVISO VA ENCIMA, y es la decisión, no una casualidad del orden: un aviso
-   * que dice «tarea aprobada» tapando una mascota decorativa es inofensivo; una
-   * mascota tapando el aviso esconde información que alguien necesita.
-   */
   --z-index-widget: 40;
   --z-index-toast: 50;
 
-  /* Anchos con nombre, para que ninguna pieza escriba `max-w-[28rem]`. */
   --container-dialog: 28rem;
   --container-reading: 40rem;
   --container-orbit: 20rem;
-  /*
-   * El escenario de las órbitas en la puerta pública, donde son protagonistas y
-   * no un adorno lateral. Es solo el ESCENARIO: los radios de los anillos siguen
-   * siendo los que son, para no ampliar la excepción de estilo en línea que los
-   * cubre.
-   */
+
   --container-orbit-hero: 26rem;
-  /* La tesela de un premio. Con dos columnas y sin tope, a 1150px cada una
-     pasaba de 450px: una foto de producto del tamaño de media pantalla. */
+
   --container-tile: 18.75rem;
-  /* La tarjeta del catálogo del padre: la misma idea que la tesela del niño,
-     más ancha porque lleva tres controles y la lista de a quién se le ofrece. */
+
   --container-card: 24rem;
   --container-wide: 72rem;
-  /* El lateral de navegación. `max-w-full` detrás, para que a 320px no desborde. */
-  --container-sidebar: 17rem;
-  /* Contraído: cabe un icono con su área de toque y nada más. */
+
+  --container-sidebar: 15rem;
+  --container-sidebar-wide: 17rem;
+
   --container-sidebar-collapsed: 4.5rem;
 
-  /*
-   * El giro de las órbitas de la puerta pública. Los dos sentidos son tokens
-   * porque `animate-[girar_linear_infinite]` sería un valor arbitrario, y esos
-   * están prohibidos. La DURACIÓN la pone cada órbita, porque es geometría.
-   */
   --animate-orbit: mnd-orbit linear infinite;
   --animate-orbit-reverse: mnd-orbit-reverse linear infinite;
 
-  /*
-   * La cinta del acceso: lo mismo que orbita en la puerta pública, en línea
-   * recta. La tira se escribe DOS veces y se desplaza la mitad, así que al
-   * terminar la copia está exactamente donde empezó la primera y el salto no se
-   * ve. Aquí la duración SÍ va en el token: no es geometría, es una sola tira.
-   */
   --animate-strip: mnd-strip 32s linear infinite;
 
-  /*
-   * El disco del acceso. Los dos sentidos y la MISMA duración: el aro gira y
-   * cada emoji gira al revés a la vez, así que orbita sin ponerse cabeza abajo.
-   * Con la duración dentro del token no hace falta un valor arbitrario ni una
-   * excepción de estilos en línea, que es lo que sí necesitan las órbitas de la
-   * puerta pública porque su geometría se calcula.
-   */
   --animate-disc: mnd-orbit 44s linear infinite;
   --animate-disc-reverse: mnd-orbit-reverse 44s linear infinite;
-  /*
-   * El anillo de fuera va más lento. Es lo mismo que hacen las órbitas de la
-   * puerta pública: cuanto más fuera, más despacio, para que el conjunto se lea
-   * como un sistema y no como tres cosas girando.
-   */
-  /*
-   * La frase de Monedín al relevarse. Corta y solo de entrada: lo que sale no se
-   * despide, se sustituye, y animar la salida obligaría a mantener dos frases
-   * montadas a la vez para nada.
-   */
+
   --animate-fade-in: mnd-fade-in var(--duration-normal) ease-out;
 
   --animate-disc-slow: mnd-orbit 70s linear infinite;
@@ -313,112 +170,188 @@
   }
 }
 
-/* ------------------------------------------------------------------ *
- * Los neutros dependen de DÓNDE están.
- *
- * Es el mismo mecanismo que la escala, y por eso se eligió: un token no cambia
- * de significado —«texto secundario» sigue siendo texto secundario—, cambia de
- * VALOR según dónde está. Una pieza sigue pidiendo `text-ink` sin saber sobre
- * qué superficie la han apoyado, que es justo lo que la capa semántica existe
- * para permitir.
- *
- *   La escala                      La superficie
- *   ─────────                      ─────────────
- *   [data-scale="child"]           [data-surface="brand"]
- *   --text-hero: 4rem              --color-ink: claro
- *   --radius-card: 1.5rem          --color-surface-raised: oscuro
- *   por AUDIENCIA                  por FONDO
- *
- * SOBRE OSCURO NO BASTA CON INVERTIR LA TINTA, y esa es la trampa. Si solo
- * cambiara `--color-ink`, la etiqueta de un campo quedaría bien y el TEXTO
- * DENTRO del campo saldría claro sobre un campo blanco. Por eso la superficie
- * reasigna también las superficies: `--color-surface-raised` pasa a índigo, el
- * campo deja de ser una píldora blanca y pasa a ser un campo oscuro con texto
- * claro, y `Input` y `Field` componen solos sin enterarse.
- *
- * `Alert` NO compone, porque sus cuatro tonos traen su propio fondo claro. Lo
- * resuelve la pantalla del registro, y está explicado allí.
- *
- * NADA de esto sale de este selector, así que el resto de la aplicación no se
- * entera. Eso hay que comprobarlo abriendo pantallas, no suponerlo: es el
- * riesgo real de tocar tokens y no lo cubre ningún test.
- * ------------------------------------------------------------------ */
-
 [data-surface="brand"] {
-  --color-ink: var(--mnd-slate-0);
-  --color-ink-muted: var(--mnd-indigo-200);
+  --color-ink: var(--mnd-arena-0);
+  --color-ink-muted: var(--mnd-violeta-200);
 
-  /* Un campo sobre el panel es más CLARO que él, no blanco: sobre oscuro, una
-     píldora blanca es un agujero. */
-  --color-surface-raised: var(--mnd-indigo-700);
-  --color-surface-sunken: var(--mnd-indigo-800);
-  --color-border: var(--mnd-indigo-600);
-  --color-border-strong: var(--mnd-indigo-500);
+  --color-surface-raised: var(--mnd-violeta-800);
+  --color-surface-sunken: var(--mnd-violeta-900);
+  --color-border: var(--mnd-violeta-600);
+  --color-border-strong: var(--mnd-violeta-500);
 
-  /* Sombras más profundas: sobre un fondo oscuro, la sombra clara del sistema
-     no separa nada. */
   --shadow-card:
-    0 1px 2px oklch(var(--mnd-indigo-shadow) / 0.3), 0 4px 12px oklch(var(--mnd-indigo-shadow) / 0.25);
+    0 1px 2px oklch(var(--mnd-violeta-shadow) / 0.3), 0 4px 12px oklch(var(--mnd-violeta-shadow) / 0.25);
   --shadow-raised:
-    0 2px 4px oklch(var(--mnd-indigo-shadow) / 0.35), 0 12px 28px oklch(var(--mnd-indigo-shadow) / 0.4);
+    0 2px 4px oklch(var(--mnd-violeta-shadow) / 0.35), 0 12px 28px oklch(var(--mnd-violeta-shadow) / 0.4);
 }
 
-/*
- * Vuelta a la superficie CLARA, para lo que trae su propio fondo claro dentro
- * de una superficie de color.
- *
- * `Alert` pinta su fondo suave y su borde: es una superficie clara esté donde
- * esté. Sin esto, dentro del acceso su cuerpo heredaba la tinta clara del panel
- * y salía blanco sobre azul claro. Pasó, y no lo caza ningún test.
- *
- * Repite las referencias a los primitivos, no sus valores: si un primitivo
- * cambia, este bloque lo sigue. Es la contrapartida de que una superficie pueda
- * reasignar neutros, y hace falta en cuanto una anida dentro de otra.
- */
+@theme inline {
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-ink);
+  --color-card: var(--color-surface-raised);
+  --color-card-foreground: var(--color-ink);
+  --color-popover: var(--color-surface-raised);
+  --color-popover-foreground: var(--color-ink);
+  --color-primary-foreground: var(--color-ink-inverted);
+  --color-secondary: var(--color-surface-sunken);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: var(--color-surface-sunken);
+  --color-muted-foreground: var(--color-ink-muted);
+  --color-accent: var(--color-primary-soft);
+  --color-accent-foreground: var(--color-primary-hover);
+  --color-destructive: var(--color-danger);
+  --color-input: var(--color-border-strong);
+  --color-ring: var(--color-primary);
+}
+
+:root {
+  --noche-surface: var(--mnd-noche-0);
+  --noche-surface-raised: var(--mnd-noche-200);
+  --noche-surface-sunken: var(--mnd-noche-300);
+  --noche-ink: var(--mnd-noche-tinta);
+  --noche-ink-muted: var(--mnd-arena-500);
+  --noche-border: var(--mnd-noche-400);
+  --noche-border-strong: var(--mnd-noche-500);
+  --noche-primary: var(--mnd-coral-700);
+  --noche-primary-hover: var(--mnd-coral-600);
+  --noche-primary-soft: var(--mnd-coral-noche);
+  --noche-brand: var(--mnd-violeta-800);
+  --noche-brand-deep: var(--mnd-violeta-950);
+  --noche-brand-line: var(--mnd-violeta-600);
+  --noche-brand-soft: var(--mnd-violeta-400);
+  --noche-spotlight-veil: oklch(12% 0.02 300 / 0.78);
+  --noche-coin: var(--mnd-amber-400);
+  --noche-coin-soft: var(--mnd-amber-noche);
+  --noche-coin-ink: var(--mnd-amber-claro);
+  --noche-done: var(--mnd-violeta-claro);
+  --noche-done-soft: var(--mnd-violeta-noche);
+  --noche-info: var(--mnd-arena-500);
+  --noche-info-soft: var(--mnd-noche-300);
+  --noche-conflict: var(--mnd-coral-claro);
+  --noche-conflict-soft: var(--mnd-coral-noche);
+  --noche-danger: var(--mnd-red-100);
+  --noche-danger-soft: oklch(28% 0.08 25);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-surface: var(--noche-surface);
+    --color-surface-raised: var(--noche-surface-raised);
+    --color-surface-sunken: var(--noche-surface-sunken);
+    --color-ink: var(--noche-ink);
+    --color-ink-muted: var(--noche-ink-muted);
+    --color-border: var(--noche-border);
+    --color-border-strong: var(--noche-border-strong);
+    --color-primary: var(--noche-primary);
+    --color-primary-hover: var(--noche-primary-hover);
+    --color-primary-soft: var(--noche-primary-soft);
+    --color-brand: var(--noche-brand);
+    --color-brand-deep: var(--noche-brand-deep);
+    --color-brand-line: var(--noche-brand-line);
+    --color-brand-soft: var(--noche-brand-soft);
+    --color-spotlight-veil: var(--noche-spotlight-veil);
+    --color-coin: var(--noche-coin);
+    --color-coin-soft: var(--noche-coin-soft);
+    --color-coin-ink: var(--noche-coin-ink);
+    --color-done: var(--noche-done);
+    --color-done-soft: var(--noche-done-soft);
+    --color-info: var(--noche-info);
+    --color-info-soft: var(--noche-info-soft);
+    --color-conflict: var(--noche-conflict);
+    --color-conflict-soft: var(--noche-conflict-soft);
+    --color-danger: var(--noche-danger);
+    --color-danger-soft: var(--noche-danger-soft);
+
+    --tema-ink: var(--noche-ink);
+    --tema-ink-muted: var(--noche-ink-muted);
+    --tema-surface-raised: var(--noche-surface-raised);
+    --tema-surface-sunken: var(--noche-surface-sunken);
+    --tema-border: var(--noche-border);
+    --tema-border-strong: var(--noche-border-strong);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-surface: var(--noche-surface);
+  --color-surface-raised: var(--noche-surface-raised);
+  --color-surface-sunken: var(--noche-surface-sunken);
+  --color-ink: var(--noche-ink);
+  --color-ink-muted: var(--noche-ink-muted);
+  --color-border: var(--noche-border);
+  --color-border-strong: var(--noche-border-strong);
+  --color-primary: var(--noche-primary);
+  --color-primary-hover: var(--noche-primary-hover);
+  --color-primary-soft: var(--noche-primary-soft);
+  --color-brand: var(--noche-brand);
+  --color-brand-deep: var(--noche-brand-deep);
+  --color-brand-line: var(--noche-brand-line);
+  --color-brand-soft: var(--noche-brand-soft);
+  --color-spotlight-veil: var(--noche-spotlight-veil);
+  --color-coin: var(--noche-coin);
+  --color-coin-soft: var(--noche-coin-soft);
+  --color-coin-ink: var(--noche-coin-ink);
+  --color-done: var(--noche-done);
+  --color-done-soft: var(--noche-done-soft);
+  --color-info: var(--noche-info);
+  --color-info-soft: var(--noche-info-soft);
+  --color-conflict: var(--noche-conflict);
+  --color-conflict-soft: var(--noche-conflict-soft);
+  --color-danger: var(--noche-danger);
+  --color-danger-soft: var(--noche-danger-soft);
+
+  --tema-ink: var(--noche-ink);
+  --tema-ink-muted: var(--noche-ink-muted);
+  --tema-surface-raised: var(--noche-surface-raised);
+  --tema-surface-sunken: var(--noche-surface-sunken);
+  --tema-border: var(--noche-border);
+  --tema-border-strong: var(--noche-border-strong);
+}
+
+:root {
+  --tema-ink: var(--mnd-arena-900);
+  --tema-ink-muted: var(--mnd-arena-700);
+  --tema-surface-raised: var(--mnd-arena-0);
+  --tema-surface-sunken: var(--mnd-arena-200);
+  --tema-border: var(--mnd-arena-300);
+  --tema-border-strong: var(--mnd-arena-400);
+}
+
 [data-surface="default"] {
-  --color-ink: var(--mnd-slate-900);
-  --color-ink-muted: var(--mnd-slate-500);
-  --color-surface-raised: var(--mnd-slate-0);
-  --color-surface-sunken: var(--mnd-slate-100);
-  --color-border: var(--mnd-slate-200);
-  --color-border-strong: var(--mnd-slate-300);
+  --color-ink: var(--tema-ink);
+  --color-ink-muted: var(--tema-ink-muted);
+  --color-surface-raised: var(--tema-surface-raised);
+  --color-surface-sunken: var(--tema-surface-sunken);
+  --color-border: var(--tema-border);
+  --color-border-strong: var(--tema-border-strong);
 }
-
-/* ------------------------------------------------------------------ *
- * CAPA 3 — Escala. El MISMO token con otro valor según la audiencia.
- *
- * Monedín son dos productos en una app. La diferencia no se resuelve
- * duplicando piezas ni con una prop `size` que cada pantalla puede
- * equivocar: se declara UNA vez, en el contenedor, donde ya se sabe quién
- * está operando. Ver decisión 3 del design.
- *
- * Estos valores NO van en `@theme` para no chocar con utilidades nativas
- * —`text-balance` ya existe en Tailwind y significa otra cosa— y para que
- * cada uno tenga un solo origen. Las utilidades se declaran abajo a mano.
- *
- * `add-app-shell` pondrá el atributo. Hasta entonces lo declara el catálogo
- * vivo, y la escala del padre es la de por defecto.
- * ------------------------------------------------------------------ */
 
 :root,
-[data-scale="parent"] {
-  --text-hero: 1.75rem;
-  --text-title: 1.375rem;
-  --text-body: 1rem;
-  --text-small: 0.875rem;
 
-  --radius-control: 0.5rem;
-  --radius-card: 0.75rem;
-  /* La lámina blanca que sube desde abajo en el acceso. */
+[data-scale="parent"] {
+  --font-weight-normal: 700;
+  --font-weight-medium: 700;
+  --font-weight-semibold: 800;
+  --font-weight-bold: 900;
+  --font-weight-extrabold: 900;
+  --font-weight-black: 900;
+
+  --text-micro: 0.75rem;
+  --text-small: 0.8125rem;
+  --text-body: 0.875rem;
+  --text-lead: 1rem;
+  --text-title: 1.1875rem;
+  --text-display: 1.625rem;
+  --text-hero: 2.75rem;
+
+  --radius-control: 0.75rem;
+  --radius-card: 1.125rem;
+  --radius-panel: 1.625rem;
+  --radius-pill: 999px;
+
   --radius-sheet: 2rem;
 
-  /* 40px: un padre usa el pulgar sobre una lista densa. */
   --tap-min: 2.5rem;
-  /*
-   * 56px: la acción de una página que CONVENCE, no la de un formulario que ya
-   * se está rellenando. En el segundo la acción ya se está mirando; en el
-   * primero hay que encontrarla.
-   */
+
   --tap-large: 3.5rem;
 
   --duration-quick: 120ms;
@@ -426,24 +359,64 @@
   --duration-slow: 320ms;
 }
 
-/* Se repite el bloque del padre porque una escala puede anidarse dentro de la
-   otra: sin esto, un panel del padre dentro de uno del niño heredaría la suya. */
 [data-scale="child"] {
-  /* El saldo es el elemento más grande de la aplicación, y es a propósito:
-     es lo que el producto enseña. */
+  --text-micro: 0.75rem;
+  --text-small: 0.875rem;
+  --text-body: 0.9375rem;
+  --text-lead: 1.125rem;
+  --text-title: 1.3125rem;
+  --text-display: 1.625rem;
   --text-hero: 4rem;
-  --text-title: 1.75rem;
-  --text-body: 1.125rem;
-  --text-small: 1rem;
 
   --radius-control: 0.875rem;
-  --radius-card: 1.5rem;
+  --radius-card: 1.375rem;
 
-  /* 44px es el mínimo, no el objetivo. Lo exige la spec. */
   --tap-min: 2.75rem;
 }
 
-/* Las utilidades de la capa 3, para que ninguna pieza escriba una medida. */
+[data-scale="public"] {
+  --text-micro: 0.8125rem;
+  --text-small: 1rem;
+  --text-body: 1.125rem;
+  --text-lead: 1.25rem;
+  --text-title: 1.5rem;
+  --text-display: 2.125rem;
+  --text-hero: 3.625rem;
+}
+
+[data-scale="entry"] {
+  --text-micro: 0.8125rem;
+  --text-small: 0.9375rem;
+  --text-body: 1rem;
+  --text-lead: 1.125rem;
+  --text-title: 1.5rem;
+  --text-display: 1.75rem;
+  --text-hero: 2.75rem;
+}
+
+@media (width < 40rem) {
+  [data-scale="public"] {
+    --text-title: 1.5rem;
+    --text-display: 2rem;
+    --text-hero: 2.25rem;
+  }
+}
+
+@utility text-micro {
+  font-size: var(--text-micro);
+  line-height: 1.4;
+}
+
+@utility text-lead {
+  font-size: var(--text-lead);
+  line-height: 1.35;
+}
+
+@utility text-display {
+  font-size: var(--text-display);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
 
 @utility text-hero {
   font-size: var(--text-hero);
@@ -465,17 +438,16 @@
   line-height: 1.45;
 }
 
+@utility rounded-pill {
+  border-radius: var(--radius-pill);
+}
+
 @utility rounded-control {
   border-radius: var(--radius-control);
 }
 
-/*
- * El radio de un PANEL. `rounded-card` son 0.75rem, correctos para una tarjeta
- * de lista y pequeños para media pantalla: con ellos un panel parece una caja.
- * Reutiliza el radio de la lámina, que ya describe «una superficie grande».
- */
 @utility rounded-panel {
-  border-radius: var(--radius-sheet);
+  border-radius: var(--radius-panel);
 }
 
 @utility rounded-t-sheet {
@@ -487,7 +459,6 @@
   border-radius: var(--radius-card);
 }
 
-/* Transicionar el tamaño sin escribir `transition-[width]` en el punto de uso. */
 @utility transition-size {
   transition-property: inline-size, block-size;
 }
@@ -497,7 +468,6 @@
   min-inline-size: var(--tap-min);
 }
 
-/* La talla mayor de una acción. La declara la pieza, nunca el punto de uso. */
 @utility tap-target-large {
   min-block-size: var(--tap-large);
   min-inline-size: var(--tap-large);
@@ -515,19 +485,17 @@
   transition-duration: var(--duration-slow);
 }
 
-/* ------------------------------------------------------------------ *
- * CAPA BASE — Cómo se ve el marcado desnudo.
- *
- * El reinicio de Tailwind quita los estilos del navegador: sin esto, un
- * `<input>` no tiene borde y es literalmente invisible. Definir el aspecto
- * de los elementos sin vestir es parte del sistema, no un parche: cuando
- * una pantalla se vista, esta capa deja de notarse en vez de borrarse.
- * Ver decisión 1b del design.
- * ------------------------------------------------------------------ */
-
 @layer base {
   html {
+    color-scheme: light dark;
+  }
+
+  :root[data-theme="light"] {
     color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
   }
 
   body {
@@ -535,18 +503,20 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: var(--text-body);
+
+    font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
 
   h1 {
     font-size: var(--text-hero);
-    font-weight: 800;
+    font-weight: var(--font-weight-bold);
     line-height: 1.1;
   }
 
   h2 {
     font-size: var(--text-title);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
     line-height: 1.25;
   }
 
@@ -555,7 +525,7 @@
   h5,
   h6 {
     font-size: var(--text-body);
-    font-weight: 700;
+    font-weight: var(--font-weight-bold);
   }
 
   a {
@@ -564,7 +534,6 @@
     text-underline-offset: 2px;
   }
 
-  /* Un control sin vestir tiene que verse y poder tocarse. */
   input,
   select,
   textarea {
@@ -595,7 +564,7 @@
     border-radius: var(--radius-control);
     background-color: var(--color-surface-raised);
     color: var(--color-ink);
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     cursor: pointer;
   }
 
@@ -604,17 +573,11 @@
     opacity: 0.55;
   }
 
-  /* El foco visible es un token, no una decisión de cada pantalla. */
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
 }
-
-/* ------------------------------------------------------------------ *
- * Movimiento reducido. Se respeta AQUÍ, en el sistema, para que ninguna
- * pantalla tenga que acordarse. Lo exige la spec.
- * ------------------------------------------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {
   :root,

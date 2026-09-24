@@ -8,7 +8,7 @@ import {
 } from "@monedin/contracts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createMemoryHistory, createRouter } from "@tanstack/react-router";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { routeTree } from "../../src/routeTree.gen";
 import { messages } from "../../src/lib/messages.js";
@@ -67,12 +67,6 @@ function pagina(items: unknown[], extra: { total?: number; totalPages?: number }
   };
 }
 
-/**
- * Sirve el panel entero.
- *
- * Va con router de verdad porque lo que hay que comprobar incluye A DÓNDE
- * llevan los avisos, y un doble del router diría que sí a todo.
- */
 async function montarPanel({
   repartos = [],
   totalPaginasDeTareas = 1,
@@ -128,36 +122,24 @@ async function montarPanel({
   return router;
 }
 
-/**
- * La trampa de este change.
- *
- * `GET /tasks?status=COMPLETED` pagina por REPARTO y devuelve el reparto
- * ENTERO, así que las dos cuentas obvias dan números equivocados en direcciones
- * opuestas. El caso de estados MEZCLADOS es el único que las distingue: con un
- * reparto de una sola tarea completada, las tres cuentas dan 1 y el test no
- * probaría nada.
- */
+async function avisoDe(etiqueta: string): Promise<HTMLElement> {
+  return (await screen.findByText(etiqueta)).closest("a") as HTMLElement;
+}
+
+function sinAvisoDe(etiqueta: string): boolean {
+  return screen.queryByText(etiqueta) === null;
+}
+
 describe("las tareas por aprobar se cuentan por fila, no por reparto", () => {
   it("un reparto con tres hermanos en estados distintos cuenta DOS", async () => {
     await montarPanel({ repartos: [reparto("b1", ["COMPLETED", "COMPLETED", "PENDING"])] });
 
-    /*
-     * DOS completadas y no una, a propósito: es lo que hace que las tres
-     * cuentas den números distintos y que este test las distinga.
-     *
-     *   total (repartos)            → 1
-     *   items.flatMap(b => b.tasks) → 3
-     *   filas en COMPLETED          → 2  ✓
-     *
-     * La primera versión usaba una sola completada, y entonces las tres daban
-     * 1: el test pasaba con la cuenta equivocada puesta. Comprobado
-     * inyectándola.
-     */
-    expect(
-      await screen.findByText(`2 ${messages.parents.tasksToApprove}`),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(`1 ${messages.parents.taskToApprove}`)).toBeNull();
-    expect(screen.queryByText(`3 ${messages.parents.tasksToApprove}`)).toBeNull();
+    const aviso = await avisoDe(messages.parents.tasksToApprove);
+
+    expect(within(aviso).getByText("2")).toBeInTheDocument();
+    expect(within(aviso).queryByText("3")).toBeNull();
+
+    expect(sinAvisoDe(messages.parents.taskToApprove)).toBe(true);
   });
 
   it("dos repartos con dos completadas cada uno cuentan CUATRO", async () => {
@@ -168,10 +150,9 @@ describe("las tareas por aprobar se cuentan por fila, no por reparto", () => {
       ],
     });
 
-    // Aquí `total` habría dicho 2 y contar filas habría dicho 5.
-    expect(
-      await screen.findByText(`4 ${messages.parents.tasksToApprove}`),
-    ).toBeInTheDocument();
+    const aviso = await avisoDe(messages.parents.tasksToApprove);
+
+    expect(within(aviso).getByText("4")).toBeInTheDocument();
   });
 });
 
@@ -179,9 +160,9 @@ describe("una cifra que se queda corta lo dice", () => {
   it("con todo en una página, la cifra es exacta", async () => {
     await montarPanel({ repartos: [reparto("b1", ["COMPLETED", "COMPLETED"])] });
 
-    expect(
-      await screen.findByText(`2 ${messages.parents.tasksToApprove}`),
-    ).toBeInTheDocument();
+    const aviso = await avisoDe(messages.parents.tasksToApprove);
+
+    expect(within(aviso).getByText("2")).toBeInTheDocument();
   });
 
   it("con más páginas, la cifra se marca como mínimo", async () => {
@@ -190,9 +171,10 @@ describe("una cifra que se queda corta lo dice", () => {
       totalPaginasDeTareas: 3,
     });
 
-    expect(
-      await screen.findByText(`2+ ${messages.parents.tasksToApprove}`),
-    ).toBeInTheDocument();
+    const aviso = await avisoDe(messages.parents.tasksToApprove);
+
+    expect(within(aviso).getByText("2+")).toBeInTheDocument();
+    expect(within(aviso).queryByText("2")).toBeNull();
   });
 });
 
@@ -207,18 +189,16 @@ describe("no tener nada pendiente es una respuesta, no dos ceros", () => {
   it("con solo una bandeja llena, la otra no aparece a cero", async () => {
     await montarPanel({ canjesPendientes: 2 });
 
-    expect(
-      await screen.findByText(`2 ${messages.parents.redemptionsWaiting}`),
-    ).toBeInTheDocument();
+    const aviso = await avisoDe(messages.parents.redemptionsWaiting);
+
+    expect(within(aviso).getByText("2")).toBeInTheDocument();
     expect(screen.queryByText(messages.parents.allClear)).toBeNull();
-    expect(screen.queryByText(`0 ${messages.parents.tasksToApprove}`)).toBeNull();
+
+    expect(sinAvisoDe(messages.parents.tasksToApprove)).toBe(true);
+    expect(sinAvisoDe(messages.parents.taskToApprove)).toBe(true);
   });
 });
 
-/**
- * Llevar al listado SIN filtro obligaría al padre a repetir a mano la búsqueda
- * que el panel acaba de hacer por él.
- */
 describe("cada aviso lleva a su listado ya filtrado", () => {
   it("el de tareas apunta a /tasks en COMPLETED", async () => {
     await montarPanel({ repartos: [reparto("b1", ["COMPLETED"])] });
@@ -243,14 +223,6 @@ describe("cada aviso lleva a su listado ya filtrado", () => {
   });
 });
 
-/**
- * El panel trae a los hijos en UNA página y no pagina.
- *
- * Eso solo es correcto mientras el máximo por familia quepa en el tamaño de
- * página. Es una relación entre dos constantes que nadie escribió a propósito, y
- * de las que se rompen en silencio: subir el máximo a 25 dejaría al panel
- * escondiendo hijos sin que fallara nada. Aquí falla.
- */
 describe("los saldos del panel cubren a toda la familia", () => {
   it("el máximo de hijos cabe en una página", () => {
     expect(MAX_CHILDREN_PER_FAMILY).toBeLessThanOrEqual(DEFAULT_PAGE_SIZE);

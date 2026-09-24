@@ -11,6 +11,7 @@ import {
   resolveAvatarKey,
   setChildPinSchema,
   updateParentAvatarSchema,
+  updateThemeSchema,
   updateTutorialSchema,
 } from "@monedin/contracts";
 import type { Request, RequestHandler } from "express";
@@ -24,23 +25,10 @@ import { accountOf, actorOf } from "../../shared/http/session.js";
 import { validatedPart } from "../../shared/http/validate.js";
 import * as service from "./auth.service.js";
 
-/**
- * Parseo y serialización. Cero autorización.
- *
- * Lo único que decide aquí es qué cookies emitir y qué forma tiene la
- * respuesta. Quién puede hacer qué lo decide el servicio, con el actor.
- */
-
-// ---------------------------------------------------------------------------
-// Cuenta
-// ---------------------------------------------------------------------------
-
 export const handleRegister: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", registerParentSchema);
   const { session } = await service.registerParent(input);
 
-  // Registrarse acredita la cuenta y NO activa ningún perfil: se llega a la
-  // rejilla, igual que en cualquier apertura posterior.
   setAccountSessionCookie(res, session.token, session.expiresAt);
 
   res.status(201).json(accountWithoutProfile());
@@ -50,7 +38,6 @@ export const handleLogin: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", loginParentSchema);
   const { session } = await service.loginParent(input);
 
-  // Entrar descarta cualquier perfil que hubiera activo.
   clearProfileSessionCookie(res);
   setAccountSessionCookie(res, session.token, session.expiresAt);
 
@@ -61,7 +48,6 @@ export const handleLogout: RequestHandler = async (req, res) => {
   const current = req.session;
 
   if (current !== undefined) {
-    // Cerrar la cuenta se lleva por cascada el perfil activo.
     await service.logout(current.accountSessionId);
   }
 
@@ -80,10 +66,6 @@ export const handleChangePassword: RequestHandler = async (req, res) => {
   res.status(204).send();
 };
 
-// ---------------------------------------------------------------------------
-// PIN de adulto
-// ---------------------------------------------------------------------------
-
 export const handleChangeAdultPin: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", changeAdultPinSchema);
 
@@ -92,7 +74,6 @@ export const handleChangeAdultPin: RequestHandler = async (req, res) => {
   res.status(204).send();
 };
 
-/** El niño cambia el PIN de SU perfil, el de la sesión, sabiendo el actual. */
 export const handleChangeOwnChildPin: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", changeOwnChildPinSchema);
 
@@ -101,12 +82,6 @@ export const handleChangeOwnChildPin: RequestHandler = async (req, res) => {
   res.status(204).send();
 };
 
-/**
- * Restablecer el PIN con la contraseña.
- *
- * Solo exige cuenta, no perfil activo: es la vía por la que un padre bloqueado
- * fuera de su propio perfil se rescata.
- */
 export const handleResetAdultPin: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", resetAdultPinSchema);
   const account = accountOf(req);
@@ -115,10 +90,6 @@ export const handleResetAdultPin: RequestHandler = async (req, res) => {
 
   res.status(204).send();
 };
-
-// ---------------------------------------------------------------------------
-// Rejilla de perfiles
-// ---------------------------------------------------------------------------
 
 export const handleListProfiles: RequestHandler = async (req, res) => {
   const account = accountOf(req);
@@ -149,6 +120,7 @@ export const handleEnterProfile: RequestHandler = async (req, res) => {
             avatar: profile.avatar,
             coins: profile.coins ?? 0,
             tutorialSeen: profile.tutorialSeen,
+            theme: profile.theme,
           }
         : {
             familyRole: "PARENT" as const,
@@ -157,6 +129,7 @@ export const handleEnterProfile: RequestHandler = async (req, res) => {
             email: profile.email ?? "",
             avatar: profile.avatar,
             tutorialSeen: profile.tutorialSeen,
+            theme: profile.theme,
           },
     hasAccount: true,
   } satisfies SessionState);
@@ -169,15 +142,10 @@ export const handleLeaveProfile: RequestHandler = async (req, res) => {
     await service.leaveProfile(current.profileSessionId);
   }
 
-  // Borrar la cookie es idempotente: salir sin estar dentro no es un error.
   clearProfileSessionCookie(res);
 
   res.status(204).send();
 };
-
-// ---------------------------------------------------------------------------
-// PIN de los hijos
-// ---------------------------------------------------------------------------
 
 export const handleSetChildPin: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", setChildPinSchema);
@@ -196,17 +164,6 @@ export const handleUnlockChildProfile: RequestHandler = async (req, res) => {
   res.status(204).send();
 };
 
-// ---------------------------------------------------------------------------
-// Estado de la sesión
-// ---------------------------------------------------------------------------
-
-/**
- * Responde 200 en las TRES situaciones.
- *
- * No es un endpoint de error: la aplicación web lo llama al cargarse, y tanto
- * «no ha entrado nadie» como «hay cuenta y falta elegir perfil» son casos
- * normales que deciden qué pantalla pintar.
- */
 export const handleSessionState: RequestHandler = async (req, res) => {
   res.status(200).json(await buildSessionState(req));
 };
@@ -233,11 +190,11 @@ async function buildSessionState(req: Request): Promise<SessionState> {
             familyRole: "CHILD",
             id: child.id,
             name: child.name,
-            // Resuelto al de por defecto, igual que en la rejilla: eran dos
-            // formas del mismo dato y el front tenía que tratar el hueco.
+
             avatar: resolveAvatarKey(child.avatar),
             coins: child.coins,
             tutorialSeen: child.tutorialSeen,
+            theme: child.theme,
           },
           hasAccount: true,
         };
@@ -255,30 +212,27 @@ async function buildSessionState(req: Request): Promise<SessionState> {
           email: parent.email,
           avatar: parent.avatar,
           tutorialSeen: parent.tutorialSeen,
+          theme: parent.theme,
         },
         hasAccount: true,
       };
 }
 
-/** Hay cuenta acreditada y todavía no se ha elegido perfil: toca la rejilla. */
 function accountWithoutProfile(): SessionState {
   return { actor: null, hasAccount: true };
 }
 
-// ---------------------------------------------------------------------------
-// Avatar propio del padre
-// ---------------------------------------------------------------------------
-
-/**
- * Marcar el recorrido como visto, o pedirlo otra vez.
- *
- * El controlador parsea y ya: qué tabla se toca lo decide el servicio a partir
- * del actor, que es donde vive la rama por rol.
- */
 export const handleUpdateTutorial: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", updateTutorialSchema);
 
   await service.updateTutorialSeen(actorOf(req), input);
+  res.status(204).send();
+};
+
+export const handleUpdateTheme: RequestHandler = async (req, res) => {
+  const input = validatedPart(req, "body", updateThemeSchema);
+
+  await service.updateTheme(actorOf(req), input);
   res.status(204).send();
 };
 

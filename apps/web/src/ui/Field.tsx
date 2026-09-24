@@ -9,23 +9,15 @@ interface FieldContextValue {
 
 const FieldContext = createContext<FieldContextValue | null>(null);
 
-/**
- * Lo que un control consume de su `Field`.
- *
- * Devuelve `null` fuera de un `Field`, porque una entrada suelta es legítima
- * —un buscador sin etiqueta visible, por ejemplo—. Lo que no es legítimo es que
- * cada pantalla tenga que acordarse de cablear `id` y `aria-describedby` a mano:
- * eso es lo que esta pieza hace por ellas.
- */
 export function useField(): FieldContextValue | null {
   return useContext(FieldContext);
 }
 
 export interface FieldProps {
   label: string;
-  /** Texto de ayuda permanente. Se anuncia junto al control. */
+
   help?: string;
-  /** Mensaje de error. Si viene, el control queda marcado como inválido. */
+
   error?: string;
   children: ReactNode;
 }
@@ -49,15 +41,11 @@ export function Field({ label, help, error, children }: FieldProps): React.React
         {children}
 
         {help !== undefined && (
-          <p id={helpId} className="text-small text-ink-muted">
+          <p id={helpId} className="text-micro text-ink-muted">
             {help}
           </p>
         )}
 
-        {/*
-          `role="alert"` y no solo el color: un error que solo se ve en rojo no
-          existe para quien usa un lector de pantalla.
-        */}
         {error !== undefined && (
           <p id={errorId} role="alert" className="text-small font-semibold text-danger">
             {error}

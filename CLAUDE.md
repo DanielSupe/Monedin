@@ -763,13 +763,22 @@ tiene que **morir** con ella. Y se cierra al cambiar la DIRECCIÓN, no en el `on
 el botón atrás también cambia la dirección, y un panel abierto tapando la pantalla a la que se acaba
 de volver es peor que no tenerlo.
 
-**Un 409 se cuenta como ADVERTENCIA, no como error.** `Alert` lo declara desde `add-design-system`
-—«nadie hizo nada mal: el padre aprobó dos veces, o el hermano llegó antes»— y hasta
-`redesign-parent-inbox` esa distinción no llegaba a ninguna pantalla: las dos bandejas del padre, que
-son las **únicas** que producen un 409 de verdad, aplanaban todos sus errores en el mismo párrafo
-rojo. La API está construida entera alrededor de esa diferencia y la interfaz la tiraba. Lo decide
-`alertToneFor(error)`, en `lib/` y no en `ui/` porque mira el CÓDIGO de un error y una pieza no sabe
-de eso.
+**Un 409 tiene TONO PROPIO y no es un error.** `Alert` lo declara desde `add-design-system` —«nadie
+hizo nada mal: el padre aprobó dos veces, o el hermano llegó antes»— y hasta `redesign-parent-inbox`
+esa distinción no llegaba a ninguna pantalla: las dos bandejas del padre, que son las **únicas** que
+producen un 409 de verdad, aplanaban todos sus errores en el mismo párrafo rojo. La API está
+construida entera alrededor de esa diferencia y la interfaz la tiraba. Lo decide `alertToneFor(error)`,
+en `lib/` y no en `ui/` porque mira el CÓDIGO de un error y una pieza no sabe de eso.
+
+Ese tono se llama `conflict` desde `repaint-design-system`, y antes se llamaba `warning`. **Se
+renombró porque su nombre describía un color** —el ámbar— y al repintar la paleta habría quedado
+mintiendo. Lo mismo con `success`, que era verde y pasó a `done`.
+
+**Y `info` NO se renombró, que es la mitad que importa de esa regla.** Nunca nombró un color: nombra
+un papel, y sigue siendo exacto ahora que su valor es arena. Se descubrió implementándolo, con el
+aviso de «dos claves, para dos cosas distintas» del registro — no espera a nadie, solo explica, y con
+el nombre `waiting` que el design proponía habría quedado mintiendo justo ahí. Un renombrado que
+arrastra todo lo que puede no es una regla, es una moda.
 
 **Un filtro que vive en la dirección es un conjunto de ENLACES, no de pestañas.** `Tabs` prometía en
 su cabecera que la estrenarían los filtros por estado del padre. Al ir a usarla no encajaba, y no por
@@ -875,11 +884,40 @@ contrato, nunca escrito a mano: tenerlo en dos sitios acaba con uno de los dos m
 piden dos credenciales en la misma pantalla, se explica para qué sirve cada una — si no, parece un
 error del producto.
 
-**El acceso va en ÍNDIGO PROFUNDO, y el ámbar es el acento.** Es la única pantalla del producto que
+**La paleta son DOS tonos, la moneda, y un rojo que solo existe para el error.** Desde
+`repaint-design-system`: coral `#FF6B4A` = **hacer** —la acción, el destino activo, la voz de la
+mascota—; violeta `#6C4BD6` = **conseguido y ahorrado** —los premios, el progreso, una tarea aprobada—;
+ámbar = la moneda, sin cambiar de valor; y arena para **esperando**, que pierde su color a propósito
+porque no es un estado con voz: es la AUSENCIA de acción. Antes había cinco tonos en pantalla y
+ninguno mandaba.
+
+El rojo del error sobrevive como **la única excepción declarada**, y no por nostalgia: un color de
+peligro no es una decisión de marca. Si el error llevara el coral de la acción, el mismo color diría
+«pulsa aquí» y «esto falló», que es justo lo que ese color existe para impedir.
+
+**El modo oscuro dejó de ser una promesa.** `tokens.css` llevaba escrito desde `add-design-system` que
+sería «reasignar la capa 2 y nada más», y eso es exactamente lo que es: un tercer bloque, con TRES
+estados —claro explícito, oscuro explícito y, sin atributo, lo que diga el sistema—. Ninguna pieza lo
+conoce. **Sigue al sistema y no se elige**: sin interruptor, sin almacenamiento y sin campo nuevo en
+el contrato. El día que se quiera elegir, la preferencia va DENTRO del actor como `tutorialSeen` y
+nunca en el navegador — la tablet es compartida, y con `localStorage` el niño heredaría el tema de su
+padre.
+
+Dos trampas que ese change pagó y conviene no volver a pisar. **`[data-surface="default"]` se invierte
+en oscuro**: existe para que un `Alert` recupere su fondo dentro del acceso, y escribía los primitivos
+claros; con dos temas eso deja el aviso claro sobre claro. Ahora restituye variables de tema, así que
+«por defecto» significa el del tema vigente. Y **`color-scheme` tiene que seguir al tema**, o se
+quedan con el contrario los cuatro controles nativos que esta aplicación tiene: la barra de
+desplazamiento, el autocompletado, el selector de la fecha límite y el de archivo de una foto.
+
+**El acceso va en VIOLETA PROFUNDO, y el ámbar es el acento.** Es la única pantalla del producto que
 mira un adulto: la calidez le corresponde al niño —su inicio, sus tareas, sus premios— y en la puerta
 se lee como juguete justo donde alguien decide si esto es de fiar. El ámbar no desaparece, cambia de
-papel: pintando media pantalla no decía nada, y sobre índigo un punto ámbar **es dinero**. La
+papel: pintando media pantalla no decía nada, y sobre el violeta un punto ámbar **es dinero**. La
 rejilla, el PIN y la puerta pública siguen claros.
+
+Iba en índigo hasta `repaint-design-system`, que retiró ese color del sistema. **Lo que cambió es el
+matiz, no el argumento**: sigue siendo el tono profundo de la marca, y sigue sin ser el del niño.
 
 **El ámbar es la moneda Y LA MASCOTA, y esto se reasignó a conciencia.** Decía «la moneda, y solo la
 moneda». `redesign-assistant-chat` lo amplió para que los globos de Monedín en el chat lleven ámbar
@@ -922,6 +960,132 @@ tocar su nombre ni un solo punto de uso.
 
 **Al tocar tokens hay que abrir pantallas del padre y del niño para confirmar que no se enteraron**,
 porque eso no lo cubre ningún test.
+
+**Comparar dos listas de texto dice qué NO COINCIDE, no qué falta.** Es el método con el que se
+cuadraron las treinta y dos pantallas contra sus maquetas, y se pagó tres veces por usarlo mal: un
+renglón que solo aparece en la maqueta puede ser algo ausente, algo dicho con otras palabras, o un
+estado que la aplicación no está mostrando — y la lista no los distingue. Afirmé que faltaban las
+acciones de un hijo (están en la fila, igual que en su artboard), el saludo y la meta del inicio del
+niño (están, con otras palabras) y la insignia de «¡Ya te alcanza!» (estaba, pero ningún dato de la
+siembra la alcanzaba). **Cada candidato se abre en el navegador antes de llamarlo ausencia.**
+
+**Y MEDIR NO VE LA FORMA, que es el punto ciego del mismo método.** Comparar el texto visible y los
+pasos de escala de una pantalla contra su maqueta encuentra casi todo, y por construcción no puede
+encontrar nada de esto: una tarjeta vertical y una horizontal llevan el mismo texto y la misma
+escala. De las treinta y dos pantallas, dieciocho se habían medido sin abrirlas, y abrirlas dio
+cuatro diferencias más —una tarjeta en vertical con 300px de imagen vacía, unas ofertas en renglones
+en vez de píldoras, un historial que no decía de quién era y un pie con los dos controles
+estirados—. **Una pantalla no está cuadrada hasta que se abre**, y una medida que coincide entera es
+motivo para abrirla, no para saltársela.
+
+Y la factura de ese punto ciego fue MÁS LARGA. Al abrir una pantalla en un monitor se vio que **cinco
+llevaban una columna estrecha donde su maqueta reparte en dos**: el inicio del niño, sus tareas, sus
+canjes y las dos altas del padre. En cuatro de las cinco el panel de la derecha **ya existía** y se
+dibujaba debajo — o sea que el texto coincidía entero, que es justo lo que el método comparaba.
+
+Dos cosas que conviene llevarse de ahí. La primera: **no todo lo que está en una columna es un
+defecto**. Las tareas del padre, sus canjes y sus hijos tienen maqueta de una columna, y comprobarlo
+una a una es lo que evitó «arreglar» tres pantallas que estaban bien. La segunda: el reparto lo
+declara **una** pieza, `SplitLayout`, y no cada pantalla — cinco rejillas escritas por separado es
+exactamente cómo estas cinco volverían a dejar de parecerse.
+
+**Una proporción de una maqueta no se copia al píxel si la escala no la tiene.** Las maquetas reparten
+con `1.5fr` en tres pantallas y `1.55fr` en dos: dos números para la misma intención. Escribirlos pide
+un valor arbitrario de Tailwind, que un test prohíbe con razón. Cinco columnas con tres y dos dan 1,5
+exacto y salen de la escala; la diferencia con 1,55 son seis píxeles en un monitor de 1600.
+
+**Una cuenta que se hace en el cliente dice de qué CONJUNTO habla.** Los contadores por estado de los
+canjes del niño cuentan las filas de la página, porque ese listado pagina por fila y su `total` cuenta
+canjes y no estados. Decir «3 aprobados» sobre un total mayor sería afirmar algo que no se ha contado,
+así que el rótulo lo acota. Pedirle el desglose a la API sería un cambio de contrato para tres números
+que se pueden contar donde ya están.
+
+**Una medida FIJA pesa distinto según lo que tenga alrededor.** El lateral mide 272 px y su maqueta
+264 —ocho de diferencia, y con la letra más pequeña—, así que no estaba mal dibujado. Lo que estaba
+mal es que fuera una sola medida: la columna se monta a partir de 1024 px, y ahí esos 272 son el 27 %
+de la pantalla, mientras que en la maqueta, dibujada a 1440, son el 18 %. Ahora son dos —240 de base
+y 272 desde `xl`— con el límite escrito de que no puede estrecharse hasta que el nombre de un destino
+deje de caber en una línea. **Antes de mover una medida que «se ve mal», medirla contra su maqueta**:
+aquí la medida era correcta y el defecto estaba en que no se adaptara.
+
+**El saldo del inicio del niño YA NO es el elemento más grande, y esa reversión tiene dueño.** El
+requisito lo exigía desde `redesign-child-home`, y nació de un defecto real: la cifra iba en negrita
+dentro de un párrafo, al tamaño de los enlaces de al lado. La cura fue el extremo contrario — una
+tarjeta que gastaba el tercio superior y empujaba las tareas por debajo del pliegue, de modo que lo
+primero que veía un niño al entrar era cuánto tiene y lo que venía a hacer había que buscarlo. Desde
+`match-child-home-header` el saldo es una píldora en la cabecera: **lo que sustituye al tamaño es el
+SITIO**, siempre la misma esquina y con su moneda al lado.
+
+Las dos mitades de esto valen igual. La que se cae es el tamaño. La que NO se cae, y sigue escrita
+palabra por palabra en el requisito, es lo que aquello existía para impedir: que el saldo no va dentro
+de una frase, que lo dibuja la pieza del sistema y que se anuncia con su unidad. **Revertir medio
+requisito se hace cambiando el requisito**, no dejándolo mintiendo en la spec.
+
+**Y una maqueta no manda en los CAMINOS que el producto garantiza.** La suya dibuja esa píldora
+estática; aquí es un enlace, porque el historial de un niño no tiene destino propio en su navegación
+—se llega desde el saldo— y hay un escenario vigente que lo exige. Es el mismo argumento que «una
+maqueta manda en el aspecto, no en los hechos del modelo de datos», aplicado a lo alcanzable: estática,
+ese camino se pierde para quien recorre la pantalla con teclado. El test que lo sostiene no comprueba
+el aspecto, comprueba el enlace — que es justo lo que un rediseño se llevaría por delante sin enterarse.
+
+**Una maqueta manda en el ASPECTO, no en los hechos del modelo de datos.** Su diálogo de dar de baja
+dice que el saldo y el historial «se van con el perfil»; lo copié y es falso —la baja es lógica y el
+historial no se puede ni borrar, lo impide un disparador—. Llegó a estar escrito en dos sitios de la
+interfaz. Si el texto de una maqueta afirma algo del producto, se comprueba antes de copiarlo.
+
+**Un defecto de la SIEMBRA se distingue de uno del código, y se arregla en la siembra.** La insignia
+de «ya te alcanza» parecía no existir y llevaba implementada desde siempre: el único premio que el
+hijo de ejemplo podía pagar ya estaba canjeado. Antes de escribir que algo falta, hay que comprobar
+que el ESTADO que lo enseñaría es alcanzable con los datos que hay. Y una siembra no imita el
+comportamiento del producto: prepara un estado para verlo — bloquear un perfil treinta minutos, como
+en producción, lo desbloquea solo antes de que a nadie le dé tiempo a mirarlo.
+
+**Un nombre que solo vive en `aria-label` no es un nombre.** Existe para quien no ve la pantalla y no
+para quien la mira. Ya van tres: el acceso a la ayuda —cuya pieza AFIRMABA en su cabecera que «lleva
+nombre y no solo un símbolo»—, el grupo de opciones de `RadioGroup`, que se anunciaba con el nombre
+del conjunto entero y no con su pregunta, y el envío de las dos pantallas de acceso, que era una
+flecha redonda. Un test que lo persiga tiene que pedir las DOS cosas: que el control siga nombrado, y
+que su nombre esté EN LA PANTALLA — con el defecto puesto, lo primero pasa solo.
+
+**El formato de una fecha visible se decide en un sitio, y su idioma se DECLARA.** Lo decidían cuatro
+pantallas de tres maneras, y las cuatro pasaban `undefined` como configuración regional: un producto
+entero en español imprimía `9/21/2026` en un teléfono en inglés, y quien desarrolla no lo ve nunca
+porque el suyo está en español. Vive en `lib/dates.ts`, con dos formas nombradas por su papel —la
+larga para una línea de texto, la corta para una celda— y un test que falla si una pantalla vuelve a
+elegir el suyo.
+
+**Las dos pantallas que reparten EXPLICAN el ciclo, y son dos a propósito.** Que marcar una tarea no
+paga nada —lo paga aprobar— y que el precio de un premio se congela al pedirlo son los dos mecanismos
+centrales del producto, los que la API implementa con más cuidado, y la interfaz no los decía en
+ninguna parte. Ahora lo dice el alta de una tarea, el alta de un premio y las tareas del niño:
+contárselo solo a quien reparte deja suponiendo a quien marca, y es donde un niño se lleva el chasco.
+
+**La ayuda son DOS listas, una por rol.** Revierte la decisión de «una sola pantalla para los dos»,
+que sigue siendo cierta de la PANTALLA y no lo es del contenido: «subí el precio de un premio que ya
+me habían pedido» no es una duda que un niño pueda tener, y las nueve preguntas estaban en tercera
+persona —un manual para quien administra—. Una lista de preguntas sirve para encontrar la propia, y
+la mitad que no puede ser tuya estorba.
+
+**El color de la rejilla de perfiles sigue una REGLA, no un reparto**: el tono de la marca para el
+adulto, el de la acción para los hijos. Su maqueta alterna los dos entre hijos, y alternar hay que
+volver a decidirlo cada vez que se añade uno. Y su pregunta va en un panel de marca con Monedín: es
+la pantalla por la que se pasa cada vez que alguien coge la tablet, y era la más plana del producto.
+
+**DECISIÓN TOMADA: el coral se queda como está.** Medido: `--color-primary` da **2.82** contra blanco
+y contra la tinta clara que va encima, el paso más oscuro de la rampa llega a 3.38, y un texto normal
+pide 4.5 — así que hoy la etiqueta de cada botón principal y los enlaces corales sobre superficie
+clara están por debajo de AA en tema claro. En oscuro ya pasa (4.82). Cualquier coral que llegue al
+mínimo es bastante más oscuro que el de la marca y se nota en toda la aplicación, y esa es una
+decisión de marca. **Lo que esto NO autoriza es usar el coral para texto pequeño nuevo**: se acepta
+lo que ya hay, no una licencia para repetirlo.
+
+**Lo que NO se copió de las maquetas, y por qué.** El teclado del PIN de colores, porque pide
+imponerle color a `Button` desde fuera —lo que su propia cabecera prohíbe, y ya se cobró una vez en
+ese mismo teclado— o nombrar una variante por su color en vez de por su papel. El «hoy» de «hoy te
+esperan dos tareas», porque el modelo no tiene jornada y sería un dato inventado; la CUENTA sí se
+dice. Y la edad en la rejilla, que un requisito vigente de `profile-selection` prohíbe. Las manchas
+difusas del fondo del camino de entrada se probaron y se retiraron: sobre el crema no se leen como
+ambiente sino como una mancha sucia, y media decoración es peor que ninguna.
 
 **Un dato del perfil viaja DENTRO del actor, no por un camino aparte.** El avatar del padre lo
 aprendió por las malas —estaba fuera y `add-file-storage` lo metió dentro porque era «el mismo dato
@@ -1160,8 +1324,18 @@ arriba a la izquierda y contenido centrado en los dos ejes. Antes caían en un c
 **sin marca**, así que se entraba por una página con logo, se pasaba por cuatro pantallas anónimas y
 el logo volvía al final. Quiénes lo reciben **no se lista**: es la última rama de la raíz, o sea todo
 lo que llega sin actor y sin pedir ancho completo, y como toda ruta de la aplicación exige actor ese
-conjunto es exactamente el camino de entrada. No declara escala: la elige la audiencia, y ahí todavía
-no se sabe quién está delante.
+conjunto es exactamente el camino de entrada.
+
+**Y el camino de entrada es una audiencia PROPIA.** Esta frase decía que el marco no declara escala,
+«porque la elige la audiencia y ahí todavía no se sabe quién está delante». La mitad que sigue en
+pie: ahí no se elige entre la escala del padre y la del niño. La que no: sin declarar nada se quedaba
+con la base, que es **la del padre** —la más densa del producto, medida para un adulto repasando
+listas largas—, así que «no se sabe quién está delante» se resolvía eligiendo al padre en silencio.
+Desde `tune-scale-to-mockups` declara `data-scale="entry"`, con los pasos contados en sus siete
+maquetas: la ayuda de un campo son 13, su etiqueta 15, los botones 16, el nombre de un perfil 22 y el
+«¿Quién eres?» 46 — un paso entero por encima del padre en cada uno. Lo declaran **dos** sitios y
+hacen falta los dos: el marco para las que van dentro, y `AccessLayout` para entrar y registrarse,
+que van a sangre y no pasan por él — igual que la portada declara la suya.
 
 **Un marco centra; el ancho lo declara cada pantalla.** `EntryShell` lo intentó imponer y partía la
 rejilla en dos filas. Solo la pantalla sabe si es un formulario de 22rem o una fila de caras.

@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { requireParent } from "../app/guards.js";
 import { RewardForm } from "../features/rewards/RewardForm.js";
 
-/** Publicar un premio y ponerle precio a cada hijo. */
 export const Route = createFileRoute("/rewards/new")({
   beforeLoad: ({ context }) => requireParent(context.queryClient),
   component: NewRewardRoute,

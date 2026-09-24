@@ -3,15 +3,6 @@ import { describe, expect, it } from "vitest";
 import { getConfig } from "../../src/config/index.js";
 import { createChild, createParent, withRollback } from "../support/database.js";
 
-/**
- * Aislamiento de la batería de tests.
- *
- * Cada test corre dentro de una transacción que siempre se deshace, así que el
- * orden no importa y dos tests que tocan las mismas entidades no se ven entre
- * sí. Ver la spec `data-access`, requisito "Los tests se ejecutan contra un
- * esquema real y aislado".
- */
-
 const CORREO_COMPARTIDO = "colision@monedin.test";
 
 describe("aislamiento entre tests", () => {
@@ -25,7 +16,6 @@ describe("aislamiento entre tests", () => {
 
   it("el segundo escribe el MISMO correo y no choca", () =>
     withRollback(async (db) => {
-      // Si el test anterior hubiera dejado su fila, esto reventaría por unicidad.
       const padre = await createParent(db, { email: CORREO_COMPARTIDO });
       await createChild(db, padre.id, { name: "Del segundo" });
 
@@ -54,7 +44,6 @@ describe("la batería no toca la base de datos de desarrollo", () => {
 
     await dev.connect();
     try {
-      // El esquema sigue en pie: la batería recrea la SUYA, no esta.
       const tablas = await dev.query<{ count: string }>(
         `SELECT count(*)::text AS count FROM information_schema.tables
           WHERE table_schema = 'public' AND table_name IN
@@ -63,7 +52,6 @@ describe("la batería no toca la base de datos de desarrollo", () => {
       );
       expect(Number(tablas.rows[0]?.count)).toBe(7);
 
-      // Y ninguno de los datos que fabrican los tests aparece aquí.
       const intrusos = await dev.query<{ count: string }>(
         `SELECT count(*)::text AS count FROM users WHERE email LIKE '%@monedin.test'`,
       );

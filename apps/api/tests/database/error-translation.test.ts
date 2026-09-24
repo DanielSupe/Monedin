@@ -8,15 +8,6 @@ import {
 import { translateDatabaseError } from "../../src/shared/database/translate-error.js";
 import { createChild, createParent, withRollback } from "../support/database.js";
 
-/**
- * Traducción de fallos del motor a errores de dominio.
- *
- * Los errores se provocan CONTRA LA BASE DE DATOS DE VERDAD, no se fabrican a
- * mano: lo que se comprueba es que la traducción sigue reconociendo la forma que
- * Prisma produce realmente, que es lo que cambiaría al subir de versión.
- */
-
-/** Provoca una operación y devuelve el error ya traducido. */
 async function traducir(operacion: () => Promise<unknown>): Promise<unknown> {
   try {
     await operacion();

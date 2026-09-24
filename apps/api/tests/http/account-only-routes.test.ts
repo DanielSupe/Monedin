@@ -5,8 +5,6 @@ import { createApp } from "../../src/app.js";
 import { declaredRoutesOf } from "../../src/shared/http/module-router.js";
 import { asChild, asParent, resetAuthData } from "../support/auth.js";
 
-// Importar la app arrastra todos los archivos de rutas, que es lo que llena el
-// registro. Sin esto el registro estaría vacío y el test pasaría en falso.
 const app = createApp();
 
 beforeEach(async () => {
@@ -17,14 +15,6 @@ afterAll(async () => {
   await resetAuthData();
 });
 
-/**
- * La lista cerrada de rutas que se conforman con la CUENTA acreditada.
- *
- * Cada una es un hueco por el que se opera sin haber elegido perfil, así que
- * ninguna se añade sin pensarlo. Si este test falla porque apareció una sexta,
- * la pregunta no es «cómo arreglo el test» sino «por qué esa ruta no puede
- * exigir actor».
- */
 const ESPERADAS = [
   "GET /auth/profiles",
   "POST /auth/profiles/enter",
@@ -33,7 +23,6 @@ const ESPERADAS = [
   "POST /children",
 ] as const;
 
-/** Las públicas, que ni siquiera exigen cuenta. También cerradas. */
 const PUBLICAS_ESPERADAS = [
   "GET /health",
   "POST /auth/register",
@@ -60,8 +49,6 @@ describe("la lista de rutas de solo cuenta es cerrada y verificable", () => {
   });
 
   it("ninguna ruta de solo cuenta toca monedas, tareas, premios ni canjes", () => {
-    // Lo que hace tolerable que estas rutas no exijan perfil es que ninguna
-    // opera sobre el dinero de nadie.
     const prohibido = /\/(tasks|rewards|redemptions|coins|transactions)/;
 
     for (const route of declaredRoutesOf("account")) {
@@ -89,8 +76,6 @@ describe("qué se puede hacer con solo la cuenta acreditada", () => {
   }, 60_000);
 
   it("un perfil de niño activo no abre las rutas de solo cuenta que son de gestión", async () => {
-    // Solo cuenta NO significa sin autorización: crear un perfil se conforma
-    // con la cookie, pero su servicio sigue decidiendo quién puede.
     const { cookies } = await asChild(app);
 
     await request(app)

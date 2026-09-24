@@ -19,17 +19,8 @@ import {
   useOwnRedemptions,
 } from "../redemptions/use-redemptions.js";
 import { describeRewardsError, useOwnRewards } from "./use-rewards.js";
+import { metaMasCercana } from "../children/home-data.js";
 
-/**
- * El escaparate de un niño: solo lo que se le ofrece a él, a SU precio.
- *
- * Sin selector de hijo: el perfil sale de la sesión, así que esta pantalla no
- * tiene ningún identificador que pudiera apuntar a otro niño.
- *
- * El botón de pedir cruza en el CLIENTE el escaparate con los canjes propios
- * en `PENDING`: es cómo se sabe "ya lo pediste" sin tocar el contrato de
- * `rewards`. Ver la decisión 8 del design de `add-redemptions`.
- */
 export function MyRewards(): React.ReactElement {
   const { data, isPending, error } = useOwnRewards();
   const pendientes = useOwnRedemptions({ status: "PENDING" });
@@ -50,18 +41,21 @@ export function MyRewards(): React.ReactElement {
     (pendientes.data?.items ?? []).map((canje) => canje.reward.id),
   );
 
-  return (
-    <section className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-baseline gap-3">
-        <h2 className="text-title font-bold">
-          {messages.rewards.myRewardsTitle}
-        </h2>
+  const meta = metaMasCercana(premios);
 
-        {/*
-          En una rejilla, «cuántos hay» deja de leerse solo: una columna se
-          recorre hasta el final y una rejilla se abarca de un vistazo sin
-          llegar a contarla.
-        */}
+  return (
+    <section className="flex flex-col gap-5">
+      <div className="flex flex-wrap items-baseline gap-3">
+        <div className="flex flex-col gap-1">
+
+          <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+            {messages.rewards.myRewardsLead}
+          </span>
+          <h2 className="text-display font-extrabold">
+            {messages.rewards.myRewardsTitle}
+          </h2>
+        </div>
+
         {premios.length > 0 && (
           <p className="text-small text-ink-muted">
             {contar(
@@ -76,18 +70,6 @@ export function MyRewards(): React.ReactElement {
       {premios.length === 0 ? (
         <EmptyState glyph="🎁" title={messages.rewards.myRewardsEmpty} />
       ) : (
-        /*
-          REJILLA de dos columnas, y sigue siendo una lista.
-
-          Dos y no «tantas como quepan»: dos es lo que hace falta para comparar
-          dos precios sin desplazar, y cada columna de más encoge la foto, que
-          es lo que hace que un premio se reconozca sin leer.
-
-          Que sea `<ul>`/`<li>` no cambia: quien recorre la pantalla sin verla
-          oye «lista de seis elementos», que es lo que hay. Una rejilla es una
-          colocación, no otra estructura. Ver la decisión 1 del design de
-          `redesign-child-surfaces`.
-        */
         <ul className="grid list-none grid-cols-2 gap-3 p-0 md:grid-cols-3">
           {premios.map((premio) => (
             <MyRewardRow
@@ -95,6 +77,7 @@ export function MyRewards(): React.ReactElement {
               reward={premio}
               balance={saldo}
               yaPedido={premiosYaPedidos.has(premio.id)}
+              esMeta={premio.id === meta?.id}
             />
           ))}
         </ul>
@@ -107,68 +90,52 @@ function MyRewardRow({
   reward,
   balance,
   yaPedido,
+  esMeta,
 }: {
   reward: OwnReward;
   balance: number;
   yaPedido: boolean;
+
+  esMeta: boolean;
 }): React.ReactElement {
-  // `affordable` decide el mensaje; la diferencia es solo para mostrar cuánto
-  // falta, y se calcula contra el saldo de la SESIÓN, no contra uno propio del
-  // ítem: el contrato no lo lleva a propósito, para no duplicar el saldo en
-  // cada fila. Ver la decisión 5 del design de `add-rewards`.
   const faltan = Math.max(0, reward.coins - balance);
   const solicitar = useCreateRedemption();
   const pedido = yaPedido || solicitar.isSuccess;
 
   return (
-    /*
-      TOPE de ancho por tesela, además de las columnas.
-      
-      Sin él, la tesela vale lo que valga su columna: con dos columnas en el
-      ancho máximo del contenido, cada una pasaba de 450px y la foto de un
-      producto ocupaba media pantalla. El tope va aquí y no en la rejilla porque
-      es lo que mide UNA tesela, y sale de un token —ninguna pantalla escribe
-      píxeles—.
-    */
     <li className="h-full w-full max-w-tile">
-      {/*
-        `h-full` en cadena hasta el contenido: en una rejilla la fila se estira
-        hasta la tesela más alta, pero las demás no la rellenaban, así que un
-        premio con descripción dejaba a sus vecinos más bajos. La altura la
-        marca la fila y todas la ocupan.
-      */}
-      <Card className="h-full">
-        <div className="flex h-full min-w-0 flex-col gap-3">
-          <RewardImage image={reward.image} title={reward.title} />
 
-          <div className="flex flex-wrap items-start justify-between gap-2">
-            <div className="flex min-w-0 flex-col gap-1">
-              <p className="text-body font-bold">{reward.title}</p>
-              {reward.description !== null && (
-                <p className="text-small text-ink-muted">
-                  {reward.description}
-                </p>
-              )}
-            </div>
-            {/* «Ya lo pediste» es un ESTADO, no un párrafo al final: lo que se
-                ve y lo que se puede hacer van juntos. */}
-            {pedido && (
-              <Badge tone="info">{messages.redemptions.alreadyRequested}</Badge>
+      <Card className={esMeta ? "h-full border-2 border-done" : "h-full"}>
+        <div className="flex h-full min-w-0 flex-col gap-3">
+
+          <div className="relative">
+            <RewardImage image={reward.image} title={reward.title} />
+
+            {(pedido || reward.affordable || esMeta) && (
+              <span className="absolute right-2 top-2">
+                {pedido ? (
+                  <Badge tone="info">{messages.redemptions.alreadyRequested}</Badge>
+                ) : reward.affordable ? (
+                  <Badge tone="done">{messages.rewards.affordable}</Badge>
+                ) : (
+                  <Badge tone="done">{messages.rewards.nextRewardTitle}</Badge>
+                )}
+              </span>
             )}
           </div>
 
-          {/* Empuja lo de abajo al pie: con alturas iguales, los precios y las
-              acciones se alinean entre teselas en vez de flotar donde acabe el
-              texto de cada una. */}
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="text-lead font-bold">{reward.title}</p>
+            {reward.description !== null && (
+              <p className="text-small text-ink-muted">{reward.description}</p>
+            )}
+          </div>
+
           <div className="mt-auto flex flex-col gap-3">
             <Coins amount={reward.coins} />
 
             {reward.affordable ? (
               <>
-                <p className="text-small font-semibold text-success">
-                  {messages.rewards.affordable}
-                </p>
-
                 {!pedido && (
                   <Button
                     variant="primary"
@@ -189,17 +156,6 @@ function MyRewardRow({
                 )}
               </>
             ) : (
-              /*
-              Aquí se ESTRENA `ProgressBar`, que es lo que su propia cabecera
-              dice desde `add-design-system` y hasta hoy solo hacía el catálogo.
-              Es la mitad del ciclo que el producto enseña: ver cuánto falta
-              para una meta es lo que convierte un saldo en una decisión de
-              ahorro.
-
-              La cifra se queda junto a la barra. La barra dice «estás por
-              aquí» y el número dice cuánto exactamente; quitarlo sería cambiar
-              precisión por gráfico.
-            */
               <div className="flex flex-col gap-1">
                 <ProgressBar
                   value={balance}
@@ -209,6 +165,12 @@ function MyRewardRow({
                 <p className="text-small text-ink-muted">
                   {messages.rewards.missingPrefix} {faltan}{" "}
                   {messages.rewards.coins.toLowerCase()}
+                </p>
+
+                <p className="text-small font-bold text-ink-muted tabular-nums">
+                  {balance}
+                  {messages.rewards.goalOf}
+                  {reward.coins}
                 </p>
               </div>
             )}

@@ -11,7 +11,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/** El saldo de `comoNino()` son 120 monedas. */
 const SALDO = 120;
 
 const PREMIOS: OwnReward[] = [
@@ -96,11 +95,6 @@ function montar(pantalla: React.ReactElement): void {
   render(<QueryClientProvider client={queryClient}>{pantalla}</QueryClientProvider>);
 }
 
-/**
- * `ProgressBar` se escribió en `add-design-system` para este caso exacto —lo
- * dice su cabecera— y hasta este change solo la usaba el catálogo. Ver cuánto
- * falta para una meta es la mitad del ciclo que el producto enseña.
- */
 describe("lo que le falta a un niño se ve como progreso", () => {
   it("un premio que no alcanza enseña la distancia, con su valor y su meta", async () => {
     servir(PREMIOS, []);
@@ -112,7 +106,6 @@ describe("lo que le falta a un niño se ve como progreso", () => {
     expect(barra).toHaveAttribute("aria-valuenow", String(SALDO));
     expect(barra).toHaveAttribute("aria-valuemax", "200");
 
-    // La cifra se queda: la barra dice «estás por aquí» y el número dice cuánto.
     expect(caro).toHaveTextContent(`${messages.rewards.missingPrefix} 80`);
   });
 
@@ -139,10 +132,6 @@ describe("lo que le falta a un niño se ve como progreso", () => {
   });
 });
 
-/**
- * No son tres variantes de lo mismo: aprobar descuenta y rechazar es terminal
- * y no devuelve nada, porque el descuento solo ocurre al aprobar.
- */
 describe("el estado de un canje se distingue por su forma", () => {
   it("los tres estados llevan su etiqueta", async () => {
     servir([], CANJES);
@@ -153,14 +142,6 @@ describe("el estado de un canje se distingue por su forma", () => {
     expect(screen.getByText(messages.redemptions.statusRejected)).toBeInTheDocument();
   });
 
-  /*
-   * Y se DISTINGUEN, que es lo que pide la spec.
-   *
-   * La primera versión de este test solo comprobaba que las tres etiquetas
-   * estuvieran, y eso ya pasaba antes de vestir la pantalla: al inyectar el
-   * mismo tono en los tres estados, el test seguía en verde. Un test que no
-   * falla ante la violación que persigue no está probando nada.
-   */
   it("y se distinguen entre sí, no solo por su texto", async () => {
     servir([], CANJES);
     montar(<MyRedemptions />);

@@ -1,51 +1,39 @@
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
+  AVATAR_OPTIONS,
   Accordion,
   Alert,
   Avatar,
   Badge,
   Button,
   Card,
+  Checkbox,
   Coins,
   DataTable,
   Dialog,
   Drawer,
   EmptyState,
   Field,
+  HeroPanel,
+  IconTile,
   Input,
   Logo,
+  Mascota,
   Pagination,
   ProgressBar,
+  ProgressRing,
+  SplitLayout,
+  RadioGroup,
   Select,
   Skeleton,
+  Slider,
   Spotlight,
   Tabs,
   Toast,
   ToastProvider,
 } from "./ui/index.js";
 import "./styles/tokens.css";
-
-/**
- * Catálogo vivo del sistema de diseño.
- *
- * Punto de entrada APARTE, no una ruta de la aplicación. Dos razones, y la
- * segunda no la buscábamos:
- *
- * 1. Una ruta `/ui` habría necesitado `import.meta.env.DEV` para no publicarse,
- *    y eso obligaba a una TERCERA excepción de `allowEnvAccess`, que CLAUDE.md
- *    marca como señal de que algo se está haciendo mal. Así se excluye del build
- *    de producción desde `vite.config.ts`, con el `mode` que ya recibe.
- *
- * 2. Aquí no hay `QueryClientProvider` ni router. Si una pieza necesitara un
- *    proveedor para montarse, este archivo se rompe — y ese es exactamente el
- *    aviso que queremos, porque la frontera «una pieza no conoce el dominio» es
- *    lo que permite probarlas sin servidor.
- *
- * El contenido de ejemplo vive aquí a propósito y NO en `lib/messages.ts`: no lo
- * lee ningún usuario y no viaja en la compilación publicada, así que llevarlo al
- * catálogo de mensajes solo conseguiría que alguien tradujera cadenas muertas.
- */
 
 const EJEMPLO = {
   tarea: "Sacar la basura",
@@ -80,7 +68,6 @@ function Fila({ children }: { children: React.ReactNode }): React.ReactElement {
   return <div className="flex flex-wrap items-center gap-3">{children}</div>;
 }
 
-/** Todas las piezas, una vez. Se monta dos veces, una por escala. */
 function Piezas(): React.ReactElement {
   const [focoAbierto, setFocoAbierto] = useState(false);
   const [focoCentrado, setFocoCentrado] = useState(false);
@@ -88,6 +75,9 @@ function Piezas(): React.ReactElement {
   const [avisoAbierto, setAvisoAbierto] = useState(false);
   const [pestana, setPestana] = useState("pendientes");
   const [cajonAbierto, setCajonAbierto] = useState(false);
+  const [marcado, setMarcado] = useState(true);
+  const [reparto, setReparto] = useState("igual");
+  const [acercamiento, setAcercamiento] = useState(1.4);
 
   return (
     <div className="flex flex-col gap-6">
@@ -98,17 +88,18 @@ function Piezas(): React.ReactElement {
           <Button variant="ghost">Ver más</Button>
           <Button variant="danger">Dar de baja</Button>
         </Fila>
-        {/* Las dos TALLAS, juntas y para comparar: enseñar la mayor sola no
-            enseña la diferencia, que es lo único que hay que ver. */}
+
         <Fila>
           <Button variant="primary" size="large">
             Empezar
           </Button>
           <Button variant="primary">Empezar</Button>
         </Fila>
-        {/* `contrast` se enseña SOBRE la superficie de marca, que es donde vive:
-            fuera de ella no se entiende para qué existe. */}
-        <div data-surface="brand" className="rounded-card flex gap-3 bg-brand p-4">
+
+        <div
+          data-surface="brand"
+          className="rounded-card flex gap-3 bg-brand p-4"
+        >
           <Button variant="contrast">Entrar</Button>
           <Button variant="primary">Primario, para comparar</Button>
         </div>
@@ -124,10 +115,14 @@ function Piezas(): React.ReactElement {
           </Button>
         </Fila>
         <Fila>
-          {/* Redondo y sin texto. El tipo EXIGE `aria-label`: una flecha sola no
-              dice si envía, avanza o vuelve. */}
+
           <Button variant="primary" iconOnly aria-label="Entrar a mi cuenta">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-6">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              className="size-6"
+            >
               <path
                 d="M5 12h14m-6-6 6 6-6 6"
                 strokeWidth="2"
@@ -145,6 +140,8 @@ function Piezas(): React.ReactElement {
           <Coins amount={1} />
           <Coins amount={1250} />
         </Fila>
+
+        <Coins amount={128} size="large" />
         <Coins amount={340} size="hero" />
       </Seccion>
 
@@ -176,8 +173,8 @@ function Piezas(): React.ReactElement {
         <Fila>
           <Badge>Pendiente</Badge>
           <Badge tone="info">Esperando</Badge>
-          <Badge tone="success">Aprobada</Badge>
-          <Badge tone="warning">En conflicto</Badge>
+          <Badge tone="done">Aprobada</Badge>
+          <Badge tone="conflict">En conflicto</Badge>
           <Badge tone="danger">Rechazada</Badge>
         </Fila>
       </Seccion>
@@ -203,18 +200,44 @@ function Piezas(): React.ReactElement {
           <Avatar value="koala" size="xlarge" alt={EJEMPLO.hija} />
         </Fila>
         <Fila>
-          <Avatar value="nutria" size="medium" shape="rounded" alt={EJEMPLO.hija} />
-          <Avatar value="zorro" size="large" shape="rounded" alt={EJEMPLO.hija} />
-          <Avatar value="pulpo" size="xlarge" shape="rounded" alt={EJEMPLO.hija} />
+          <Avatar
+            value="nutria"
+            size="medium"
+            shape="rounded"
+            alt={EJEMPLO.hija}
+          />
+          <Avatar
+            value="zorro"
+            size="large"
+            shape="rounded"
+            alt={EJEMPLO.hija}
+          />
+          <Avatar
+            value="pulpo"
+            size="xlarge"
+            shape="rounded"
+            alt={EJEMPLO.hija}
+          />
+        </Fila>
+
+        <Fila>
+          {AVATAR_OPTIONS.map((opcion) => (
+            <Avatar
+              key={opcion.key}
+              value={opcion.key}
+              size="large"
+              alt={opcion.key}
+            />
+          ))}
         </Fila>
       </Seccion>
 
       <Seccion titulo="Alert">
         <Alert tone="info">{EJEMPLO.tarea}</Alert>
-        <Alert tone="success" title="Tarea aprobada">
+        <Alert tone="done" title="Tarea aprobada">
           {EJEMPLO.tarea}
         </Alert>
-        <Alert tone="warning" title={EJEMPLO.conflicto}>
+        <Alert tone="conflict" title={EJEMPLO.conflicto}>
           {EJEMPLO.conflictoDetalle}
         </Alert>
         <Alert tone="danger" title="No se pudo aprobar">
@@ -233,11 +256,7 @@ function Piezas(): React.ReactElement {
       </Seccion>
 
       <Seccion titulo="Drawer">
-        {/*
-          Se monta sin router: los enlaces los pone quien la usa, así que aquí
-          van anclas sueltas. Es lo mismo que permite montarla en un test sin
-          proveedores.
-        */}
+
         <Drawer
           open={cajonAbierto}
           onOpenChange={setCajonAbierto}
@@ -245,10 +264,16 @@ function Piezas(): React.ReactElement {
           trigger={<Button variant="secondary">Abrir el cajón</Button>}
         >
           <nav className="flex flex-col gap-1 p-3">
-            <a href="#uno" className="rounded-control bg-primary-soft px-3 py-2 text-primary no-underline">
+            <a
+              href="#uno"
+              className="rounded-control bg-primary-soft px-3 py-2 text-primary no-underline"
+            >
               Inicio
             </a>
-            <a href="#dos" className="rounded-control px-3 py-2 text-ink no-underline">
+            <a
+              href="#dos"
+              className="rounded-control px-3 py-2 text-ink no-underline"
+            >
               Tareas
             </a>
           </nav>
@@ -256,11 +281,7 @@ function Piezas(): React.ReactElement {
       </Seccion>
 
       <Seccion titulo="Pagination">
-        {/*
-          Los dos casos que importan. La pieza NO construye sus enlaces —no puede
-          importar el router— así que aquí se le pasan anclas sueltas, que es
-          exactamente lo que la hace montable sin proveedores.
-        */}
+
         <Pagination
           page={1}
           totalPages={4}
@@ -272,19 +293,12 @@ function Piezas(): React.ReactElement {
           previous={<a href="#anterior">Anterior</a>}
           next={<a href="#siguiente">Siguiente</a>}
         />
-        {/* Con una sola página no se dibuja: aquí debajo no hay nada. */}
+
         <Pagination page={1} totalPages={1} />
       </Seccion>
 
       <Seccion titulo="DataTable">
-        {/*
-          Recibe encabezados y celdas ya compuestas, igual que `Pagination`
-          recibe sus enlaces: aquí se le pasa un `Badge` en una celda, y la pieza
-          no sabe ni qué es un canje ni por qué ese tono.
 
-          La columna de cantidades va a la derecha y con las cifras de ancho
-          fijo, que es donde una columna de números se lee comparando.
-        */}
         <DataTable
           caption="Ejemplo de historial"
           columns={[
@@ -299,7 +313,7 @@ function Piezas(): React.ReactElement {
               cells: {
                 que: "Helado",
                 cuanto: <Coins amount={60} />,
-                estado: <Badge tone="success">Aprobado</Badge>,
+                estado: <Badge tone="done">Aprobado</Badge>,
                 cuando: "3 sep",
               },
             },
@@ -317,17 +331,19 @@ function Piezas(): React.ReactElement {
               cells: {
                 que: "Patines",
                 cuanto: <Coins amount={350} />,
-                // Advertencia y NO peligro: que un padre diga que no a un premio
-                // no es un error del niño.
-                estado: <Badge tone="warning">No esta vez</Badge>,
+
+                estado: <Badge tone="conflict">No esta vez</Badge>,
                 cuando: "1 sep",
               },
             },
           ]}
         />
 
-        {/* Sin filas no dibuja nada: aquí debajo no hay tabla. */}
-        <DataTable caption="Historial vacío" columns={[{ key: "a", header: "A" }]} rows={[]} />
+        <DataTable
+          caption="Historial vacío"
+          columns={[{ key: "a", header: "A" }]}
+          rows={[]}
+        />
       </Seccion>
 
       <Seccion titulo="Accordion">
@@ -336,7 +352,9 @@ function Piezas(): React.ReactElement {
             {
               value: "monedas",
               label: "¿Qué son las monedas?",
-              content: <p>Las gana haciendo tareas y las gasta pidiendo premios.</p>,
+              content: (
+                <p>Las gana haciendo tareas y las gasta pidiendo premios.</p>
+              ),
             },
             {
               value: "aprobar",
@@ -358,25 +376,34 @@ function Piezas(): React.ReactElement {
           value={pestana}
           onValueChange={setPestana}
           items={[
-            { value: "pendientes", label: "Pendientes", content: <p>Nada pendiente.</p> },
-            { value: "completadas", label: "Completadas", content: <p>Una esperando.</p> },
-            { value: "aprobadas", label: "Aprobadas", content: <p>Dos aprobadas.</p> },
+            {
+              value: "pendientes",
+              label: "Pendientes",
+              content: <p>Nada pendiente.</p>,
+            },
+            {
+              value: "completadas",
+              label: "Completadas",
+              content: <p>Una esperando.</p>,
+            },
+            {
+              value: "aprobadas",
+              label: "Aprobadas",
+              content: <p>Dos aprobadas.</p>,
+            },
           ]}
         />
       </Seccion>
 
       <Seccion titulo="Spotlight">
-        {/*
-          Las DOS formas, porque la diferencia es lo único que hay que ver: con
-          algo destacado y sin nada. Sin la segunda, nadie sabría que la pieza
-          también sirve para un paso que no señala a ninguna parte.
 
-          Recibe dónde destacar y qué decir: no sabe de perfiles ni de roles, y
-          por eso se monta aquí sin proveedores.
-        */}
         <Fila>
-          <Button onClick={() => setFocoAbierto(true)}>Con algo destacado</Button>
-          <Button onClick={() => setFocoCentrado(true)}>Sin nada destacado</Button>
+          <Button onClick={() => setFocoAbierto(true)}>
+            Con algo destacado
+          </Button>
+          <Button onClick={() => setFocoCentrado(true)}>
+            Sin nada destacado
+          </Button>
         </Fila>
 
         <Spotlight
@@ -427,7 +454,10 @@ function Piezas(): React.ReactElement {
           description="Es definitivo y no se puede deshacer. Su historial se conserva."
           footer={
             <>
-              <Button variant="secondary" onClick={() => setDialogoAbierto(false)}>
+              <Button
+                variant="secondary"
+                onClick={() => setDialogoAbierto(false)}
+              >
                 Cancelar
               </Button>
               <Button variant="danger" onClick={() => setDialogoAbierto(false)}>
@@ -442,7 +472,7 @@ function Piezas(): React.ReactElement {
         <Toast
           open={avisoAbierto}
           onOpenChange={setAvisoAbierto}
-          tone="success"
+          tone="done"
           title="Tarea aprobada"
           description={EJEMPLO.tarea}
         />
@@ -453,23 +483,204 @@ function Piezas(): React.ReactElement {
           <p>Una tarjeta despegada del fondo, para lo que se mira.</p>
         </Card>
       </Seccion>
+
+      <Seccion titulo="HeroPanel">
+        <HeroPanel
+          tone="action"
+          mascot={<Mascota pose="saluda" size="large" />}
+          aside={<ProgressRing done={2} total={5} className="size-28" />}
+        >
+          <p className="text-display font-extrabold text-ink-inverted">
+            Hola, {EJEMPLO.hija}
+          </p>
+          <p className="text-body text-ink-inverted opacity-90">
+            Hoy te esperan dos tareas. Cuando termines una, aviso a tu papá o a
+            tu mamá.
+          </p>
+        </HeroPanel>
+
+        <HeroPanel
+          tone="saving"
+          mascot={<Mascota pose="elige" size="medium" />}
+        >
+          <p className="text-micro font-extrabold uppercase text-ink-inverted opacity-80">
+            Tu próximo premio
+          </p>
+          <p className="text-title font-extrabold text-ink-inverted">
+            {EJEMPLO.premio}
+          </p>
+          <ProgressBar value={128} max={300} label="Lo que llevas ahorrado" />
+        </HeroPanel>
+      </Seccion>
+
+      <Seccion titulo="IconTile">
+        <Fila>
+          <IconTile tone="action">
+            <IconoEjemplo />
+          </IconTile>
+          <IconTile tone="saving">
+            <IconoEjemplo />
+          </IconTile>
+          <IconTile tone="coin">
+            <IconoEjemplo />
+          </IconTile>
+          <IconTile tone="waiting">
+            <IconoEjemplo />
+          </IconTile>
+        </Fila>
+      </Seccion>
+
+      <Seccion titulo="Mascota">
+        <Fila>
+          <Mascota pose="saluda" size="small" />
+          <Mascota pose="celebra" size="medium" />
+          <Mascota pose="duda" size="large" />
+        </Fila>
+        <Mascota pose="explica">
+          <p className="text-body font-bold">
+            Las monedas se van cuando lo aprueban.
+          </p>
+          <p className="text-small text-ink-muted">No cuando lo pides.</p>
+        </Mascota>
+      </Seccion>
+
+      <Seccion titulo="ProgressRing">
+        <HeroPanel tone="action">
+          <Fila>
+            <ProgressRing done={0} total={5} className="size-24" />
+            <ProgressRing done={2} total={5} className="size-24" />
+            <ProgressRing done={5} total={5} className="size-24" />
+          </Fila>
+        </HeroPanel>
+      </Seccion>
+
+      <Seccion titulo="SplitLayout">
+        <SplitLayout
+          aside={
+            <Card>
+              <p className="text-body">Lo que apoya, resume o explica.</p>
+            </Card>
+          }
+        >
+          <Card>
+            <p className="text-body">Lo que se viene a hacer.</p>
+          </Card>
+          <Card>
+            <p className="text-body">Y sigue.</p>
+          </Card>
+          <Card>
+            <p className="text-body">Y sigue.</p>
+          </Card>
+        </SplitLayout>
+      </Seccion>
+
+      <Seccion titulo="Checkbox · RadioGroup · Slider">
+        <Fila>
+          <Checkbox checked={marcado} onCheckedChange={setMarcado}>
+            {EJEMPLO.hija}
+          </Checkbox>
+          <Checkbox checked={false} onCheckedChange={() => undefined} disabled>
+            Sin hijos que elegir
+          </Checkbox>
+        </Fila>
+
+        <RadioGroup
+          label="Cuánto vale la tarea"
+          value={reparto}
+          onValueChange={setReparto}
+          options={[
+            { value: "igual", label: "El mismo valor para todos" },
+            {
+              value: "propio",
+              label: "Un valor para cada uno",
+              hint: "Se pide uno por hijo",
+            },
+          ]}
+        />
+
+        <Slider
+          label="Acercar"
+          value={acercamiento}
+          onValueChange={setAcercamiento}
+        />
+      </Seccion>
     </div>
   );
 }
 
-/**
- * Las dos escalas, enfrentadas.
- *
- * El atributo lo pondrá el shell en `add-app-shell`; hasta entonces se declara
- * aquí a mano, que es lo que permite ver la diferencia sin haberlo construido.
- */
+function IconoEjemplo(): React.ReactElement {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      className="size-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 7.5l2.5 2.5L11 5" />
+      <path d="M13.5 8h7" />
+      <path d="M4 17.5L6.5 20 11 15" />
+      <path d="M13.5 18h7" />
+    </svg>
+  );
+}
+
+type Tema = "sistema" | "light" | "dark";
+
+function ConmutadorDeTema(): React.ReactElement {
+  const [tema, setTema] = useState<Tema>("sistema");
+
+  const elegir = (siguiente: Tema): void => {
+    setTema(siguiente);
+
+    if (siguiente === "sistema") {
+      delete document.documentElement.dataset.theme;
+      return;
+    }
+
+    document.documentElement.dataset.theme = siguiente;
+  };
+
+  return (
+    <fieldset className="rounded-card flex flex-wrap items-center gap-2 border border-border p-3">
+      <legend className="text-small px-1 font-bold">Tema</legend>
+
+      {(
+        [
+          ["sistema", "Lo que diga el sistema"],
+          ["light", "Claro"],
+          ["dark", "Oscuro"],
+        ] as const
+      ).map(([valor, texto]) => (
+        <Button
+          key={valor}
+          variant={tema === valor ? "primary" : "secondary"}
+          onClick={() => elegir(valor)}
+        >
+          {texto}
+        </Button>
+      ))}
+    </fieldset>
+  );
+}
+
 function Catalogo(): React.ReactElement {
   return (
     <ToastProvider>
+      <div className="mx-auto flex max-w-(--container-reading) flex-col gap-4 p-4 lg:max-w-none">
+        <ConmutadorDeTema />
+      </div>
+
       <div className="mx-auto flex max-w-(--container-reading) flex-col gap-4 p-4 lg:max-w-none lg:flex-row lg:items-start">
         <div data-scale="parent" className="flex-1">
           <h1>Escala del padre</h1>
-          <p className="text-body text-ink-muted">Densidad alta, escaneo rápido.</p>
+          <p className="text-body text-ink-muted">
+            Densidad alta, escaneo rápido.
+          </p>
           <div className="pt-4">
             <Piezas />
           </div>
@@ -477,7 +688,9 @@ function Catalogo(): React.ReactElement {
 
         <div data-scale="child" className="flex-1">
           <h1>Escala del niño</h1>
-          <p className="text-body text-ink-muted">Cifras grandes, toque amplio.</p>
+          <p className="text-body text-ink-muted">
+            Cifras grandes, toque amplio.
+          </p>
           <div className="pt-4">
             <Piezas />
           </div>

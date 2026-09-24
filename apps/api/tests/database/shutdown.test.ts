@@ -5,18 +5,6 @@ import {
   registerGracefulShutdown,
 } from "../../src/shared/database/client.js";
 
-/**
- * Cierre ordenado.
- *
- * La suscripción a señales se prueba comprobando que engancha y desengancha, no
- * enviando señales de verdad: en Windows `child.kill` no entrega SIGTERM al
- * proceso hijo, así que un test así pasaría en Linux y sería humo en la máquina
- * en la que se está desarrollando.
- *
- * Lo que sí se prueba de verdad es el orden de las dos operaciones, que es lo
- * único que puede estar mal.
- */
-
 afterEach(() => {
   vi.restoreAllMocks();
 });
@@ -76,7 +64,6 @@ describe("suscripción a las señales de terminación", () => {
       process.emit("SIGTERM");
       process.emit("SIGTERM");
 
-      // El cierre es asíncrono; hay que dejar que la microcola avance.
       await new Promise((resolve) => setImmediate(resolve));
 
       expect(llamadas).toBe(1);

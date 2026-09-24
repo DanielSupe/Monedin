@@ -1,0 +1,273 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!--
+    GENERADO por design/ui/a-oscuro.mjs a partir de su pareja en claro.
+    NO SE EDITA A MANO: se edita la clara, o se edita el mapa de color de
+    ese script. `node design/ui/a-oscuro.mjs --check` falla si se separan.
+  -->
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
+  <style>
+    body { margin: 0; font-family: "Nunito", ui-rounded, "Segoe UI", system-ui, sans-serif; }
+    a { color: #8B6BF0; text-decoration: none; }
+    a:hover { color: #B9A6F2; }
+  </style>
+</helmet>
+
+<div style="display: flex; width: 1440px; min-height: 900px; background: #1C1620; color: #F5F0EA;">
+
+  <!-- Lateral: los cuatro destinos del niño, ayuda y su perfil al pie. -->
+  <aside style="display: flex; flex-direction: column; width: 264px; flex-shrink: 0; box-sizing: border-box; background: #262031; border-right: 1px solid #332B40; padding: 24px 14px 20px 14px;">
+    <span style="display: flex; align-items: center; gap: 10px; padding: 0 8px;">
+      <svg width="32" height="32" viewBox="0 0 32 32">
+        <circle cx="16" cy="16" r="15" fill="#F5B93B"></circle>
+        <circle cx="16" cy="16" r="11.5" fill="none" stroke="#8A5A10" stroke-width="1.5"></circle>
+        <path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span style="font-size: 21px; font-weight: 900; letter-spacing: -0.02em;">Monedín</span>
+    </span>
+
+    <nav style="display: flex; flex-direction: column; gap: 6px; margin-top: 28px;">
+      <a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 14px; border-radius: 16px; background: #FF6B4A; font-size: 17px; font-weight: 900; color: #FFFFFF; box-shadow: 0 6px 16px rgba(255,107,74,0.32);">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5"></path><path d="M6.5 10v9h11v-9"></path></svg>
+        Inicio
+      </a>
+
+      <a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 14px; border-radius: 16px; font-size: 17px; font-weight: 800; color: #CFC9DA;">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#FF6B4A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5l2.5 2.5L11 5"></path><path d="M13.5 8h7"></path><path d="M4 17.5L6.5 20 11 15"></path><path d="M13.5 18h7"></path></svg>
+        Tareas
+        <span style="margin-left: auto; display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 8px; border-radius: 999px; background: #3D2620; font-size: 14px; font-weight: 900; color: #FF9A7E;">2</span>
+      </a>
+
+      <a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 14px; border-radius: 16px; font-size: 17px; font-weight: 800; color: #CFC9DA;">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8B6BF0" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16v9.5H4z"></path><path d="M3 7.5h18V11H3z"></path><path d="M12 7.5v13"></path><path d="M12 7.5S10.5 3 7.8 3.6C5.9 4 6 7.5 12 7.5z"></path><path d="M12 7.5S13.5 3 16.2 3.6C18.1 4 18 7.5 12 7.5z"></path></svg>
+        Premios
+      </a>
+
+      <a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 14px; border-radius: 16px; font-size: 17px; font-weight: 800; color: #CFC9DA;">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#8B6BF0" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5a2 2 0 002-2h14a2 2 0 002 2v2a2 2 0 000 3v2a2 2 0 00-2 2H5a2 2 0 00-2-2v-2a2 2 0 000-3z"></path><path d="M9.5 9.5v5"></path></svg>
+        Canjes
+      </a>
+    </nav>
+
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: auto;">
+      <a href="#" style="display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 14px; border-radius: 16px; background: #3D3220; font-size: 15px; font-weight: 800; color: #F5C978;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#E8B45E" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M9.6 9.4a2.5 2.5 0 114.4 2c-1 .9-1.8 1.4-1.8 2.6"></path><path d="M12 17.2v.1"></path></svg>
+        Pregúntale a Monedín
+      </a>
+
+      <a href="#" style="display: flex; align-items: center; gap: 11px; min-height: 60px; padding: 0 10px; border-radius: 18px; background: #1C1620;">
+        <span style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; background: #3D2620; flex-shrink: 0;">
+          <svg width="32" height="32" viewBox="0 0 40 40">
+            <path d="M8 9l5 6h14l5-6 1 11c0 8-5 13-13 13S7 28 7 20z" fill="#EE8B4A"></path>
+            <path d="M13 15h14l.6 6c0 6-3.6 10-7.6 10s-7.6-4-7.6-10z" fill="#FFE7D2"></path>
+            <circle cx="16" cy="21" r="2" fill="#3A2A16"></circle><circle cx="24" cy="21" r="2" fill="#3A2A16"></circle>
+            <ellipse cx="20" cy="24.3" rx="1.9" ry="1.4" fill="#3A2A16"></ellipse>
+          </svg>
+        </span>
+        <span style="display: flex; flex-direction: column; min-width: 0;">
+          <span style="font-size: 16px; font-weight: 900; color: #F5F0EA;">Mateo</span>
+          <span style="font-size: 14px; font-weight: 700; color: #A9A2B8;">Mi perfil</span>
+        </span>
+      </a>
+    </div>
+  </aside>
+
+  <main style="position: relative; flex-grow: 1; min-width: 0; box-sizing: border-box; padding: 32px 40px 32px 40px;">
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+
+      <!-- Cabecera: quién eres y cuánto tienes. -->
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1;">
+          <span style="font-size: 15px; font-weight: 800; color: #9C9086;">Miércoles 8 de septiembre</span>
+          <h1 style="margin: 0; font-size: 34px; font-weight: 900; letter-spacing: -0.03em;">Hola, Mateo</h1>
+        </div>
+
+        <span style="display: inline-flex; align-items: center; gap: 10px; padding: 10px 20px 10px 12px; border-radius: 999px; background: #262031; border: 1px solid #332B40; box-shadow: 0 4px 14px rgba(0,0,0,0.05);">
+          <svg width="30" height="30" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#F5B93B"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span style="font-size: 26px; font-weight: 900; color: #F5F0EA; font-variant-numeric: tabular-nums;">128</span>
+          <span style="font-size: 15px; font-weight: 800; color: #A9A2B8;">monedas</span>
+        </span>
+      </div>
+
+      <!-- Monedín saluda, y a la derecha cómo va el día. -->
+      <section style="position: relative; display: flex; align-items: center; gap: 18px; overflow: hidden; border-radius: 28px; background: linear-gradient(115deg, #FF7C5A 0%, #FF6B4A 58%, #F5533A 100%); padding: 20px 28px 20px 20px; box-shadow: 0 12px 30px rgba(255,107,74,0.26);">
+        <div style="position: absolute; top: -60px; left: 260px; width: 200px; height: 200px; border-radius: 50%; background: rgba(255,255,255,0.09);"></div>
+        <div style="position: absolute; bottom: -80px; right: 220px; width: 220px; height: 220px; border-radius: 50%; background: rgba(255,255,255,0.07);"></div>
+
+        <img src="saluda.png" alt="" style="position: relative; width: 128px; height: auto; flex-shrink: 0;">
+
+        <div style="position: relative; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; max-width: 560px; padding: 18px 22px; border-radius: 22px 22px 22px 6px; background: #262031; box-shadow: 0 8px 20px rgba(180,60,35,0.18);">
+          <p style="margin: 0; font-size: 21px; font-weight: 900; color: #F5F0EA; text-wrap: pretty;">¡Hola! Hoy te esperan 2 tareas.</p>
+          <p style="margin: 0; font-size: 16px; font-weight: 700; line-height: 1.4; color: #A9A2B8; text-wrap: pretty;">Soy Monedín y te acompaño. Cuando termines una, aviso a tu papá o a tu mamá para que la revisen.</p>
+        </div>
+
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 118px; height: 118px; flex-shrink: 0;">
+          <svg width="118" height="118" viewBox="0 0 118 118">
+            <circle cx="59" cy="59" r="46" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="13"></circle>
+            <circle cx="59" cy="59" r="46" fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round" stroke-dasharray="115.6 289.0" transform="rotate(-90 59 59)"></circle>
+          </svg>
+          <span style="position: absolute; display: flex; flex-direction: column; align-items: center;">
+            <span style="font-size: 28px; font-weight: 900; color: #FFFFFF; line-height: 1;">2/5</span>
+            <span style="font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.9);">hechas hoy</span>
+          </span>
+        </div>
+      </section>
+
+      <div style="display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; align-items: start;">
+
+        <!-- Lo que hay que hacer, sin salir del inicio. -->
+        <section style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; align-items: baseline; gap: 12px;">
+            <h2 style="margin: 0; font-size: 21px; font-weight: 900;">Tus tareas</h2>
+            <a href="#" style="margin-left: auto; font-size: 15px; font-weight: 800; color: #FF6B4A;">Ver todas</a>
+          </div>
+
+          <ul style="display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; list-style: none;">
+
+            <li style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 20px; background: #262031; border: 1px solid #332B40; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 18px rgba(0,0,0,0.04);">
+              <span style="display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 15px; background: #3D2620; flex-shrink: 0;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF9A7E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 14h17v5.5h-17z"></path><path d="M5.5 14V9.5A2.5 2.5 0 018 7h8a2.5 2.5 0 012.5 2.5V14"></path><path d="M9 11h6"></path></svg>
+              </span>
+              <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+                <span style="font-size: 18px; font-weight: 900;">Tender la cama</span>
+                <span style="font-size: 14px; font-weight: 700; color: #A9A2B8;">Antes de ir al colegio</span>
+              </span>
+              <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 17px; font-weight: 900; color: #F5C978; flex-shrink: 0;">
+                <svg width="19" height="19" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#F5B93B"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                8
+              </span>
+              <a href="#" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 20px; min-height: 46px; box-sizing: border-box; border-radius: 999px; background: #FF6B4A; font-size: 16px; font-weight: 900; color: #FFFFFF; flex-shrink: 0; box-shadow: 0 5px 14px rgba(255,107,74,0.3);">¡Ya la hice!</a>
+            </li>
+
+            <li style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 20px; background: #262031; border: 1px solid #332B40; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 18px rgba(0,0,0,0.04);">
+              <span style="display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 15px; background: #3D2620; flex-shrink: 0;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF9A7E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h6a2.5 2.5 0 012.5 2.5v11a2 2 0 00-2-2H4z"></path><path d="M20 5.5h-6a2.5 2.5 0 00-2.5 2.5v11a2 2 0 012-2H20z"></path></svg>
+              </span>
+              <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+                <span style="font-size: 18px; font-weight: 900;">Leer 15 minutos</span>
+                <span style="font-size: 14px; font-weight: 700; color: #A9A2B8;">El libro que elegiste</span>
+              </span>
+              <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 17px; font-weight: 900; color: #F5C978; flex-shrink: 0;">
+                <svg width="19" height="19" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#F5B93B"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                12
+              </span>
+              <a href="#" style="display: inline-flex; align-items: center; justify-content: center; padding: 0 20px; min-height: 46px; box-sizing: border-box; border-radius: 999px; background: #FF6B4A; font-size: 16px; font-weight: 900; color: #FFFFFF; flex-shrink: 0; box-shadow: 0 5px 14px rgba(255,107,74,0.3);">¡Ya la hice!</a>
+            </li>
+
+            <li style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 20px; background: #262031; border: 1px solid #332B40; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 18px rgba(0,0,0,0.04);">
+              <span style="display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 15px; background: #322B3C; flex-shrink: 0;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9BCAE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg>
+              </span>
+              <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+                <span style="font-size: 18px; font-weight: 900;">Poner la mesa</span>
+                <span style="font-size: 14px; font-weight: 700; color: #A9A2B8;">Se lo dijimos a tu papá o a tu mamá.</span>
+              </span>
+              <span style="display: inline-flex; align-items: center; padding: 9px 16px; border-radius: 999px; background: #322B3C; font-size: 15px; font-weight: 900; color: #C9BCAE; flex-shrink: 0;">Enviada</span>
+            </li>
+
+            <li style="display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 20px; background: #262031; border: 1px solid #332B40; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 18px rgba(0,0,0,0.04);">
+              <span style="display: flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 15px; background: #8B6BF0; flex-shrink: 0;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+              </span>
+              <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+                <span style="font-size: 18px; font-weight: 800; color: #7E788F; text-decoration: line-through;">Sacar la basura</span>
+                <span style="font-size: 14px; font-weight: 700; color: #B9A6F2;">¡Ganaste estas monedas!</span>
+              </span>
+              <span style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; background: #3D3220; font-size: 16px; font-weight: 900; color: #F5C978; flex-shrink: 0;">
+                <svg width="17" height="17" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#F5B93B"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                +5
+              </span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- La otra mitad del ciclo: para qué sirven las monedas. -->
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+
+          <section style="position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 14px; padding: 20px 22px; border-radius: 24px; background: linear-gradient(140deg, #9B7CF5 0%, #8B6BF0 60%, #B9A6F2 100%); box-shadow: 0 12px 28px rgba(108,75,214,0.28);">
+            <div style="position: absolute; top: -70px; right: -50px; width: 190px; height: 190px; border-radius: 50%; background: rgba(255,255,255,0.09);"></div>
+
+            <span style="position: relative; font-size: 14px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.78);">Tu próximo premio</span>
+
+            <div style="position: relative; display: flex; align-items: center; gap: 14px;">
+              <span style="display: flex; align-items: center; justify-content: center; width: 54px; height: 54px; border-radius: 17px; background: rgba(255,255,255,0.18); flex-shrink: 0;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="12.5" rx="2"></rect><path d="M8 21h8"></path><path d="M12 17.5V21"></path><path d="M10.4 9.2l4 2.1-4 2.1z"></path></svg>
+              </span>
+              <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                <span style="font-size: 21px; font-weight: 900; color: #FFFFFF;">Noche de pelis</span>
+                <span style="font-size: 15px; font-weight: 800; color: rgba(255,255,255,0.8);">300 monedas</span>
+              </span>
+            </div>
+
+            <div style="position: relative; display: flex; flex-direction: column; gap: 8px;">
+              <span style="display: block; height: 14px; border-radius: 999px; background: rgba(255,255,255,0.24);">
+                <span style="display: block; width: 43%; height: 14px; border-radius: 999px; background: #F5B93B;"></span>
+              </span>
+              <span style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+                <span style="font-size: 15px; font-weight: 800; color: #FFFFFF;">Te faltan 172 monedas</span>
+                <span style="font-size: 15px; font-weight: 900; color: rgba(255,255,255,0.85); font-variant-numeric: tabular-nums;">128/300</span>
+              </span>
+            </div>
+          </section>
+
+          <section style="display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; border-radius: 24px; background: #262031; border: 1px solid #332B40; box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 18px rgba(0,0,0,0.04);">
+            <div style="display: flex; align-items: baseline; gap: 10px;">
+              <h2 style="margin: 0; font-size: 19px; font-weight: 900;">Tus monedas</h2>
+              <a href="#" style="margin-left: auto; font-size: 14px; font-weight: 800;">Ver todo</a>
+            </div>
+
+            <ul style="display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; list-style: none;">
+              <li style="display: flex; align-items: center; gap: 11px;">
+                <span style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 11px; background: #3D3220; flex-shrink: 0;">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"></path><path d="M6 11l6-6 6 6"></path></svg>
+                </span>
+                <span style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0;">
+                  <span style="font-size: 15px; font-weight: 800;">Ganó 5</span>
+                  <span style="font-size: 13px; font-weight: 700; color: #A9A2B8;">Por una tarea aprobada</span>
+                </span>
+                <span style="font-size: 14px; font-weight: 800; color: #8F899E; font-variant-numeric: tabular-nums;">128</span>
+              </li>
+
+              <li style="display: flex; align-items: center; gap: 11px;">
+                <span style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 11px; background: #302847; flex-shrink: 0;">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#B9A6F2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M6 13l6 6 6-6"></path></svg>
+                </span>
+                <span style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0;">
+                  <span style="font-size: 15px; font-weight: 800;">Gastó 120</span>
+                  <span style="font-size: 13px; font-weight: 700; color: #A9A2B8;">Por un premio canjeado</span>
+                </span>
+                <span style="font-size: 14px; font-weight: 800; color: #8F899E; font-variant-numeric: tabular-nums;">123</span>
+              </li>
+
+              <li style="display: flex; align-items: center; gap: 11px;">
+                <span style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 11px; background: #3D3220; flex-shrink: 0;">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"></path><path d="M6 11l6-6 6 6"></path></svg>
+                </span>
+                <span style="display: flex; flex-direction: column; flex-grow: 1; min-width: 0;">
+                  <span style="font-size: 15px; font-weight: 800;">Ganó 6</span>
+                  <span style="font-size: 13px; font-weight: 700; color: #A9A2B8;">Por una tarea aprobada</span>
+                </span>
+                <span style="font-size: 14px; font-weight: 800; color: #8F899E; font-variant-numeric: tabular-nums;">243</span>
+              </li>
+            </ul>
+          </section>
+
+          <a href="#" style="display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 48px; border-radius: 999px; border: 1px solid #3E3549; background: #262031; font-size: 15px; font-weight: 800; color: #CFC9DA;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#A9A2B8" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8"></path><path d="M15 12h6"></path><path d="M18.5 9l3 3-3 3"></path></svg>
+            Cambiar de perfil
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+</body>
+</html>

@@ -396,3 +396,139 @@ pantalla entera.
 - **WHEN** el padre abre su cuenta
 - **THEN** su avatar aparece una sola vez en la pantalla
 
+### Requirement: Las pantallas de acceso encabezan con lo que se viene a hacer
+
+En entrar y en registrarse, el elemento más grande del panel del formulario SHALL ser **a cuál de los
+dos se ha llegado**, y el saludo SHALL quedar por encima como antetítulo.
+
+Era al revés: «¡Bienvenido!» ocupaba el tamaño grande y lo que distingue las dos pantallas se leía de
+letra pequeña debajo. Un saludo no dice nada que ayude a nadie a decidir, y esta es la única pantalla
+del producto que mira un adulto antes de confiar en él.
+
+El panel de presentación SHALL llevar además la frase del producto, la que no cambia entre las dos
+pantallas, tomada de donde ya vive en el catálogo y no escrita otra vez.
+
+#### Scenario: Se llega a entrar
+
+- **WHEN** se abre la pantalla de entrar
+- **THEN** su encabezado dice que se va a entrar a una cuenta, y el saludo queda por encima
+
+#### Scenario: Se llega a registrarse
+
+- **WHEN** se abre la pantalla de registro
+- **THEN** su encabezado dice que se va a crear una cuenta, y el saludo queda por encima
+
+#### Scenario: Las dos dicen qué es Monedín
+
+- **WHEN** se mira cualquiera de las dos
+- **THEN** su panel de presentación lleva la frase del producto, y es la misma en las dos
+
+### Requirement: La acción principal del acceso lleva su nombre a la vista
+
+El control que envía cualquiera de los dos formularios de acceso SHALL llevar su nombre **escrito**,
+y NO SHALL llevarlo solo en su etiqueta accesible.
+
+Era una flecha redonda con el nombre en `aria-label`: existía para quien no ve la pantalla y no para
+quien la mira. En la única pantalla donde un adulto decide si el producto es de fiar, una flecha sin
+palabra obliga a deducir qué va a pasar al pulsarla.
+
+SHALL ocupar el ancho de su panel, que es lo que la distingue de una acción cualquiera.
+
+#### Scenario: Alguien mira el formulario
+
+- **WHEN** se abre entrar o registrarse
+- **THEN** su acción principal lleva escrito lo que hace
+
+#### Scenario: No queda ninguna acción sin palabra
+
+- **WHEN** se revisan las dos pantallas de acceso
+- **THEN** ninguna acción principal se ofrece solo como icono
+
+### Requirement: La cuenta explica lo que cuesta cerrar sesión y en qué se diferencia el PIN
+
+La pantalla de la cuenta SHALL decir, junto a cerrar sesión, que para volver habrá que teclear el
+correo y la contraseña; y SHALL decir, junto a donde se cambia el PIN, para qué sirve cada una de las
+dos credenciales.
+
+Que cerrar sesión y cambiar de perfil sean distintos ya estaba resuelto poniéndolos en pantallas
+distintas, pero eso lo sabe quien conoce la decisión y no quien mira el botón. Lo que hace falta
+antes de pulsar no es que son distintos, sino qué ocurre: que este dispositivo se desvincula.
+
+Y el registro explica las dos credenciales una vez, hace meses. Donde hace falta otra vez es donde
+alguien está a punto de cambiar una.
+
+Una pista del asistente NO SHALL contar como esa explicación: vive dentro de un globo que hay que
+abrir, y esto tiene que estar al lado del control.
+
+#### Scenario: Alguien va a cerrar sesión
+
+- **WHEN** mira el control de cerrar sesión
+- **THEN** lee al lado que para volver habrá que teclear el correo y la contraseña
+
+#### Scenario: Alguien va a cambiar su PIN
+
+- **WHEN** mira la sección del PIN
+- **THEN** lee para qué sirve el PIN y para qué la contraseña
+
+### Requirement: La cuenta dice de quién es antes de enumerar lo que cambia
+
+El antetítulo de la pantalla de la cuenta SHALL decir que lo que hay allí es del adulto y no de sus
+hijos.
+
+En una tablet que comparte toda la familia, la confusión real no es qué se puede cambiar sino a quién
+se le cambia. Enumerar el contenido —«tu foto, tu PIN y tu sesión»— no avisa de eso.
+
+#### Scenario: Se abre la cuenta
+
+- **WHEN** se lee su encabezado
+- **THEN** dice que lo de esa pantalla es del adulto y no de un hijo
+
+### Requirement: La pantalla del hijo que se edita dice a quién se está editando
+
+La pantalla de edición de un perfil SHALL identificar al hijo: su nombre, y las cifras que confirman
+que es el que se quería —su edad y su saldo—.
+
+Se llega desde una lista de caras, y un formulario que solo dice «Editar perfil» deja esa pregunta
+contestada por lo que el formulario trajera dentro.
+
+El TÍTULO SHALL seguir nombrando la operación y no al hijo: el título de una pantalla dice qué se
+hace allí, y con el nombre de un hijo de título la pantalla deja de decir para qué sirve.
+
+Si el perfil está bloqueado, SHALL decirlo, porque explica por qué alguien ha llegado ahí. La acción
+de desbloquear NO SHALL duplicarse aquí: informar en dos pantallas está bien, tener la misma mutación
+en dos sitios son dos caminos.
+
+#### Scenario: Se abre la edición de un hijo
+
+- **WHEN** se mira la pantalla
+- **THEN** su título dice que se está editando un perfil
+- **AND** se puede leer de qué hijo se trata, con su edad y su saldo
+
+#### Scenario: El perfil está bloqueado
+
+- **WHEN** se abre su edición
+- **THEN** la pantalla lo dice
+
+### Requirement: Las pantallas que reparten explican qué pasa después
+
+El alta de una tarea y el alta de un premio SHALL explicar, en la propia pantalla, qué ocurre con lo
+que se está creando.
+
+Son los dos mecanismos centrales del producto y los que más se malinterpretan. En una tarea: que un
+hijo la marque NO le paga nada, y las monedas salen solo al aprobarla. En un premio: que un hijo VE
+lo que todavía no puede pagar —con cuánto le falta, que es lo que convierte un saldo en una decisión
+de ahorro— y que el precio se CONGELA al pedirlo.
+
+Va donde se decide y no en la ayuda: es ahí donde alguien está poniendo un valor o un precio. Y una
+decisión de producto que no se explica en pantalla es indistinguible de un defecto.
+
+#### Scenario: Se reparte una tarea
+
+- **WHEN** se abre el alta de una tarea
+- **THEN** la pantalla dice que marcarla no paga nada y que aprobar es lo que acredita
+
+#### Scenario: Se publica un premio
+
+- **WHEN** se abre el alta de un premio
+- **THEN** la pantalla dice que un hijo lo ve aunque no le alcance, y que el precio se congela al pedirlo
+

@@ -1,244 +1,68 @@
-/**
- * Constantes de dominio de Monedin.
- *
- * Este archivo es la UNICA fuente de verdad de rangos y limites. La API los usa
- * para validar la entrada y el front para validar formularios antes de enviar.
- * Si un limite cambia, cambia aqui y en ningun otro sitio.
- *
- * Regla: nunca duplicar uno de estos numeros en un modulo. Ver CLAUDE.md.
- */
-
-/** Prefijo bajo el que se sirve toda la API. Front y back lo comparten. */
 export const API_PREFIX = "/api/v1";
 
-/**
- * Rol familiar. Discrimina que puede ver y hacer quien llama.
- *
- * NO es una columna de la base de datos: solo los padres son `User` y el nino
- * vive como `ChildProfile`, asi que una columna de rol valdria siempre PARENT.
- * Es un tipo de dominio, y lo que discrimina es el actor. Ver la decision 2 del
- * design de `add-data-model`.
- */
 export const FAMILY_ROLES = ["PARENT", "CHILD"] as const;
 export type FamilyRole = (typeof FAMILY_ROLES)[number];
 
-/** Edad del nino. Monedin esta disenado para 6 a 11 anos. */
 export const CHILD_AGE_MIN = 6;
 export const CHILD_AGE_MAX = 11;
 
-/**
- * PIN de acceso del nino.
- *
- * El nino no tiene correo ni nombre de usuario: entra eligiendo su perfil dentro
- * de la cuenta del padre y tecleando este PIN. Se declara como rango y no como
- * longitud exacta porque el numero definitivo se cierra en `add-authentication`,
- * y dentro de este rango cabe sin romper nada.
- */
 export const PIN_MIN_LENGTH = 4;
 export const PIN_MAX_LENGTH = 6;
 
-/** Nombre visible de una persona. */
 export const NAME_MIN_LENGTH = 2;
 export const NAME_MAX_LENGTH = 60;
 
-/** Titulo de una tarea o de un premio. */
 export const TITLE_MIN_LENGTH = 2;
 export const TITLE_MAX_LENGTH = 100;
 
-/** Descripcion opcional de una tarea o de un premio. */
 export const DESCRIPTION_MAX_LENGTH = 500;
 
-/**
- * Monedas que vale una tarea o cuesta un premio.
- *
- * El minimo es 1, no 0: una tarea que no vale nada no es una tarea, y un premio
- * gratis no ensena nada sobre el valor de las cosas.
- */
 export const COINS_MIN = 1;
 export const COINS_MAX = 9999;
 
-/** El saldo de un nino nunca es negativo. */
 export const COINS_BALANCE_MIN = 0;
 
-/**
- * Ciclo de vida de una tarea.
- *
- * NO existe un estado de rechazo: rechazar devuelve la tarea a PENDING para que
- * el nino la reintente. Un valor de enum que ningun flujo produce es una
- * invitacion a que alguien lo use mal.
- *
- * Duplica los valores del enum `TaskStatus` del esquema de Prisma, y no hay
- * forma de evitarlo: el cliente generado vive dentro de `apps/api` y el front
- * no puede importarlo. Lo que si se evita es que cada capa escriba su propia
- * lista. Es el mismo caso que FAMILY_ROLES.
- */
 export const TASK_STATUSES = ["PENDING", "COMPLETED", "APPROVED"] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
-/**
- * Filtro del catálogo de premios. NO es una columna: el motor guarda
- * `Reward.isActive` como booleano, y este par es solo cómo se pide el filtro
- * en la query. Un estado y no un booleano porque puede crecer —un premio
- * agotado, uno programado— sin tener que renombrarse. Ver la decisión 6 del
- * design de `add-rewards`.
- */
 export const REWARD_STATUSES = ["ACTIVE", "RETIRED"] as const;
 export type RewardStatus = (typeof REWARD_STATUSES)[number];
 
-/**
- * Ciclo de vida de un canje.
- *
- * Solo dos transiciones desde `PENDING`, y las dos las decide el padre: el niño
- * no tiene una tercera opción para cancelar la suya en este alcance. `REJECTED`
- * es terminal, igual que `APPROVED`: rechazar un canje no lo devuelve a
- * `PENDING` como sí ocurre con una tarea, porque aquí no hay nada que
- * reintentar sin volver a pedirlo. Ver la decisión 3 del design de
- * `add-redemptions`.
- */
 export const REDEMPTION_STATUSES = ["PENDING", "APPROVED", "REJECTED"] as const;
 export type RedemptionStatus = (typeof REDEMPTION_STATUSES)[number];
 
-/**
- * De dónde vino un movimiento de monedas.
- *
- * Refleja el enum `CoinReason` del esquema, y el orden importa poco porque no
- * hay máquina de estados: un movimiento ocurre y queda escrito para siempre.
- *
- * `MANUAL_ADJUSTMENT` existe desde `add-data-model` y **no lo escribe nadie
- * todavía**. Es el mecanismo con el que se corrige una acreditación equivocada
- * —registrando otro movimiento que la compense, porque el historial es
- * inmutable— y sigue sin exponerse por ningún endpoint. Se declara aquí porque
- * el contrato describe lo que la tabla puede contener, no solo lo que hoy se
- * escribe.
- */
 export const COIN_REASONS = ["TASK_APPROVED", "REDEMPTION_APPROVED", "MANUAL_ADJUSTMENT"] as const;
 export type CoinReason = (typeof COIN_REASONS)[number];
 
-/**
- * Hijos activos que caben en una familia.
- *
- * Es un limite de POLITICA, no un invariante de integridad: excederlo no
- * corrompe nada, asi que lo impone el servicio y no el motor. Un tope de filas
- * por padre no se expresa con un CHECK (es un recuento entre filas) y exigiria
- * un disparador. Ver la decision 7 del design de `add-children`.
- *
- * Diez es deliberadamente generoso: el numero existe para acotar el desorden
- * que puede crear quien tenga el dispositivo, porque el alta no pide PIN de
- * adulto. No opina sobre cuantos hijos puede tener una familia.
- *
- * Los hijos dados de baja NO cuentan.
- */
 export const MAX_CHILDREN_PER_FAMILY = 10;
 
-// ---------------------------------------------------------------------------
-// Autenticacion
-// ---------------------------------------------------------------------------
-
-/**
- * Longitud del PIN del nino. Exacta, no un rango: cuatro digitos es lo que un
- * nino de 6 anos recuerda y teclea sin frustrarse.
- *
- * Lo que convierte cuatro digitos en una frontera NO es su longitud, son los
- * limites de intentos de mas abajo. Si alguien los relaja, el PIN deja de
- * proteger nada.
- */
 export const PIN_LENGTH = 4;
 
-/**
- * Minimo de la contrasena del padre.
- *
- * Se fija una longitud y no reglas de composicion (mayusculas, simbolos):
- * las reglas de composicion producen contrasenas peores y mas dificiles de
- * recordar, y la longitud es lo que de verdad aporta entropia.
- */
 export const PASSWORD_MIN_LENGTH = 10;
 export const PASSWORD_MAX_LENGTH = 128;
 
-/**
- * Bloqueo por intentos fallidos.
- *
- * Los numeros difieren por quien se equivoca. Un adulto teclea mal su
- * contrasena unas pocas veces; un nino de seis anos falla su PIN sin querer con
- * facilidad, asi que su bloqueo es mas corto para no convertir un despiste en
- * un berrinche. Y su padre puede desbloquearlo al momento.
- */
 export const PARENT_MAX_FAILED_ATTEMPTS = 10;
 export const PARENT_LOCKOUT_MINUTES = 15;
 export const CHILD_MAX_FAILED_ATTEMPTS = 5;
 export const CHILD_LOCKOUT_MINUTES = 5;
 
-/**
- * Bloqueo del PIN de adulto, con los mismos numeros que su contrasena: es un
- * adulto tecleando, no un nino de seis anos. Se cuenta APARTE del de la
- * contrasena, para que bloquear uno no bloquee el otro.
- */
 export const PARENT_PIN_MAX_FAILED_ATTEMPTS = 10;
 export const PARENT_PIN_LOCKOUT_MINUTES = 15;
 
-/**
- * Duracion de las sesiones.
- *
- * La del padre es larga porque el dispositivo es familiar y volver a teclear la
- * contrasena cada dia es justo lo que hace que la gente la apunte en un papel.
- * La del nino es corta y ademas nunca sobrevive a la de su padre.
- */
 export const PARENT_SESSION_DAYS = 30;
 export const CHILD_SESSION_HOURS = 12;
 
-/**
- * Nombres de las cookies.
- *
- * `ACCOUNT_SESSION_COOKIE` acredita que el dispositivo pertenece a una cuenta.
- * NO concede poderes por si sola.
- * `PROFILE_SESSION_COOKIE` dice que perfil esta activo: el del padre o el de un
- * hijo. Es la que da el actor.
- *
- * Ver la decision 1 del design de add-profile-selection.
- */
 export const ACCOUNT_SESSION_COOKIE = "monedin_session";
 export const PROFILE_SESSION_COOKIE = "monedin_profile";
 
-/** Paginacion por defecto de los listados de la API. */
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 100;
 
-/**
- * Limites del asistente.
- *
- * REGLA DE REPARTO, escrita para que nadie tenga que adivinarla: aqui viven los
- * limites que el FRONT tambien necesita —el maximo del campo, el recorte del
- * hilo antes de enviarlo—. Los que solo necesita el proveedor —el modelo, el
- * tiempo de espera, los tokens de salida— viven en `shared/ai/provider.ts`,
- * igual que los TTL viven en `shared/storage/provider.ts`. Y los que solo
- * necesita el servicio —cuantas tareas caben en un prompt— se quedan locales en
- * el servicio.
- *
- * Pasarse de cualquiera de los tres es 422 y NO un recorte silencioso, por el
- * mismo argumento que `MAX_PAGE_SIZE`: recortar esconde el error de quien llama.
- * Y aqui pesa mas, porque recortar el hilo dejaria a quien pregunta creyendo que
- * Monedin recuerda algo que nunca le llego.
- */
-
-/** Cuanto puede escribir alguien de una vez. */
 export const ASSISTANT_QUESTION_MAX_LENGTH = 500;
 
-/**
- * Turnos previos que el cliente reenvia.
- *
- * Un turno es UN mensaje, no una pareja de pregunta y respuesta: doce son seis
- * intercambios.
- */
 export const ASSISTANT_MAX_HISTORY_TURNS = 12;
 
-/** Tope de cada turno reenviado. Acota lo que cuesta una conversacion larga. */
 export const ASSISTANT_TURN_MAX_LENGTH = 2000;
 
-/**
- * Quien hablo en un turno, en el vocabulario del PRODUCTO.
- *
- * `assistant` y no `model`, que es como lo llama el proveedor en
- * `shared/ai/provider.ts`. Son dos vocabularios distintos a proposito: este es
- * el que ve el front, y quien traduce es el servicio, en un solo sitio.
- */
 export const ASSISTANT_ROLES = ["user", "assistant"] as const;
 export type AssistantRole = (typeof ASSISTANT_ROLES)[number];

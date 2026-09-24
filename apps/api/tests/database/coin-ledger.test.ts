@@ -11,13 +11,6 @@ import {
   withRollback,
 } from "../support/database.js";
 
-/**
- * El libro de monedas.
- *
- * Los tests de concurrencia NO pueden usar `withRollback`: necesitan dos
- * transacciones de verdad compitiendo, y una transacción externa las serializaría
- * y no probaría nada. Esos limpian lo suyo a mano.
- */
 describe("movimiento de monedas", () => {
   it("acredita y deja su fila de historial", () =>
     withRollback(async (db) => {
@@ -62,7 +55,6 @@ describe("movimiento de monedas", () => {
         applyCoinMovement(db, { childId: hijo.id, amount: -50, reason: "REDEMPTION_APPROVED" }),
       ).rejects.toBeInstanceOf(ConflictError);
 
-      // Ni el saldo ni el historial se tocaron.
       const despues = await db.childProfile.findUniqueOrThrow({ where: { id: hijo.id } });
       expect(despues.coins).toBe(20);
       expect(await db.coinTransaction.count({ where: { childId: hijo.id } })).toBe(0);
@@ -139,8 +131,6 @@ describe("atomicidad", () => {
       const padre = await createParent(db);
       const hijo = await createChild(db, padre.id, { coins: 10 });
 
-      // Una transacción anidada que sube el saldo y después falla al escribir el
-      // historial: el movimiento apunta a una tarea inexistente.
       await expect(
         (async () => {
           await db.childProfile.update({
@@ -181,7 +171,7 @@ describe("atomicidad", () => {
             amount: 50,
             reason: "TASK_APPROVED",
           });
-          // Algo posterior falla dentro de la misma transacción.
+
           throw new Error("fallo posterior en la misma unidad de trabajo");
         }),
       ).rejects.toThrow("fallo posterior");
@@ -197,10 +187,6 @@ describe("atomicidad", () => {
 });
 
 describe("concurrencia", () => {
-  /**
-   * Prepara un hijo fuera de transacción para que dos operaciones simultáneas
-   * puedan verlo, y lo limpia al terminar.
-   */
   async function conHijoReal(
     saldoInicial: number,
     cuerpo: (childId: string) => Promise<void>,
@@ -279,7 +265,6 @@ describe("concurrencia", () => {
       const exitosos = resultados.filter((r) => r.status === "fulfilled");
       expect(exitosos).toHaveLength(1);
 
-      // Lo importante: el saldo nunca quedó negativo.
       const hijo = await prisma.childProfile.findUniqueOrThrow({ where: { id: childId } });
       expect(hijo.coins).toBe(10);
       expect(hijo.coins).toBeGreaterThanOrEqual(0);
@@ -290,10 +275,6 @@ describe("concurrencia", () => {
     await conHijoReal(0, async (childId) => {
       const prisma = testPrisma();
 
-      // Dos peticiones idénticas, como las que produce un doble toque. La
-      // protección real contra esto es la transición condicional del estado de
-      // la tarea, que llega con su módulo; aquí se comprueba que el libro sigue
-      // cuadrando pase lo que pase.
       await Promise.all([
         prisma.$transaction((tx) =>
           applyCoinMovement(tx, { childId, amount: 50, reason: "TASK_APPROVED" }),
@@ -306,7 +287,6 @@ describe("concurrencia", () => {
       const hijo = await prisma.childProfile.findUniqueOrThrow({ where: { id: childId } });
       const movimientos = await prisma.coinTransaction.findMany({ where: { childId } });
 
-      // El saldo coincide con la suma del historial: no hay monedas de la nada.
       const suma = movimientos.reduce((total, m) => total + m.amount, 0);
       expect(hijo.coins).toBe(suma);
     });
@@ -365,8 +345,6 @@ describe("auditoría del saldo", () => {
 
       await applyCoinMovement(db, { childId: hijo.id, amount: 100, reason: "TASK_APPROVED" });
 
-      // Alguien mueve el saldo por fuera del libro: exactamente lo que la
-      // comprobación de coherencia tiene que cazar.
       await db.childProfile.update({
         where: { id: hijo.id },
         data: { coins: { increment: 999 } },

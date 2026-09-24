@@ -125,6 +125,15 @@ que la API resuelve con un 409— se comunique con un tono propio y un texto exp
 La API ya distingue sus errores con un código estable; la interfaz SHALL poder reflejar esa distinción
 en lugar de aplanarla en un texto rojo único.
 
+Cada tono SHALL nombrarse por **el papel que cumple** y no por el color que lleva, igual que se nombra
+un token o una variante de botón. Un nombre que describe el valor se queda obsoleto en cuanto el valor
+cambia; uno que describe el papel sobrevive.
+
+El tono del error SHALL conservar un matiz propio, distinto del de la acción principal. Es la única
+excepción admitida a la paleta de la marca, y lo es porque un color de peligro no es una decisión de
+marca: si el mismo matiz dijera «pulsa aquí» y «esto falló», el color dejaría de hacer lo único para
+lo que existe.
+
 #### Scenario: Un error de validación y un conflicto
 
 - **WHEN** una pantalla recibe un error de validación y otra recibe un conflicto
@@ -134,6 +143,17 @@ en lugar de aplanarla en un texto rojo único.
 
 - **WHEN** aparece un aviso de error como resultado de una acción del usuario
 - **THEN** queda expuesto a las tecnologías de asistencia sin que la pantalla tenga que recordarlo
+
+#### Scenario: El color de un tono cambia
+
+- **WHEN** se reasigna el color de un tono del sistema
+- **THEN** su nombre sigue describiéndolo, porque nombra el papel y no el color
+- **AND** ningún punto de uso tiene que cambiar por el hecho de que el color sea otro
+
+#### Scenario: El error y la acción principal aparecen en la misma pantalla
+
+- **WHEN** una pantalla muestra a la vez su acción principal y un aviso de error
+- **THEN** se distinguen por matiz, y no solo por posición o por texto
 
 ### Requirement: Las piezas del sistema no conocen el dominio
 
@@ -935,4 +955,424 @@ verificación: nada impedía pintar un botón de ámbar salvo que alguien se aco
 - **WHEN** se comprueba la lista de archivos autorizados
 - **THEN** contiene al menos uno
 - **AND** así una lista vaciada por accidente no hace pasar la comprobación por no encontrar nada
+
+### Requirement: El tema se reasigna entero, y la paridad se comprueba
+
+El front SHALL ofrecer un tema oscuro, y ese tema SHALL declararse **reasignando la capa semántica de
+tokens**, sin que ninguna pieza lo conozca. Es el mismo mecanismo con el que una superficie de color
+reasigna los neutros: una pieza pide «texto secundario» y lo que cambia es el VALOR de ese token.
+
+El tema SHALL admitir tres estados: claro explícito, oscuro explícito, y **la preferencia del sistema
+cuando no se ha elegido ninguno**. Con solo dos estados habría que escribir uno por defecto antes del
+primer pintado, que es de donde salen los destellos al cargar.
+
+El esquema de color declarado al navegador SHALL seguir al tema, para que los controles NATIVOS
+—barras de desplazamiento, autocompletado, selectores de fecha y de archivo— no se queden con el
+aspecto del tema contrario.
+
+El bloque de un tema SHALL reasignar **todos** los tokens semánticos que declara el tema por defecto,
+y eso SHALL comprobarse automáticamente. Es lo único de un tema que una batería puede verificar,
+porque el entorno de pruebas no aplica CSS: el aspecto se comprueba abriendo pantallas, pero que no
+falte ningún valor se comprueba leyendo el archivo.
+
+#### Scenario: El dispositivo prefiere el tema oscuro y nadie ha elegido
+
+- **WHEN** se abre la aplicación en un dispositivo configurado en oscuro y sin tema elegido
+- **THEN** la interfaz se pinta en oscuro desde el primer pintado, sin destello
+
+#### Scenario: Se añade un token semántico y se olvida su valor oscuro
+
+- **WHEN** se declara un token semántico nuevo en el tema por defecto y no se declara en el oscuro
+- **THEN** la verificación del proyecto falla nombrando el token que falta
+
+#### Scenario: Una pieza no sabe en qué tema está
+
+- **WHEN** se cambia de tema
+- **THEN** ninguna pieza necesita una rama, una clase ni una prop para pintarse correctamente
+
+#### Scenario: Un control nativo aparece en una pantalla
+
+- **WHEN** se muestra un selector de fecha, un selector de archivo o una barra de desplazamiento
+- **THEN** el control se pinta con el esquema del tema vigente y no con el contrario
+
+### Requirement: Una superficie clara anidada vuelve a los valores del tema vigente
+
+Cuando un componente que pinta su propio fondo se anide dentro de una superficie de color, los tokens
+que restituya SHALL ser los del **tema vigente**, y NO SHALL ser los del tema claro escritos
+literalmente.
+
+Escribir ahí los valores claros funciona mientras solo haya un tema y se vuelve exactamente del revés
+en cuanto hay dos: el componente restituiría una tinta oscura sobre el fondo oscuro que él mismo
+acaba de pintar.
+
+#### Scenario: Un aviso dentro de una superficie de color, en tema oscuro
+
+- **WHEN** un componente con fondo propio se muestra dentro de una superficie de color y el tema es
+  oscuro
+- **THEN** su tinta y sus bordes son los del tema oscuro, y el texto se lee sobre su fondo
+
+#### Scenario: El mismo componente en tema claro
+
+- **WHEN** ese mismo componente se muestra en tema claro dentro de una superficie de color
+- **THEN** restituye los valores claros, como hasta ahora
+
+### Requirement: La escala de radios y de tipografía es cerrada y se nombra por su papel
+
+El sistema SHALL declarar un número cerrado de pasos de radio y de tamaño tipográfico, y cada paso
+SHALL nombrarse por **lo que envuelve o para qué sirve**, no por cuánto mide. Ningún punto de uso
+SHALL introducir un paso intermedio.
+
+Una escala abierta no es una escala: si cada pantalla puede elegir su valor, dos pantallas que
+resuelven lo mismo acaban con medidas distintas y nadie puede decir cuál es la correcta.
+
+El radio de una píldora entra en la escala como cualquier otro paso, aunque su valor sea trivial: hoy
+se escribe a mano en cada punto de uso, que es justo lo que la regla del origen único prohíbe.
+
+#### Scenario: Una pantalla necesita un radio intermedio
+
+- **WHEN** una pantalla usa un radio que no es ninguno de los pasos declarados
+- **THEN** la verificación del proyecto falla señalando el archivo de tokens como el sitio correcto
+
+#### Scenario: Un paso se nombra por su medida
+
+- **WHEN** se propone un paso de escala cuyo nombre describe cuánto vale
+- **THEN** se nombra por su papel, para que reasignarlo no deje el nombre mintiendo
+
+### Requirement: Una audiencia con otra distancia de lectura tiene su propia escala
+
+Cuando una pantalla se lea a una distancia o con una intención distintas de las de las audiencias
+existentes, SHALL declararse como una escala propia, y NO SHALL estirarse la escala de otra audiencia
+para acomodarla.
+
+Estirar una escala existente la deforma para todas las pantallas que la usan por culpa de una sola.
+
+#### Scenario: La página pública necesita titulares mayores que cualquier pantalla
+
+- **WHEN** la puerta pública necesita un tamaño que supera el mayor de las audiencias existentes
+- **THEN** se declara una escala propia para esa audiencia
+- **AND** las escalas del padre y del niño mantienen sus valores
+
+### Requirement: Un componente de terceros se adopta sin adoptar su paleta
+
+El sistema SHALL poder incorporar componentes de una librería externa **sin declarar los colores de
+esa librería**. Los nombres de variable que el componente externo espera SHALL resolverse a los tokens
+del sistema desde el archivo de tokens, y NO SHALL declararse un segundo juego de valores de color.
+
+Copiar el bloque de tema de una librería daría dos fuentes de verdad del color, que es exactamente lo
+que la regla del origen único existe para impedir.
+
+El mecanismo de tema del sistema SHALL seguir siendo el suyo: un componente externo que traiga su
+propia convención de tema se adapta al reasignar los valores, y no obliga a escribir esa convención en
+los puntos de uso.
+
+#### Scenario: Se incorpora un componente externo
+
+- **WHEN** se trae un componente de una librería externa que espera sus propias variables de color
+- **THEN** esas variables se resuelven a tokens del sistema desde el archivo de tokens
+- **AND** el componente se repinta con la paleta del producto sin editar su color
+
+#### Scenario: El tema cambia con un componente externo en pantalla
+
+- **WHEN** se cambia de tema y hay un componente externo montado
+- **THEN** se repinta como cualquier pieza propia, sin necesitar la convención de tema de su librería
+
+#### Scenario: Alguien copia el bloque de tema de la librería
+
+- **WHEN** un archivo distinto del archivo de tokens declara un color de la librería externa
+- **THEN** la verificación del proyecto falla señalando el archivo y el valor
+
+### Requirement: Un realce de color es una pieza, no una receta que copia cada pantalla
+
+Cuando una pantalla destaque una zona pintándola con un color de la marca, esa superficie SHALL venir
+de una pieza del sistema, y ninguna pantalla SHALL declarar su propio degradado, su propia sombra de
+color ni sus propias formas de fondo.
+
+El realce es lo que más se repite del rediseño: aparece en trece de las treinta y dos pantallas. Una
+receta copiada trece veces son trece decisiones que nadie ha comparado, y el día que haya que cambiar
+el degradado hay que encontrarlas todas. Es lo mismo que ya pasó con las tres pantallas del niño que
+acabaron con la misma lista idéntica sin que nadie lo decidiera.
+
+La pieza SHALL recibir su tono como una opción declarada de un conjunto cerrado, y NO SHALL admitir un
+color arbitrario desde el punto de uso. Un degradado que mezcle dos tonos del sistema deja de decir
+cuál de los dos manda; que el punto de uso solo pueda elegir entre los tonos previstos convierte esa
+regla en algo que no se puede incumplir.
+
+#### Scenario: Una pantalla nueva necesita destacar una zona
+
+- **WHEN** una pantalla necesita una superficie de realce con la marca
+- **THEN** la obtiene de la pieza del sistema indicando su tono
+- **AND** no declara ningún valor de color
+
+#### Scenario: Una pantalla escribe su propio degradado
+
+- **WHEN** un archivo de pantalla declara un degradado o una sombra de color
+- **THEN** la verificación del proyecto falla señalando el archivo
+
+#### Scenario: Se cambia el aspecto del realce
+
+- **WHEN** se modifica el degradado en la pieza
+- **THEN** cambian todas las pantallas que lo usan, sin editar ninguna de ellas
+
+### Requirement: La mascota se monta desde una pieza, y su pose sale de un solo mapa
+
+La mascota SHALL montarse desde una pieza del sistema, y la asociación entre un contexto y la pose que
+le corresponde SHALL vivir en un único mapa. Ninguna pantalla SHALL elegir una ilustración por su
+nombre de archivo.
+
+Ya existe un mapa de contexto a pose. Escribir un segundo sería tener el mismo dato en dos sitios
+comportándose distinto, que es exactamente el problema que obligó a meter el avatar del padre dentro
+del actor: un segundo camino trae su propia copia, y una copia puede separarse de la primera.
+
+La pieza SHALL tratar la ilustración como decorativa para las tecnologías de asistencia. Lo que nombra
+lo que está pasando es el texto que la acompaña, no el dibujo.
+
+#### Scenario: Una pantalla muestra la mascota
+
+- **WHEN** una pantalla monta la mascota para un contexto del producto
+- **THEN** la pose sale del mapa, y la pantalla no nombra ningún archivo
+
+#### Scenario: Se cambia la pose de un contexto
+
+- **WHEN** se cambia qué pose corresponde a un contexto
+- **THEN** se cambia en un solo sitio y todas las pantallas de ese contexto lo siguen
+
+#### Scenario: Alguien recorre la pantalla sin verla
+
+- **WHEN** una tecnología de asistencia recorre una pantalla con la mascota
+- **THEN** la ilustración no se anuncia
+- **AND** lo que se anuncia es el texto que la acompaña
+
+### Requirement: Un avatar del catálogo lo dibuja el producto, no el dispositivo
+
+Las ilustraciones del catálogo de avatares SHALL dibujarse dentro del producto, y NO SHALL delegarse a
+un glifo que cada sistema operativo compone a su manera.
+
+El mismo perfil tiene que verse igual en los dos dispositivos de una casa. Un glifo del sistema se
+dibuja distinto en una tablet y en un portátil, y a un niño pequeño su cara es cómo reconoce cuál es
+su perfil en la rejilla.
+
+El color de una ilustración SHALL ser propio de ella y NO SHALL reasignarse con el tema: un avatar es
+contenido, como una foto. Lo que sí sigue al tema es la superficie sobre la que se dibuja.
+
+Cambiar cómo se pinta un avatar SHALL seguir tocando un solo archivo. Ni las claves del catálogo, ni
+la validación, ni el almacenamiento SHALL enterarse.
+
+#### Scenario: El mismo perfil en dos dispositivos
+
+- **WHEN** se abre la rejilla de perfiles en dos dispositivos distintos
+- **THEN** cada avatar se ve igual en los dos
+
+#### Scenario: Se añade una ilustración al catálogo
+
+- **WHEN** se incorpora una ilustración nueva
+- **THEN** se toca el archivo que las dibuja y la lista de claves compartida, y nada más
+- **AND** ni la validación ni el almacenamiento cambian
+
+#### Scenario: Se cambia de tema con avatares en pantalla
+
+- **WHEN** se cambia entre el tema claro y el oscuro
+- **THEN** los colores de cada animal no cambian
+- **AND** el círculo sobre el que se dibujan sí sigue al tema
+
+### Requirement: Un componente traído de fuera entra como pieza propia
+
+Un componente incorporado desde una librería externa SHALL cumplir, desde el momento en que entra,
+los mismos deberes que cualquier pieza del sistema: aparecer en el catálogo vivo, no conocer el
+dominio, cubrir sus estados, no declarar valores visuales literales y declarar sus variantes como
+opciones en lugar de admitirlas desde fuera con clases.
+
+Un componente copiado no pertenece a su librería: es código del proyecto desde el primer minuto. Si no
+puede cumplir esos deberes, no entra — y eso es preferible a tener una zona del sistema que se rige
+por otras reglas.
+
+El mecanismo de tema del componente SHALL ser el del sistema. Un componente que traiga su propia
+convención de tema se adapta al entrar, y NO SHALL quedar ninguna marca de esa convención en el
+código.
+
+#### Scenario: Se incorpora un componente externo
+
+- **WHEN** se trae un componente de una librería externa
+- **THEN** aparece en el catálogo vivo como cualquier pieza propia
+- **AND** sus colores y medidas salen de los tokens del sistema
+
+#### Scenario: Queda rastro de la convención de tema ajena
+
+- **WHEN** un archivo del proyecto usa la convención de tema de la librería externa
+- **THEN** la verificación del proyecto falla señalando el archivo
+
+#### Scenario: Un componente externo no puede cumplir los deberes
+
+- **WHEN** un componente traído necesitaría un estilo en línea o conocer el dominio para funcionar
+- **THEN** no se incorpora, y la necesidad se resuelve con una pieza propia
+
+### Requirement: La escala y el peso salen de las maquetas, y se pueden medir
+
+Los pasos de cada escala tipográfica y el registro de pesos del sistema SHALL corresponder a lo que
+las maquetas de referencia usan, y esa correspondencia SHALL ser verificable contando las
+declaraciones de los artboards en lugar de mirándolos.
+
+Los artboards son HTML con estilos en línea, así que cada tamaño y cada peso se puede contar. Eso
+convierte «se ve distinto» en una cifra, y es lo que permite distinguir un defecto de una pantalla de
+un defecto del sistema: si la aplicación escribe 30px donde la maqueta escribe 16 en dieciocho
+sitios, lo que está mal es el token.
+
+El registro de pesos SHALL declararse en la capa de tokens y NO SHALL reescribirse en cada pieza. Una
+pieza pide «semibold» y lo que cambia es a qué apunta esa palabra en este producto, igual que un
+color semántico cambia de valor sin que ninguna pieza se entere.
+
+Cuando el registro declarado haga que un nombre signifique algo distinto de su valor habitual, SHALL
+decirse en el propio archivo de tokens. Una palabra que significa otra cosa sin avisar es peor que un
+valor raro.
+
+#### Scenario: Se compara una pantalla con su maqueta
+
+- **WHEN** se cuentan los tamaños y pesos de una pantalla y los de su maqueta
+- **THEN** los pasos que domina cada una son los mismos
+
+#### Scenario: El diseño ajusta su registro tipográfico
+
+- **WHEN** las maquetas cambian el peso con el que se escribe el producto
+- **THEN** se ajusta en la capa de tokens, sin tocar ninguna pieza ni ninguna pantalla
+
+#### Scenario: Una cifra de la aplicación no sale de la maqueta
+
+- **WHEN** un paso de la escala se aparta de lo que la maqueta usa por una decisión de producto
+- **THEN** esa decisión queda escrita donde vive el token, en lugar de corregirse en silencio
+
+### Requirement: El camino de entrada tiene su propia escala, y no hereda la del padre
+
+Las pantallas previas a tener un rol —acceso, registro, rejilla de perfiles, teclado de PIN, alta de
+perfil y restablecer PIN— SHALL declarar una escala propia, y NO SHALL quedarse con la escala base
+por no declarar ninguna.
+
+La escala base es la del padre, que es la más densa del producto. No declarar nada no significa «no
+elegir»: significa elegir la del padre en silencio, y un valor por defecto que tapa una decisión
+ausente es lo que este proyecto no admite en ninguna otra capa.
+
+El conjunto de pantallas que la reciben SHALL seguir sin enumerarse. Las que van dentro del marco de
+entrada la reciben del marco; las que van a sangre la declaran ellas, igual que la puerta pública
+declara la suya.
+
+#### Scenario: Se llega a una pantalla previa a tener un rol
+
+- **WHEN** se abre cualquiera de ellas, con o sin marco
+- **THEN** su texto se dibuja con la escala del camino de entrada, y no con la del padre ni con la
+  del niño
+
+#### Scenario: Se añade una pantalla al camino de entrada
+
+- **WHEN** se declara una ruta nueva que llega sin actor y se conforma con el marco
+- **THEN** recibe esa escala sin que nadie tenga que acordarse
+
+### Requirement: Un paso de la escala sirve a UN papel
+
+Cuando un mismo paso de la escala esté sirviendo a dos papeles que las maquetas dibujan a tamaños
+distintos, SHALL repartirse entre los pasos que ya existen en lugar de ajustar su valor.
+
+Un paso que sirve al encabezado de una sección, al logo y a un botón grande a la vez no se puede
+corregir cambiando su valor, porque no hay un valor que sirva a los tres. La escala tiene siete pasos
+nombrados por su papel precisamente para que cada papel tenga el suyo.
+
+#### Scenario: Un paso sirve a dos papeles de tamaño distinto
+
+- **WHEN** se corrige el valor de un paso y eso rompe otro papel que lo comparte
+- **THEN** los papeles se reparten entre los pasos existentes, sin inventar uno nuevo
+
+### Requirement: Una pieza declara sus tallas, y el CSS generado no decide ninguna
+
+Una pantalla NO SHALL imponer el tamaño de texto de una pieza pasándole una utilidad por `className`.
+Cuando una pieza necesite una talla que no tiene, SHALL declararla como opción de la pieza.
+
+`cx` no fusiona utilidades de Tailwind, así que dos del mismo grupo las resuelve el orden del CSS
+generado. Eso hace que una imposición desde fuera pueda funcionar hoy por el orden que tocó y dejar
+de funcionar al cambiar el token que se pide, sin que nada falle.
+
+#### Scenario: Una pantalla necesita una pieza a otro tamaño
+
+- **WHEN** ese tamaño no está entre las tallas de la pieza
+- **THEN** se añade como talla de la pieza, nombrada por su papel
+
+### Requirement: Una fecha visible se escribe en un solo sitio, y en el idioma del producto
+
+El formato con el que el producto escribe una fecha SHALL decidirse en un solo sitio, y ninguna
+pantalla SHALL elegir el suyo.
+
+Es una decisión del producto, como el tamaño de un título o el mínimo de una contraseña. Escrita en
+cada pantalla, cuatro acabaron con tres formatos distintos y la quinta habría inventado el cuarto.
+
+La configuración regional SHALL declararse y NO SHALL heredarse del dispositivo. Un producto entero
+en español que deja la fecha al dispositivo imprime el mes antes del día en un teléfono en inglés, y
+quien desarrolla no lo ve nunca porque el suyo está en español.
+
+#### Scenario: Una pantalla enseña una fecha
+
+- **WHEN** cualquier pantalla escribe una fecha
+- **THEN** sale con el formato del producto, sea cual sea la configuración del dispositivo
+
+#### Scenario: Una pantalla nueva necesita escribir una fecha
+
+- **WHEN** se añade una pantalla que enseña fechas
+- **THEN** usa la del producto en vez de decidir un formato, y no hacerlo falla una verificación
+
+### Requirement: El nombre de un grupo de opciones se ve, no solo se oye
+
+Un grupo de opciones excluyentes SHALL mostrar en pantalla qué se está eligiendo, y NO SHALL dejar
+ese nombre únicamente en su etiqueta accesible.
+
+Existe para que dos opciones se COMPAREN sin abrir nada. Sin la pregunta delante, «el mismo valor
+para todos» y «uno para cada uno» no dicen el mismo valor de qué.
+
+El nombre SHALL seguir atado al grupo además de dibujarse: un texto colocado al lado no nombra un
+grupo por estar cerca.
+
+#### Scenario: Se mira un grupo de opciones
+
+- **WHEN** se abre una pantalla que ofrece elegir entre dos modos
+- **THEN** la pregunta que los distingue está en la pantalla
+- **AND** el grupo sigue anunciándose con ella
+
+### Requirement: Un valor que se reparte dice a cuántos va
+
+Cuando un valor se aplique a varios destinatarios a la vez, la pantalla SHALL decir a cuántos va, y
+NO SHALL dejarlo a deducir de la cifra.
+
+Es la duda que cuesta dinero si se entiende al revés: si ocho monedas son ocho en total o ocho para
+cada hijo elegido.
+
+La cifra y su unidad SHALL componerse donde se usan y declinar con el número, para que un valor de
+uno no diga «1 monedas».
+
+#### Scenario: Se escribe un valor para todos
+
+- **WHEN** se pone un valor que reciben todos los elegidos
+- **THEN** la pantalla dice que es para cada uno
+
+#### Scenario: El valor es uno
+
+- **WHEN** se escribe uno
+- **THEN** la unidad va en singular
+
+### Requirement: Una pantalla con panel de apoyo lo coloca al lado cuando hay ancho
+
+Cuando una pantalla tenga un contenido principal y un panel que lo apoya —que explica, resume o
+remata—, y haya ancho para los dos, el sistema SHALL colocarlos **lado a lado**, con el principal
+más ancho que el de apoyo. Sin ancho, SHALL apilarlos.
+
+El reparto SHALL declararlo **una** pieza del sistema y NO cada pantalla por su cuenta: son varias
+las que lo necesitan, y que cada una escriba su propia rejilla es cómo dejan de parecerse.
+
+El panel de apoyo SHALL ir **después** del contenido principal en el orden del documento, en los dos
+anchos. Quien recorre la pantalla con teclado o con un lector llega primero a lo que hay que hacer y
+después a lo que lo explica, igual que quien la mira.
+
+#### Scenario: Una pantalla con panel de apoyo
+
+- **WHEN** se monta una pantalla que declara contenido principal y panel de apoyo
+- **THEN** los dos están en la misma banda
+- **AND** el panel de apoyo viene después del contenido en el documento
+
+#### Scenario: El panel no se estira con el contenido
+
+- **WHEN** el contenido principal es más alto que el panel
+- **THEN** el panel conserva su propia altura
 

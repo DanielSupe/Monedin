@@ -1,0 +1,259 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap">
+  <style>
+    body { margin: 0; font-family: "Nunito", ui-rounded, "Segoe UI", system-ui, sans-serif; }
+    a { color: #6C4BD6; text-decoration: none; }
+    a:hover { color: #5A3CBE; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; min-height: 2400px; background: #FFF7EC; color: #2A2438;">
+
+  <header style="display: flex; align-items: center; gap: 16px; padding: 24px 64px;">
+    <span style="display: flex; align-items: center; gap: 10px; flex-grow: 1;">
+      <svg width="34" height="34" viewBox="0 0 32 32">
+        <circle cx="16" cy="16" r="15" fill="#F5B93B"></circle>
+        <circle cx="16" cy="16" r="11.5" fill="none" stroke="#8A5A10" stroke-width="1.5"></circle>
+        <path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span style="font-size: 24px; font-weight: 900; letter-spacing: -0.02em;">Monedín</span>
+    </span>
+
+    <!-- Las dos acciones pesan IGUAL: esta página recibe a quien no conoce el
+         producto y a quien lo usa y perdió la sesión. -->
+    <a href="#" style="display: inline-flex; align-items: center; padding: 0 20px; min-height: 46px; box-sizing: border-box; border-radius: 999px; border: 1px solid #E3D6C4; background: #FFFFFF; font-size: 16px; font-weight: 800; color: #464154;">Entrar</a>
+    <a href="#" style="display: inline-flex; align-items: center; padding: 0 22px; min-height: 46px; box-sizing: border-box; border-radius: 999px; background: #FF6B4A; font-size: 16px; font-weight: 900; color: #FFFFFF; box-shadow: 0 6px 16px rgba(255,107,74,0.3);">Empezar</a>
+  </header>
+
+  <!-- Héroe -->
+  <section style="display: flex; align-items: center; gap: 56px; padding: 40px 64px 60px 64px;">
+    <div style="display: flex; flex-direction: column; gap: 22px; width: 640px; flex-shrink: 0;">
+      <h1 style="margin: 0; font-size: 58px; font-weight: 900; line-height: 1.08; letter-spacing: -0.035em; text-wrap: pretty;">Sus tareas valen monedas.<br>Sus premios cuestan monedas.</h1>
+      <p style="margin: 0; font-size: 20px; font-weight: 700; line-height: 1.5; color: #6B6053; text-wrap: pretty;">Monedín le enseña a tu hijo el ciclo completo: se esfuerza, gana, y decide en qué gastarlo. Tú apruebas cada paso.</p>
+      <div style="display: flex; align-items: center; gap: 14px; padding-top: 6px;">
+        <a href="#" style="display: inline-flex; align-items: center; gap: 9px; padding: 0 26px; min-height: 56px; box-sizing: border-box; border-radius: 16px; background: #FF6B4A; font-size: 18px; font-weight: 900; color: #FFFFFF; box-shadow: 0 8px 20px rgba(255,107,74,0.32);">
+          Empezar
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"></path><path d="M13.5 6.5L20 12l-6.5 5.5"></path></svg>
+        </a>
+        <span style="font-size: 16px; font-weight: 700; color: #6B6053;">¿Ya tienes cuenta? <a href="#" style="font-weight: 900;">Entrar</a></span>
+      </div>
+    </div>
+
+    <!-- El ciclo, girando. En el centro el saldo; alrededor, lo que lo mueve. -->
+    <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 420px; height: 420px; flex-shrink: 0;">
+      <span style="position: absolute; inset: 0; border-radius: 50%; border: 2px dashed #E3D6C4;"></span>
+      <span style="position: absolute; inset: 62px; border-radius: 50%; border: 2px dashed #EADFCF;"></span>
+
+      <span style="position: absolute; top: 6px; left: 50%; margin-left: -34px; display: flex; align-items: center; justify-content: center; width: 68px; height: 68px; border-radius: 22px; background: #FFE9E2; box-shadow: 0 8px 20px rgba(42,36,56,0.07);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C7452A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5l2.5 2.5L11 5"></path><path d="M13.5 8h7"></path><path d="M4 17.5L6.5 20 11 15"></path><path d="M13.5 18h7"></path></svg>
+      </span>
+      <span style="position: absolute; bottom: 52px; right: 8px; display: flex; align-items: center; justify-content: center; width: 68px; height: 68px; border-radius: 22px; background: #EDE8FC; box-shadow: 0 8px 20px rgba(42,36,56,0.07);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5A3CBE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16v9.5H4z"></path><path d="M3 7.5h18V11H3z"></path><path d="M12 7.5v13"></path><path d="M12 7.5S10.5 3 7.8 3.6C5.9 4 6 7.5 12 7.5z"></path><path d="M12 7.5S13.5 3 16.2 3.6C18.1 4 18 7.5 12 7.5z"></path></svg>
+      </span>
+      <span style="position: absolute; bottom: 52px; left: 8px; display: flex; align-items: center; justify-content: center; width: 68px; height: 68px; border-radius: 22px; background: #F1E9DA; box-shadow: 0 8px 20px rgba(42,36,56,0.07);">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#6B6053" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+      </span>
+
+      <span style="position: absolute; top: 96px; right: 60px;">
+        <svg width="34" height="34" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#FBE2A8"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#E0B45E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </span>
+      <span style="position: absolute; bottom: 108px; left: 56px;">
+        <svg width="26" height="26" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#FBE2A8"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#E0B45E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </span>
+
+      <div style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; width: 208px; height: 208px; border-radius: 50%; background: #FFFFFF; border: 1px solid #F0E6D8; box-shadow: 0 14px 34px rgba(42,36,56,0.1); justify-content: center;">
+        <img src="mira-el-saldo.png" alt="" style="position: absolute; right: -46px; bottom: -10px; width: 104px; height: auto;">
+        <span style="display: flex; align-items: center; gap: 8px;">
+          <svg width="34" height="34" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#F5B93B"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span style="font-size: 52px; font-weight: 900; line-height: 1; letter-spacing: -0.03em;">240</span>
+        </span>
+        <span style="font-size: 15px; font-weight: 800; color: #6B6053;">sus monedas</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- La franja de confianza: lo primero que piensa un adulto al leer «monedas». -->
+  <section style="display: flex; gap: 44px; margin: 0 64px; padding: 36px 44px; border-radius: 28px; background: #FFFFFF; border: 1px solid #F0E6D8; box-shadow: 0 1px 2px rgba(42,36,56,0.04), 0 10px 26px rgba(42,36,56,0.05);">
+    <h2 style="margin: 0; width: 360px; flex-shrink: 0; font-size: 30px; font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; text-wrap: pretty;">Dinero de mentira, decisiones de verdad</h2>
+    <div style="display: flex; flex-direction: column; gap: 14px;">
+      <p style="margin: 0; font-size: 18px; font-weight: 700; line-height: 1.55; color: #6B6053; text-wrap: pretty;">Las monedas de Monedín no salen de tu cuenta ni llegan a ninguna. No hay pagos, no hay tarjetas y no se comparte nada con otras familias: el saldo de tu hijo vive dentro de tu casa.</p>
+      <p style="margin: 0; font-size: 18px; font-weight: 700; line-height: 1.55; color: #2A2438; text-wrap: pretty;">Lo que sí es real es lo que aprende. Ve cuánto tiene, cuánto le falta para lo que quiere, y qué pasó con cada moneda que gastó.</p>
+    </div>
+  </section>
+
+  <!-- El ciclo como FLUJO y no como lista: aprobar va ENTRE la tarea y las
+       monedas, porque aprobar es lo que acredita. -->
+  <section style="display: flex; flex-direction: column; gap: 26px; padding: 64px 64px 0 64px;">
+    <h2 style="margin: 0; font-size: 34px; font-weight: 900; letter-spacing: -0.025em;">Así funciona, de principio a fin</h2>
+
+    <div style="display: flex; align-items: stretch; gap: 14px;">
+      <div style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1; padding: 22px; border-radius: 24px; background: #FFFFFF; border: 1px solid #F0E6D8; box-shadow: 0 1px 2px rgba(42,36,56,0.04), 0 8px 20px rgba(42,36,56,0.04);">
+        <span style="display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 16px; background: #FFE9E2;">
+          <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#C7452A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5l2.5 2.5L11 5"></path><path d="M13.5 8h7"></path><path d="M4 17.5L6.5 20 11 15"></path><path d="M13.5 18h7"></path></svg>
+        </span>
+        <span style="font-size: 20px; font-weight: 900;">Hace una tarea</span>
+        <span style="font-size: 16px; font-weight: 700; line-height: 1.45; color: #6B6053; text-wrap: pretty;">Recoger la mesa, la cama, los deberes. Vale lo que tú decidas.</span>
+      </div>
+
+      <span style="display: flex; align-items: center; flex-shrink: 0;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C9BCAE" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"></path><path d="M13.5 6.5L20 12l-6.5 5.5"></path></svg>
+      </span>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1; padding: 22px; border-radius: 24px; background: #FF6B4A; box-shadow: 0 10px 26px rgba(255,107,74,0.26);">
+        <span style="display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 16px; background: rgba(255,255,255,0.22);">
+          <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+        </span>
+        <span style="font-size: 20px; font-weight: 900; color: #FFFFFF;">Tú apruebas</span>
+        <span style="font-size: 16px; font-weight: 700; line-height: 1.45; color: rgba(255,255,255,0.92); text-wrap: pretty;">Nada se acredita sin que lo mires. Es el paso que sostiene el resto.</span>
+      </div>
+
+      <span style="display: flex; align-items: center; flex-shrink: 0;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C9BCAE" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"></path><path d="M13.5 6.5L20 12l-6.5 5.5"></path></svg>
+      </span>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1; padding: 22px; border-radius: 24px; background: #FFFFFF; border: 1px solid #F0E6D8; box-shadow: 0 1px 2px rgba(42,36,56,0.04), 0 8px 20px rgba(42,36,56,0.04);">
+        <span style="display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 16px; background: #FFF4DD;">
+          <svg width="28" height="28" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#F5B93B"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+        <span style="font-size: 20px; font-weight: 900;">Gana sus monedas</span>
+        <span style="font-size: 16px; font-weight: 700; line-height: 1.45; color: #6B6053; text-wrap: pretty;">Se le acreditan al aprobar, y ve de dónde salió cada una.</span>
+      </div>
+
+      <span style="display: flex; align-items: center; flex-shrink: 0;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C9BCAE" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"></path><path d="M13.5 6.5L20 12l-6.5 5.5"></path></svg>
+      </span>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1; padding: 22px; border-radius: 24px; background: #FFFFFF; border: 1px solid #F0E6D8; box-shadow: 0 1px 2px rgba(42,36,56,0.04), 0 8px 20px rgba(42,36,56,0.04);">
+        <span style="display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 16px; background: #EDE8FC;">
+          <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="#5A3CBE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16v9.5H4z"></path><path d="M3 7.5h18V11H3z"></path><path d="M12 7.5v13"></path><path d="M12 7.5S10.5 3 7.8 3.6C5.9 4 6 7.5 12 7.5z"></path><path d="M12 7.5S13.5 3 16.2 3.6C18.1 4 18 7.5 12 7.5z"></path></svg>
+        </span>
+        <span style="font-size: 20px; font-weight: 900;">Elige su premio</span>
+        <span style="font-size: 16px; font-weight: 700; line-height: 1.45; color: #6B6053; text-wrap: pretty;">Del cine a una hora más de consola, con el precio que le pongas.</span>
+      </div>
+    </div>
+
+    <p style="display: flex; align-items: center; gap: 11px; margin: 0; align-self: center; padding: 12px 20px; border-radius: 999px; background: #F1E9DA; font-size: 16px; font-weight: 800; color: #6B6053;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#6B6053" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12a7.5 7.5 0 1114.2 3.4"></path><path d="M19.5 11l-1 4.6-4.4-1.4"></path></svg>
+      Y vuelta a empezar. Canjear también pasa por ti.
+    </p>
+  </section>
+
+  <!-- Las dos caras, CONSTRUIDAS con las piezas del producto y no capturadas:
+       una captura envejece en silencio cuando cambia un token. -->
+  <section style="display: flex; flex-direction: column; gap: 22px; padding: 64px 64px 0 64px;">
+    <div style="display: flex; align-items: flex-end; gap: 32px;">
+      <h2 style="margin: 0; width: 420px; flex-shrink: 0; font-size: 34px; font-weight: 900; line-height: 1.15; letter-spacing: -0.025em;">Las dos caras de Monedín</h2>
+      <p style="margin: 0; font-size: 18px; font-weight: 700; line-height: 1.5; color: #6B6053; text-wrap: pretty;">Tú gestionas y apruebas; tu hijo ve lo suyo, en grande. Es la misma aplicación con dos medidas distintas, porque un niño de seis años y tú no leéis una pantalla igual.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px;">
+
+      <!-- Ejemplo del panel del padre -->
+      <div style="display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 26px; background: #FFFFFF; border: 1px solid #F0E6D8; box-shadow: 0 1px 2px rgba(42,36,56,0.04), 0 10px 26px rgba(42,36,56,0.05);">
+        <span style="display: inline-flex; align-self: flex-start; padding: 6px 14px; border-radius: 999px; background: #EDE8FC; font-size: 13px; font-weight: 900; color: #5A3CBE;">Lo que ves tú</span>
+
+        <span style="font-size: 13px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: #A08F86;">Te esperan</span>
+        <span style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; background: #FF6B4A;">
+          <span style="display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 12px; background: rgba(255,255,255,0.22);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5l2.5 2.5L11 5"></path><path d="M13.5 8h7"></path><path d="M4 17.5L6.5 20 11 15"></path><path d="M13.5 18h7"></path></svg>
+          </span>
+          <span style="display: flex; flex-direction: column;">
+            <span style="font-size: 21px; font-weight: 900; color: #FFFFFF; line-height: 1.1;">3</span>
+            <span style="font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.92);">tareas por aprobar</span>
+          </span>
+        </span>
+
+        <span style="font-size: 13px; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; color: #A08F86;">Tus hijos</span>
+        <span style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="display: flex; align-items: center; gap: 11px;">
+            <span style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(140deg, #FFD9CC 0%, #FFB49C 100%); flex-shrink: 0;">
+              <svg width="26" height="26" viewBox="0 0 40 40"><path d="M8 9l5 6h14l5-6 1 11c0 8-5 13-13 13S7 28 7 20z" fill="#EE8B4A"></path><path d="M13 15h14l.6 6c0 6-3.6 10-7.6 10s-7.6-4-7.6-10z" fill="#FFE7D2"></path><circle cx="16" cy="21" r="2" fill="#3A2A16"></circle><circle cx="24" cy="21" r="2" fill="#3A2A16"></circle><ellipse cx="20" cy="24.3" rx="1.9" ry="1.4" fill="#3A2A16"></ellipse></svg>
+            </span>
+            <span style="flex-grow: 1; font-size: 15px; font-weight: 800;">Mateo</span>
+            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 900; color: #8A5A10;">
+              <svg width="15" height="15" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#F5B93B"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              128
+            </span>
+          </span>
+          <span style="display: flex; align-items: center; gap: 11px;">
+            <span style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(140deg, #E2DAFB 0%, #B9A6F2 100%); flex-shrink: 0;">
+              <svg width="26" height="26" viewBox="0 0 40 40"><circle cx="11.5" cy="11" r="4.6" fill="#2F3446"></circle><circle cx="28.5" cy="11" r="4.6" fill="#2F3446"></circle><circle cx="20" cy="21" r="12" fill="#FFFFFF"></circle><ellipse cx="14.6" cy="19.4" rx="3.5" ry="4.2" fill="#2F3446"></ellipse><ellipse cx="25.4" cy="19.4" rx="3.5" ry="4.2" fill="#2F3446"></ellipse><circle cx="15" cy="19.4" r="1.4" fill="#FFFFFF"></circle><circle cx="25" cy="19.4" r="1.4" fill="#FFFFFF"></circle><ellipse cx="20" cy="25" rx="2.2" ry="1.6" fill="#2F3446"></ellipse></svg>
+            </span>
+            <span style="flex-grow: 1; font-size: 15px; font-weight: 800;">Emma</span>
+            <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 900; color: #8A5A10;">
+              <svg width="15" height="15" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#F5B93B"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              64
+            </span>
+          </span>
+        </span>
+
+        <span style="font-size: 13px; font-weight: 700; color: #A08F86;">Ejemplo del panel del padre. Los datos no son de nadie.</span>
+      </div>
+
+      <!-- Ejemplo del inicio del niño -->
+      <div style="display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 26px; background: #FFFFFF; border: 1px solid #F0E6D8; box-shadow: 0 1px 2px rgba(42,36,56,0.04), 0 10px 26px rgba(42,36,56,0.05);">
+        <span style="display: inline-flex; align-self: flex-start; padding: 6px 14px; border-radius: 999px; background: #FFE9E2; font-size: 13px; font-weight: 900; color: #C7452A;">Lo que ve tu hijo</span>
+
+        <span style="position: relative; overflow: hidden; display: flex; align-items: center; gap: 12px; padding: 14px 18px 14px 12px; border-radius: 20px; background: linear-gradient(115deg, #FF7C5A 0%, #FF6B4A 58%, #F5533A 100%);">
+          <span style="position: absolute; top: -40px; right: 30px; width: 130px; height: 130px; border-radius: 50%; background: rgba(255,255,255,0.1);"></span>
+          <img src="saluda.png" alt="" style="position: relative; width: 68px; height: auto;">
+          <span style="position: relative; display: flex; flex-direction: column; gap: 2px;">
+            <span style="font-size: 20px; font-weight: 900; color: #FFFFFF;">Hola, Mateo</span>
+            <span style="font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.92);">Hoy te esperan 2 tareas.</span>
+          </span>
+        </span>
+
+        <span style="display: flex; align-items: center; gap: 12px; padding: 4px 2px;">
+          <svg width="40" height="40" viewBox="0 0 32 32"><circle cx="16" cy="16" r="15" fill="#F5B93B"></circle><path d="M11 21V11l5 6 5-6v10" fill="none" stroke="#8A5A10" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span style="font-size: 44px; font-weight: 900; line-height: 1; letter-spacing: -0.03em;">128</span>
+          <span style="font-size: 16px; font-weight: 800; color: #6B6053;">tus monedas</span>
+        </span>
+
+        <span style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px;">
+          <span style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; background: #FFF7EC; border: 1px solid #F0E6D8;">
+            <span style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 11px; background: #FFE9E2;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C7452A" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5l2.5 2.5L11 5"></path><path d="M13.5 8h7"></path><path d="M4 17.5L6.5 20 11 15"></path><path d="M13.5 18h7"></path></svg>
+            </span>
+            <span style="font-size: 15px; font-weight: 900;">Mis tareas</span>
+          </span>
+          <span style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; background: #FFF7EC; border: 1px solid #F0E6D8;">
+            <span style="display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 11px; background: #EDE8FC;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5A3CBE" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11h16v9.5H4z"></path><path d="M3 7.5h18V11H3z"></path><path d="M12 7.5v13"></path></svg>
+            </span>
+            <span style="font-size: 15px; font-weight: 900;">Mis premios</span>
+          </span>
+        </span>
+
+        <span style="font-size: 13px; font-weight: 700; color: #A08F86;">Ejemplo del inicio del niño. Los datos no son de nadie.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- El cierre. Sin argumentar otra vez y sin formulario: una página que no
+       puede validar nada no debe fingir una pantalla de acceso. -->
+  <section style="margin: 64px 64px 0 64px; padding: 46px 52px;">
+    <div style="position: relative; overflow: hidden; display: flex; align-items: center; gap: 32px; padding: 34px 44px; border-radius: 30px; background: linear-gradient(120deg, #7B5BE0 0%, #6C4BD6 58%, #5836BC 100%); box-shadow: 0 16px 40px rgba(108,75,214,0.3);">
+      <div style="position: absolute; top: -90px; right: 220px; width: 260px; height: 260px; border-radius: 50%; background: rgba(255,255,255,0.09);"></div>
+      <img src="celebra.png" alt="" style="position: relative; width: 128px; height: auto; flex-shrink: 0;">
+      <div style="position: relative; display: flex; flex-direction: column; gap: 8px; flex-grow: 1;">
+        <h2 style="margin: 0; font-size: 34px; font-weight: 900; letter-spacing: -0.025em; color: #FFFFFF;">Empieza esta semana</h2>
+        <p style="margin: 0; font-size: 18px; font-weight: 700; line-height: 1.45; color: rgba(255,255,255,0.9); text-wrap: pretty;">Crea tu cuenta, añade a tus hijos y pon la primera tarea. Se tarda menos que leer esto.</p>
+      </div>
+      <a href="#" style="position: relative; display: inline-flex; align-items: center; gap: 9px; padding: 0 28px; min-height: 58px; box-sizing: border-box; border-radius: 16px; background: #FF6B4A; font-size: 18px; font-weight: 900; color: #FFFFFF; flex-shrink: 0; box-shadow: 0 8px 20px rgba(255,107,74,0.35);">
+        Crear mi cuenta
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15"></path><path d="M13.5 6.5L20 12l-6.5 5.5"></path></svg>
+      </a>
+    </div>
+  </section>
+</div>
+</x-dc>
+</body>
+</html>

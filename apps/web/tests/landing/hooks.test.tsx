@@ -4,11 +4,6 @@ import { useCoinCycle } from "../../src/features/landing/use-coin-cycle.js";
 import { useCountUp } from "../../src/features/landing/use-count-up.js";
 import { useTypewriter } from "../../src/features/landing/use-typewriter.js";
 
-/**
- * jsdom no implementa `matchMedia`, así que la preferencia se declara aquí.
- * Es el mismo criterio que el relleno de captura de puntero en `tests/setup.ts`:
- * rellenar un hueco del entorno para que se parezca al navegador de verdad.
- */
 function declararMovimientoReducido(reducido: boolean): void {
   vi.stubGlobal("matchMedia", (consulta: string) => ({
     matches: reducido && consulta.includes("prefers-reduced-motion"),
@@ -19,9 +14,6 @@ function declararMovimientoReducido(reducido: boolean): void {
 }
 
 beforeEach(() => {
-  // `requestAnimationFrame` y `performance` hay que pedirlos: vitest no los
-  // simula por defecto, y sin ellos la cuenta corre en tiempo real mientras el
-  // test cree estar adelantando el reloj.
   vi.useFakeTimers({
     toFake: [
       "setTimeout",
@@ -70,8 +62,6 @@ describe("la cuenta del saldo", () => {
     declararMovimientoReducido(true);
     const { result } = renderHook(() => useCountUp(340));
 
-    // Sin avanzar un solo temporizador. Una cuenta detenida en cero enseña un
-    // dato falso, que es peor que no tener cuenta.
     expect(result.current).toBe(340);
   });
 });
@@ -111,39 +101,19 @@ describe("la máquina de escribir", () => {
     declararMovimientoReducido(true);
     const { result } = renderHook(() => useTypewriter(TITULAR));
 
-    // Un titular detenido en su primera letra no es una animación discreta: es
-    // una página rota.
     expect(result.current.text).toBe(TITULAR);
     expect(result.current.done).toBe(true);
   });
 });
 
-/**
- * El saldo del centro de las órbitas, que ya no cuenta una vez sino que CICLA.
- *
- * Sube por pasos y al llegar al tope vuelve a cero: es el ciclo del producto
- * contado con la única cifra que hay en la página.
- */
 describe("el saldo del centro cicla", () => {
-  /** Los valores del ciclo, para no escribirlos a mano en cada expectativa. */
   const INICIO = 300;
   const PASO = 20;
   const TOPE = 500;
   const INTERVALO = 5000;
-  /** Lo que dura la transición de un paso. Menor que el intervalo, a propósito. */
+
   const TRANSICION = 700;
 
-  /**
-   * Adelanta N pasos y deja que el último termine de animarse.
-   *
-   * De UNA vez y no en un bucle de «espera + asienta»: cada asentamiento suma
-   * al reloj, así que en diez vueltas se colaban dos intervalos de más y la
-   * cuenta salía pasada. Se adelanta el tiempo exacto de los N pasos y solo
-   * después lo que tarda la última transición, que al ser menor que un
-   * intervalo no dispara ninguno más.
-   *
-   * Se llama UNA vez por test, por lo mismo.
-   */
   function avanzarPasos(cuantos: number): void {
     act(() => {
       vi.advanceTimersByTime(cuantos * INTERVALO);
@@ -168,19 +138,10 @@ describe("el saldo del centro cicla", () => {
     expect(result.current).toBe(INICIO + PASO);
   });
 
-  /*
-   * El caso que de verdad prueba el ciclo.
-   *
-   * Se llega al tope y se da UN paso más: si no volviera a cero seguiría
-   * subiendo, y ese es el defecto que este test persigue. Los números están
-   * elegidos para que las dos respuestas se distingan — 0 contra 520.
-   */
   it("al llegar al tope vuelve a cero, y sigue desde ahí", () => {
     declararMovimientoReducido(false);
     const { result } = renderHook(() => useCoinCycle());
 
-    // Los pasos justos para llegar al tope, y UNO más. Si no volviera a cero
-    // seguiría subiendo: las dos respuestas son 0 y 520, que se distinguen.
     const hastaElTope = (TOPE - INICIO) / PASO;
 
     avanzarPasos(hastaElTope + 1);
@@ -194,15 +155,11 @@ describe("el saldo del centro cicla", () => {
     act(() => {
       vi.advanceTimersByTime(INTERVALO);
     });
-    // Justo al saltar el reloj, la transición acaba de empezar.
+
     expect(result.current).toBeLessThan(INICIO + PASO);
     expect(result.current).toBeGreaterThanOrEqual(INICIO);
   });
 
-  /*
-   * Un número que cambia solo cada cinco segundos ES movimiento, y de la clase
-   * que peor sienta: aparece en el rabillo del ojo y obliga a volver a mirar.
-   */
   it("con movimiento reducido NO cicla: se queda quieto", () => {
     declararMovimientoReducido(true);
     const { result } = renderHook(() => useCoinCycle());

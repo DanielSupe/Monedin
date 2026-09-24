@@ -12,16 +12,6 @@ import * as api from "../../api/tasks.js";
 import { ApiRequestError } from "../../lib/http-client.js";
 import { messages } from "../../lib/messages.js";
 
-/**
- * Datos de las tareas.
- *
- * Lo que hay que invalidar al aprobar no es solo la lista: aprobar cambia DOS
- * cosas, el estado de la tarea y el SALDO del hijo. Y el saldo viaja dentro del
- * actor de `GET /auth/session` y también en `GET /children/me`, así que olvidar
- * esas dos claves deja al niño viendo su saldo viejo justo después de que le
- * paguen, que es el momento en el que más mira. Ver la decisión 9 del design de
- * `add-tasks`.
- */
 function useRefreshTasks(): () => Promise<void> {
   const queryClient = useQueryClient();
 
@@ -30,7 +20,6 @@ function useRefreshTasks(): () => Promise<void> {
   };
 }
 
-/** Lo anterior MÁS todo lo que enseña un saldo. Solo para lo que mueve monedas. */
 function useRefreshTasksAndCoins(): () => Promise<void> {
   const queryClient = useQueryClient();
 
@@ -39,14 +28,10 @@ function useRefreshTasksAndCoins(): () => Promise<void> {
     await queryClient.invalidateQueries({ queryKey: authApi.sessionQueryKey });
     await queryClient.invalidateQueries({ queryKey: childrenApi.ownChildQueryKey });
     await queryClient.invalidateQueries({ queryKey: childrenApi.childrenQueryKey });
-    // Y el HISTORIAL: este movimiento acaba de escribir una fila en él. Sin
-    // esto, el saldo sube y la pantalla que lo explica sigue sin la fila que lo
-    // explica.
+
     await queryClient.invalidateQueries({ queryKey: coinsApi.coinHistoryQueryKey });
   };
 }
-
-// --- Gestión del padre ------------------------------------------------------
 
 export function useTaskBatches(query: Partial<ListTasksQuery>) {
   return useQuery({
@@ -77,7 +62,6 @@ export function useDeleteTask() {
   return useMutation({ mutationFn: api.deleteTask, onSuccess: refresh });
 }
 
-/** Aprobar ACREDITA: es la mutación que obliga a invalidar también el saldo. */
 export function useApproveTask() {
   const refresh = useRefreshTasksAndCoins();
 
@@ -90,8 +74,6 @@ export function useRejectTask() {
   return useMutation({ mutationFn: api.rejectTask, onSuccess: refresh });
 }
 
-// --- Vista propia del niño --------------------------------------------------
-
 export function useOwnTasks(query: Partial<ListOwnTasksQuery> = {}) {
   return useQuery({
     queryKey: api.ownTasksQueryKey(query),
@@ -99,7 +81,6 @@ export function useOwnTasks(query: Partial<ListOwnTasksQuery> = {}) {
   });
 }
 
-/** Marcar como hecha NO paga, así que no hace falta refrescar ningún saldo. */
 export function useCompleteTask() {
   const refresh = useRefreshTasks();
 
@@ -110,14 +91,6 @@ export function useCompleteTask() {
   });
 }
 
-/**
- * Traduce un error de tareas a un texto para la persona.
- *
- * NO se reutiliza `describeChildrenError` a propósito: allí un 409 significa
- * «esta familia ya tiene el máximo de perfiles», y aquí significa «esa tarea ya
- * no está pendiente». El código HTTP es estable, pero no quiere decir lo mismo
- * en dos módulos distintos; el mensaje lo decide el contexto.
- */
 export function describeTasksError(error: unknown): string {
   if (!(error instanceof ApiRequestError)) {
     return messages.errors.network;
@@ -137,7 +110,6 @@ export function describeTasksError(error: unknown): string {
   }
 }
 
-/** El estado de una tarea, tal como lo lee una persona. */
 export function describeTaskStatus(status: "PENDING" | "COMPLETED" | "APPROVED"): string {
   switch (status) {
     case "PENDING":

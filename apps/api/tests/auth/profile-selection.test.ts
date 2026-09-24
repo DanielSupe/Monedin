@@ -86,7 +86,7 @@ describe("la rejilla ofrece todos los perfiles de la familia", () => {
 
     expect(profiles[1].avatar).toBe("zorro");
     expect(profiles[2].avatar).toBe(DEFAULT_AVATAR_KEY);
-    // El padre tampoco se queda sin cara.
+
     expect(profiles[0].avatar).toBe(DEFAULT_AVATAR_KEY);
   }, 60_000);
 
@@ -129,9 +129,6 @@ describe("elegir perfil es obligatorio antes de operar", () => {
     const parentId = await parentIdByEmail(CREDENCIALES.correo);
     const hijo = await createChildProfile(parentId, { pin: "1234" });
 
-    // Con solo la cuenta, una operación reservada al padre se rechaza igual que
-    // si no hubiera sesión. Es lo que hace que el PIN de adulto sea una
-    // frontera y no una pantalla.
     const response = await request(app)
       .post(`${API_PREFIX}/auth/child-profiles/pin`)
       .set("Cookie", cookies)
@@ -242,8 +239,6 @@ describe("bloqueo del perfil del padre", () => {
     const { cookies } = await registerParent(app);
     await fallar(cookies, PARENT_PIN_MAX_FAILED_ATTEMPTS);
 
-    // Son dos fronteras distintas y se cuentan aparte: un niño aporreando el
-    // PIN de su madre no puede dejarla sin poder entrar desde su móvil.
     const acceso = await login(app, {
       email: CREDENCIALES.correo,
       password: CREDENCIALES.password,
@@ -331,7 +326,6 @@ describe("cambiar y restablecer el PIN de adulto", () => {
   it("se restablece con la contraseña, sin necesitar perfil activo", async () => {
     const { cookies } = await registerParent(app);
 
-    // Sin perfil elegido: es justo la situación de quien olvidó su PIN.
     const reset = await request(app)
       .post(`${API_PREFIX}/auth/pin/reset`)
       .set("Cookie", cookies)
@@ -444,7 +438,6 @@ describe("forma de las filas de sesión", () => {
     const hijo = await createChildProfile(parentId, { pin: "1234" });
     expect(cookies.length).toBeGreaterThan(0);
 
-    // Sin sesión padre detrás es una cuenta, y una cuenta no puede tener perfil.
     await expect(
       testPrisma().session.create({
         data: {

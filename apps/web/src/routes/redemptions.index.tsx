@@ -4,7 +4,6 @@ import { requireParent } from "../app/guards.js";
 import { statusSearch } from "../app/search.js";
 import { RedemptionInbox } from "../features/redemptions/RedemptionInbox.js";
 
-/** Bandeja de canjes del padre: lo que sus hijos han pedido. */
 export const Route = createFileRoute("/redemptions/")({
   beforeLoad: ({ context }) => requireParent(context.queryClient),
   validateSearch: statusSearch(REDEMPTION_STATUSES),

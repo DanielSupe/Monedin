@@ -23,13 +23,6 @@ function pagina<T>(items: T[]): unknown {
   return { items, page: 1, pageSize: 20, total: items.length, totalPages: 1 };
 }
 
-/**
- * Monta el inicio de un rol, diciendo si a ese perfil ya se le explicó.
- *
- * `comoPadre`/`comoNino` traen `tutorialSeen` en CIERTO por defecto — si no,
- * cada test que monta el inicio se encontraría el recorrido encima de lo que
- * iba a comprobar. Aquí se pide el contrario a propósito.
- */
 async function montarInicio(quien: "padre" | "nino", yaLoVio: boolean) {
   const espia = vi.fn((entrada: RequestInfo | URL, init?: RequestInit) => {
     const url = String(entrada);
@@ -65,19 +58,12 @@ async function montarInicio(quien: "padre" | "nino", yaLoVio: boolean) {
   return espia;
 }
 
-/** Lo que se mandó a la ruta del recorrido, si se mandó algo. */
 function marcados(espia: ReturnType<typeof vi.fn>): Array<{ seen: boolean }> {
   return espia.mock.calls
     .filter(([entrada]) => String(entrada).startsWith(`${API_PREFIX}/auth/tutorial`))
     .map(([, init]) => JSON.parse(String((init as RequestInit).body)) as { seen: boolean });
 }
 
-/**
- * Lo que este change existe para arreglar.
- *
- * Quien entra por primera vez aterriza en una pantalla que no le explica nada:
- * el padre en un panel vacío, el niño en un saldo en cero con cuatro teselas.
- */
 describe("el recorrido sale la primera vez, y solo la primera", () => {
   it("el padre lo ve si no lo ha visto", async () => {
     await montarInicio("padre", false);
@@ -87,11 +73,6 @@ describe("el recorrido sale la primera vez, y solo la primera", () => {
     ).toBeInTheDocument();
   });
 
-  /*
-   * LOS DOS CASOS, y este es el que importa: comprobar solo que aparece pasaría
-   * con un recorrido que sale siempre, que es justo el defecto que arruinaría
-   * el producto para quien ya lo usa.
-   */
   it("y NO lo ve si ya lo vio", async () => {
     await montarInicio("padre", true);
 
@@ -113,11 +94,6 @@ describe("el recorrido sale la primera vez, y solo la primera", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  /*
-   * Los dos guiones son DISTINTOS, y se comprueba comparándolos entre sí. Un
-   * test que solo mirara que cada uno tiene un primer paso pasaría con el mismo
-   * guion servido a los dos roles.
-   */
   it("y cada rol recibe el suyo, que no es el del otro", async () => {
     await montarInicio("padre", false);
     const delPadre = (await screen.findByRole("dialog")).getAttribute("aria-labelledby");
@@ -146,11 +122,6 @@ describe("se avanza, y se sale", () => {
     ).toBeInTheDocument();
   });
 
-  /*
-   * Saltar MARCA VISTO. Un recorrido que solo contara como visto al llegar al
-   * final volvería a salirle cada vez a quien lo saltó — que es justo a quien
-   * ya dijo que no.
-   */
   it("saltar marca visto", async () => {
     const espia = await montarInicio("padre", false);
     await screen.findByRole("dialog");
@@ -160,11 +131,19 @@ describe("se avanza, y se sale", () => {
     expect(marcados(espia)).toEqual([{ seen: true }]);
   });
 
+  it("y salir con Escape cuenta igual que saltar", async () => {
+    const espia = await montarInicio("padre", false);
+    await screen.findByRole("dialog");
+
+    await userEvent.keyboard("{Escape}");
+
+    expect(marcados(espia)).toEqual([{ seen: true }]);
+  });
+
   it("y llegar al final también", async () => {
     const espia = await montarInicio("nino", false);
     await screen.findByRole("dialog");
 
-    // Cuatro «seguir» para llegar al quinto y último paso.
     for (let i = 0; i < 4; i += 1) {
       await userEvent.click(screen.getByRole("button", { name: messages.tutorial.next }));
     }
@@ -175,15 +154,9 @@ describe("se avanza, y se sale", () => {
 });
 
 describe("un paso cuya parte no está en pantalla", () => {
-  /*
-   * El saludo y el cierre no señalan a nada, y una cuenta recién creada no tiene
-   * filas que iluminar. El recorrido tiene que seguir funcionando: es
-   * exactamente cuando más falta hace.
-   */
   it("se muestra igual, en vez de dejar el recorrido en blanco", async () => {
     await montarInicio("padre", false);
 
-    // El primer paso no tiene ancla y aun así se ve entero.
     const panel = await screen.findByRole("dialog", {
       name: messages.tutorial.parentWelcomeTitle,
     });

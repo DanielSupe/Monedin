@@ -1,21 +1,23 @@
-import type { CoinReason, CoinTransaction, CoinTransactionsPage } from "@monedin/contracts";
+import type {
+  CoinReason,
+  CoinTransaction,
+  CoinTransactionsPage,
+} from "@monedin/contracts";
 import type { ReactNode } from "react";
 import { alertToneFor } from "../../lib/alert-tone.js";
+import { fechaCorta } from "../../lib/dates.js";
 import { messages } from "../../lib/messages.js";
-import { Alert, Badge, Card, Coins, EmptyState, Pagination, Skeleton } from "../../ui/index.js";
+import {
+  Alert,
+  Card,
+  Coins,
+  EmptyState,
+  IconTile,
+  Pagination,
+  Skeleton,
+} from "../../ui/index.js";
 import { describeCoinsError } from "./use-coins.js";
 
-/**
- * El historial de movimientos, para quien sea que lo mire.
- *
- * UNA pieza y no dos: lo que cambia entre el niño y el padre es el título y a
- * dónde llevan sus enlaces de paginación, no cómo se lee un movimiento. Si
- * aparecieran dos componentes cuya única diferencia es la audiencia, sería un
- * defecto —es la misma regla que gobierna la doble escala—.
- *
- * Los enlaces de paginación entran como CONTENIDO, igual que en `Pagination`:
- * esta pieza no sabe a qué ruta pertenece.
- */
 const RAZON: Record<CoinReason, string> = {
   TASK_APPROVED: messages.coins.reasonTaskApproved,
   REDEMPTION_APPROVED: messages.coins.reasonRedemptionApproved,
@@ -24,6 +26,7 @@ const RAZON: Record<CoinReason, string> = {
 
 export function CoinHistory({
   title,
+  note,
   page,
   isPending,
   error,
@@ -31,6 +34,8 @@ export function CoinHistory({
   next,
 }: {
   title: string;
+
+  note?: string;
   page: CoinTransactionsPage | undefined;
   isPending: boolean;
   error: unknown;
@@ -40,8 +45,12 @@ export function CoinHistory({
   const movimientos = page?.items ?? [];
 
   return (
-    <section className="flex flex-col gap-4">
-      <h2 className="text-title font-bold">{title}</h2>
+    <section className="flex flex-col gap-5">
+      <h2 className="text-display font-extrabold">{title}</h2>
+
+      {note !== undefined && (
+        <p className="text-small text-ink-muted">{note}</p>
+      )}
 
       {isPending ? (
         <Skeleton lines={4} />
@@ -50,11 +59,13 @@ export function CoinHistory({
       ) : movimientos.length === 0 ? (
         <EmptyState glyph="🪙" title={messages.coins.empty} />
       ) : (
-        <ul className="flex list-none flex-col gap-3 p-0">
-          {movimientos.map((movimiento) => (
-            <MovementRow key={movimiento.id} movement={movimiento} />
-          ))}
-        </ul>
+        <Card>
+          <ul className="flex list-none flex-col p-0">
+            {movimientos.map((movimiento) => (
+              <MovementRow key={movimiento.id} movement={movimiento} />
+            ))}
+          </ul>
+        </Card>
       )}
 
       {page !== undefined && (
@@ -69,43 +80,75 @@ export function CoinHistory({
   );
 }
 
-function MovementRow({ movement }: { movement: CoinTransaction }): React.ReactElement {
-  /*
-   * Que sume o reste es la información MÁS importante de la fila, y `-60` frente
-   * a `60` la deja colgando de un solo carácter. Se dice con palabra y con tono.
-   *
-   * Gastar va en NEUTRO y no en peligro: es el niño usando sus monedas en algo
-   * que quería, que es justo el ciclo que el producto enseña. Pintarlo de rojo
-   * le diría que hizo algo mal.
-   */
+export function MovementRow({
+  movement,
+  compact = false,
+}: {
+  movement: CoinTransaction;
+
+  compact?: boolean;
+}): React.ReactElement {
   const acredita = movement.amount > 0;
 
   return (
-    <li>
-      <Card>
-        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 flex-col gap-1">
-            <Badge tone={acredita ? "success" : "neutral"}>
-              {acredita ? messages.coins.earned : messages.coins.spent}
-            </Badge>
-            <p className="text-small text-ink-muted">{RAZON[movement.reason]}</p>
-          </div>
+    <li className="flex min-w-0 flex-wrap items-center gap-4 border-b border-border py-3 first:pt-0 last:border-b-0 last:pb-0">
+      <IconTile tone={acredita ? "coin" : "saving"}>
+        <Flecha hacia={acredita ? "arriba" : "abajo"} />
+      </IconTile>
 
-          <div className="flex flex-col items-end gap-1">
-            {/* El importe en valor absoluto: el signo ya lo dice la etiqueta. */}
-            <Coins amount={Math.abs(movement.amount)} />
-            {/*
-              El saldo viene GUARDADO en la fila y no se acumula aquí. La columna
-              es redundante desde `add-data-model` con una razón escrita, y sumar
-              en el cliente sería además incorrecto en cuanto haya paginación: la
-              segunda página no sabe con qué saldo empezó.
-            */}
-            <p className="text-small text-ink-muted">
-              {messages.coins.balanceAfter} {movement.balanceAfter}
-            </p>
-          </div>
-        </div>
-      </Card>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+
+        <p className="text-lead font-extrabold">
+          {acredita ? messages.coins.earned : messages.coins.spent}{" "}
+          {Math.abs(movement.amount)}
+        </p>
+        <p className="text-small font-bold text-ink-muted">
+          {RAZON[movement.reason]}
+        </p>
+      </div>
+
+      {!compact && (
+        <span className="shrink-0 text-small font-bold text-ink-muted">
+          {fechaCorta(movement.createdAt)}
+        </span>
+      )}
+
+      <div className="flex shrink-0 flex-col items-end">
+        {!compact && (
+          <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+            {messages.coins.balanceAfter}
+          </span>
+        )}
+        <Coins amount={movement.balanceAfter} />
+      </div>
     </li>
+  );
+}
+
+function Flecha({ hacia }: { hacia: "arriba" | "abajo" }): React.ReactElement {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      focusable="false"
+      className="size-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {hacia === "arriba" ? (
+        <>
+          <path d="M12 19V5" />
+          <path d="M6 11l6-6 6 6" />
+        </>
+      ) : (
+        <>
+          <path d="M12 5v14" />
+          <path d="M6 13l6 6 6-6" />
+        </>
+      )}
+    </svg>
   );
 }

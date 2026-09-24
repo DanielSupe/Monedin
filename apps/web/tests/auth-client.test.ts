@@ -1,7 +1,7 @@
 import { API_PREFIX, AVATAR_KEYS, DEFAULT_AVATAR_KEY, ERROR_CODES } from "@monedin/contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as api from "../src/api/auth.js";
-import { AVATAR_OPTIONS, avatarGlyph } from "../src/ui/avatars.js";
+import { AVATAR_OPTIONS } from "../src/ui/avatars.js";
 import { describeAuthError, isLockout, screenFor } from "../src/features/auth/use-session.js";
 import { ApiRequestError } from "../src/lib/http-client.js";
 import { messages } from "../src/lib/messages.js";
@@ -53,6 +53,7 @@ describe("cliente de sesión", () => {
           actor: {
             familyRole: "CHILD",
             tutorialSeen: false,
+            theme: "SYSTEM" as const,
             id: "c1",
             name: "Mateo",
             avatar: DEFAULT_AVATAR_KEY,
@@ -70,9 +71,6 @@ describe("cliente de sesión", () => {
   });
 
   it("el avatar del actor llega siempre resuelto, nunca nulo", async () => {
-    // La API lo resuelve al de por defecto antes de responder, igual que en la
-    // rejilla. Eran dos formas del mismo dato y el front tenía que tratar el
-    // hueco en cada pantalla. Ver la tarea 1.6 de `add-children`.
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -84,6 +82,7 @@ describe("cliente de sesión", () => {
             avatar: null,
             coins: 0,
             tutorialSeen: false,
+            theme: "SYSTEM" as const,
           },
           hasAccount: true,
         }),
@@ -96,8 +95,6 @@ describe("cliente de sesión", () => {
   it("maneja una respuesta 204 sin cuerpo", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(emptyResponse(204)));
 
-    // Cerrar sesión y salir de un perfil responden 204: parsearlo como JSON
-    // reventaría.
     await expect(api.logout()).resolves.toBeUndefined();
     await expect(api.leaveProfile()).resolves.toBeUndefined();
   });
@@ -136,6 +133,7 @@ describe("cliente de la rejilla", () => {
           actor: {
             familyRole: "PARENT",
             tutorialSeen: false,
+            theme: "SYSTEM" as const,
             id: "u1",
             name: "Lucía",
             email: "l@x.test",
@@ -236,6 +234,7 @@ describe("la guarda tiene tres estados, no dos", () => {
           email: "l@x.test",
           avatar: "nutria",
           tutorialSeen: true,
+          theme: "SYSTEM" as const,
         },
         hasAccount: true,
       }),
@@ -247,7 +246,6 @@ describe("mensajes visibles", () => {
   it("el mensaje de credenciales no señala cuál de los dos datos falla", () => {
     const texto = messages.auth.invalidCredentials;
 
-    // Nombra ambos, que es lo que lo hace ambiguo.
     expect(texto).toMatch(/correo/i);
     expect(texto).toMatch(/contraseñ/i);
   });
@@ -260,9 +258,6 @@ describe("mensajes visibles", () => {
 
 describe("la pantalla del PIN habla el idioma de quien la ve", () => {
   it("un PIN de hijo incorrecto no dice nada de correos ni contraseñas", () => {
-    // El código es el mismo que el de una contraseña equivocada, así que esta
-    // pantalla necesita su propio mensaje. Se detectó probándolo en el
-    // navegador: al niño le salía «El correo o la contraseña no son correctos».
     expect(messages.auth.pinWrong).not.toMatch(/correo/i);
     expect(messages.auth.pinWrong).not.toMatch(/contraseñ/i);
     expect(messages.auth.pinWrong).toMatch(/PIN/i);
@@ -274,9 +269,6 @@ describe("la pantalla del PIN habla el idioma de quien la ve", () => {
   });
 
   it("el PIN del padre tiene sus propios mensajes, distintos de los del hijo", () => {
-    // Mismo código de error (401 / 429) para los dos roles, pero un padre no
-    // necesita que le digan que pida ayuda a un adulto, y a un niño no se le
-    // dice que restablezca su PIN con una contraseña.
     expect(messages.auth.adultPinWrong).not.toBe(messages.auth.pinWrong);
     expect(messages.auth.adultPinLocked).not.toBe(messages.auth.pinLocked);
     expect(messages.auth.adultPinLocked).not.toMatch(/adulto/i);
@@ -296,13 +288,7 @@ describe("el catálogo de avatares", () => {
     expect(claves.sort()).toEqual([...AVATAR_KEYS].sort());
   });
 
-  it("cada opción tiene una ilustración", () => {
-    for (const option of AVATAR_OPTIONS) {
-      expect(option.glyph.length).toBeGreaterThan(0);
-    }
-  });
-
-  it("una clave desconocida resuelve al avatar por defecto en vez de fallar", () => {
-    expect(avatarGlyph("no-existe")).toBe(avatarGlyph(null));
+  it("el catálogo de opciones cubre exactamente las claves del contrato", () => {
+    expect(AVATAR_OPTIONS.map((opcion) => opcion.key).sort()).toEqual([...AVATAR_KEYS].sort());
   });
 });

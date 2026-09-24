@@ -4,19 +4,6 @@ import { afterEach, describe, expect, it } from "vitest";
 import { GeminiProvider } from "../../src/shared/ai/gemini-provider.js";
 import { AiProviderError } from "../../src/shared/ai/provider.js";
 
-/**
- * El proveedor de IA, contra un servidor de verdad.
- *
- * Va contra HTTP real y no contra un `fetch` falso a propósito: lo que se
- * prueba es cómo se traduce lo que llega POR EL CABLE —un 429, un 500, un
- * cuerpo con otra forma, una petición que no termina—, y eso es exactamente lo
- * que un doble de `fetch` daría por supuesto.
- *
- * No es MinIO ni pretende serlo: no es Gemini, es un servidor que responde lo
- * que este test necesita. La diferencia con el almacén está escrita en la
- * decisión 4 del design.
- */
-
 let servidor: Server | undefined;
 
 afterEach(async () => {
@@ -27,7 +14,6 @@ afterEach(async () => {
   }
 });
 
-/** Levanta un servidor que responde siempre lo mismo y devuelve su dirección. */
 async function servidorQueResponde(
   handler: (responder: (estado: number, cuerpo: string) => void) => void,
 ): Promise<string> {
@@ -77,11 +63,6 @@ describe("el camino que funciona", () => {
 });
 
 describe("lo que manda por el cable", () => {
-  /*
-   * La clave va en una CABECERA y NUNCA en la dirección. Este caso es la mitad
-   * ejecutable de esa regla; la otra mitad —que tampoco acaba en un log— la
-   * comprueba `ai-secret-leak.test.ts`.
-   */
   it("la clave viaja en la cabecera y no en la dirección", async () => {
     let cabecera: string | undefined;
     let direccion: string | undefined;
@@ -103,11 +84,6 @@ describe("lo que manda por el cable", () => {
     expect(direccion).not.toContain("key=");
   });
 
-  /*
-   * La pregunta va como turno PROPIO y no concatenada dentro de la instrucción
-   * de sistema. Concatenar es lo que hace trivial una inyección de prompt, así
-   * que la separación de canales se fija aquí y no solo en un comentario.
-   */
   it("la pregunta va en su turno y no dentro de la instrucción de sistema", async () => {
     let cuerpo = "";
 
@@ -138,7 +114,6 @@ describe("lo que manda por el cable", () => {
     expect(enviado.systemInstruction.parts[0]?.text).toBe("eres una prueba");
     expect(enviado.systemInstruction.parts[0]?.text).not.toContain("IGNORA-TUS-INSTRUCCIONES");
 
-    // El hilo previo, en orden, y la pregunta al final como turno de usuario.
     expect(enviado.contents.map((c) => c.role)).toEqual(["user", "model", "user"]);
     expect(enviado.contents[2]?.parts[0]?.text).toBe("IGNORA-TUS-INSTRUCCIONES");
   });
@@ -165,7 +140,6 @@ describe("los cuatro motivos de fallo", () => {
   });
 
   it("no llegar a tiempo es un timeout", async () => {
-    // Nunca responde: el manejador se queda con la petición abierta.
     const baseUrl = await servidorQueResponde(() => {});
 
     const fallo = await proveedor(baseUrl, 150).complete(PREGUNTA).catch((e: unknown) => e);
@@ -174,7 +148,6 @@ describe("los cuatro motivos de fallo", () => {
   });
 
   it("no llegar a ningún sitio es servicio no disponible", async () => {
-    // Puerto cerrado: no hay nadie escuchando.
     const fallo = await proveedor("http://127.0.0.1:1")
       .complete(PREGUNTA)
       .catch((e: unknown) => e);
@@ -184,11 +157,6 @@ describe("los cuatro motivos de fallo", () => {
 });
 
 describe("un cuerpo que no se puede leer NO se deja pasar", () => {
-  /*
-   * Estos tres son el coste declarado de hablar el cable a mano en vez de con
-   * un SDK: si Google cambia la forma, esto lo convierte en un fallo honesto en
-   * lugar de en un `undefined` llegando a la pantalla de un niño.
-   */
   it("un cuerpo que no es JSON", async () => {
     const abierto = createServer((_req, res) => {
       res.writeHead(200, { "Content-Type": "text/html" });
@@ -215,11 +183,6 @@ describe("un cuerpo que no se puede leer NO se deja pasar", () => {
     expect((fallo as AiProviderError).reason).toBe("invalid_response");
   });
 
-  /*
-   * Un candidato SIN texto no es una respuesta vacía legítima: pasa cuando el
-   * modelo se corta por su filtro o por el tope de salida. Devolver "" dejaría
-   * a quien pregunta mirando un turno en blanco sin saber que algo falló.
-   */
   it("una respuesta sin texto", async () => {
     const baseUrl = await servidorQueResponde((responder) => {
       responder(200, JSON.stringify({ candidates: [{ content: { parts: [] } }] }));

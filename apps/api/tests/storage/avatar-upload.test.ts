@@ -6,15 +6,6 @@ import { resetAuthData } from "../support/auth.js";
 import { sembrarObjeto, subirConUrlFirmada } from "../support/storage.js";
 import { familiaOperando } from "../support/tasks.js";
 
-/**
- * El avatar propio, de punta a punta y contra MinIO de verdad.
- *
- * Las dos garantías que sostienen este flujo, y que son lo que estos tests
- * vigilan: que una clave de OTRO no se puede confirmar como propia aunque el
- * objeto exista, y que una que nunca se subió no queda guardada como si fuera
- * una foto.
- */
-
 const app = createApp();
 
 beforeEach(async () => {
@@ -57,7 +48,7 @@ describe("el niño sube su propia foto", () => {
     const confirmado = await confirmarPropio(ana.cookies, { avatarUploadKey: url.body.key });
 
     expect(confirmado.status).toBe(200);
-    // Sale como URL lista para pintar, nunca como la clave cruda del almacén.
+
     expect(confirmado.body.avatar).toMatch(/^https?:\/\//);
     expect(confirmado.body.avatar).not.toBe(url.body.key);
   }, 180_000);
@@ -87,8 +78,6 @@ describe("el niño sube su propia foto", () => {
   }, 180_000);
 
   it("la clave de un HERMANO da 422 aunque el objeto exista de verdad", async () => {
-    // Es la comprobación de prefijo: sin ella, quien viera la clave de otro en
-    // una respuesta podría confirmarla como suya.
     const { hijos } = await familiaOperando(app, ["Ana", "Bruno"]);
     const [ana, bruno] = hijos;
 
@@ -193,11 +182,9 @@ describe("el avatar del padre", () => {
       .send({ avatarUploadKey: url.body.key })
       .expect(200);
 
-    // Dentro de su sesión: es lo que antes de este change no podía ver.
     const sesion = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
     expect(sesion.body.actor.avatar).toMatch(/^https?:\/\//);
 
-    // Y en la rejilla previa.
     const rejilla = await request(app)
       .get(`${API_PREFIX}/auth/profiles`)
       .set("Cookie", accountCookies);
@@ -218,13 +205,6 @@ describe("el avatar del padre", () => {
     expect(response.status).toBe(403);
   }, 120_000);
 
-  /*
-   * El padre gana el catálogo en `polish-profile-and-reward-image`, que es lo
-   * que el esquema dejó escrito que pasaría «cuando esa pantalla exista».
-   *
-   * Se comprueba con DOS animales distintos y no con uno: con uno solo, un
-   * servicio que ignorase el campo y escribiera siempre el mismo pasaría.
-   */
   it.each(["koala", "pulpo"])("elige del catálogo el animal «%s»", async (animal) => {
     const { cookies } = await familiaOperando(app, ["Ana"]);
 
@@ -249,8 +229,6 @@ describe("el avatar del padre", () => {
     expect(response.status).toBe(422);
   }, 120_000);
 
-  // Misma regla que ya tenían los hijos, y AHORA COMPARTIDA de verdad: la
-  // función vive en `avatar.ts` y no copiada en dos esquemas.
   it("mandar catálogo y foto a la vez es entrada inválida", async () => {
     const { cookies, parentId } = await familiaOperando(app, ["Ana"]);
 

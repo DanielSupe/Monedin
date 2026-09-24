@@ -50,11 +50,6 @@ describe("el niño ve su escaparate y solo el suyo", () => {
     expect(response.body.items).toHaveLength(1);
     expect(response.body.items[0].coins).toBe(200);
 
-    // El precio del hermano no está en el cuerpo, en absoluto. Se comprueba
-    // sobre TODOS los números de la respuesta y no sobre el JSON serializado:
-    // buscar "999" como texto tumbó la batería el día que `createdAt` acabó en
-    // «...12.999Z». Sigue cubriendo la respuesta entera, que era lo que la
-    // comprobación anterior buscaba, sin sus falsos positivos.
     expect(valoresNumericos(response.body)).not.toContain(999);
   }, 180_000);
 

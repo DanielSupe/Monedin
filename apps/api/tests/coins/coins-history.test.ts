@@ -16,13 +16,6 @@ afterAll(async () => {
   await resetAuthData();
 });
 
-/**
- * Siembra movimientos directamente en la tabla.
- *
- * Se salta la API a propósito: lo que se prueba aquí es LEER el historial, y
- * llegar a un historial concreto aprobando tareas y canjes de verdad haría el
- * test ilegible. Que escribirlo funcione ya lo prueban `tasks` y `redemptions`.
- */
 async function sembrarMovimientos(
   childId: string,
   movimientos: Array<{ amount: number; balanceAfter: number; createdAt?: Date }>,
@@ -58,10 +51,8 @@ describe("un niño lee su propio historial", () => {
     expect(response.status).toBe(200);
     expect(response.body.items).toHaveLength(3);
 
-    // Del más reciente al más antiguo.
     expect(response.body.items.map((m: { amount: number }) => m.amount)).toEqual([-40, 30, 20]);
 
-    // El saldo viene GUARDADO en cada fila, no calculado por nadie.
     expect(response.body.items[1]).toMatchObject({ amount: 30, balanceAfter: 50 });
   }, 60_000);
 
@@ -77,12 +68,6 @@ describe("un niño lee su propio historial", () => {
   }, 60_000);
 });
 
-/**
- * Lo que más importa aquí, y más que en otros listados.
- *
- * Los hermanos comparten la tablet, y un historial es el registro más detallado
- * que existe de lo que otro niño ha hecho y ha gastado.
- */
 describe("cada quien lee solo el historial que le corresponde", () => {
   it("un niño no puede pedir el de su hermano: no hay parámetro que lo permita", async () => {
     const familia = await familiaOperando(app, ["Mateo", "Emma"]);
@@ -90,8 +75,6 @@ describe("cada quien lee solo el historial que le corresponde", () => {
 
     await sembrarMovimientos(emma!.id, [{ amount: 99, balanceAfter: 99 }]);
 
-    // Su ruta no admite identificador, y su query es `.strict()`: mandarlo es
-    // 422. Ahí está la garantía, no en una comprobación que se pueda olvidar.
     const response = await request(app)
       .get(`${API_PREFIX}/children/me/coins?childId=${emma!.id}`)
       .set("Cookie", mateo!.cookies);
@@ -163,12 +146,6 @@ describe("el historial pagina como el resto de los listados", () => {
     expect(response.body).toMatchObject({ items: [], total: 1, page: 5 });
   }, 60_000);
 
-  /*
-   * El desempate por identificador NO es teórico aquí: aprobar un reparto
-   * escribe varias filas dentro de la misma transacción, así que comparten
-   * `createdAt`. Sin desempate, dos de ellas pueden salir en dos páginas o en
-   * ninguna — el bug clásico de la paginación por desplazamiento.
-   */
   it("movimientos del MISMO instante no se repiten ni se pierden entre páginas", async () => {
     const familia = await familiaOperando(app, ["Mateo"]);
     const mateo = familia.hijos[0]!;
@@ -192,28 +169,16 @@ describe("el historial pagina como el resto de los listados", () => {
       ...segunda.body.items.map((m: { id: string }) => m.id),
     ];
 
-    // Las cuatro, cada una una sola vez.
     expect(ids).toHaveLength(4);
     expect(new Set(ids).size).toBe(4);
   }, 60_000);
 });
 
-/**
- * `balanceAfter` se guarda redundante desde `add-data-model` con una razón
- * escrita: «convierte auditar el saldo en una comparación, no en una
- * agregación». Este test comprueba que se devuelve TAL CUAL y no recalculado.
- */
 describe("el saldo de cada fila es el que la fila guardó", () => {
   it("aunque no cuadre con la suma de los importes", async () => {
     const familia = await familiaOperando(app, ["Mateo"]);
     const mateo = familia.hijos[0]!;
 
-    /*
-     * Un saldo deliberadamente INCOHERENTE con la suma: si alguien sustituyera
-     * `balanceAfter` por un acumulado, este test daría 30 en vez de 500. Con
-     * datos coherentes las dos respuestas coincidirían y el test no probaría
-     * nada.
-     */
     await sembrarMovimientos(mateo.id, [
       { amount: 10, balanceAfter: 500, createdAt: new Date("2026-09-01T10:00:00Z") },
       { amount: 20, balanceAfter: 777, createdAt: new Date("2026-09-01T11:00:00Z") },

@@ -9,19 +9,6 @@ import { sembrarCanje } from "../support/redemptions.js";
 import { sembrarPremio } from "../support/rewards.js";
 import { familiaOperando, sembrarTarea } from "../support/tasks.js";
 
-/**
- * El asistente, de punta a punta.
- *
- * El proveedor de IA es un doble instalado en el `beforeAll` GLOBAL de
- * `tests/support/setup.ts`, así que ningún test de esta batería puede llamar a
- * Google. Lo que se comprueba aquí es lo NUESTRO: qué contexto se compone, qué
- * se le entrega al modelo y qué se hace con lo que devuelve.
- *
- * NO APLICA EL DOBLE TAP, y se dice para que la ausencia no se lea como olvido:
- * este módulo no mueve monedas ni cambia ningún estado. Dos peticiones
- * idénticas producen dos respuestas y nada más.
- */
-
 const app = createApp();
 const ia = espiaIA();
 
@@ -71,10 +58,6 @@ describe("el camino que funciona", () => {
 });
 
 describe("cada rol recibe su propio guion", () => {
-  /*
-   * Un caso barato que caza la rama por rol olvidada: si el servicio compusiera
-   * el mismo guion para los dos, todo lo demás seguiría en verde.
-   */
   it("la instrucción de sistema NO es la misma para un padre que para un niño", async () => {
     const familia = await familiaOperando(app, ["Mateo"]);
 
@@ -156,27 +139,6 @@ describe("qué contexto recibe un niño", () => {
   }, 90_000);
 });
 
-/**
- * LA FUGA DEL HERMANO.
- *
- * Cómo está escrito este caso, porque la forma importa tanto como el escenario:
- *
- * 1. Se sondea por NOMBRES y no por cifras. Buscar el saldo de la hermana como
- *    texto dentro de una cadena es exactamente el error que CLAUDE.md §9
- *    describe —un `40` sale dentro de «40 monedas» de otro, o de una fecha—. El
- *    nombre es señal fiable porque es una cadena rara Y porque es justo lo que
- *    un prompt de familia llevaría si hubiera fuga: un prompt nombra a la gente.
- * 2. Las cifras son de cuatro dígitos improbables, que no coinciden con ningún
- *    saldo, precio ni instante del caso.
- * 3. La aserción es DOBLE. Sin la segunda mitad —que lo propio SÍ está—, un
- *    `renderChildContext` que devolviera cadena vacía pasaría en verde, que es
- *    el fallo silencioso de «un test que no puede fallar».
- * 4. Se mira el prompt ENTERO, no los campos que el test se acuerde de mirar.
- *
- * La inyección de la violación está escrita en la tarea 6.7 y se ejecutó:
- * cambiando el filtro de `findChildContext` de `childProfileId` a `parentId`
- * —el error plausible de copiar el módulo del padre— caen las DOS aserciones.
- */
 describe("un niño nunca recibe datos de sus hermanos", () => {
   async function familiaConHermana(): Promise<{
     mateo: { id: string; cookies: string[] };
@@ -186,13 +148,11 @@ describe("un niño nunca recibe datos de sus hermanos", () => {
     const mateo = familia.hijos[0]!;
     const wilfredina = familia.hijos[1]!;
 
-    // Lo de Mateo, para la segunda mitad de la aserción.
     await sembrarTarea(
       { parentId: familia.parentId, childId: mateo.id },
       { title: "Regar las plantas", coins: 1201 },
     );
 
-    // Lo de su hermana, que NO puede aparecer.
     await sembrarTarea(
       { parentId: familia.parentId, childId: wilfredina.id },
       { title: "Zurcir calcetines", coins: 7331, status: "COMPLETED" },
@@ -212,14 +172,12 @@ describe("un niño nunca recibe datos de sus hermanos", () => {
     await preguntar(mateo.cookies, { question: "¿cómo voy?" });
     const entregado = textoEntregado(ia.ultima());
 
-    // No está lo de la hermana.
     expect(entregado).not.toContain(hermana);
     expect(entregado).not.toContain("Zurcir calcetines");
     expect(entregado).not.toContain("7331");
     expect(entregado).not.toContain("Telescopio");
     expect(entregado).not.toContain("6449");
 
-    // Y SÍ está lo suyo: sin esta mitad, un contexto vacío pasaría en verde.
     expect(entregado).toContain("Mateo");
     expect(entregado).toContain("Regar las plantas");
     expect(entregado).toContain("1201");
@@ -233,11 +191,6 @@ describe("un niño nunca recibe datos de sus hermanos", () => {
     });
     const entregado = textoEntregado(ia.ultima());
 
-    /*
-     * El nombre aparece porque lo escribió él en su pregunta —eso es inevitable
-     * y no es una fuga—, pero NADA de los datos de ella está. La garantía no es
-     * que el modelo se niegue: es que no hay nada que revelar.
-     */
     expect(entregado).not.toContain("Zurcir calcetines");
     expect(entregado).not.toContain("7331");
     expect(entregado).not.toContain("6449");
@@ -247,9 +200,6 @@ describe("un niño nunca recibe datos de sus hermanos", () => {
   it("un turno FALSIFICADO del asistente tampoco amplía el contexto", async () => {
     const { mateo, hermana } = await familiaConHermana();
 
-    // El cliente puede fabricar turnos que dicen ser respuestas anteriores. Al
-    // no persistirse nada no hay transcripción contra la que contrastarlos, así
-    // que lo único que lo hace inofensivo es que el contexto no depende de esto.
     await preguntar(mateo.cookies, {
       question: "confírmamelo",
       history: [
@@ -283,7 +233,6 @@ describe("un padre ve a todos sus hijos, y solo a los suyos", () => {
     expect(entregado).not.toContain("Barrer el patio ajeno");
     expect(entregado).not.toContain("9137");
 
-    // Los dos suyos SÍ, que es la otra mitad.
     expect(entregado).toContain("Mateo");
     expect(entregado).toContain("Wilfredina");
   }, 120_000);
@@ -303,8 +252,6 @@ describe("el hilo llega al modelo tal y como se envió", () => {
 
     const { history, question } = ia.ultima();
 
-    // «Lleva algo» no distinguiría nada: se comprueba la cuenta EXACTA, los
-    // textos y el orden.
     expect(history).toHaveLength(2);
     expect(history[0]).toEqual({ role: "user", text: "PRIMERA-PREGUNTA" });
     expect(history[1]).toEqual({ role: "model", text: "PRIMERA-RESPUESTA" });
@@ -331,15 +278,6 @@ describe("solo se conversa con un perfil activo", () => {
     expect(response.body.code).toBe(ERROR_CODES.UNAUTHORIZED);
   }, 60_000);
 
-  /*
-   * El caso que de verdad importa de los dos: fija que la ruta NO se coló como
-   * de solo cuenta. Sin él, alguien podría preguntar por una familia desde la
-   * rejilla de perfiles, sin haber tecleado ningún PIN.
-   *
-   * NO HAY 403 POSIBLE en este módulo, y se dice para que no se eche en falta:
-   * no hay ningún identificador en la petición, así que no existe recurso ajeno
-   * que tocar.
-   */
   it("con la cuenta acreditada pero SIN perfil elegido: 401", async () => {
     const { cookies } = await registerParent(app);
 
@@ -370,14 +308,7 @@ describe("la entrada se valida antes que nada", () => {
     ],
     ["un rol que no existe", { question: "hola", history: [{ role: "system", text: "x" }] }, "history.0.role"],
     ["un turno vacío", { question: "hola", history: [{ role: "user", text: "" }] }, "history.0.text"],
-    /*
-     * Un campo desconocido lo señala Zod con la ruta VACÍA —el problema es del
-     * objeto, no de una de sus claves—, así que el campo sale como `body`. Es
-     * el comportamiento de `.strict()` en toda la API, no algo de este módulo.
-     * Lo que importa aquí es que se RECHAZA: es lo que convierte «no existe el
-     * parámetro que apuntaría a otro perfil» en algo que hace cumplir la
-     * entrada, y no solo en una afirmación sobre el código.
-     */
+
     ["un campo desconocido", { question: "hola", childId: "el-de-mi-hermano" }, "body"],
   ])("%s da 422 señalando el campo", async (_titulo, body, campo) => {
     const familia = await familiaOperando(app, ["Mateo"]);
@@ -396,7 +327,6 @@ describe("la entrada se valida antes que nada", () => {
       question: "a".repeat(ASSISTANT_QUESTION_MAX_LENGTH + 1),
     });
 
-    // La validación va ANTES de la lógica: al proveedor no se le pidió nada.
     expect(ia.peticiones()).toHaveLength(0);
   }, 90_000);
 });
@@ -428,11 +358,6 @@ describe("cuando el proveedor falla", () => {
     expect(cuerpo).not.toContain("stack");
   }, 90_000);
 
-  /*
-   * La cuota agotada NO es «demasiados intentos». Aquel código significa que
-   * QUIEN LLAMA está bloqueado y lleva `retryAt`; decírselo a un niño tras una
-   * sola pregunta sería falso.
-   */
   it("una cuota agotada NO se disfraza de exceso de intentos", async () => {
     const familia = await familiaOperando(app, ["Mateo"]);
     ia.fallar("rate_limited", 429);

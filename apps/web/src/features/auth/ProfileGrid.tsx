@@ -1,21 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { messages } from "../../lib/messages.js";
-import { Avatar, buttonClasses, cx } from "../../ui/index.js";
+import { Avatar, Badge, HeroPanel, Mascota, buttonClasses, cx } from "../../ui/index.js";
 import { useProfiles } from "./use-session.js";
 
-/**
- * Rejilla de perfiles. Se ve con cuenta acreditada y sin perfil elegido
- * (decisión 7 del design de `add-profile-selection`).
- *
- * Desde `add-app-shell` es solo la rejilla: el teclado de PIN, el alta de un
- * hijo y el restablecimiento del PIN de adulto son destinos propios y ya no
- * vistas de este componente.
- *
- * Desde `redesign-profile-grid` tiene un modo de ADMINISTRACIÓN, que llega en la
- * dirección y no en un estado local. Ver la decisión 1 de su design: lo que
- * decide es que la intención sobreviva al viaje al teclado de PIN, porque
- * después de acertarlo quien navega es la guarda y no este componente.
- */
 export function ProfileGrid({ manage = false }: { manage?: boolean }): React.ReactElement {
   const { data, isPending } = useProfiles(true);
 
@@ -27,13 +14,20 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
 
   return (
     <section className="flex w-full max-w-(--container-wide) flex-col items-center gap-8">
-      <h2 className="text-title text-center font-bold">
-        {manage ? messages.auth.manageProfilesTitle : messages.auth.whoIsPlaying}
-      </h2>
+
+      <HeroPanel className="w-full max-w-reading" mascot={<Mascota pose="saluda" size="medium" />}>
+        <h2 className="text-hero font-extrabold text-ink-inverted">
+          {manage ? messages.auth.manageProfilesTitle : messages.auth.whoIsPlaying}
+        </h2>
+
+        <p className="text-lead text-ink-inverted opacity-90">
+          {manage ? messages.auth.manageProfilesLead : messages.auth.whoIsPlayingLead}
+        </p>
+      </HeroPanel>
 
       <ul className="flex list-none flex-wrap justify-center gap-6 p-0">
         {profiles.map((profile) => (
-          <li key={profile.id}>
+          <li key={profile.id} className="flex">
             {profile.locked ? (
               <LockedTile name={profile.name} avatar={profile.avatar} />
             ) : (
@@ -41,42 +35,37 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
                 to="/profiles/$profileId/pin"
                 params={{ profileId: profile.id }}
                 search={{ manage: manage || undefined }}
-                /*
-                 * Un solo elemento interactivo por tesela. El lápiz va DENTRO y
-                 * es decorativo: dos objetivos de toque solapados fallan justo
-                 * donde el dedo de un niño ya falla, y con teclado serían dos
-                 * paradas para una sola cosa. Ver la decisión 3 del design.
-                 */
+
                 aria-label={manage ? `${messages.auth.editProfile} ${profile.name}` : undefined}
-                className={tileClasses}
+                className={tileClasses(profile.familyRole === "PARENT" ? "brand" : "primary")}
               >
                 <span className="relative">
-                  <Avatar value={profile.avatar} size="xlarge" shape="rounded" />
+                  <Avatar value={profile.avatar} size="xlarge" />
                   {profile.familyRole === "PARENT" && <CrownBadge />}
                   {manage && <PencilBadge />}
                 </span>
-                <span className="text-body font-semibold">{profile.name}</span>
+
+                <span className="text-title px-2 font-semibold">{profile.name}</span>
               </Link>
             )}
           </li>
         ))}
 
-        <li>
-          {/*
-            «Agregar perfil» es una tesela más y no un enlace de texto debajo:
-            crear el primer hijo es lo que hace que el producto haga algo, y
-            enterrarlo bajo la rejilla lo escondía.
-          */}
-          <Link to="/profiles/new" className={tileClasses}>
+        <li className="flex">
+
+          <Link
+            to="/profiles/new"
+
+            className={cx(tileClasses("muted"), "border-dashed hover:bg-surface-sunken")}
+          >
             <span
               aria-hidden="true"
-              // `size-36` es la misma medida que `Avatar size="xlarge"`: son la misma
-              // fila, y una tesela más baja que las demás se lee como un error.
-              className="rounded-card text-hero flex size-36 items-center justify-center bg-surface-sunken text-ink-muted leading-none"
+
+              className="rounded-pill text-hero flex size-28 items-center justify-center bg-surface-sunken text-primary leading-none"
             >
               +
             </span>
-            <span className="text-body font-semibold">{messages.auth.createProfile}</span>
+            <span className="text-lead px-2 font-semibold">{messages.auth.createProfile}</span>
           </Link>
         </li>
       </ul>
@@ -92,34 +81,16 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
   );
 }
 
-/*
- * La caja de una tesela. Misma forma para un perfil y para «agregar».
- *
- * `w-36` y sin relleno lateral: la tesela mide EXACTAMENTE lo que el avatar.
- *
- * Se midió mal la primera vez. Con `w-40` hacían falta 344 px para dos teselas
- * y su hueco, y en una pantalla de 390 hay 343 en cuanto aparece la barra de
- * desplazamiento — que aparece justo cuando hay perfiles de sobra—. Fallaba por
- * UN píxel, y al caer a una columna la página se alargaba y la barra se quedaba:
- * un bucle. Ahora hacen falta 312, con 31 de holgura.
- *
- * El crecimiento va bajo `motion-safe`, y el realce de fondo NO. Bajo
- * movimiento reducido el sistema pone las duraciones a 1 ms, y eso convierte
- * este crecimiento en un salto instantáneo — que es peor para quien pidió no
- * ver movimiento, no mejor. Así, con movimiento reducido la tesela sigue
- * respondiendo por color y no se mueve. Ver la decisión 3 del design.
- */
-const tileClasses =
-  "rounded-card flex w-36 flex-col items-center gap-2 px-0 py-2 text-center no-underline text-ink transition duration-normal hover:bg-surface-sunken motion-safe:hover:scale-105";
+function tileClasses(tono: "brand" | "primary" | "muted"): string {
+  return cx(
+    "rounded-card flex min-h-52 w-36 flex-col items-center justify-start gap-3 border-2 bg-surface-raised px-0 py-5 text-center no-underline text-ink shadow-card transition duration-normal sm:w-44",
+    tono === "brand" && "border-brand",
+    tono === "primary" && "border-primary",
+    tono === "muted" && "border-border",
+    tono !== "muted" && "hover:bg-surface-sunken motion-safe:hover:scale-105",
+  );
+}
 
-/**
- * Un perfil bloqueado NO es un enlace y NO lleva lápiz.
- *
- * Sin destino al que llevar, un enlace deshabilitado no existe en HTML y un
- * botón muerto confunde menos que un enlace que no navega. Y ofrecer editarlo
- * sería ofrecer algo que el sistema va a rechazar: sin PIN no se entra, y sin
- * entrar no se edita.
- */
 function LockedTile({
   name,
   avatar,
@@ -128,21 +99,21 @@ function LockedTile({
   avatar: string | null;
 }): React.ReactElement {
   return (
-    <span className={cx(tileClasses, "opacity-55")}>
-      <Avatar value={avatar} size="xlarge" shape="rounded" />
-      <span className="text-body font-semibold">{name}</span>
-      <span className="text-small text-ink-muted">{messages.auth.profileLocked}</span>
+    <span className={cx(tileClasses("muted"), "opacity-70")}>
+      <Avatar value={avatar} size="xlarge" />
+      <span className="text-title px-2 font-semibold">{name}</span>
+
+      <Badge tone="conflict">{messages.auth.profileLocked}</Badge>
     </span>
   );
 }
 
-/** El lápiz del modo administrar. Decorativo: lo que se anuncia es la tesela. */
 function PencilBadge(): React.ReactElement {
   return (
     <span
       aria-hidden="true"
-      // Mismo velo que el diálogo, que es el precedente del sistema.
-      className="rounded-card absolute inset-0 flex items-center justify-center bg-ink/40 text-ink-inverted"
+
+      className="rounded-pill absolute inset-0 flex items-center justify-center bg-ink/40 text-ink-inverted"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-10">
         <path
@@ -156,14 +127,6 @@ function PencilBadge(): React.ReactElement {
   );
 }
 
-/**
- * La corona del adulto.
- *
- * NO es decorativa: lleva nombre. Un icono suelto hay que aprenderlo, y quien
- * no ve la pantalla no lo aprende nunca, así que la distinción existe en los
- * dos canales o no existe. Va en la esquina y no bajo el nombre para que todas
- * las teselas queden a la misma altura.
- */
 function CrownBadge(): React.ReactElement {
   return (
     <span

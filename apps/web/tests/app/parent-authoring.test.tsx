@@ -33,7 +33,6 @@ const HIJOS: Child[] = [
   },
 ];
 
-/** Lo que se envió en el último POST, ya parseado. */
 let enviado: unknown = null;
 
 function json(cuerpo: unknown, status = 200): Response {
@@ -86,20 +85,11 @@ async function montar(direccion: string, hijos: Child[] = HIJOS) {
   return router;
 }
 
-/** Escribe el título y elige a un hijo. Lo mínimo para poder enviar. */
 async function rellenarMinimo(etiquetaTitulo: string): Promise<void> {
-  await userEvent.type(await screen.findByLabelText(etiquetaTitulo), "Recoger la mesa");
-  await userEvent.click(screen.getByRole("checkbox", { name: /Mateo/ }));
+  await userEvent.click(await screen.findByRole("checkbox", { name: /Mateo/ }));
+  await userEvent.type(screen.getByLabelText(etiquetaTitulo), "Recoger la mesa");
 }
 
-/**
- * Lo que este change existe para arreglar, parte 1.
- *
- * `TaskForm` y `RewardForm` eran un `<section>` con un `type="button"` que
- * llamaba a `enviar()`. Escribir el título y pulsar Enter no hacía nada, y
- * `ChildForm` sí lo hacía: la misma tecla respondía distinto según la pantalla
- * dentro del mismo producto.
- */
 describe("una pantalla de escritura es un formulario", () => {
   it("la tarea se envía con Enter", async () => {
     await montar("/tasks/new");
@@ -120,14 +110,6 @@ describe("una pantalla de escritura es un formulario", () => {
   });
 });
 
-/**
- * Lo que este change existe para arreglar, parte 2.
- *
- * «A quién y por cuánto» estaba escrito TRES veces. Ahora es una pieza, y lo
- * que se comprueba es que construye la forma que el contrato espera en cada uno
- * de sus dos modos — que es lo que de verdad se rompería si una de las copias
- * se hubiera separado de las otras.
- */
 describe("la pieza construye la forma que el contrato espera", () => {
   it("con el mismo valor para todos manda childIds y coins", async () => {
     await montar("/tasks/new");
@@ -167,23 +149,15 @@ describe("la pieza construye la forma que el contrato espera", () => {
     await userEvent.click(screen.getByRole("button", { name: messages.tasks.create }));
 
     expect(await screen.findByText(messages.children.pickAtLeastOne)).toBeInTheDocument();
-    // Lo importante no es el mensaje: es que no salió nada hacia el servidor.
+
     expect(enviado).toBeNull();
   });
 });
 
-/**
- * Editar un premio ocurre donde se ve.
- *
- * Decidido: es un retoque pequeño y frecuente, y sacarlo a otra pantalla obliga
- * a ir y volver por cada cambio.
- */
 describe("un premio se edita sin cambiar de dirección", () => {
   it("el editor se abre dentro del catálogo", async () => {
     const router = await montar("/rewards?page=1&status=ACTIVE");
 
-    // Sin premios no hay tarjeta que editar; lo que se comprueba aquí es que la
-    // pantalla no ofrece salir a otra dirección para editar.
     await screen.findByRole("heading", { name: messages.rewards.title });
 
     expect(router.state.location.pathname).toBe("/rewards");
@@ -191,9 +165,6 @@ describe("un premio se edita sin cambiar de dirección", () => {
   });
 });
 
-/**
- * Sin hijos no hay a quién repartir, y la salida es crear uno.
- */
 describe("cuando todavía no hay hijos", () => {
   it("lo dice y ofrece crear un perfil", async () => {
     await montar("/tasks/new", []);
@@ -204,14 +175,68 @@ describe("cuando todavía no hay hijos", () => {
   });
 });
 
-/**
- * Y por dónde se sale sin guardar: un ENLACE, no un callback.
- */
 describe("cancelar es una navegación", () => {
   it("el alta de un hijo ofrece salir con un enlace", async () => {
     await montar("/children/new");
 
     const salir = await screen.findByRole("link", { name: messages.children.cancel });
     expect(salir).toHaveAttribute("href", expect.stringContaining("/children"));
+  });
+});
+
+describe("los controles traídos siguen funcionando con el teclado", () => {
+  it("la casilla de un hijo se marca con la barra espaciadora", async () => {
+    await montar("/tasks/new");
+
+    const casilla = await screen.findByRole("checkbox", { name: /Mateo/ });
+    expect(casilla).toHaveAttribute("aria-checked", "false");
+
+    casilla.focus();
+    await userEvent.keyboard(" ");
+
+    expect(casilla).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("el grupo del valor se anuncia, y elegir el otro modo cambia lo que se pide", async () => {
+    await montar("/tasks/new");
+
+    await userEvent.click(await screen.findByRole("checkbox", { name: /Mateo/ }));
+
+    const mismo = screen.getByRole("radio", { name: messages.tasks.sameCoins });
+    const porHijo = screen.getByRole("radio", { name: messages.tasks.coinsPerChild });
+
+    expect(mismo).toHaveAttribute("aria-checked", "true");
+    expect(porHijo).toHaveAttribute("aria-checked", "false");
+
+    await userEvent.click(porHijo);
+
+    expect(porHijo).toHaveAttribute("aria-checked", "true");
+
+    expect(screen.getByLabelText(`${messages.tasks.coins} · Mateo`)).toBeInTheDocument();
+  });
+});
+
+describe("el nombre del grupo del valor se ve y se oye", () => {
+  it("está en la pantalla y además nombra al grupo", async () => {
+    await montar("/tasks/new");
+
+    await userEvent.click(await screen.findByRole("checkbox", { name: /Mateo/ }));
+
+    expect(screen.getByRole("radiogroup", { name: messages.tasks.valueLegend })).toBeInTheDocument();
+    expect(screen.getByText(messages.tasks.valueLegend)).toBeInTheDocument();
+  });
+
+  it("y dice a cuántos va ese valor, declinado", async () => {
+    await montar("/tasks/new");
+
+    await userEvent.click(await screen.findByRole("checkbox", { name: /Mateo/ }));
+
+    const valor = screen.getByRole("spinbutton", { name: messages.tasks.coins });
+    await userEvent.clear(valor);
+    await userEvent.type(valor, "1");
+
+    expect(
+      screen.getByText(`${1} ${messages.ui.coinsUnitSingular} ${messages.children.coinsEachChosen}`),
+    ).toBeInTheDocument();
   });
 });

@@ -8,17 +8,6 @@ import {
 import { describe, expect, it } from "vitest";
 import { testPrisma } from "../support/database.js";
 
-/**
- * Los límites de dominio viven en `@monedin/contracts` y se repiten en SQL,
- * porque una migración es un artefacto congelado y no puede importar constantes.
- *
- * Esa duplicación es justo lo que `CLAUDE.md` prohíbe, así que la salida no es
- * evitarla sino hacerla verificable: este test lee las restricciones VIVAS de la
- * base de datos y las compara con las constantes. Si alguien cambia un límite y
- * no escribe la migración correspondiente, esto falla nombrando la restricción
- * descuadrada. Ver la decisión 4 del design.
- */
-
 interface ConstraintRow {
   conname: string;
   definition: string;
@@ -34,7 +23,6 @@ async function liveCheckConstraints(): Promise<Map<string, string>> {
   return new Map(rows.map((row) => [row.conname, row.definition]));
 }
 
-/** Números que aparecen en la definición de una restricción, en orden. */
 function numbersIn(definition: string): number[] {
   return [...definition.matchAll(/-?\d+/g)].map((match) => Number(match[0]));
 }
@@ -147,8 +135,7 @@ describe("reglas estructurales de la sesión", () => {
     const definicion = (await liveCheckConstraints()).get("sessions_token_hash_is_sha256");
 
     expect(definicion, "falta sessions_token_hash_is_sha256").toBeDefined();
-    // 64 caracteres hexadecimales. Si esto cambiara, sería señal de que se está
-    // guardando otra cosa en esa columna.
+
     expect(numbersIn(definicion ?? "")).toContain(64);
   });
 });

@@ -279,3 +279,71 @@ filas.
 - **WHEN** un niño abre su historial con canjes
 - **THEN** ve cuántos son
 
+### Requirement: La bandeja explica lo que una fila no puede decir
+
+La bandeja de canjes SHALL explicar, en la propia pantalla donde se decide, las tres cosas que
+determinan lo que cuesta una decisión y que no se pueden deducir de una fila:
+
+- que las monedas se descuentan **al aprobar** y no al pedir, así que una solicitud pendiente todavía
+  no le ha costado nada al niño;
+- que el precio quedó **congelado el día de la solicitud**, así que cambiar el precio del premio
+  después no cambia lo que ese canje va a costar;
+- que **rechazar no descuenta nada**, así que decir que no no le quita monedas a nadie.
+
+Las tres son ciertas desde que existen los canjes y ninguna llega a la interfaz. El resultado es un
+padre que aprueba con dudas o que no rechaza por miedo a quitarle algo a su hijo — y el producto
+entero se apoya en que ese padre decida con tranquilidad.
+
+Esa explicación SHALL estar donde se decide y NO SHALL delegarse a una ayuda aparte. Una regla que
+hay que ir a buscar no está disponible en el momento en que hace falta.
+
+#### Scenario: Un padre abre la bandeja con canjes pendientes
+
+- **WHEN** se muestran solicitudes por resolver
+- **THEN** la pantalla dice que aprobar es lo que descuenta, que el precio está congelado y que
+  rechazar no cuesta nada
+
+#### Scenario: El padre duda de si rechazar le quita monedas al niño
+
+- **WHEN** va a rechazar una solicitud
+- **THEN** puede leer en la misma pantalla que rechazar no mueve el saldo
+
+#### Scenario: Un premio subió de precio después de pedirse
+
+- **WHEN** una solicitud pendiente corresponde a un premio cuyo precio cambió después
+- **THEN** la pantalla deja claro que se cobrará el precio del día en que se pidió
+
+### Requirement: La lista de canjes del niño explica cuándo se van las monedas
+
+La pantalla de canjes de un niño SHALL explicar los dos hechos que su tabla de estados no dice: que
+las monedas se descuentan **al aprobar** y no al pedir, y que un canje rechazado no le cuesta nada
+porque el precio se congeló el día que lo pidió.
+
+Es la mitad del ciclo que un niño no puede deducir de una lista de estados. El producto ya se la
+cuenta a quien reparte, en las dos altas del padre; contárselo solo a quien reparte deja suponiendo
+a quien pide, que es donde se lleva el chasco.
+
+La pantalla SHALL además resumir **cuántos canjes hay en cada estado**, para repasar sin leer la
+tabla entera.
+
+Ese resumen SHALL contar las filas que la pantalla tiene delante, y SHALL decir que es de la página
+que se ve. NO SHALL presentarse como el total de la familia: este listado pagina por fila, así que su
+total cuenta canjes y no estados, y un resumen que dijera «3 aprobados» sobre un total mayor estaría
+afirmando algo que no ha contado.
+
+#### Scenario: Un niño abre sus canjes
+
+- **WHEN** un niño abre su lista de canjes
+- **THEN** la pantalla explica que las monedas se van al aprobar y no al pedir
+- **AND** explica que un rechazo no le cuesta nada
+
+#### Scenario: Hay canjes en varios estados
+
+- **WHEN** la página que se ve tiene canjes esperando, aprobados y rechazados
+- **THEN** cada estado dice cuántos hay en esa página
+
+#### Scenario: Un estado sin ninguno
+
+- **WHEN** en la página que se ve no hay ningún canje de un estado
+- **THEN** ese estado dice cero, y no desaparece
+

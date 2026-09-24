@@ -1,30 +1,15 @@
 import { getPrisma, withTranslatedErrors } from "../../shared/database/index.js";
 
-/**
- * Capa de datos del módulo `rewards`.
- *
- * ÚNICO archivo del módulo que toca Prisma. No sabe de roles ni de
- * pertenencia: eso lo comprueba el servicio, con el actor, antes de llamar
- * aquí. Lo único que este archivo decide es si una operación condicional
- * encontró el estado del que decía partir.
- *
- * Este módulo no mueve monedas: no hay `applyCoinMovement`, ni transición
- * condicional que pueda perder una carrera de doble tap. Eso vuelve en
- * `add-redemptions`. Ver el Context del design.
- */
-
-/** Un hijo con lo que le cuesta A ÉL, tal como sale de la base. */
 export interface RewardOfferRow {
   coins: number;
   child: { id: string; name: string; avatar: string | null };
 }
 
-/** Un premio tal como sale de la base, con TODAS sus ofertas. */
 export interface RewardRow {
   id: string;
   title: string;
   description: string | null;
-  /** Clave en el almacén, no una URL: las URLs se firman al serializar. */
+
   image: string | null;
   isActive: boolean;
   createdAt: Date;
@@ -32,7 +17,6 @@ export interface RewardRow {
   offers: RewardOfferRow[];
 }
 
-/** Un premio desde el lado del hijo al que se le ofrece: solo SU precio. */
 export interface OwnRewardRow {
   id: string;
   title: string;
@@ -42,7 +26,6 @@ export interface OwnRewardRow {
   createdAt: Date;
 }
 
-/** Los campos que devuelve cualquier lectura de un premio para el padre. */
 const REWARD_FIELDS = {
   id: true,
   title: true,
@@ -59,7 +42,6 @@ const REWARD_FIELDS = {
   },
 } as const;
 
-/** La forma que devuelve Prisma con `REWARD_FIELDS`, antes de renombrar. */
 interface RewardSelection {
   id: string;
   title: string;
@@ -84,24 +66,11 @@ function toRewardRow(reward: RewardSelection): RewardRow {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Alta
-// ---------------------------------------------------------------------------
-
-/**
- * Crea un premio con TODAS sus ofertas de una vez.
- *
- * Es una escritura anidada de Prisma: el premio y sus asignaciones se crean en
- * la MISMA operación, así que o entran las dos cosas o no entra ninguna. No
- * hace falta un `$transaction` explícito para esto en concreto —una única
- * escritura anidada ya es atómica—, a diferencia del reemplazo de más abajo,
- * que sí son dos operaciones distintas.
- */
 export function createReward(data: {
   parentId: string;
   title: string;
   description?: string;
-  /** Clave YA confirmada por el servicio. El repositorio no comprueba nada. */
+
   image?: string;
   assignments: Array<{ childId: string; coins: number }>;
 }): Promise<RewardRow> {
@@ -110,7 +79,7 @@ export function createReward(data: {
       data: {
         parentId: data.parentId,
         title: data.title,
-        // `exactOptionalPropertyTypes` no admite pasar `undefined` explícito.
+
         ...(data.description === undefined ? {} : { description: data.description }),
         ...(data.image === undefined ? {} : { image: data.image }),
         assignments: {
@@ -127,16 +96,6 @@ export function createReward(data: {
   });
 }
 
-/**
- * De los identificadores pedidos, cuáles son hijos ACTIVOS de este padre.
- *
- * Mismo patrón que `tasks.repository.findChildIdsOwnedBy`: los tres casos que
- * hacen que un identificador no salga —no existe, es de otra familia, está
- * dado de baja— son indistinguibles desde fuera, y es deliberado. No se
- * reutiliza la de `tasks` porque cada módulo es el único que toca Prisma
- * dentro de sí mismo; `children` todavía no expone una equivalente. Ver la
- * tarea 3.3 del change.
- */
 export function findChildIdsOwnedBy(parentId: string, childIds: string[]): Promise<string[]> {
   return withTranslatedErrors(async () => {
     const rows = await getPrisma().childProfile.findMany({
@@ -148,16 +107,6 @@ export function findChildIdsOwnedBy(parentId: string, childIds: string[]): Promi
   });
 }
 
-// ---------------------------------------------------------------------------
-// Lecturas del padre
-// ---------------------------------------------------------------------------
-
-/**
- * Una página del catálogo del padre, con el total sin paginar.
- *
- * Contar y leer van en la MISMA transacción, y el `orderBy` desempata por
- * `id`: mismas dos razones de siempre del patrón de paginación.
- */
 export function findRewardsPage(
   parentId: string,
   filters: { isActive: boolean },
@@ -182,13 +131,6 @@ export function findRewardsPage(
   });
 }
 
-/**
- * Un premio por identificador, con TODAS sus ofertas y `parentId`.
- *
- * Devuelve `parentId` a propósito, porque el SERVICIO es quien decide qué
- * significa: para el padre, si es suyo; para el niño, si una de las ofertas es
- * la suya. El repositorio no sabe de pertenencia.
- */
 export function findRewardById(id: string): Promise<(RewardRow & { parentId: string }) | null> {
   return withTranslatedErrors(async () => {
     const reward = await getPrisma().reward.findUnique({
@@ -200,22 +142,6 @@ export function findRewardById(id: string): Promise<(RewardRow & { parentId: str
   });
 }
 
-// ---------------------------------------------------------------------------
-// Lecturas del niño
-// ---------------------------------------------------------------------------
-
-/**
- * Una página del escaparate de un niño: solo premios ACTIVOS ofrecidos a él,
- * con SU precio.
- *
- * El saldo se lee en la MISMA transacción que la página, para que
- * `affordable` no se calcule contra un saldo de hace dos consultas. Ver la
- * decisión 5 del design.
- *
- * El desempate ordena por cuándo se publicó el PREMIO, no por cuándo se creó
- * la oferta: reemplazar el conjunto de ofertas reinicia el `createdAt` de la
- * asignación (decisión 3 del design), y nada debe depender de ese valor.
- */
 export function findOwnRewardsPage(
   childId: string,
   { skip, take }: { skip: number; take: number },
@@ -256,14 +182,6 @@ export function findOwnRewardsPage(
   });
 }
 
-/**
- * El saldo actual de un hijo. Para el detalle propio de un solo premio: la
- * página lo lee dentro de su propia transacción, pero un ítem suelto no la
- * necesita.
- *
- * `findUniqueOrThrow`: el actor sale de una sesión activa, y dar de baja a un
- * hijo revoca sus sesiones. Que no exista aquí es inalcanzable en la práctica.
- */
 export function findChildBalance(childId: string): Promise<number> {
   return withTranslatedErrors(async () => {
     const child = await getPrisma().childProfile.findUniqueOrThrow({
@@ -275,11 +193,6 @@ export function findChildBalance(childId: string): Promise<number> {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Edición
-// ---------------------------------------------------------------------------
-
-/** Cambia título y/o descripción. Nunca el precio: eso es `replaceAssignments`. */
 export function updateReward(
   id: string,
   data: {
@@ -303,17 +216,6 @@ export function updateReward(
   });
 }
 
-/**
- * Reemplaza el conjunto COMPLETO de ofertas de un premio: borra todas las que
- * tenía y crea las del conjunto nuevo, en una transacción.
- *
- * Y no un `upsert` por hijo calculando la diferencia: una asignación no lleva
- * historial, nadie la referencia —`RewardRedemption` congela su propio precio
- * apuntando al premio y al hijo, no a la asignación— así que borrarla y
- * recrearla es indistinguible de haberla actualizado. Ver la decisión 3 del
- * design. Un conjunto vacío es válido: retira la oferta a todos sin retirar el
- * premio.
- */
 export function replaceAssignments(
   rewardId: string,
   assignments: Array<{ childId: string; coins: number }>,
@@ -338,15 +240,6 @@ export function replaceAssignments(
   );
 }
 
-/**
- * Retira un premio, condicionado a que siguiera activo. Devuelve cuántas
- * filas cambió.
- *
- * Es el mismo mecanismo que la baja de un hijo: `updateMany` con el estado de
- * ORIGEN en el `WHERE`, para que dos retiros simultáneos no se pisen. Cero
- * filas es 404 y no 409: retirar no mueve monedas, así que quien pierde la
- * carrera pregunta por un premio que ya no está activo. Ver la decisión 4.
- */
 export function retireReward(id: string): Promise<number> {
   return withTranslatedErrors(async () => {
     const result = await getPrisma().reward.updateMany({

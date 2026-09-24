@@ -345,26 +345,42 @@ la clave interna con la que la imagen está guardada.
 
 ### Requirement: El saldo es lo principal del inicio del niño
 
-En el inicio de un niño, su saldo SHALL ser el elemento más grande y lo primero que se lee. NO SHALL
-presentarse como un dato dentro de una frase.
+En el inicio de un niño, su saldo SHALL tener un sitio propio y constante en la cabecera de la
+pantalla, y SHALL leerse de un vistazo sin buscarlo. NO SHALL presentarse como un dato dentro de una
+frase.
 
 Es lo que el producto entero existe para enseñar: que las tareas valen monedas y los premios cuestan
 monedas. Un número en negrita dentro de un párrafo, al mismo tamaño que los enlaces de al lado, no
 enseña nada.
 
+Este requisito DECÍA que el saldo tenía que ser el elemento más grande de la pantalla, y se revierte
+a conciencia. Nació de ese defecto —la cifra dentro de un párrafo— y la cura fue el extremo
+contrario: una tarjeta que ocupa el tercio superior y empuja las tareas por debajo del pliegue, de
+modo que lo primero que ve un niño al entrar es cuánto tiene y lo que viene a hacer hay que buscarlo.
+Lo que sustituye al tamaño es el SITIO: siempre la misma esquina, con su moneda al lado. Se encuentra
+por posición en vez de por tamaño.
+
 El saldo SHALL dibujarse con la pieza que el sistema tiene para las cantidades, de modo que se escriba
 igual que en el resto del producto.
+
+Desde el saldo SHALL poder abrirse el historial: es el gesto natural sobre la cifra, y el historial de
+un niño no tiene destino propio en su navegación.
 
 #### Scenario: Un niño entra a su perfil
 
 - **WHEN** se muestra su inicio
-- **THEN** su saldo es el elemento de mayor tamaño de la pantalla
-- **AND** se lee antes que cualquier otra cosa
+- **THEN** su saldo está en la cabecera, con su moneda al lado
+- **AND** no se presenta como un dato dentro de una frase
 
 #### Scenario: El saldo se anuncia con su unidad
 
 - **WHEN** se recorre el inicio con un lector de pantalla
 - **THEN** el saldo se anuncia con su unidad y no como un número suelto
+
+#### Scenario: Desde el saldo se llega a de dónde salió
+
+- **WHEN** se toca el saldo del inicio
+- **THEN** se abre el historial de sus monedas
 
 ### Requirement: Los destinos del niño se tocan con el dedo
 
@@ -416,4 +432,70 @@ aplicación hasta que apareciese el padre.
 - **WHEN** se enumeran los destinos del marco del niño
 - **THEN** salir del perfil no figura entre ellos
 - **AND** ningún destino del marco aparece dos veces
+
+### Requirement: El diálogo de una baja desvía a quien se confundió de acción
+
+El diálogo que confirma dar de baja un perfil SHALL decir que la baja **no se puede deshacer** y qué
+se pierde con ella —el saldo y el historial del niño—, y SHALL ofrecer la salida a quien en realidad
+buscaba otra cosa: desbloquear un perfil que solo falló el PIN.
+
+Las dos acciones se parecen desde fuera —un perfil al que no se puede entrar— y solo una es
+reversible. Un padre cuyo hijo lleva tres intentos fallidos busca «recuperar su perfil», y lo que
+encuentra primero puede ser el que lo borra.
+
+Confirmar NO SHALL bastar con un botón junto a la fila. Una acción irreversible sobre una lista de
+hermanos, en una tablet que se usa con el dedo, está a un toque de la fila de al lado.
+
+#### Scenario: Un padre va a dar de baja un perfil
+
+- **WHEN** se pide confirmación
+- **THEN** el diálogo dice que no se puede deshacer y qué se pierde
+- **AND** ofrece desbloquear como la alternativa para un perfil bloqueado
+
+#### Scenario: El perfil solo está bloqueado
+
+- **WHEN** el perfil sobre el que se va a actuar está bloqueado por intentos fallidos
+- **THEN** la alternativa de desbloquear se ofrece antes que la baja
+
+#### Scenario: La confirmación no cuelga de la fila
+
+- **WHEN** se inicia la baja desde el listado de perfiles
+- **THEN** la confirmación ocurre fuera de la fila, y no a un toque de la del hermano siguiente
+
+### Requirement: La lista de hijos distingue dar de baja de bloquear, antes de pulsar
+
+La pantalla que lista los hijos SHALL explicar la diferencia entre dar de baja un perfil y
+desbloquearlo, y SHALL hacerlo sin que haga falta abrir ningún diálogo.
+
+Las dos acciones se ofrecen en la misma fila y suenan a lo mismo. No lo son: desbloquear se deshace
+pulsando otra vez, y dar de baja se lleva el saldo y el historial de un niño para siempre. Además
+bloquear no lo decide nadie: ocurre al fallar el PIN varias veces.
+
+El diálogo de confirmación ya lo explica, pero allí llega quien YA pulsó. La explicación tiene que
+estar donde se elige.
+
+#### Scenario: Se abre la lista de hijos
+
+- **WHEN** se muestra la lista, sin abrir nada
+- **THEN** se puede leer que dar de baja no se recupera y que bloquear es otra cosa
+
+### Requirement: La edad de un hijo se escribe con su unidad y declinada
+
+Donde se enseñe la edad de un hijo SHALL escribirse con su unidad —«8 años»— y NO SHALL escribirse
+como una etiqueta seguida de una cifra.
+
+El mismo dato se escribía de dos maneras: con etiqueta en la lista del padre y con su unidad en el
+perfil del propio niño. Y la etiqueta sobra: un número seguido de «años» ya dice que es una edad.
+
+La unidad SHALL declinar con la cifra, porque componer un número con un texto fijo produce «1 años».
+
+#### Scenario: Un hijo tiene un año
+
+- **WHEN** se enseña su edad
+- **THEN** la unidad va en singular
+
+#### Scenario: Un hijo tiene más de un año
+
+- **WHEN** se enseña su edad
+- **THEN** la unidad va en plural
 

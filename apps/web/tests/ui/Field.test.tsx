@@ -26,7 +26,7 @@ describe("Field", () => {
     const control = screen.getByLabelText("Monedas");
     expect(control).toHaveAttribute("aria-invalid", "true");
     expect(control).toHaveAccessibleDescription("Tiene que ser al menos 1.");
-    // Un error que solo se ve en rojo no existe para un lector de pantalla.
+
     expect(screen.getByRole("alert")).toHaveTextContent("Tiene que ser al menos 1.");
   });
 

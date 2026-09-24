@@ -5,20 +5,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { messages } from "../../src/lib/messages.js";
 import { SOLO_CUENTA, montarApp } from "../support/router.js";
 
-/**
- * El teclado de PIN.
- *
- * Lo que se prueba aquí es que corregir NO cuesta un intento. Sin borrado, quien
- * se equivoca en un dígito intermedio está obligado a completar un PIN que sabe
- * equivocado, y los intentos fallidos bloquean el perfil. Ver la decisión 5 del
- * design de `redesign-profile-grid`.
- */
-
 const PERFILES: SelectableProfile[] = [
   { id: "hijo-1", familyRole: "CHILD", name: "Mateo", avatar: "zorro", locked: false },
 ];
 
-/** Cuántas veces se ha intentado entrar de verdad, o sea contra la API. */
 function intentos(): number {
   const llamadas = vi.mocked(globalThis.fetch).mock.calls;
 
@@ -33,12 +23,10 @@ async function teclear(digitos: string): Promise<void> {
   }
 }
 
-/** Lo mismo, pero por el teclado físico. */
 async function escribir(teclas: string): Promise<void> {
   await userEvent.keyboard(teclas);
 }
 
-/** Los PIN que se han llegado a mandar, en orden. */
 function pinesEnviados(): string[] {
   return vi
     .mocked(globalThis.fetch)
@@ -62,7 +50,6 @@ describe("corregir el PIN no cuesta un intento", () => {
 
     expect(intentos()).toBe(0);
 
-    // Queda un dígito: hacen falta PIN_LENGTH - 1 más para que se intente.
     await teclear("2".repeat(PIN_LENGTH - 2));
     expect(intentos()).toBe(0);
 
@@ -75,8 +62,6 @@ describe("corregir el PIN no cuesta un intento", () => {
 
     const borrar = await screen.findByRole("button", { name: messages.auth.pinDelete });
 
-    // Deshabilitado sin nada que borrar: un botón que no hace nada al pulsarlo
-    // miente sobre lo que ofrece.
     expect(borrar).toBeDisabled();
     expect(intentos()).toBe(0);
   });
@@ -101,16 +86,6 @@ describe("el teclado dice a dónde va", () => {
   });
 });
 
-/**
- * El teclado físico, que hasta ahora no servía para nada.
- *
- * Eran diez botones y ni un manejador de teclado: en un portátil había que
- * teclear cada dígito con el ratón, y el escritorio es un destino real desde
- * que el lateral se fija a partir de `lg`.
- *
- * Lo que se comprueba no es «que funcione» sino que es EL MISMO camino que los
- * botones. Ver la decisión 5 del design de `polish-profile-and-reward-image`.
- */
 describe("el PIN también se escribe con el teclado", () => {
   it("se teclea entero y se intenta una vez, con lo que se escribió", async () => {
     await montarApp("/profiles/hijo-1/pin", SOLO_CUENTA, PERFILES);
@@ -123,35 +98,12 @@ describe("el PIN también se escribe con el teclado", () => {
     expect(pinesEnviados()).toEqual([esperado]);
   });
 
-  /*
-   * El caso que destapó la batería: teclas MÁS RÁPIDAS que el pintado.
-   *
-   * `press` leía `pin` de su cierre y componía `pin + digit`. Con los botones no
-   * se notaba —un toque por pintado— pero tecleando, dos seguidas veían el mismo
-   * valor y la segunda pisaba a la primera: se escribió `1234` y se envió
-   * `1223`.
-   *
-   * Se manda TODO de una vez, sin ceder el turno entre teclas, que es lo que
-   * reproduce la carrera. Y se comprueba el PIN enviado y no el número de
-   * intentos: con un dígito perdido el intento existe igual — lo que falla es
-   * que es un PIN equivocado, y los intentos fallidos BLOQUEAN el perfil.
-   */
   it("sin ceder el turno entre teclas, no se pierde ningún dígito", async () => {
     await montarApp("/profiles/hijo-1/pin", SOLO_CUENTA, PERFILES);
     await screen.findByRole("button", { name: "1" });
 
     const esperado = "1234".slice(0, PIN_LENGTH);
 
-    /*
-     * Los eventos se disparan A MANO y todos dentro del MISMO `act`.
-     *
-     * `userEvent.keyboard` no sirve para esto ni con `delay: null`: envuelve
-     * cada tecla en su propio `act`, así que React repinta entre una y otra y el
-     * cierre siempre llega fresco. Se probó, y pasaba con el defecto puesto.
-     *
-     * En un solo `act` React no repinta hasta el final, que es exactamente lo
-     * que pasa cuando alguien teclea más rápido de lo que el navegador pinta.
-     */
     await act(async () => {
       for (const tecla of esperado) {
         document.dispatchEvent(new KeyboardEvent("keydown", { key: tecla, bubbles: true }));
@@ -169,8 +121,6 @@ describe("el PIN también se escribe con el teclado", () => {
     await escribir("{Backspace}");
     expect(intentos()).toBe(0);
 
-    // Queda el «1»: con PIN_LENGTH - 1 dígitos más se completa, y el que se
-    // borró no puede aparecer en lo que se manda.
     await escribir("2".repeat(PIN_LENGTH - 1));
 
     expect(intentos()).toBe(1);
@@ -187,17 +137,6 @@ describe("el PIN también se escribe con el teclado", () => {
     expect(pinesEnviados()).toEqual([`12${"3".repeat(PIN_LENGTH - 2)}`]);
   });
 
-  /*
-   * El caso que de verdad distingue «la misma función» de «una vía paralela».
-   *
-   * Se descubrió inyectando la violación: un teclado con su propio camino, que
-   * repetía el guardado del dígito y el envío, pasaba los otros ocho tests. Lo
-   * que NO repetía era el `onError` que limpia el PIN, así que tras un fallo se
-   * quedaba con cuatro dígitos puestos y no se podía reintentar tecleando.
-   *
-   * Por eso el número tiene que ser DOS: uno por el PIN fallado y otro por el
-   * siguiente. Con la vía paralela el segundo nunca sale y da uno.
-   */
   it("tras un PIN equivocado el teclado queda limpio para reintentar", async () => {
     await montarApp("/profiles/hijo-1/pin", SOLO_CUENTA, PERFILES);
     await screen.findByRole("button", { name: "1" });
@@ -237,31 +176,15 @@ describe("el PIN también se escribe con el teclado", () => {
 
     await escribir("3".repeat(PIN_LENGTH - 2));
 
-    // Si una letra hubiera contado, lo enviado no sería esto.
     expect(pinesEnviados()).toEqual([`12${"3".repeat(PIN_LENGTH - 2)}`]);
   });
 });
 
-/**
- * Mientras se comprueba, el teclado queda inerte igual que los botones con su
- * `disabled`.
- *
- * Aquí y no arriba: «seguir tecleando con el PIN completo» solo significa algo
- * MIENTRAS la petición está en el aire. Una vez respondida, si falló, el PIN se
- * limpia a propósito y volver a teclear es el camino correcto, no un segundo
- * envío. Un test que tecleara de más tras la respuesta mediría eso y no esto.
- *
- * Sin esa guarda el retroceso sí llegaría a bajar el PIN durante la petición, y
- * el siguiente dígito lo completaría otra vez: dos intentos donde solo hubo uno,
- * y los intentos bloquean el perfil.
- */
 describe("mientras se comprueba el PIN, el teclado no responde", () => {
   it("el retroceso durante la petición no deja mandar un segundo intento", async () => {
     await montarApp("/profiles/hijo-1/pin", SOLO_CUENTA, PERFILES);
     await screen.findByRole("button", { name: "1" });
 
-    // Se re-apunta `fetch` para que la entrada se quede en el aire: es la única
-    // forma de tener la pantalla en «comprobando» mientras se teclea.
     const enElAire = vi.fn((entrada: RequestInfo | URL) => {
       if (String(entrada).startsWith(`${API_PREFIX}/auth/profiles/enter`)) {
         return new Promise<Response>(() => {});

@@ -1,0 +1,704 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Compartidas"
+    },
+    {
+      "id": "page-2",
+      "name": "Padre"
+    },
+    {
+      "id": "page-3",
+      "name": "Niño"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Bienvenida.dc.html",
+      "title": "Puerta pública",
+      "page": "page-1",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 2400
+    },
+    {
+      "file": "BienvenidaOscuro.dc.html",
+      "title": "Puerta pública — oscuro",
+      "page": "page-1",
+      "x": 0,
+      "y": 2620,
+      "w": 1440,
+      "h": 2400
+    },
+    {
+      "file": "Entrar.dc.html",
+      "title": "Entrar",
+      "page": "page-1",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "Registro.dc.html",
+      "title": "Crear cuenta",
+      "page": "page-1",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "ResetPin.dc.html",
+      "title": "Restablecer PIN",
+      "page": "page-1",
+      "x": 4680,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "Perfiles.dc.html",
+      "title": "¿Quién eres? — rejilla",
+      "page": "page-1",
+      "x": 1560,
+      "y": 1240,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "Pin.dc.html",
+      "title": "Teclado de PIN",
+      "page": "page-1",
+      "x": 3120,
+      "y": 1240,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "NuevoPerfil.dc.html",
+      "title": "Nuevo perfil",
+      "page": "page-1",
+      "x": 4680,
+      "y": 1240,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "Administrar.dc.html",
+      "title": "Rejilla en modo administrar",
+      "page": "page-1",
+      "x": 1560,
+      "y": 2480,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "EntrarOscuro.dc.html",
+      "title": "Entrar — oscuro",
+      "page": "page-1",
+      "x": 1560,
+      "y": 3980,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "RegistroOscuro.dc.html",
+      "title": "Crear cuenta — oscuro",
+      "page": "page-1",
+      "x": 3120,
+      "y": 3980,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "ResetPinOscuro.dc.html",
+      "title": "Restablecer PIN — oscuro",
+      "page": "page-1",
+      "x": 4680,
+      "y": 3980,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PerfilesOscuro.dc.html",
+      "title": "¿Quién eres? — rejilla — oscuro",
+      "page": "page-1",
+      "x": 1560,
+      "y": 5220,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PinOscuro.dc.html",
+      "title": "Teclado de PIN — oscuro",
+      "page": "page-1",
+      "x": 3120,
+      "y": 5220,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "NuevoPerfilOscuro.dc.html",
+      "title": "Nuevo perfil — oscuro",
+      "page": "page-1",
+      "x": 4680,
+      "y": 5220,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "AdministrarOscuro.dc.html",
+      "title": "Rejilla en modo administrar — oscuro",
+      "page": "page-1",
+      "x": 1560,
+      "y": 6460,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadrePanel.dc.html",
+      "title": "Panel",
+      "page": "page-2",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreTareas.dc.html",
+      "title": "Tareas — bandeja",
+      "page": "page-2",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreCanjes.dc.html",
+      "title": "Canjes — bandeja",
+      "page": "page-2",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadrePremios.dc.html",
+      "title": "Premios — catálogo",
+      "page": "page-2",
+      "x": 4680,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreHijos.dc.html",
+      "title": "Perfiles de la familia",
+      "page": "page-2",
+      "x": 0,
+      "y": 1240,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreNuevaTarea.dc.html",
+      "title": "Nueva tarea",
+      "page": "page-2",
+      "x": 1560,
+      "y": 1240,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreNuevoPremio.dc.html",
+      "title": "Nuevo premio",
+      "page": "page-2",
+      "x": 3120,
+      "y": 1240,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreEditarHijo.dc.html",
+      "title": "Editar un perfil",
+      "page": "page-2",
+      "x": 4680,
+      "y": 1240,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreHistorial.dc.html",
+      "title": "Historial de un hijo",
+      "page": "page-2",
+      "x": 0,
+      "y": 2480,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreCuenta.dc.html",
+      "title": "Mi cuenta",
+      "page": "page-2",
+      "x": 1560,
+      "y": 2480,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreAyuda.dc.html",
+      "title": "Preguntas frecuentes",
+      "page": "page-2",
+      "x": 3120,
+      "y": 2480,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreChat.dc.html",
+      "title": "Pregúntale a Monedín",
+      "page": "page-2",
+      "x": 4680,
+      "y": 2480,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "ModalRetirar.dc.html",
+      "title": "Modal · retirar un premio",
+      "page": "page-2",
+      "x": 0,
+      "y": 3720,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "ModalBaja.dc.html",
+      "title": "Modal · dar de baja",
+      "page": "page-2",
+      "x": 1560,
+      "y": 3720,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "ModalRecorte.dc.html",
+      "title": "Modal · recortar una foto",
+      "page": "page-2",
+      "x": 3120,
+      "y": 3720,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadrePanelOscuro.dc.html",
+      "title": "Panel — oscuro",
+      "page": "page-2",
+      "x": 0,
+      "y": 5220,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreTareasOscuro.dc.html",
+      "title": "Tareas — bandeja — oscuro",
+      "page": "page-2",
+      "x": 1560,
+      "y": 5220,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreCanjesOscuro.dc.html",
+      "title": "Canjes — bandeja — oscuro",
+      "page": "page-2",
+      "x": 3120,
+      "y": 5220,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadrePremiosOscuro.dc.html",
+      "title": "Premios — catálogo — oscuro",
+      "page": "page-2",
+      "x": 4680,
+      "y": 5220,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreHijosOscuro.dc.html",
+      "title": "Perfiles de la familia — oscuro",
+      "page": "page-2",
+      "x": 0,
+      "y": 6460,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreNuevaTareaOscuro.dc.html",
+      "title": "Nueva tarea — oscuro",
+      "page": "page-2",
+      "x": 1560,
+      "y": 6460,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreNuevoPremioOscuro.dc.html",
+      "title": "Nuevo premio — oscuro",
+      "page": "page-2",
+      "x": 3120,
+      "y": 6460,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreEditarHijoOscuro.dc.html",
+      "title": "Editar un perfil — oscuro",
+      "page": "page-2",
+      "x": 4680,
+      "y": 6460,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreHistorialOscuro.dc.html",
+      "title": "Historial de un hijo — oscuro",
+      "page": "page-2",
+      "x": 0,
+      "y": 7700,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreCuentaOscuro.dc.html",
+      "title": "Mi cuenta — oscuro",
+      "page": "page-2",
+      "x": 1560,
+      "y": 7700,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreAyudaOscuro.dc.html",
+      "title": "Preguntas frecuentes — oscuro",
+      "page": "page-2",
+      "x": 3120,
+      "y": 7700,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PadreChatOscuro.dc.html",
+      "title": "Pregúntale a Monedín — oscuro",
+      "page": "page-2",
+      "x": 4680,
+      "y": 7700,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "ModalRetirarOscuro.dc.html",
+      "title": "Modal · retirar un premio — oscuro",
+      "page": "page-2",
+      "x": 0,
+      "y": 8940,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "ModalBajaOscuro.dc.html",
+      "title": "Modal · dar de baja — oscuro",
+      "page": "page-2",
+      "x": 1560,
+      "y": 8940,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "ModalRecorteOscuro.dc.html",
+      "title": "Modal · recortar una foto — oscuro",
+      "page": "page-2",
+      "x": 3120,
+      "y": 8940,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "Main.dc.html",
+      "title": "Inicio del niño",
+      "page": "page-3",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "Tareas.dc.html",
+      "title": "Mis tareas",
+      "page": "page-3",
+      "x": 1560,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "Premios.dc.html",
+      "title": "Mis premios",
+      "page": "page-3",
+      "x": 3120,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "Canjes.dc.html",
+      "title": "Mis canjes",
+      "page": "page-3",
+      "x": 4680,
+      "y": 0,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "Chat.dc.html",
+      "title": "Pregúntale a Monedín",
+      "page": "page-3",
+      "x": 0,
+      "y": 1240,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "NinoMonedas.dc.html",
+      "title": "De dónde salieron tus monedas",
+      "page": "page-3",
+      "x": 1560,
+      "y": 1240,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "NinoPerfil.dc.html",
+      "title": "Mi perfil",
+      "page": "page-3",
+      "x": 3120,
+      "y": 1240,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "NinoAyuda.dc.html",
+      "title": "Preguntas frecuentes",
+      "page": "page-3",
+      "x": 4680,
+      "y": 1240,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "Recorrido.dc.html",
+      "title": "Recorrido de bienvenida",
+      "page": "page-3",
+      "x": 0,
+      "y": 2480,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "MainOscuro.dc.html",
+      "title": "Inicio del niño — oscuro",
+      "page": "page-3",
+      "x": 0,
+      "y": 3980,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "TareasOscuro.dc.html",
+      "title": "Mis tareas — oscuro",
+      "page": "page-3",
+      "x": 1560,
+      "y": 3980,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "PremiosOscuro.dc.html",
+      "title": "Mis premios — oscuro",
+      "page": "page-3",
+      "x": 3120,
+      "y": 3980,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "CanjesOscuro.dc.html",
+      "title": "Mis canjes — oscuro",
+      "page": "page-3",
+      "x": 4680,
+      "y": 3980,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "ChatOscuro.dc.html",
+      "title": "Pregúntale a Monedín — oscuro",
+      "page": "page-3",
+      "x": 0,
+      "y": 5220,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "NinoMonedasOscuro.dc.html",
+      "title": "De dónde salieron tus monedas — oscuro",
+      "page": "page-3",
+      "x": 1560,
+      "y": 5220,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "NinoPerfilOscuro.dc.html",
+      "title": "Mi perfil — oscuro",
+      "page": "page-3",
+      "x": 3120,
+      "y": 5220,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "NinoAyudaOscuro.dc.html",
+      "title": "Preguntas frecuentes — oscuro",
+      "page": "page-3",
+      "x": 4680,
+      "y": 5220,
+      "w": 1440,
+      "h": 900
+    },
+    {
+      "file": "RecorridoOscuro.dc.html",
+      "title": "Recorrido de bienvenida — oscuro",
+      "page": "page-3",
+      "x": 0,
+      "y": 6460,
+      "w": 1440,
+      "h": 900
+    }
+  ],
+  "annotations": [
+    {
+      "id": "compartidas",
+      "page": "page-1",
+      "x": 1560,
+      "y": -440,
+      "w": 1440,
+      "text": "PANTALLAS COMPARTIDAS\nSon las dos por las que se pasa antes de ser alguien, así que llevan el marco de entrada: logo arriba a la izquierda y contenido centrado, sin lateral. Todavía no se sabe quién está delante, así que no adoptan ni la escala del niño ni la del padre.\nLa rejilla enseña nombre y avatar y NADA más —ni saldos—, que es lo que impide que los hermanos se comparen cada vez que se abre la aplicación, y que cualquiera con la tablet desbloqueada vea todos los saldos sin teclear un PIN.\nLos avatares dejan de ser emojis y pasan a ser animales dibujados en SVG: zorro, panda y lechuza de los doce del catálogo. Un emoji lo pinta cada dispositivo a su manera; el mismo perfil tiene que verse igual en la tablet y en el portátil."
+    },
+    {
+      "id": "entrada",
+      "page": "page-1",
+      "x": 3120,
+      "y": -440,
+      "w": 2880,
+      "text": "EL CAMINO DE ENTRADA, ENTERO\nPuerta pública → crear cuenta o entrar → rejilla → PIN → dentro. Y las dos salidas de emergencia: restablecer el PIN con la contraseña, y crear un perfil sin tener ninguno activo.\nEL ACCESO VA EN MORADO PROFUNDO, no en naranja, y es a propósito: es la única pantalla del producto que mira SOLO un adulto. La calidez le corresponde al niño —su inicio, sus tareas, sus premios— y en la puerta se lee como juguete justo donde alguien decide si esto es de fiar. El ámbar no desaparece: cambia de papel y pasa a ser el acento.\nEl modo administrar es un parámetro de la dirección (?manage=true), no un estado escondido: la intención cruza hasta el teclado de PIN, el botón atrás sale del modo y recargar lo conserva."
+    },
+    {
+      "id": "oscuro-compartidas",
+      "page": "page-1",
+      "x": 0,
+      "y": 3840,
+      "w": 1440,
+      "text": "DE AQUÍ ABAJO, LAS MISMAS EN OSCURO\nNi un cambio de posición, de tamaño ni de contenido: solo cambian las superficies, la tinta y los fondos suaves. La regla completa está en la página Compartidas.\nLos tres acentos se quedan idénticos —naranja #FF6B4A, morado aclarado a #8B6BF0 y el ámbar de la moneda sin tocar—, así que los paneles de Monedín, los botones y las barras se ven EXACTAMENTE igual en los dos temas."
+    },
+    {
+      "id": "sistema",
+      "page": "page-2",
+      "x": 0,
+      "y": -440,
+      "w": 1440,
+      "text": "DOS TONOS Y LA MONEDA. NADA MÁS. (vale para las tres páginas)\nNARANJA #FF6B4A = hacer. La acción principal, la mascota, el destino activo, lo que le toca a quien mira.\nMORADO #6C4BD6 = conseguido y ahorrado. Los premios, el progreso, una tarea aprobada, un canje resuelto.\nÁMBAR #F5B93B = la moneda, y solo la moneda: ni un botón, ni una tarjeta, ni un aviso.\nARENA #F1E9DA / #6B6053 = esperando. No es un color, es la AUSENCIA de acción: cuando la pelota está en el tejado del otro, no hay nada que hacer y el color no debe fingir que sí.\nRechazado y dar de baja van en naranja apagado #B5533A, nunca en rojo y nunca en ámbar.\nPapel crema #FFF7EC, tarjetas blancas, tinta #2A2438, línea #F0E6D8. Nunito 800-900."
+    },
+    {
+      "id": "padre",
+      "page": "page-2",
+      "x": 1560,
+      "y": -440,
+      "w": 1440,
+      "text": "EL PADRE: MISMO SISTEMA, OTRA ESCALA\nMismos colores y mismas piezas que el niño, pero en la escala normal —15-26 px, controles de 44— y sin mascota ni paneles decorativos: lo que abre a diario es «qué me está esperando», no un tablero.\nAPROBAR es siempre el botón naranja y RECHAZAR el contorno apagado, en las dos bandejas. Aprobar es lo único que mueve monedas, así que es lo único que se ve como acción principal.\nLos filtros por estado son ENLACES en forma de píldora, no pestañas: el filtro vive en la dirección, así que se puede abrir en otra pestaña y el botón atrás lo deshace.\nY los listados PAGINAN, los dos, porque un listado sin paginación es un listado sin terminar."
+    },
+    {
+      "id": "bandejas",
+      "page": "page-2",
+      "x": 3120,
+      "y": -440,
+      "w": 2880,
+      "text": "LO QUE LAS BANDEJAS TIENEN QUE EXPLICAR\nTAREAS: la unidad de la lista es el REPARTO, no la tarea. Una tarea repartida a tres hijos son tres tareas independientes, y filtrando por «Por aprobar» el reparto se enseña ENTERO —con las pendientes de los hermanos dentro—. Eso no es un filtro roto, y la pantalla lo dice en vez de dejarlo en un comentario del código.\nCANJES: aquí la unidad SÍ es la fila. Y el aviso morado dice las tres cosas que un padre no puede deducir: las monedas se descuentan al aprobar y no al pedir, el precio se congela el día de la solicitud, y rechazar no descuenta nada.\nNUEVA TAREA: el panel de la derecha cuenta el ciclo completo, porque «repartir» no dice por sí solo que marcar no paga y que pagar es aprobar."
+    },
+    {
+      "id": "modales",
+      "page": "page-2",
+      "x": 0,
+      "y": 3580,
+      "w": 2880,
+      "text": "LOS MODALES, SOBRE SU PANTALLA DE VERDAD\nEl fondo de cada uno es la pantalla real, no una imitación: así se ve qué tapa el diálogo y cuánto pesa la decisión sobre lo que hay detrás.\nLA CEREMONIA SE MIDE CONTRA LO QUE CUESTA DESHACER LA ACCIÓN. Retirar un premio se revierte publicándolo otra vez, así que el diálogo es corto y lo dice. Dar de baja un perfil NO se deshace —se van su saldo y su historial—, así que lo dice con todas las letras y además desvía al que se confundió: si el perfil solo está bloqueado por fallar el PIN, lo que busca es «Desbloquear».\nY ninguna de las dos acciones destructivas es un botón suelto en una fila, a un dedo de la fila del hijo de al lado."
+    },
+    {
+      "id": "oscuro-padre",
+      "page": "page-2",
+      "x": 0,
+      "y": 5080,
+      "w": 1440,
+      "text": "DE AQUÍ ABAJO, LAS MISMAS EN OSCURO\nNi un cambio de posición, de tamaño ni de contenido: solo cambian las superficies, la tinta y los fondos suaves. La regla completa está en la página Compartidas.\nLos tres acentos se quedan idénticos —naranja #FF6B4A, morado aclarado a #8B6BF0 y el ámbar de la moneda sin tocar—, así que los paneles de Monedín, los botones y las barras se ven EXACTAMENTE igual en los dos temas."
+    },
+    {
+      "id": "vida",
+      "page": "page-3",
+      "x": 0,
+      "y": -440,
+      "w": 1440,
+      "text": "DE DÓNDE SALE LA VIDA\nCada pantalla lleva su panel de degradado con círculos translúcidos detrás —naranja donde se hace algo, morado en el ahorro y lo conseguido— y Monedín con una pose distinta: saluda en el inicio y en la rejilla, celebra en las tareas y en el chat, elige en los premios, explica en los canjes, duda en el PIN. Son las que ya estaban ilustradas en el proyecto.\nAnillo de progreso, barras ámbar, teselas de icono en degradado y cintas de estado sobre la foto del premio. El color va en BLOQUES grandes de dos tonos, que es lo que lo mantiene limpio y a la vez lo hace vivo, y los degradados van SIEMPRE dentro del mismo tono, nunca de un tono a otro."
+    },
+    {
+      "id": "escritorio",
+      "page": "page-3",
+      "x": 1560,
+      "y": -440,
+      "w": 1440,
+      "text": "ESCRITORIO, NO MÓVIL\n1440 × 900, con el lateral fijo de 264 px que la aplicación ya monta a partir de lg. Dos columnas: lo que hay que hacer a la izquierda, para qué sirve a la derecha.\nLa escala es la del niño: cifras grandes, botones de 46-48 px de alto y ningún texto por debajo de 14 px. El contenido no se estira a lo ancho de la pantalla — una línea de 1.400 px no se lee, y menos con ocho años."
+    },
+    {
+      "id": "datos",
+      "page": "page-3",
+      "x": 3120,
+      "y": -440,
+      "w": 2880,
+      "text": "TODO SALE DE DATOS QUE YA EXISTEN\nEl anillo «2 de 5 hechas» y los grupos «Por hacer / Esperando revisión / Hechas» son las tres etapas de una tarea, contadas en el cliente. «Tu próximo premio» es el más barato que aún no alcanza, con lo que ya devuelve el escaparate. Las tres últimas líneas de «Tus monedas» son el historial: ganar sale en ÁMBAR porque es la moneda, gastar en morado porque es un premio.\nNingún endpoint nuevo, en ninguna de las trece pantallas. Lo único que cambia respecto a lo construido es que el saldo pasa a verse SIEMPRE en la cabecera del niño; hoy el producto lo deja solo en el inicio a propósito. Sigue pendiente de tu decisión."
+    },
+    {
+      "id": "recorrido",
+      "page": "page-3",
+      "x": 0,
+      "y": 2340,
+      "w": 2880,
+      "text": "EL RECORRIDO DE BIENVENIDA\nEl velo con agujero es una SOMBRA proyectada, no un recorte: una caja sobre lo que se destaca, con box-shadow de 100vmax alrededor, tiñe todo lo de fuera y deja limpio lo de dentro. Sin máscaras, sin SVG y sin recalcular una silueta — mover la caja mueve el agujero.\nQue el resto de la pantalla quede INERTE no es un obstáculo, es el requisito: lo que se pulsa es «Seguir», nunca el elemento iluminado. El foco señala, no invita a interactuar.\nY terminar y saltar hacen LO MISMO: un recorrido que solo contara como visto al llegar al final volvería a salirle cada vez a quien lo saltó, que es justo a quien ya dijo que no."
+    },
+    {
+      "id": "oscuro-nino",
+      "page": "page-3",
+      "x": 0,
+      "y": 3840,
+      "w": 1440,
+      "text": "DE AQUÍ ABAJO, LAS MISMAS EN OSCURO\nNi un cambio de posición, de tamaño ni de contenido: solo cambian las superficies, la tinta y los fondos suaves. La regla completa está en la página Compartidas.\nLos tres acentos se quedan idénticos —naranja #FF6B4A, morado aclarado a #8B6BF0 y el ámbar de la moneda sin tocar—, así que los paneles de Monedín, los botones y las barras se ven EXACTAMENTE igual en los dos temas."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-3"
+  }
+}

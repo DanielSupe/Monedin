@@ -554,3 +554,184 @@ que un destino sea de los dos roles no lo hace público.
 - **THEN** es la misma pantalla
 - **AND** la diferencia de tamaños y radios la impone el marco del rol
 
+### Requirement: El marco no muestra el saldo
+
+El marco de navegación NO SHALL mostrar el saldo de un niño de forma permanente. El saldo SHALL vivir
+en el inicio —donde ya es el elemento más grande— y en su historial.
+
+Tenerlo delante en todas las pantallas convierte la navegación en un tablero de puntuación. El inicio
+es el sitio donde el niño mira su saldo a propósito; en las otras pantallas está haciendo otra cosa, y
+un número que le sigue a todas partes le dice que lo que importa es la cifra y no lo que está
+haciendo.
+
+Donde el saldo decide algo, la pantalla ya lo dice mejor que una cifra suelta: en el escaparate cada
+premio anuncia lo que le falta, que es la forma útil del mismo dato.
+
+#### Scenario: El niño recorre sus pantallas
+
+- **WHEN** un niño navega entre sus destinos
+- **THEN** su saldo no aparece en el marco en ninguno de ellos
+
+#### Scenario: El niño quiere ver su saldo
+
+- **WHEN** un niño quiere saber cuánto tiene
+- **THEN** lo ve en su inicio como el elemento más grande de la pantalla
+- **AND** desde ahí puede abrir de dónde salió cada moneda
+
+### Requirement: El tema del perfil se aplica al documento entero
+
+Cuando haya un perfil activo, el marco SHALL aplicar su preferencia de tema **a la raíz del
+documento**, no al contenedor del marco.
+
+Tiene que ser la raíz porque el tema tiene que alcanzar lo que se pinta FUERA del marco: los diálogos
+y el velo del recorrido de bienvenida salen por un portal, al final del documento, y con el atributo
+puesto más abajo se quedarían con el tema contrario.
+
+Cuando la preferencia sea seguir al sistema, el marco NO SHALL escribir ningún tema explícito: es la
+ausencia del atributo lo que deja mandar a la preferencia del dispositivo.
+
+Ninguna pieza del sistema de diseño SHALL recibir ni consultar el tema. Lo que cambia es el valor de
+los tokens, y esa es la razón por la que esto se resuelve en el marco y no en treinta componentes.
+
+#### Scenario: Un perfil que eligió el tema oscuro
+
+- **WHEN** entra un perfil cuya preferencia es oscuro
+- **THEN** la interfaz se pinta en oscuro, incluidos los diálogos que salen por un portal
+
+#### Scenario: Un perfil que sigue al sistema
+
+- **WHEN** entra un perfil cuya preferencia es seguir al sistema
+- **THEN** la interfaz sigue a la preferencia del dispositivo, sin tema explícito escrito
+
+#### Scenario: Se cambia de perfil
+
+- **WHEN** se sale de un perfil en oscuro y se entra a otro que prefiere claro
+- **THEN** la interfaz pasa al claro sin recargar la página
+
+### Requirement: La cabecera ofrece cambiar de tema
+
+Los dos marcos con perfil activo SHALL ofrecer un control de tema en su cabecera, a la derecha.
+
+SHALL recorrer los tres estados con un solo control, y no ofrecer tres. La cabecera es donde el sitio
+es caro y son tres estados que un icono distingue.
+
+SHALL anunciar el estado ACTUAL y no el siguiente: lo que alguien necesita al llegar al control es
+saber dónde está, no a dónde iría. El nombre SHALL cambiar con el estado, porque lo que el control
+hace cambia — es la misma regla que el control de contraer el lateral.
+
+Las pantallas previas a elegir perfil NO SHALL ofrecerlo: allí no hay actor, así que no habría dónde
+guardar la elección.
+
+#### Scenario: Dentro de un perfil
+
+- **WHEN** se mira la cabecera con un perfil activo
+- **THEN** hay un control de tema a la derecha, anunciado con el estado en el que está
+
+#### Scenario: Se recorre el ciclo
+
+- **WHEN** se acciona el control tres veces desde «seguir al sistema»
+- **THEN** pasa por claro y oscuro y vuelve a seguir al sistema, guardando cada paso
+
+#### Scenario: Antes de elegir perfil
+
+- **WHEN** se mira el acceso, la rejilla o el teclado de PIN
+- **THEN** no hay control de tema
+
+### Requirement: La ayuda es un destino con nombre, no un icono
+
+El acceso a la ayuda SHALL ser un destino de la navegación del perfil, con su nombre a la vista, y NO
+SHALL alcanzarse únicamente pulsando un icono sin palabra.
+
+Es el mismo argumento que dejó escrito la navegación de un perfil para los otros cinco destinos: uno
+que solo se alcanza pulsando algo sin texto no se encuentra. La ayuda se había quedado fuera.
+
+Y SHALL estar en UN solo sitio del marco. Dejarla además en la cabecera sería un segundo destino
+duplicado, y la única excepción declarada a eso es el perfil.
+
+#### Scenario: Alguien busca la ayuda
+
+- **WHEN** recorre la navegación de su perfil
+- **THEN** encuentra la ayuda nombrada, como los demás destinos
+
+#### Scenario: Se revisa el marco completo
+
+- **WHEN** se enumeran los destinos que ofrece el marco de un rol
+- **THEN** la ayuda aparece una sola vez
+
+### Requirement: Contraída, la navegación cabe en su columna
+
+Con la navegación contraída a solo iconos, nada de lo que dibuja SHALL salirse de la columna ni
+desplazar al icono de su centro.
+
+Una cuenta de cosas pendientes NO SHALL dibujar su cifra en esa forma: no cabe, y al ocupar sitio en
+la fila empuja al icono contra el borde contrario. SHALL quedar en su lugar una marca que diga que
+hay algo esperando, sin decir cuántos.
+
+La cuenta NO SHALL perderse para quien no ve la pantalla: el texto que ya la anunciaba SHALL seguir
+entero. Lo que se quita es el dibujo, no el dato.
+
+Un glifo decorativo al final de una fila —el que acompaña al perfil— NO SHALL dibujarse en esa forma:
+comparte sitio con el avatar, y contraído solo compite con él.
+
+#### Scenario: Hay tareas esperando y la navegación está contraída
+
+- **WHEN** la pantalla es ancha, hay cosas esperando y se contrae la navegación
+- **THEN** la cifra no se ve
+- **AND** el destino sigue anunciando cuántas hay para quien no ve la pantalla
+
+#### Scenario: La misma cuenta con la navegación extendida
+
+- **WHEN** la pantalla es ancha, hay cosas esperando y la navegación está extendida
+- **THEN** la cifra se ve junto al nombre de su destino
+
+#### Scenario: El pie del perfil con la navegación contraída
+
+- **WHEN** la navegación está contraída
+- **THEN** la fila del perfil se queda con su avatar
+- **AND** el glifo que la acompañaba no está en el documento
+
+### Requirement: El control de contraer encabeza la navegación
+
+El control que contrae la navegación SHALL ir **antes** que los destinos en el orden del documento, en
+una cabecera propia de la columna, y NO SHALL ir al final, debajo del perfil.
+
+Es el control del marco y no un destino más. Al final de la lista queda detrás de todo lo que se usa a
+diario, que es el último sitio donde se busca. Arriba es donde se busca y donde lo ponen las
+bibliotecas de las que este marco copia su forma.
+
+SHALL seguir existiendo solo cuando la navegación está delante: en pantalla estrecha es un cajón que
+se abre encima y no hay nada que contraer.
+
+#### Scenario: Se recorre la navegación con teclado
+
+- **WHEN** la pantalla es ancha y hay un perfil activo
+- **THEN** el control de contraer se alcanza antes que el primer destino
+
+#### Scenario: En pantalla estrecha no hay control de contraer
+
+- **WHEN** la pantalla es estrecha
+- **THEN** no existe control de contraer
+
+### Requirement: La columna de navegación no pesa lo mismo en todas las pantallas
+
+Cuando la navegación esté delante como columna, su ancho SHALL tener en cuenta el que le queda al
+contenido: SHALL ser más estrecha en las ventanas donde el sitio escasea y ensancharse donde sobra.
+
+Una medida fija pesa distinto según lo que tenga alrededor. La columna se monta desde que hay ancho
+para ella, y en la ventana más estrecha que la recibe una medida pensada para un monitor grande se
+lleva más de la cuarta parte de la pantalla.
+
+NO SHALL estrecharse tanto que el nombre de un destino deje de caber: lo que nombra un destino es su
+texto, y un texto partido en dos renglones o recortado deja de nombrarlo.
+
+#### Scenario: La ventana más estrecha que recibe la columna
+
+- **WHEN** la pantalla es ancha por poco
+- **THEN** la columna usa su medida estrecha
+- **AND** los nombres de los destinos siguen cabiendo en una línea
+
+#### Scenario: Una ventana amplia
+
+- **WHEN** hay ancho de sobra
+- **THEN** la columna usa su medida amplia
+

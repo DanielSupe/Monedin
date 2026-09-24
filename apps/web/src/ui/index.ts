@@ -1,16 +1,3 @@
-/**
- * Las piezas del sistema de diseño de Monedín.
- *
- * Esta lista es el contrato: un test enumera lo que se exporta aquí y falla si
- * una pieza no aparece en el catálogo vivo. Es lo que impide que el catálogo
- * envejezca, que es como muere un sistema de diseño.
- *
- * Regla que ningún archivo de esta carpeta puede romper: una pieza NO importa
- * nada de `features/` ni de `api/`. Por eso se puede montar en un test sin
- * servidor, sin sesión y sin datos, y por eso el catálogo no necesita
- * proveedores. Hay un test que lo comprueba.
- */
-
 export { Accordion, type AccordionItem, type AccordionProps } from "./Accordion.js";
 export { Alert, type AlertProps, type AlertTone } from "./Alert.js";
 export { Avatar, type AvatarProps, type AvatarShape, type AvatarSize } from "./Avatar.js";
@@ -23,7 +10,10 @@ export {
   type ButtonVariant,
 } from "./Button.js";
 export { Card, type CardProps } from "./Card.js";
+export { Checkbox, type CheckboxProps } from "./Checkbox.js";
 export { Coins, type CoinsProps } from "./Coins.js";
+export { HeroPanel, type HeroPanelProps, type HeroTone } from "./HeroPanel.js";
+export { IconTile, type IconTileProps, type IconTileTone } from "./IconTile.js";
 export { Dialog, type DialogProps } from "./Dialog.js";
 export { Drawer, type DrawerProps } from "./Drawer.js";
 export { EmptyState, type EmptyStateProps } from "./EmptyState.js";
@@ -36,10 +26,17 @@ export {
 export { Field, type FieldProps, useField } from "./Field.js";
 export { Input, type InputProps, type InputShape } from "./Input.js";
 export { Logo, type LogoProps, type LogoSize } from "./Logo.js";
+export { Mascota, type MascotaProps, type MascotaSize } from "./Mascota.js";
+export { POSES, type Pose } from "./mascot-poses.js";
 export { Pagination, type PaginationProps } from "./Pagination.js";
 export { ProgressBar, type ProgressBarProps } from "./ProgressBar.js";
+export { ProgressRing, type ProgressRingProps } from "./ProgressRing.js";
+
+export { SplitLayout, type SplitLayoutProps } from "./SplitLayout.js";
+export { RadioGroup, type RadioGroupProps, type RadioOption } from "./RadioGroup.js";
 export { Select, type SelectProps } from "./Select.js";
 export { Skeleton, type SkeletonProps } from "./Skeleton.js";
+export { Slider, type SliderProps } from "./Slider.js";
 export {
   Spotlight,
   type SpotlightProps,
@@ -48,5 +45,5 @@ export {
 export { Tabs, tabLinkClasses, type TabItem, type TabsProps } from "./Tabs.js";
 export { Toast, ToastProvider, type ToastProps, type ToastTone } from "./Toast.js";
 
-export { AVATAR_OPTIONS, avatarGlyph, isAvatarUrl } from "./avatars.js";
+export { AVATAR_OPTIONS, avatarDrawing, isAvatarUrl } from "./avatars.js";
 export { cx } from "./cx.js";

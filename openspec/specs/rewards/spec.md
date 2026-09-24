@@ -590,3 +590,88 @@ NO contradice que sean dos en una tablet: dos era el mínimo para comparar, y el
 - **WHEN** un niño abre su escaparate en el ancho de una tablet
 - **THEN** ve dos premios uno al lado del otro
 
+### Requirement: El escaparate anuncia cuál es la meta más cercana
+
+El escaparate de un niño SHALL destacar el premio más barato de los que todavía no alcanza, con lo
+que le falta para él.
+
+Cada premio ya dice cuánto le falta, pero ninguno dice cuál está más cerca, y esa es la pregunta que
+convierte un saldo en una decisión de ahorro: no «cuánto tengo» sino «qué consigo antes».
+
+Cuando dos premios que no alcanza cuesten lo mismo, el desempate SHALL ser estable entre cargas. Sin
+desempate, la meta destacada cambiaría entre dos recargas sin que haya pasado nada.
+
+Los dos casos en los que no hay meta SHALL distinguirse entre sí y del caso normal:
+
+- Si le alcanzan **todos** los premios, no hay meta pendiente y la pantalla lo celebra en vez de dejar
+  un hueco.
+- Si **no hay ningún premio** para él, no se destaca nada: es una situación distinta y se lee distinta.
+
+#### Scenario: Al niño le faltan monedas para varios premios
+
+- **WHEN** se muestra su escaparate
+- **THEN** se destaca el más barato de los que no alcanza
+- **AND** se dice cuánto le falta para ese
+
+#### Scenario: Dos premios que no alcanza cuestan lo mismo
+
+- **WHEN** hay empate en el precio más bajo de los que no alcanza
+- **THEN** el destacado es el mismo en cargas sucesivas
+
+#### Scenario: Al niño le alcanzan todos los premios
+
+- **WHEN** ningún premio de su escaparate está fuera de su alcance
+- **THEN** no se destaca ninguna meta
+- **AND** la pantalla lo dice, en vez de dejar el sitio vacío
+
+#### Scenario: El niño no tiene premios ofrecidos
+
+- **WHEN** no hay ningún premio para él
+- **THEN** no se destaca ninguna meta
+- **AND** se distingue del caso en que le alcanzan todos
+
+### Requirement: El catálogo del padre se lee sin fotos
+
+En el catálogo del padre, un premio SHALL ocupar el alto de su contenido y NO SHALL reservar para su
+imagen un espacio que domine la tarjeta.
+
+El estado normal de una familia que empieza es un catálogo SIN fotos. Con la imagen a todo el ancho,
+cada premio gastaba el alto de una pantalla en enseñar un hueco, y cuatro premios no cabían a la vez.
+
+La talla de la imagen SHALL declararla la pieza que la dibuja, y NO SHALL imponerse desde la pantalla
+que la coloca.
+
+El escaparate del niño NO SHALL cambiar: allí la imagen es lo que se mira y la tesela cuadrada es lo
+que permite comparar dos precios de un vistazo.
+
+#### Scenario: Un catálogo sin fotos
+
+- **WHEN** se abre el catálogo con varios premios sin imagen
+- **THEN** caben varios en una pantalla
+
+#### Scenario: Se compara con el escaparate del niño
+
+- **WHEN** se miran las dos pantallas
+- **THEN** la del niño conserva su tesela cuadrada
+
+### Requirement: Las ofertas de un premio se leen de un vistazo
+
+Las ofertas de un premio SHALL enseñarse en línea, con el hijo y su precio juntos, y NO SHALL ocupar
+un renglón por hijo.
+
+Lo que esa pantalla responde es a quién se le ofrece y por cuánto. En columna, cada hijo gastaba un
+renglón entero para dos datos cortos.
+
+El conjunto SHALL seguir teniendo nombre para quien no ve la pantalla, aunque no se dibuje: un nombre
+y una cifra sueltos detrás del título de un premio no dicen de qué son.
+
+#### Scenario: Un premio ofrecido a varios hijos
+
+- **WHEN** se mira su tarjeta
+- **THEN** los hijos y sus precios se leen sin recorrer una columna
+
+#### Scenario: Se recorre con un lector de pantalla
+
+- **WHEN** se llega a la lista de ofertas
+- **THEN** se anuncia qué es esa lista
+

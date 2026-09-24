@@ -15,7 +15,6 @@ afterAll(async () => {
   await resetAuthData();
 });
 
-/** Si el estado de la sesión dice que a ese perfil ya se le explicó. */
 async function yaLoVio(cookies: string[]): Promise<boolean> {
   const response = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
 
@@ -26,12 +25,6 @@ function marcar(cookies: string[], seen: boolean) {
   return request(app).patch(`${API_PREFIX}/auth/tutorial`).set("Cookie", cookies).send({ seen });
 }
 
-/**
- * A quién se le explicó sale del ACTOR y nunca de la petición.
- *
- * Es lo que hace imposible por construcción que un niño marque el de su
- * hermano: no hay parámetro que pudiera apuntar a otro perfil.
- */
 describe("marcar el recorrido como visto", () => {
   it("un perfil recién creado todavía no lo ha visto", async () => {
     const { cookies, hijos } = await familiaOperando(app, ["Mateo"]);
@@ -56,11 +49,6 @@ describe("marcar el recorrido como visto", () => {
     expect(await yaLoVio(hijos[0]!.cookies)).toBe(true);
   }, 120_000);
 
-  /*
-   * No mueve dinero ni cambia de estado, así que dos toques dejan lo mismo. Se
-   * dice con un test para que nadie le añada la ceremonia de una transición
-   * condicional, que aquí no hace falta.
-   */
   it("marcarlo dos veces deja lo mismo, sin conflicto", async () => {
     const { cookies } = await familiaOperando(app, ["Mateo"]);
 
@@ -70,12 +58,6 @@ describe("marcar el recorrido como visto", () => {
     expect(await yaLoVio(cookies)).toBe(true);
   }, 120_000);
 
-  /*
-   * LOS DOS LADOS.
-   *
-   * Comprobar solo que el suyo queda marcado pasaría con una implementación que
-   * los marcara todos, que es exactamente el defecto que este test persigue.
-   */
   it("un niño marca el suyo, y el de su hermano NO cambia", async () => {
     const { hijos } = await familiaOperando(app, ["Mateo", "Emma"]);
     const [mateo, emma] = hijos;

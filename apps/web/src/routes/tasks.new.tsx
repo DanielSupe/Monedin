@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { requireParent } from "../app/guards.js";
 import { TaskForm } from "../features/tasks/TaskForm.js";
 
-/** Repartir una tarea entre uno o varios hijos. */
 export const Route = createFileRoute("/tasks/new")({
   beforeLoad: ({ context }) => requireParent(context.queryClient),
   component: NewTaskRoute,

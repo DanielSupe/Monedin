@@ -65,22 +65,12 @@ describe("Button", () => {
   });
 });
 
-/**
- * La talla mayor, desde `redesign-public-entry`.
- *
- * Una llamada a la acción de una página que convence no puede pesar lo mismo
- * que el botón de un formulario que ya se está rellenando.
- */
 describe("la acción admite una talla mayor", () => {
   it("las dos tallas se distinguen ENTRE SÍ", () => {
-    // Comparar las dos y no comprobar que la mayor «tiene clases»: con las dos
-    // iguales, eso seguiría en verde y la talla no existiría.
     expect(buttonClasses("primary", false, "large")).not.toBe(buttonClasses("primary"));
   });
 
   it("y el enlace pide exactamente la misma", () => {
-    // Navegar es trabajo de un enlace, así que las dos acciones de la puerta
-    // pública son enlaces: si la talla solo viviera en el botón, no la tendrían.
     render(
       <a href="#empezar" className={buttonClasses("primary", false, "large")}>
         Empezar

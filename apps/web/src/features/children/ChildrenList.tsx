@@ -19,18 +19,9 @@ import {
   buttonClasses,
 } from "../../ui/index.js";
 import { useSetChildPin, useUnlockChildProfile } from "../auth/use-session.js";
+import { contar } from "../../lib/plural.js";
 import { describeChildrenError, useChildren, useDeactivateChild } from "./use-children.js";
 
-/**
- * Gestión de los perfiles desde el lado del padre.
- *
- * Reponer el PIN y desbloquear NO son endpoints de este módulo: son los de
- * `auth` que ya existían. Cambiar una credencial y revocar sesiones es suyo.
- *
- * Era la CUARTA y última pantalla que reescribía a mano el bloque de
- * paginación. Con esta, `Pagination` tiene todos sus consumidores y no queda
- * ninguna copia.
- */
 export function ChildrenList({ page }: { page: number }): React.ReactElement {
   const { data, isPending, error } = useChildren(page);
 
@@ -39,11 +30,18 @@ export function ChildrenList({ page }: { page: number }): React.ReactElement {
   return (
     <section className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-title font-bold">{messages.children.title}</h2>
+        <div className="flex flex-col gap-1">
+          <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
+            {messages.children.listLead}
+          </span>
+          <h2 className="text-display font-extrabold">{messages.children.title}</h2>
+        </div>
         <Link to="/children/new" className={buttonClasses("primary")}>
           {messages.children.addChild}
         </Link>
       </div>
+
+      <Alert tone="info">{messages.children.deactivateVsLock}</Alert>
 
       {isPending ? (
         <Skeleton lines={4} />
@@ -96,7 +94,6 @@ export function ChildrenList({ page }: { page: number }): React.ReactElement {
 }
 
 function ChildRow({ child }: { child: Child }): React.ReactElement {
-  /* Dos revelaciones, no dos destinos: ninguna decide qué PANTALLA se enseña. */
   const [confirmando, setConfirmando] = useState(false);
   const [reponiendoPin, setReponiendoPin] = useState(false);
   const [pinNuevo, setPinNuevo] = useState("");
@@ -106,9 +103,6 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
   const unlock = useUnlockChildProfile();
 
   function reponer(evento: React.FormEvent): void {
-    // Un `<form>` y no un campo suelto con un botón al lado: teclear cuatro
-    // dígitos y pulsar Enter es lo que hace cualquiera. Misma regla que
-    // `redesign-parent-authoring` aplicó a las tres pantallas de escritura.
     evento.preventDefault();
     setPin.mutate(
       { childProfileId: child.id, pin: pinNuevo },
@@ -129,59 +123,55 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
             <Avatar value={child.avatar} size="small" />
 
             <div className="flex min-w-0 flex-1 flex-col gap-1">
-              <p className="truncate text-body font-bold">{child.name}</p>
+              <p className="truncate text-lead font-extrabold">{child.name}</p>
+
               {child.age !== null && (
                 <p className="text-small text-ink-muted">
-                  {messages.children.age}: {child.age}
+                  {contar(child.age, messages.children.yearsOne, messages.children.yearsMany)}
                 </p>
               )}
             </div>
 
             <Coins amount={child.coins} />
 
-            {/*
-              Bloqueado va en ADVERTENCIA y no en peligro. Significa que ese niño
-              falló el PIN varias veces: no es una avería ni una culpa de nadie, y
-              el rojo se lo diría. Mismo criterio que un canje rechazado y que un
-              409. Y el tono acompaña al texto, nunca lo sustituye.
-            */}
-            {child.locked && <Badge tone="warning">{messages.children.locked}</Badge>}
+            {child.locked && <Badge tone="conflict">{messages.children.locked}</Badge>}
           </div>
 
           <div className="flex flex-wrap gap-2">
+
             <Link
               to="/children/$childId/edit"
               params={{ childId: child.id }}
+              aria-label={`${messages.children.editFull} ${child.name}`}
               className={buttonClasses("secondary")}
             >
               {messages.children.edit}
             </Link>
 
-            {/* La respuesta a «este saldo no me cuadra», que hasta
-                `add-coin-history` no tenía dónde mirarse. */}
             <Link
               to="/children/$childId/coins"
               params={{ childId: child.id }}
               search={{ page: 1 }}
+              aria-label={`${messages.children.historyFull} ${child.name}`}
               className={buttonClasses("secondary")}
             >
-              {messages.coins.seeChildHistory}
+              {messages.children.historyShort}
             </Link>
 
             <Button
               type="button"
               variant="secondary"
+              aria-label={`${messages.children.resetPinFull} ${child.name}`}
               onClick={() => setReponiendoPin((abierto) => !abierto)}
             >
               {messages.children.resetPin}
             </Button>
 
-            {/* Solo si lo está: ofrecer desbloquear un perfil que no está
-                bloqueado es prometer algo que no hace nada. */}
             {child.locked && (
               <Button
                 type="button"
                 variant="secondary"
+                aria-label={`${messages.children.unlockFull} ${child.name}`}
                 pending={unlock.isPending}
                 onClick={() => unlock.mutate(child.id)}
               >
@@ -189,7 +179,12 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
               </Button>
             )}
 
-            <Button type="button" variant="danger" onClick={() => setConfirmando(true)}>
+            <Button
+              type="button"
+              variant="danger"
+              aria-label={`${messages.children.deactivateFull} ${child.name}`}
+              onClick={() => setConfirmando(true)}
+            >
               {messages.children.deactivate}
             </Button>
           </div>
@@ -232,14 +227,6 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
             </form>
           )}
 
-          {/*
-            La baja va en un DIÁLOGO, y el argumento es la asimetría: retirar un
-            premio se revierte publicándolo otra vez y ya se pregunta con uno;
-            dar de baja un perfil NO se deshace y se preguntaba con un párrafo y
-            dos botones sueltos dentro de la fila. En una tablet que se usa con el
-            dedo, eso deja una acción destructiva a un toque de la fila de al
-            lado.
-          */}
           <Dialog
             open={confirmando}
             onOpenChange={setConfirmando}
@@ -263,6 +250,25 @@ function ChildRow({ child }: { child: Child }): React.ReactElement {
               </>
             }
           >
+
+            {child.locked && (
+              <Alert tone="conflict">
+                {messages.children.deactivateLockedHint}
+                <div className="mt-3">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    pending={unlock.isPending}
+                    onClick={() =>
+                      unlock.mutate(child.id, { onSuccess: () => setConfirmando(false) })
+                    }
+                  >
+                    {messages.children.unlock}
+                  </Button>
+                </div>
+              </Alert>
+            )}
+
             {deactivate.error !== null && (
               <Alert tone={alertToneFor(deactivate.error)}>
                 {describeChildrenError(deactivate.error)}

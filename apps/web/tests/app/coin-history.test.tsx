@@ -4,6 +4,7 @@ import { RouterProvider, createMemoryHistory, createRouter } from "@tanstack/rea
 import { render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { routeTree } from "../../src/routeTree.gen";
+import { fechaCorta, fechaLarga } from "../../src/lib/dates.js";
 import { messages } from "../../src/lib/messages.js";
 import { comoNino, comoPadre } from "../support/router.js";
 
@@ -79,65 +80,62 @@ async function montar(
   );
 }
 
-/** La fila de ese movimiento, esperándola: la lista llega después del título. */
 async function filaCon(texto: string): Promise<HTMLElement> {
   return (await screen.findByText(texto)).closest("li") as HTMLElement;
 }
 
-/**
- * Que una fila sume o reste es lo MÁS importante que dice, y `-60` frente a `60`
- * lo deja colgando de un solo carácter.
- */
-describe("acreditar y descontar se distinguen por más que el signo", () => {
-  it("cada uno lleva su palabra", async () => {
-    await montar("/me/coins?page=1", [movimiento("m1", 20, 20), movimiento("m2", -60, 40)]);
+function dice(movimiento: CoinTransaction): string {
+  const verbo = movimiento.amount > 0 ? messages.coins.earned : messages.coins.spent;
+  return `${verbo} ${Math.abs(movimiento.amount)}`;
+}
 
-    expect(await screen.findByText(messages.coins.earned)).toBeInTheDocument();
-    expect(screen.getByText(messages.coins.spent)).toBeInTheDocument();
+function teselaDe(fila: HTMLElement): HTMLElement {
+  return fila.firstElementChild as HTMLElement;
+}
+
+describe("acreditar y descontar se distinguen por más que el signo", () => {
+  const GANA = movimiento("m1", 20, 20);
+  const GASTA = movimiento("m2", -60, 40);
+
+  it("cada uno lleva su palabra, con su cantidad dentro", async () => {
+    await montar("/me/coins?page=1", [GANA, GASTA]);
+
+    expect(await screen.findByText(dice(GANA))).toBeInTheDocument();
+    expect(screen.getByText(dice(GASTA))).toBeInTheDocument();
   });
 
   it("y se distinguen entre SÍ, no solo por su texto", async () => {
-    await montar("/me/coins?page=1", [movimiento("m1", 20, 20), movimiento("m2", -60, 40)]);
+    await montar("/me/coins?page=1", [GANA, GASTA]);
 
-    await screen.findByText(messages.coins.earned);
+    const gana = teselaDe(await filaCon(dice(GANA)));
+    const gasta = teselaDe(await filaCon(dice(GASTA)));
 
-    /*
-     * Se comparan los dos tonos ENTRE SÍ. Comprobar que las dos palabras están
-     * en pantalla no comprueba que se distingan: con el mismo tono en las dos,
-     * ese test seguiría en verde. Comprobado inyectando esa violación.
-     */
-    const gana = screen.getByText(messages.coins.earned).className;
-    const gasta = screen.getByText(messages.coins.spent).className;
+    expect(gana.className).not.toEqual(gasta.className);
+  });
 
-    expect(gana).not.toEqual(gasta);
+  it("ganar lleva el color de la moneda y gastar el del ahorro", async () => {
+    await montar("/me/coins?page=1", [GANA, GASTA]);
+
+    expect(teselaDe(await filaCon(dice(GANA))).className).toContain("bg-coin-soft");
+    expect(teselaDe(await filaCon(dice(GASTA))).className).toContain("bg-done-soft");
   });
 });
 
-/**
- * `balanceAfter` se guarda redundante desde `add-data-model` con una razón
- * escrita, y acumular en el cliente sería además incorrecto en cuanto haya
- * paginación: la segunda página no sabe con qué saldo empezó.
- */
 describe("el saldo de cada fila es el que viene, no uno acumulado", () => {
   it("aunque no cuadre con la suma de los importes", async () => {
-    /*
-     * Saldos deliberadamente INCOHERENTES con la suma: si la pantalla acumulara,
-     * daría 20 y 80 en vez de 500 y 777. Con datos coherentes las dos
-     * respuestas coincidirían y el test no probaría nada — es el error que
-     * `redesign-parent-home` costó aprender.
-     */
-    await montar("/me/coins?page=1", [
-      movimiento("m1", 20, 500),
-      movimiento("m2", 60, 777),
-    ]);
+    const primero = movimiento("m1", 20, 500);
+    const segundo = movimiento("m2", 60, 777);
 
-    const primera = await filaCon(`${messages.coins.balanceAfter} 500`);
-    expect(primera).toBeInTheDocument();
-    expect(screen.getByText(`${messages.coins.balanceAfter} 777`)).toBeInTheDocument();
+    await montar("/me/coins?page=1", [primero, segundo]);
 
-    // Y ninguno de los dos acumulados aparece.
-    expect(screen.queryByText(`${messages.coins.balanceAfter} 20`)).toBeNull();
-    expect(screen.queryByText(`${messages.coins.balanceAfter} 80`)).toBeNull();
+    const arriba = await filaCon(dice(primero));
+    const abajo = await filaCon(dice(segundo));
+
+    expect(within(arriba).getByText("500")).toBeInTheDocument();
+    expect(within(abajo).getByText("777")).toBeInTheDocument();
+
+    expect(within(arriba).queryByText("20", { selector: "span" })).toBeNull();
+    expect(within(abajo).queryByText("80")).toBeNull();
   });
 });
 
@@ -198,8 +196,36 @@ describe("se llega al historial desde el saldo", () => {
     );
 
     const fila = (await screen.findByText("Mateo")).closest("li") as HTMLElement;
-    const enlace = within(fila).getByRole("link", { name: messages.coins.seeChildHistory });
+
+    const enlace = within(fila).getByRole("link", {
+      name: `${messages.children.historyFull} Mateo`,
+    });
 
     expect(enlace).toHaveAttribute("href", expect.stringContaining("/children/h1/coins"));
+  });
+});
+
+describe("cada movimiento dice cuándo fue", () => {
+  it("la fecha de cada fila es la suya", async () => {
+    const primero = { ...movimiento("m1", 20, 120), createdAt: "2026-09-08T10:00:00.000Z" };
+    const segundo = { ...movimiento("m2", -60, 60), createdAt: "2026-08-20T10:00:00.000Z" };
+
+    await montar("/me/coins?page=1", [primero, segundo]);
+
+    const filaGano = (await screen.findByText(dice(primero))).closest("li") as HTMLElement;
+    const filaGasto = (await screen.findByText(dice(segundo))).closest("li") as HTMLElement;
+
+    expect(within(filaGano).getByText(fechaCorta(primero.createdAt))).toBeInTheDocument();
+    expect(within(filaGasto).getByText(fechaCorta(segundo.createdAt))).toBeInTheDocument();
+  });
+
+  it("y en corto, no en la forma larga", async () => {
+    const uno = { ...movimiento("m1", 20, 120), createdAt: "2026-09-08T10:00:00.000Z" };
+
+    await montar("/me/coins?page=1", [uno]);
+
+    await screen.findByText(dice(uno));
+
+    expect(screen.queryByText(fechaLarga(uno.createdAt))).toBeNull();
   });
 });

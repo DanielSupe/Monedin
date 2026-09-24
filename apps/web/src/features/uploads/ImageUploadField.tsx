@@ -3,66 +3,22 @@ import { useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
 import { putToUploadUrl, UploadError } from "../../lib/s3-upload.js";
 import { messages } from "../../lib/messages.js";
-import { Alert, Button, buttonClasses, cx } from "../../ui/index.js";
+import { Alert, Button, Slider, buttonClasses, cx } from "../../ui/index.js";
 import { cropToBlob, isAllowedImage, prepareImage } from "./prepare-image.js";
 
-/**
- * Elegir una foto, prepararla y subirla.
- *
- * UNA sola pieza para los tres casos —avatar, premio, evidencia—, no tres
- * copias. Lo que cambia entre ellos son DOS props, y son dos a propósito:
- *
- *   - `aspect` decide si monta el recortador y con qué proporción.
- *   - `maxDimension` decide cuánto detalle se guarda.
- *
- * Eran una sola, y esta cabecera decía que sin `aspect` no se recortaba «la foto
- * de un premio o la evidencia de una tarea, donde recortar a cuadrado quitaría
- * justo lo que hay que ver: el juguete entero, la cama hecha».
- *
- * Eso se revierte PARA EL PREMIO, con dos razones que no existían entonces.
- * Desde `redesign-child-surfaces` los premios van en REJILLA, y ahí las
- * proporciones dispares descuadran la fila. Y el recorte NO es automático: el
- * recortador es interactivo, así que quien sube desplaza y acerca hasta que el
- * juguete cabe — la frase describía un peligro que esta herramienta no tiene.
- *
- * Para la EVIDENCIA la decisión original se queda, con su razón intacta: se mira
- * de una en una en la bandeja del padre, no junto a otras del mismo tamaño, y lo
- * que hay que ver es el conjunto. Que una sola frase cubriera los dos casos era
- * el problema: uno cambió y el otro no.
- *
- * Y por eso las props son dos. Atadas, pedir recorte para un premio le habría
- * encogido la foto a `AVATAR_MAX_DIMENSION` —512 px para una tesela que ocupa
- * media tablet—, que es justo el obstáculo que este change existe para quitar.
- * Ver las decisiones 1 y 2 del design de `crop-reward-images`.
- *
- * NO sabe de hijos, premios ni tareas: recibe cómo pedir la URL y qué hacer con
- * la clave confirmada. Ver la decisión 10 del design de `add-file-storage`.
- */
 interface ImageUploadFieldProps {
-  /** Cómo pedir la URL de subida. Lo sabe quien usa el componente, no él. */
   requestUploadUrl: (contentType: ImageContentType) => Promise<UploadUrl>;
-  /** Qué hacer con la clave, una vez el archivo está arriba de verdad. */
+
   onUploaded: (key: string) => void;
-  /** Con valor, recorta a esa proporción. Sin él, solo comprime. */
+
   aspect?: number;
-  /**
-   * Cuánto detalle guardar, en píxeles del lado mayor.
-   *
-   * Independiente de `aspect`: una imagen puede recortarse y conservar aun así
-   * la resolución de una foto. Quien usa la pieza elige entre las constantes del
-   * contrato, y no escribe un número.
-   */
+
   maxDimension: number;
   label?: string;
+
+  cropNote?: string;
 }
 
-/**
- * La altura del lienzo del recorte, en píxeles.
- *
- * Va aquí y no en `tokens.css` porque no es una medida del sistema: es lo que
- * `react-easy-crop` necesita para dimensionar su área, y ninguna otra pantalla
- * la usa ni debería.
- */
 const ALTO_DEL_RECORTE = 260;
 
 type Estado =
@@ -76,6 +32,7 @@ export function ImageUploadField({
   aspect,
   maxDimension,
   label,
+  cropNote,
 }: ImageUploadFieldProps): React.ReactElement {
   const [estado, setEstado] = useState<Estado>({ name: "idle" });
   const [error, setError] = useState<string | null>(null);
@@ -103,7 +60,7 @@ export function ImageUploadField({
 
   function elegir(event: React.ChangeEvent<HTMLInputElement>): void {
     const file = event.target.files?.[0];
-    // Que el input se pueda reusar con el mismo archivo dos veces seguidas.
+
     event.target.value = "";
 
     if (file === undefined) return;
@@ -153,22 +110,10 @@ export function ImageUploadField({
       <div className="flex flex-col gap-3">
         <p className="text-small font-semibold">{messages.uploads.crop}</p>
 
-        {/*
-          ESTILO EN LÍNEA, y es la TERCERA excepción del proyecto tras
-          `ProgressBar` y `Orbits`. `CLAUDE.md` avisa de que cada una debilita
-          la regla, así que conviene justificarla: `react-easy-crop` monta su
-          lienzo dentro de este contenedor y necesita que tenga posición y una
-          altura resuelta para medir su área. No hay token que exprese «lo que
-          esa librería necesita para medir», y la alternativa era meter una
-          utilidad de una sola pantalla en el archivo de tokens.
+        {cropNote !== undefined && (
+          <p className="text-small text-ink-muted">{cropNote}</p>
+        )}
 
-          Lo que SÍ se fue es el color: era `#333` literal y ahora es un token.
-          La excepción cubre lo mínimo.
-
-          Queda así respondida la pregunta que dejó abierta el design de
-          `add-design-system`, en un archivo de configuración y no en la cabeza
-          de alguien.
-        */}
         <div
           className="rounded-card relative overflow-hidden bg-ink"
           style={{ height: ALTO_DEL_RECORTE }}
@@ -184,18 +129,15 @@ export function ImageUploadField({
           />
         </div>
 
-        <label className="text-small flex items-center gap-2 font-semibold">
-          {messages.uploads.zoom}
-          <input
-            type="range"
-            min={1}
-            max={3}
-            step={0.1}
+        <div className="flex items-center gap-3">
+          <span className="text-small shrink-0 font-semibold">{messages.uploads.zoom}</span>
+          <Slider
+            label={messages.uploads.zoom}
             value={zoom}
-            onChange={(event) => setZoom(Number(event.target.value))}
+            onValueChange={setZoom}
             className="min-w-0 flex-1"
           />
-        </label>
+        </div>
 
         <div className="flex flex-wrap gap-2">
           <Button variant="primary" onClick={() => void confirmarRecorte()}>
@@ -209,34 +151,10 @@ export function ImageUploadField({
 
   return (
     <div className="flex min-w-0 flex-col gap-2">
-      {/*
-        El control nativo NO se enseña, y no es cuestión de aspecto.
-        `input[type=file]` tiene un ancho mínimo intrínseco de unos 360px —el
-        botón del sistema más «ningún archivo seleccionado»— y en una rejilla,
-        donde el mínimo por defecto es `auto`, ARRASTRA A SU COLUMNA. Dos
-        pantallas del niño desbordaban por él a 390px sin tenerlo en su propio
-        código, y por eso el marco llevaba un parche.
 
-        Se oculta, no se quita: sigue siendo lo que abre el selector del sistema,
-        sigue alcanzable con el teclado a través de su etiqueta, y sigue
-        anunciándose. `sr-only` oculta a la vista sin sacar del árbol.
-      */}
       <label className={cx(buttonClasses("secondary"), "relative")}>
         {label ?? messages.uploads.choose}
-        {/*
-          El control CUBRE la etiqueta, transparente, en vez de esconderse en un
-          rincón.
 
-          Con `sr-only` funcionaba el teclado pero el anillo de foco se dibujaba
-          sobre un cuadro de 1px que nadie ve: se tabulaba hasta él y no pasaba
-          nada visible. Absoluto y a opacidad cero, el control ES la etiqueta:
-          su caja de foco coincide con lo que se ve, así que el `:focus-visible`
-          que el sistema ya declara sirve tal cual y no hace falta trasladar el
-          anillo con `focus-within`.
-
-          Y sigue fuera del flujo, que es lo que importaba: un elemento absoluto
-          no aporta ancho mínimo, así que no arrastra a su columna.
-        */}
         <input
           type="file"
           accept="image/jpeg,image/png,image/webp"

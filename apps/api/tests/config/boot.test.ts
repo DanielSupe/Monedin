@@ -1,12 +1,3 @@
-/**
- * Estos tests arrancan la API como un proceso de verdad, porque lo que
- * comprueban es precisamente el comportamiento del arranque: que muera con
- * código distinto de cero y que no llegue a escuchar. Eso no se puede observar
- * llamando a una función.
- *
- * `ENV_FILE` apunta a un archivo inexistente para que el `.env` de la máquina no
- * rellene los huecos que el test quiere dejar vacíos.
- */
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -62,7 +53,6 @@ describe("arranque de la API con configuración inválida", () => {
       NODE_ENV: "test",
       API_PORT: "3999",
       DATABASE_URL: "postgresql://monedin:monedin@localhost:5432/monedin",
-      // WEB_ORIGIN ausente a propósito.
     });
 
     const result = await boot.finished;
@@ -75,7 +65,6 @@ describe("arranque de la API con configuración inválida", () => {
     const boot = bootApi({
       NODE_ENV: "test",
       API_PORT: "3998",
-      // Faltan DATABASE_URL y WEB_ORIGIN.
     });
 
     const result = await boot.finished;
@@ -105,7 +94,6 @@ describe("arranque de la API con configuración inválida", () => {
   }, 30_000);
 });
 
-/** Arranca la API y espera a que anuncie que está escuchando. */
 async function bootAndWaitForListening(
   env: Record<string, string>,
   timeoutMs = 30_000,
@@ -131,7 +119,6 @@ ${boot.stderr()}`);
 
 describe("las credenciales del almacén son secretas", () => {
   it("no imprime el valor de la credencial de S3 al rechazarla", async () => {
-    // Mismo trato que la cadena de la base: nombra la variable, nunca su valor.
     const boot = bootApi({
       NODE_ENV: "test",
       API_PORT: "3996",
@@ -143,7 +130,7 @@ describe("las credenciales del almacén son secretas", () => {
       TEST_S3_BUCKET_NAME: "monedin-test",
       TEST_S3_ENDPOINT: "http://localhost:9000",
       AWS_ACCESS_KEY_ID: "una-clave",
-      // Ausente a propósito: es lo que provoca el rechazo.
+
       S3_ENDPOINT: "no-es-una-url",
     });
 

@@ -12,14 +12,6 @@ import { actorOf } from "../../shared/http/session.js";
 import { validatedPart } from "../../shared/http/validate.js";
 import * as service from "./rewards.service.js";
 
-/**
- * Parseo y serialización. Cero autorización.
- *
- * Ni un `if` sobre el rol ni sobre la propiedad de un premio: eso lo decide el
- * servicio, con el actor. Aquí solo se lee la petición y se le da forma a la
- * respuesta.
- */
-
 export const handleCreate: RequestHandler = async (req, res) => {
   const input = validatedPart(req, "body", createRewardSchema);
 
@@ -60,17 +52,12 @@ export const handleRetire: RequestHandler = async (req, res) => {
   res.status(204).send();
 };
 
-// ---------------------------------------------------------------------------
-// Escaparate propio del niño
-// ---------------------------------------------------------------------------
-
 export const handleOwnList: RequestHandler = async (req, res) => {
   const query = validatedPart(req, "query", listOwnRewardsQuerySchema);
 
   res.status(200).json(await service.listOwnRewards(actorOf(req), query));
 };
 
-/** La vía del ALTA: no lleva premio, porque todavía no existe. */
 export const handlePendingImageUploadUrl: RequestHandler = async (req, res) => {
   const { contentType } = validatedPart(req, "body", createUploadUrlSchema);
 

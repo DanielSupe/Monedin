@@ -123,8 +123,6 @@ describe("cliente de tareas", () => {
   });
 
   it("las transiciones van por POST, no por PATCH", async () => {
-    // Una `Response` solo se puede leer una vez, así que cada llamada necesita
-    // la suya: con `mockResolvedValue` las dos compartirían el mismo cuerpo.
     const fetchMock = vi
       .fn()
       .mockImplementation(() => Promise.resolve(jsonResponse(200, UNA_TAREA)));
@@ -151,9 +149,6 @@ describe("cliente de tareas", () => {
   });
 
   it("la lista del niño no lleva identificador de hijo", async () => {
-    // Si lo llevara, un niño podría apuntar a las tareas de su hermano. La API
-    // lo rechazaría con 422 porque su esquema es estricto, pero la garantía
-    // buena es que aquí no hay ningún parámetro que ponerlo.
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, unaPaginaPropia()));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -234,8 +229,6 @@ describe("traducción de errores de tareas", () => {
   }
 
   it("un conflicto es «esa tarea ya no está pendiente», NO el tope de perfiles", () => {
-    // Es el test que impide reutilizar `describeChildrenError`: allí el mismo
-    // código significa «esta familia ya tiene el máximo de perfiles».
     const texto = describeTasksError(errorCon(ERROR_CODES.CONFLICT));
 
     expect(texto).toBe(messages.tasks.conflict);
@@ -273,8 +266,6 @@ describe("cómo se lee cada estado", () => {
   });
 
   it("el texto de «hecha» deja claro que todavía no ha pagado", () => {
-    // Que marcarla no pague es lo que hace que la aprobación signifique algo:
-    // la interfaz tiene que decirlo.
     expect(messages.tasks.statusCompleted).toMatch(/esperando/i);
   });
 });

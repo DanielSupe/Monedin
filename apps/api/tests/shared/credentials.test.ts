@@ -34,7 +34,7 @@ describe("hash de credenciales", () => {
     ]);
 
     expect(uno).not.toBe(otro);
-    // Y aun así ambos verifican.
+
     await expect(verifyCredential("la misma contraseña", uno)).resolves.toMatchObject({
       valid: true,
     });
@@ -58,8 +58,6 @@ describe("hash de credenciales", () => {
   });
 
   it("normaliza la credencial, para que la misma tecleada de dos formas valga", async () => {
-    // "ñ" se puede componer de dos maneras distintas en Unicode; para quien
-    // teclea son la misma letra.
     const compuesta = "contraseña-larga";
     const precompuesta = "contraseña-larga";
 
@@ -129,8 +127,6 @@ describe("propiedades que sostienen la seguridad", () => {
   it("la verificación no delata por su duración si el fallo fue temprano o tardío", async () => {
     const hash = await hashCredential("contraseña-de-referencia");
 
-    // Dos credenciales incorrectas: una que difiere en el primer carácter y otra
-    // en el último. Una comparación ingenua con === tardaría distinto.
     async function medir(candidata: string): Promise<number> {
       const inicio = performance.now();
       await verifyCredential(candidata, hash);
@@ -148,9 +144,6 @@ describe("propiedades que sostienen la seguridad", () => {
     const media = (temprano + tardio) / (2 * muestras);
     const diferencia = Math.abs(temprano - tardio) / muestras;
 
-    // El grueso del tiempo es la derivación, que es igual en ambos casos. La
-    // comparación final es en tiempo constante, así que la diferencia tiene que
-    // quedarse en ruido de medición.
     expect(diferencia).toBeLessThan(media * 0.5);
   }, 30_000);
 
@@ -170,8 +163,6 @@ describe("propiedades que sostienen la seguridad", () => {
       clearInterval(contador);
     }
 
-    // Si `scrypt` corriera en el hilo principal, el temporizador no habría
-    // podido dispararse ni una vez durante los hashes.
     expect(tics).toBeGreaterThan(0);
   }, 30_000);
 
@@ -180,8 +171,6 @@ describe("propiedades que sostienen la seguridad", () => {
     await hashCredential("cualquiera");
     const transcurrido = performance.now() - inicio;
 
-    // Un hash instantáneo sería señal de parámetros demasiado bajos: la lentitud
-    // es la defensa.
     expect(transcurrido).toBeGreaterThan(10);
   }, 30_000);
 });

@@ -41,6 +41,19 @@ enum RedemptionStatus {
 }
 
 /// De donde viene un movimiento de monedas.
+/// Que tema prefiere un perfil.
+///
+/// TRES valores y no un booleano: "oscuro si/no" no sabe decir "el que diga el
+/// sistema", y ese es el valor por defecto y el que mas gente va a dejar
+/// puesto. Con un booleano haria falta ademas un nulo con significado, que es
+/// tener un enumerado sin decirlo.
+enum ThemePreference {
+  /// Sigue la preferencia del dispositivo. Lo que el producto hacia siempre.
+  SYSTEM
+  LIGHT
+  DARK
+}
+
 enum CoinReason {
   TASK_APPROVED
   REDEMPTION_APPROVED
@@ -56,9 +69,9 @@ enum CoinReason {
 /// El nino no tiene fila aqui: vive entero en ChildProfile con su PIN. Por eso
 /// no hay columna de rol — valdria siempre PARENT. Ver la decision 1 del design.
 model User {
-  id           String   @id @default(cuid(2))
+  id           String  @id @default(cuid(2))
   name         String
-  email        String   @unique
+  email        String  @unique
   /// Hash opaco. El algoritmo lo decide `add-authentication`.
   passwordHash String
   image        String?
@@ -78,6 +91,14 @@ model User {
   /// de su madre no puede dejarla sin poder entrar con su contrasena.
   failedPinAttempts Int       @default(0)
   pinLockedUntil    DateTime?
+
+  /// Que tema prefiere este perfil. SYSTEM es lo que el producto hacia siempre.
+  ///
+  /// Vive AQUI y no en el navegador a proposito: la tablet es compartida, y una
+  /// preferencia del dispositivo haria que un hijo heredase el tema de su padre
+  /// —o se lo cambiase sin querer—. Guardada en la fila, el mismo nino ve su
+  /// tema en la tablet y en el movil de su madre.
+  themePreference ThemePreference @default(SYSTEM)
 
   /// Cuando se le mostro el recorrido de bienvenida. Nulo: todavia no.
   ///
@@ -118,6 +139,14 @@ model ChildProfile {
   failedPinAttempts Int       @default(0)
   lockedUntil       DateTime?
 
+  /// Que tema prefiere este perfil. SYSTEM es lo que el producto hacia siempre.
+  ///
+  /// Vive AQUI y no en el navegador a proposito: la tablet es compartida, y una
+  /// preferencia del dispositivo haria que un hijo heredase el tema de su padre
+  /// —o se lo cambiase sin querer—. Guardada en la fila, el mismo nino ve su
+  /// tema en la tablet y en el movil de su madre.
+  themePreference ThemePreference @default(SYSTEM)
+
   /// Cuando se le mostro el recorrido de bienvenida. Nulo: todavia no.
   ///
   /// FECHA y no booleano: no cuesta mas y responde una pregunta que un booleano
@@ -125,9 +154,9 @@ model ChildProfile {
   /// quien vio cual. Lo que sale por la API es solo si lo vio, no cuando.
   tutorialSeenAt DateTime?
   /// Baja logica: oculta de los listados sin destruir historial.
-  deletedAt DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   parentId String
   parent   User   @relation(fields: [parentId], references: [id], onDelete: Cascade)
@@ -242,7 +271,7 @@ model RewardAssignment {
 
 /// Solicitud de canje iniciada por el nino.
 model RewardRedemption {
-  id String @id @default(cuid(2))
+  id     String           @id @default(cuid(2))
   /// SNAPSHOT del precio al solicitar. Si el padre lo cambia despues, el canje
   /// pendiente respeta el precio original. CHECK de rango en la migracion.
   coins  Int
@@ -274,9 +303,9 @@ model RewardRedemption {
 /// instala un disparador que rechaza UPDATE y DELETE sobre esta tabla, y las
 /// relaciones son Restrict para que no se pueda borrar un nino con historial.
 model CoinTransaction {
-  id String @id @default(cuid(2))
+  id           String     @id @default(cuid(2))
   /// Positivo acredita, negativo descuenta. Nunca cero.
-  amount Int
+  amount       Int
   /// Saldo resultante tras aplicar el movimiento. Redundante a proposito:
   /// convierte auditar el saldo en una comparacion, no en una agregacion.
   /// Ver la decision 5 del design.

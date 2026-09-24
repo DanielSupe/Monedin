@@ -5,23 +5,9 @@ import { PIN_LABEL, messages } from "../../lib/messages.js";
 import { Alert, Button, Field, Input } from "../../ui/index.js";
 import { AccessLayout } from "./AccessLayout.js";
 import { PillField } from "./SignInScreen.js";
-import { ArrowRight, AtSign, Keypad, Lock, Person } from "./access-icons.js";
+import { AtSign, Keypad, Lock, Person } from "./access-icons.js";
 import { describeAuthError, useRegister } from "./use-session.js";
 
-/**
- * Crear una cuenta. Su propio destino desde `redesign-access`.
- *
- * Aquí llega quien pulsa «Empezar» en la puerta pública. Antes ese botón abría
- * el formulario de ENTRAR, así que quien venía a registrarse aterrizaba en un
- * acceso que no podía usar y la salida solo aparecía leyendo un enlace al pie.
- *
- * Dos cosas que esta pantalla dice y la anterior no decía:
- *
- * 1. El mínimo de la contraseña, ANTES de intentar enviarla. Se descubría
- *    fallando, y de uno en uno, porque el formulario enseña `issues[0]`.
- * 2. Por qué hay dos credenciales. Sin decirlo, pedir dos claves distintas en
- *    la misma pantalla parece un error del producto.
- */
 export function SignUpScreen(): React.ReactElement {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -80,11 +66,6 @@ export function SignUpScreen(): React.ReactElement {
           </PillField>
         </Field>
 
-        {/*
-          El mínimo sale de la constante del CONTRATO y no escrito a mano: es el
-          mismo número que valida la API, y tenerlo en dos sitios acaba con uno
-          de los dos mintiendo.
-        */}
         <Field
           label={messages.auth.password}
           help={`${messages.auth.passwordMinHelp} ${PASSWORD_MIN_LENGTH} ${messages.auth.passwordMinHelpTail}`}
@@ -114,24 +95,15 @@ export function SignUpScreen(): React.ReactElement {
           </PillField>
         </Field>
 
-        {/* Por qué son dos. Va junto a las dos, no colgando de la segunda. */}
         <Alert tone="info" title={messages.auth.twoKeysTitle}>
           {messages.auth.twoKeysBody}
         </Alert>
 
         {error !== undefined && <Alert tone="danger">{error}</Alert>}
 
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            variant="contrast"
-            iconOnly
-            aria-label={messages.auth.submitSignUp}
-            pending={register.isPending}
-          >
-            <ArrowRight />
-          </Button>
-        </div>
+        <Button type="submit" variant="contrast" block pending={register.isPending}>
+          {messages.auth.submitSignUp}
+        </Button>
       </form>
     </AccessLayout>
   );

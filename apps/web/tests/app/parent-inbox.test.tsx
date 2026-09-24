@@ -28,7 +28,10 @@ function tarea(id: string, status: "PENDING" | "COMPLETED" | "APPROVED") {
   };
 }
 
-/** Un reparto con las tres etapas dentro: lo que se ve al filtrar por una. */
+function acciones(accion: string): HTMLElement[] {
+  return screen.getAllByRole("button", { name: new RegExp(`^${accion}\\b`) });
+}
+
 const REPARTO_MEZCLADO = {
   batchId: "b1",
   title: "Recoger la mesa",
@@ -61,12 +64,6 @@ function json(cuerpo: unknown, status = 200): Response {
   });
 }
 
-/**
- * Monta una bandeja con router de verdad.
- *
- * `fallaAlResolver` decide con qué código responden las mutaciones, que es lo
- * que permite comprobar que un 409 no se cuenta igual que un error.
- */
 async function montar(
   direccion: string,
   {
@@ -86,7 +83,6 @@ async function montar(
     vi.fn((entrada: RequestInfo | URL, init?: RequestInit) => {
       const url = String(entrada);
 
-      // Las mutaciones son POST sobre una acción; los listados son GET.
       if (init?.method === "POST" && fallaAlResolver !== undefined) {
         return Promise.resolve(json(fallaAlResolver, fallaAlResolver.status));
       }
@@ -119,19 +115,11 @@ async function montar(
   );
 }
 
-/** Devuelve las clases del aviso que contiene ese texto. */
 function tonoDelAviso(texto: string): string {
   const parrafo = screen.getByText(texto);
   return (parrafo.closest("[role]") ?? parrafo).className;
 }
 
-/**
- * La distinción que la API protege entera y esta pantalla tiraba.
- *
- * Un 409 aquí significa una cosa: alguien se adelantó. El padre aprobó dos
- * veces, o resolvió desde otro dispositivo. Pintarlo del mismo rojo que un
- * fallo le echa la culpa a quien está mirando.
- */
 describe("un conflicto no se cuenta como un error", () => {
   const CONFLICTO = {
     status: 409,
@@ -151,13 +139,12 @@ describe("un conflicto no se cuenta como un error", () => {
     });
 
     await userEvent.click(
-      (await screen.findAllByRole("button", { name: messages.tasks.approve }))[0] as HTMLElement,
+      (await screen.findAllByRole("button", { name: new RegExp(`^${messages.tasks.approve}\\b`) }))[0] as HTMLElement,
     );
 
     await screen.findByText(messages.tasks.conflict);
     const tonoConflicto = tonoDelAviso(messages.tasks.conflict);
 
-    // Y ahora el otro caso, en un montaje limpio.
     vi.unstubAllGlobals();
     document.body.innerHTML = "";
 
@@ -167,17 +154,12 @@ describe("un conflicto no se cuenta como un error", () => {
     });
 
     await userEvent.click(
-      (await screen.findAllByRole("button", { name: messages.tasks.approve }))[0] as HTMLElement,
+      (await screen.findAllByRole("button", { name: new RegExp(`^${messages.tasks.approve}\\b`) }))[0] as HTMLElement,
     );
 
     await screen.findByText(messages.tasks.invalidData);
     const tonoError = tonoDelAviso(messages.tasks.invalidData);
 
-    /*
-     * Se comparan los DOS tonos entre sí, no que cada aviso aparezca: con los
-     * dos en rojo —que es como estaba antes de este change— un test que solo
-     * buscara los textos seguiría en verde. Comprobado inyectando la violación.
-     */
     expect(tonoConflicto).not.toEqual(tonoError);
   });
 });
@@ -188,11 +170,10 @@ describe("cada fila ofrece solo lo que su estado permite", () => {
 
     await screen.findByText("Recoger la mesa");
 
-    // Tres tareas en el reparto y UNA sola pareja de aprobar/rechazar.
-    expect(screen.getAllByRole("button", { name: messages.tasks.approve })).toHaveLength(1);
-    expect(screen.getAllByRole("button", { name: messages.tasks.reject })).toHaveLength(1);
-    // Y borrar solo sobre la pendiente.
-    expect(screen.getAllByRole("button", { name: messages.tasks.remove })).toHaveLength(1);
+    expect(acciones(messages.tasks.approve)).toHaveLength(1);
+    expect(acciones(messages.tasks.reject)).toHaveLength(1);
+
+    expect(acciones(messages.tasks.remove)).toHaveLength(1);
   });
 
   it("un canje ya resuelto no se puede volver a resolver", async () => {
@@ -200,12 +181,10 @@ describe("cada fila ofrece solo lo que su estado permite", () => {
       canjes: [CANJE_PENDIENTE, { ...CANJE_RESUELTO, child: { ...CANJE_RESUELTO.child, name: "Emma" } }],
     });
 
-    // Se espera a la LISTA y no al título: el título se pinta antes de que
-    // llegue la respuesta, así que esperarlo dejaría comprobando un esqueleto.
     await screen.findByText("Emma");
 
-    expect(screen.getAllByRole("button", { name: messages.redemptions.approve })).toHaveLength(1);
-    expect(screen.getAllByRole("button", { name: messages.redemptions.reject })).toHaveLength(1);
+    expect(acciones(messages.redemptions.approve)).toHaveLength(1);
+    expect(acciones(messages.redemptions.reject)).toHaveLength(1);
   });
 });
 
@@ -215,8 +194,6 @@ describe("el filtro es un conjunto de direcciones", () => {
 
     const filtro = await screen.findByRole("navigation", { name: messages.tasks.filterLabel });
 
-    // Enlaces y no botones: el filtro vive en la dirección, así que cada opción
-    // ES una dirección y tiene que poder abrirse en otra pestaña.
     const opciones = within(filtro).getAllByRole("link");
     expect(opciones).toHaveLength(4);
     expect(within(filtro).queryAllByRole("button")).toHaveLength(0);
@@ -231,8 +208,6 @@ describe("el filtro es un conjunto de direcciones", () => {
     const filtro = await screen.findByRole("navigation", { name: messages.tasks.filterLabel });
     const otro = within(filtro).getByRole("link", { name: messages.tasks.filterCompleted });
 
-    // Quedarse en la 4 al cambiar de filtro enseñaría una lista vacía sin
-    // explicar por qué: cambia cuántas hay.
     expect(otro).toHaveAttribute("href", expect.stringContaining("page=1"));
   });
 });
@@ -241,13 +216,10 @@ describe("un reparto filtrado explica por qué enseña lo que no casa", () => {
   it("con filtro, lo dice", async () => {
     await montar("/tasks?page=1&status=COMPLETED", { repartos: [REPARTO_MEZCLADO] });
 
-    // La nota se pinta antes de que llegue la lista, así que se espera a la
-    // lista y no a la nota: si no, se comprueba la fila sobre un esqueleto.
     await screen.findByText("Recoger la mesa");
 
     expect(screen.getByText(messages.tasks.wholeBatchNote)).toBeInTheDocument();
 
-    // Y de hecho enseña las tres, no solo la que casa.
     expect(screen.getByText("Hijo t2")).toBeInTheDocument();
   });
 
@@ -256,5 +228,89 @@ describe("un reparto filtrado explica por qué enseña lo que no casa", () => {
 
     await screen.findByText("Recoger la mesa");
     expect(screen.queryByText(messages.tasks.wholeBatchNote)).toBeNull();
+  });
+});
+
+describe("aprobar manda y rechazar acompaña", () => {
+  it("no comparten forma, y rechazar no es una acción peligrosa", async () => {
+    await montar("/tasks?page=1&status=ALL", { repartos: [REPARTO_MEZCLADO] });
+    await screen.findByText("Recoger la mesa");
+
+    const aprobar = acciones(messages.tasks.approve)[0] as HTMLElement;
+    const rechazar = acciones(messages.tasks.reject)[0] as HTMLElement;
+    const borrar = acciones(messages.tasks.remove)[0] as HTMLElement;
+
+    expect(aprobar.className).not.toEqual(rechazar.className);
+
+    expect(rechazar.className).not.toEqual(borrar.className);
+  });
+
+  it("cada acción dice sobre qué tarea y qué hijo actúa", async () => {
+    await montar("/tasks?page=1&status=ALL", {
+      repartos: [
+        {
+          batchId: "b9",
+          title: "Tender la cama",
+          description: null,
+          dueDate: null,
+          createdAt: "2026-09-01T10:00:00.000Z",
+          tasks: [
+            {
+              ...tarea("t1", "COMPLETED"),
+              title: "Tender la cama",
+              child: { id: "h1", name: "Mateo", avatar: "zorro" },
+            },
+            {
+              ...tarea("t2", "COMPLETED"),
+              title: "Tender la cama",
+              child: { id: "h2", name: "Emma", avatar: "lechuza" },
+            },
+          ],
+        } as TaskBatch,
+      ],
+    });
+
+    await screen.findByText("Tender la cama");
+
+    const nombres = acciones(messages.tasks.approve).map((boton) =>
+      boton.getAttribute("aria-label"),
+    );
+
+    expect(nombres).toHaveLength(2);
+
+    expect(new Set(nombres).size).toBe(2);
+    for (const nombre of nombres) {
+      expect(nombre).toContain("Tender la cama");
+    }
+    expect(nombres.some((n) => n?.includes("Mateo"))).toBe(true);
+    expect(nombres.some((n) => n?.includes("Emma"))).toBe(true);
+  });
+});
+
+describe("la bandeja de canjes explica sus tres reglas", () => {
+  const REGLAS = [
+    messages.redemptions.ruleDiscountOnApprove,
+    messages.redemptions.rulePriceFrozen,
+    messages.redemptions.ruleRejectFree,
+  ];
+
+  it("con algo pendiente, las tres están en pantalla", async () => {
+    await montar("/redemptions?page=1&status=ALL", { canjes: [CANJE_PENDIENTE] });
+
+    await screen.findByText("Helado");
+
+    for (const regla of REGLAS) {
+      expect(screen.getByText(regla)).toBeInTheDocument();
+    }
+  });
+
+  it("sin nada pendiente, no se dicen", async () => {
+    await montar("/redemptions?page=1&status=APPROVED", { canjes: [CANJE_RESUELTO] });
+
+    await screen.findByText("Helado");
+
+    for (const regla of REGLAS) {
+      expect(screen.queryByText(regla)).toBeNull();
+    }
   });
 });

@@ -116,8 +116,6 @@ describe("el padre consulta y edita a un hijo suyo", () => {
 
 describe("un hijo ajeno responde como si no existiera", () => {
   it("el detalle de un hijo de otra familia es idéntico al de un id inventado", async () => {
-    // Un 403 confirmaría que ese perfil existe. Los dos cuerpos tienen que ser
-    // indistinguibles.
     const nuestra = await asParent(app);
     const otra = await asParent(app, { email: "otra@monedin.test" });
     const ajeno = await createChildProfile(otra.parentId, { name: "Ajeno", pin: "1234" });
@@ -176,18 +174,13 @@ describe("la baja de un hijo es lógica y definitiva", () => {
 
     await darDeBaja(cookies, hijo.id).expect(204);
 
-    // La baja es lógica justamente para que esto siga aquí.
     expect(await testPrisma().coinTransaction.count({ where: { childId: hijo.id } })).toBe(1);
   }, 120_000);
 
   it("echa al niño del dispositivo donde estuviera dentro", async () => {
-    // Hacen falta DOS dispositivos de verdad: dentro de una misma sesión de
-    // cuenta nunca hay dos perfiles activos, así que entrar como padre habría
-    // cerrado el del niño y el test pasaría por el motivo equivocado.
     const { childId, cookies: enElDispositivoDelNino } = await asChild(app);
     const otroDispositivo = await parentOnSecondDevice(app);
 
-    // El niño sigue dentro en su dispositivo antes de la baja.
     await request(app)
       .get(`${API_PREFIX}/children/me`)
       .set("Cookie", enElDispositivoDelNino)
@@ -245,7 +238,7 @@ describe("las rutas de gestión exigen el perfil del adulto", () => {
     const sobreInventado = await detalle(cookies, ID_INVENTADO);
 
     expect(sobreHermano.status).toBe(403);
-    // Indistinguibles: el filtro de rol corta antes de mirar el recurso.
+
     expect(sobreHermano.body).toEqual(sobreInventado.body);
   }, 120_000);
 
@@ -269,7 +262,7 @@ describe("las rutas de gestión exigen el perfil del adulto", () => {
       .send({ profileId: hijo.id, pin: "1234" });
 
     expect(response.status).toBeGreaterThanOrEqual(400);
-    // Y no emite cookie de perfil: nadie queda dentro de un perfil dado de baja.
+
     expect(cookieValue(response, PROFILE_COOKIE)).toBeUndefined();
   }, 120_000);
 });

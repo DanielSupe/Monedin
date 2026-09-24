@@ -5,25 +5,6 @@ import { Alert } from "../../ui/index.js";
 import { AvatarPicker } from "../profiles/AvatarPicker.js";
 import { useSession } from "./use-session.js";
 
-/**
- * El padre cambia su propia foto.
- *
- * No existía ninguna pantalla para esto: hasta `add-file-storage` el padre
- * elegía su avatar al registrarse y no volvía a verlo, porque su actor tampoco
- * lo llevaba.
- *
- * Ofrece las DOS formas desde `polish-profile-and-reward-image`: el catálogo de
- * animales y subir una foto, con el mismo selector que «Mi perfil» del niño.
- * Solo daba la foto porque no había pantalla donde el padre eligiera ilustración
- * y el contrato no lo admitía — y las dos cosas dejaron de ser ciertas a la vez,
- * que es como estaba escrito que ocurriría.
- *
- * Desde `redesign-parent-home` es una PARTE de `/account` y no una pantalla
- * suelta: sin título de nivel superior, sin enlace de vuelta propio —el logo
- * del marco es la salida, igual que en todas las demás— y con el error en
- * `Alert`, que era el `<p style={{ color: "#b00020" }}>` que la tenía en la
- * lista de deuda.
- */
 export function ParentAvatarScreen(): React.ReactElement {
   const { session } = useSession();
   const queryClient = useQueryClient();
@@ -31,7 +12,6 @@ export function ParentAvatarScreen(): React.ReactElement {
   const actualizar = useMutation({
     mutationFn: api.updateParentAvatar,
     onSuccess: async () => {
-      // Su avatar viaja en el actor y en la rejilla: las dos hay que refrescar.
       await queryClient.invalidateQueries({ queryKey: api.sessionQueryKey });
       await queryClient.invalidateQueries({ queryKey: api.profilesQueryKey });
     },
@@ -41,13 +21,7 @@ export function ParentAvatarScreen(): React.ReactElement {
 
   return (
     <div className="flex flex-col gap-4">
-      {/*
-        SIN repetir el avatar: la tarjeta de identidad de esta misma pantalla ya
-        lo enseña, justo encima. Salían dos veces la misma foto separadas por
-        nada, que es lo que pasa al añadir una parte sin mirar la pantalla
-        entera — el mismo defecto que `redesign-parent-home` arregló aquí con
-        los tres «Volver».
-      */}
+
       <AvatarPicker
         value={avatar}
         label={messages.auth.myAvatarTitle}
@@ -56,7 +30,7 @@ export function ParentAvatarScreen(): React.ReactElement {
         onUpload={(avatarUploadKey) => actualizar.mutate({ avatarUploadKey })}
       />
 
-      {actualizar.isSuccess && <Alert tone="success">{messages.children.avatarSaved}</Alert>}
+      {actualizar.isSuccess && <Alert tone="done">{messages.children.avatarSaved}</Alert>}
 
       {actualizar.error !== null && <Alert tone="danger">{messages.uploads.failed}</Alert>}
     </div>

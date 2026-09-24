@@ -4,13 +4,6 @@ import { actorOf } from "../../shared/http/session.js";
 import { validatedPart } from "../../shared/http/validate.js";
 import * as service from "./coins.service.js";
 
-/**
- * Parsea y serializa. CERO autorización.
- *
- * El actor se LEE del middleware y se le pasa al servicio; aquí no hay ni un
- * `if` sobre el rol ni sobre la propiedad de nada.
- */
-
 export const handleOwnHistory: RequestHandler = async (req, res) => {
   const query = validatedPart(req, "query", listOwnCoinsQuerySchema);
 
