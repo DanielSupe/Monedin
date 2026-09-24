@@ -2,13 +2,6 @@ import { API_PREFIX, ERROR_CODES, apiErrorSchema, type FieldError } from "@moned
 import type { ZodType } from "zod";
 import { messages } from "./messages.js";
 
-/**
- * Error de una llamada a la API, ya interpretado.
- *
- * Lo importante es `code`: quien llama decide qué hacer mirando el código, NUNCA
- * comparando el texto del mensaje. Cambiar la redacción en el catálogo de la API
- * no debe romper ninguna decisión del front.
- */
 export class ApiRequestError extends Error {
   readonly status: number;
   readonly code: string;
@@ -31,13 +24,6 @@ export class ApiRequestError extends Error {
   }
 }
 
-/**
- * Interpreta el cuerpo de una respuesta de error.
- *
- * Si el cuerpo no cumple el contrato (un 502 de un proxy, una página de error de
- * Nginx), se construye igualmente un error con la misma forma: quien llama nunca
- * tiene que distinguir entre "error de la API" y "error de otra cosa".
- */
 async function readErrorBody(response: Response): Promise<ApiRequestError> {
   let payload: unknown;
 
@@ -77,14 +63,6 @@ function hasBody(response: Response): boolean {
   return (response.headers.get("content-length") ?? "") !== "0";
 }
 
-/**
- * Llama a la API y devuelve la respuesta ya validada contra el esquema
- * compartido.
- *
- * La ruta se da SIN el prefijo: el prefijo sale de `@monedin/contracts`, que es
- * el mismo valor que monta la API. En desarrollo el navegador habla con Vite y
- * Vite reenvía; por eso la URL es relativa y no hay un origen configurado.
- */
 export async function apiFetch<T>(
   path: string,
   schema: ZodType<T>,
@@ -111,8 +89,6 @@ export async function apiFetch<T>(
     throw await readErrorBody(response);
   }
 
-  // Una respuesta sin cuerpo (204, o cualquier 2xx vacía) no se puede parsear
-  // como JSON. Es una respuesta correcta, no un fallo.
   const payload: unknown = hasBody(response) ? await response.json() : undefined;
 
   const parsed = schema.safeParse(payload);

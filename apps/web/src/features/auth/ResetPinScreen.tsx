@@ -6,23 +6,6 @@ import { messages } from "../../lib/messages.js";
 import { Alert, Button, Card, Field, Input, buttonClasses } from "../../ui/index.js";
 import { describeAuthError, useResetAdultPin } from "./use-session.js";
 
-/**
- * Restablece el PIN de adulto con la contraseña.
- *
- * Es la vía de rescate para un padre bloqueado fuera de su propio perfil: no
- * exige perfil activo, a propósito (decisión 3 del design de
- * `add-profile-selection`). Se abre desde el teclado de PIN del padre en la
- * rejilla, y este change NO toca por dónde se llega ni a dónde se sale: es el
- * único camino de vuelta que le queda.
- *
- * Pide DOS credenciales y ahora explica cada una. Antes iban juntas y sin una
- * palabra, que es exactamente lo que `redesign-access` arregló en el registro:
- * sin decir para qué sirve cada una, parece que te están pidiendo lo mismo dos
- * veces — y quien llega aquí está nervioso.
- *
- * Fue la ÚLTIMA entrada de la lista de deuda de estilos. Al vestirla, esa lista
- * quedó vacía y su maquinaria se borró: la regla cubre ya todo `src`.
- */
 export function ResetPinScreen(): React.ReactElement {
   const [password, setPassword] = useState("");
   const [newPin, setNewPin] = useState("");
@@ -71,8 +54,7 @@ export function ResetPinScreen(): React.ReactElement {
           </Field>
 
           <Field label={messages.auth.newPin} help={messages.auth.resetPinNewPinHelp}>
-            {/* La longitud sale de la constante del contrato: tenerla también
-                escrita a mano aquí acaba con una de las dos mintiendo. */}
+
             <Input
               type="text"
               inputMode="numeric"

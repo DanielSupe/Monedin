@@ -24,7 +24,6 @@ describe("envoltura de un listado paginado", () => {
   });
 
   it("una lista vacía sigue teniendo una página", () => {
-    // Con cero, el front pintaría «página 1 de 0» y podría dividir por cero.
     const page = toPage(query, { items: [], total: 0 });
 
     expect(page.totalPages).toBe(1);

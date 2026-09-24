@@ -3,14 +3,6 @@ import { describe, expect, it } from "vitest";
 import { messages } from "../../src/lib/messages.js";
 import { Pagination } from "../../src/ui/index.js";
 
-/**
- * La pieza se monta SOLA: sin router, sin proveedores y sin servidor.
- *
- * Eso es lo que compra que reciba sus enlaces como contenido en vez de
- * construirlos. Una paginación que hiciera sus propios `<Link>` necesitaría
- * saber a qué ruta pertenece, y este archivo tendría que montar la aplicación
- * entera para probar que con una sola página no se dibuja.
- */
 const ANTERIOR = <a href="#anterior">{messages.ui.previousPage}</a>;
 const SIGUIENTE = <a href="#siguiente">{messages.ui.nextPage}</a>;
 
@@ -18,8 +10,6 @@ describe("la paginación", () => {
   it("no se dibuja con una sola página", () => {
     const { container } = render(<Pagination page={1} totalPages={1} next={SIGUIENTE} />);
 
-    // Ni siquiera el hueco: enseñar «1 / 1» y un paso apagado es ocupar sitio
-    // para no decir nada.
     expect(container).toBeEmptyDOMElement();
   });
 

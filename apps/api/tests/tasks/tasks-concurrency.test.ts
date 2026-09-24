@@ -12,20 +12,6 @@ import {
   sembrarTarea,
 } from "../support/tasks.js";
 
-/**
- * El doble toque.
- *
- * Es el archivo que justifica el change entero: un niño con un teléfono lento
- * VA a tocar dos veces, y aprobar dos veces la misma tarea no puede acreditar el
- * doble. La garantía no viene de `applyCoinMovement` —que hace lo que se le
- * pide, tantas veces como se le pida— sino de que el cambio de estado lleva su
- * estado de origen en la condición.
- *
- * Estos tests no usan `withRollback`: hacen falta transacciones de verdad
- * compitiendo, y una transacción externa las serializaría y no probaría nada.
- * Van contra la app por HTTP, que es como llegan los dos toques.
- */
-
 const app = createApp();
 
 beforeEach(async () => {
@@ -48,7 +34,6 @@ function rechazar(cookies: string[], taskId: string): request.Test {
   return request(app).post(`${API_PREFIX}/tasks/${taskId}/reject`).set("Cookie", cookies);
 }
 
-/** Los códigos de una tanda de respuestas, ordenados para poder compararlos. */
 function codigos(responses: request.Response[]): number[] {
   return responses.map((response) => response.status).sort((a, b) => a - b);
 }
@@ -70,13 +55,10 @@ describe("dos toques sobre aprobar", () => {
     expect(codigos(respuestas)).toEqual([200, 409]);
     expect(await saldoDe(ana.id)).toBe(50);
 
-    // Y una ÚNICA entrada de historial para esa tarea.
     expect(await movimientosDe(tarea.id)).toHaveLength(1);
   }, 180_000);
 
   it("el que pierde la carrera dice conflicto, no que la tarea no existe", async () => {
-    // Un 404 le haría creer al padre que la tarea desapareció. Lo que pasó es
-    // que alguien se le adelantó, y eso es justo lo que tiene que leer.
     const { cookies, parentId, hijos } = await familiaOperando(app, ["Ana"]);
     const tarea = await sembrarTarea(
       { parentId, childId: hijos[0]!.id },
@@ -116,7 +98,6 @@ describe("dos toques sobre aprobar", () => {
     const ana = hijos[0]!;
     const tarea = await sembrarTarea({ parentId, childId: ana.id }, { coins: 50 });
 
-    // Pendiente: aprobar no encuentra el estado del que decía partir.
     await aprobar(cookies, tarea.id).expect(409);
 
     expect(await saldoDe(ana.id)).toBe(0);
@@ -171,8 +152,6 @@ describe("dos toques sobre las transiciones que no mueven monedas", () => {
 
     expect(codigos([aprobada, rechazada])).toEqual([200, 409]);
 
-    // Si ganó aprobar, hay 50 y una fila de historial. Si ganó rechazar, no hay
-    // ni monedas ni historial. Lo que NO puede haber es una mezcla.
     const saldo = await saldoDe(ana.id);
     const historial = await movimientosDe(tarea.id);
 
@@ -197,9 +176,6 @@ describe("la acreditación y la tarea van juntas o no van", () => {
       { coins: 50, status: "COMPLETED" },
     );
 
-    // Dar de baja al hijo hace que el movimiento de monedas no encuentre a
-    // quién acreditar: es la forma real de que falle el segundo paso con el
-    // primero ya escrito.
     await request(app)
       .delete(`${API_PREFIX}/children/${ana.id}`)
       .set("Cookie", cookies)
@@ -209,8 +185,6 @@ describe("la acreditación y la tarea van juntas o no van", () => {
 
     expect(response.status).toBe(409);
 
-    // La transición se deshizo con la transacción: ni tarea aprobada sin
-    // monedas, ni monedas sin tarea aprobada.
     expect(await estadoDe(tarea.id)).toBe("COMPLETED");
     expect(await saldoDe(ana.id)).toBe(0);
     expect(await movimientosDe(tarea.id)).toHaveLength(0);
@@ -228,7 +202,6 @@ describe("el saldo cuadra con su historia", () => {
       tareas.push(await sembrarTarea({ parentId, childId: ana.id }, { coins, status: "COMPLETED" }));
     }
 
-    // Cada tarea recibe su orden DOS veces, y todas a la vez.
     await Promise.all(tareas.flatMap((tarea) => [aprobar(cookies, tarea.id), aprobar(cookies, tarea.id)]));
 
     const historial = await testPrisma().coinTransaction.findMany({
@@ -240,7 +213,6 @@ describe("el saldo cuadra con su historia", () => {
     expect(await saldoDe(ana.id)).toBe(suma);
     expect(suma).toBe(valores.reduce((total, valor) => total + valor, 0));
 
-    // Y cada hecho produjo COMO MUCHO un movimiento.
     for (const tarea of tareas) {
       expect(await movimientosDe(tarea.id)).toHaveLength(1);
     }

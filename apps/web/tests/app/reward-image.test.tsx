@@ -38,7 +38,6 @@ function pagina<T>(items: T[]): unknown {
   return { items, page: 1, pageSize: 20, total: items.length, totalPages: 1 };
 }
 
-/** Un premio del catálogo del padre. */
 function premio(id: string, title: string, image: string | null): Reward {
   return {
     id,
@@ -52,7 +51,6 @@ function premio(id: string, title: string, image: string | null): Reward {
   };
 }
 
-/** Un premio del escaparate del niño. */
 function ofrecido(id: string, title: string, image: string | null): OwnReward {
   return {
     id,
@@ -65,15 +63,8 @@ function ofrecido(id: string, title: string, image: string | null): OwnReward {
   };
 }
 
-/** Lo que se envió en el último POST, ya parseado. Como en `parent-authoring`. */
 let enviado: Record<string, unknown> | null = null;
 
-/**
- * Monta la aplicación del padre en una dirección, con el catálogo que se diga.
- *
- * Con router de verdad y no montando el componente suelto: `RewardCatalog` y
- * `RewardForm` usan enlaces y navegación, y sin router revientan al pintar.
- */
 async function montarPadre(direccion: string, premios: Reward[] = []) {
   enviado = null;
 
@@ -112,7 +103,6 @@ async function montarPadre(direccion: string, premios: Reward[] = []) {
   );
 }
 
-/** El escaparate del niño se monta suelto: no navega a ningún sitio. */
 function montarNino(premios: OwnReward[]): void {
   vi.stubGlobal(
     "fetch",
@@ -136,15 +126,6 @@ function fila(titulo: string): HTMLElement {
   return screen.getByText(titulo).closest("li") as HTMLElement;
 }
 
-/**
- * Un premio sin foto dejaba un HUECO donde las demás filas tienen imagen, en las
- * dos pantallas. Se lee como algo que se rompió al cargar, no como un premio sin
- * foto.
- *
- * Los dos casos van en el MISMO test a propósito: comprobar solo que el premio
- * sin foto trae respaldo pasaría igual con un respaldo pintado SIEMPRE, también
- * debajo de la foto. Hay que mirar los dos y que den cosas distintas.
- */
 describe("un premio sin foto se dibuja con un respaldo", () => {
   it("en el escaparate del niño, y el que tiene foto no lo lleva", async () => {
     montarNino([ofrecido("r1", "Helado", null), ofrecido("r2", "Cine", FOTO)]);
@@ -178,9 +159,6 @@ describe("un premio sin foto se dibuja con un respaldo", () => {
 
     await screen.findByText("Helado");
 
-    // El glifo es decorativo: lo que nombra al premio es su título. Se comprueba
-    // el atributo, que es lo que lo saca del árbol de accesibilidad — buscarlo
-    // por texto lo encuentra igual, porque las consultas no filtran por él.
     expect(within(fila("Helado")).getByText(messages.rewards.imageFallbackGlyph)).toHaveAttribute(
       "aria-hidden",
       "true",
@@ -188,12 +166,6 @@ describe("un premio sin foto se dibuja con un respaldo", () => {
   });
 });
 
-/**
- * La foto en el ALTA, que hasta ahora no se podía.
- *
- * Lo que se comprueba es que la clave viaja en el cuerpo del alta. La subida en
- * sí la hace `ImageUploadField`, que ya tenía sus propios tests y no se toca.
- */
 describe("un premio se publica con foto, o sin ella", () => {
   it("la pantalla ofrece poner una foto y dice que es opcional", async () => {
     await montarPadre("/rewards/new");

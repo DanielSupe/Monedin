@@ -23,19 +23,6 @@ import {
 } from "../children/ChildrenPicker.js";
 import { describeTasksError, useCreateTasks } from "./use-tasks.js";
 
-/**
- * Reparto de una tarea entre uno o varios hijos.
- *
- * Las DOS formas del valor —el mismo para todos, o uno por hijo— las resuelve
- * `ChildrenPicker`, compartido con el alta de un premio y con el catálogo. El
- * esquema del contrato valida ANTES de enviar, así que el error sale sin viaje
- * al servidor y con el mismo criterio que aplicará la API.
- *
- * NAVEGA ella misma al cancelar. Hasta `redesign-parent-authoring` recibía un
- * `onCancel`, que es «ciérrame» con otro nombre: empuja la navegación a quien
- * llama y ata la pantalla a su punto de uso. `onSaved` se queda, porque «esto
- * ocurrió» sí es un evento de dominio y quien lo escucha decide a dónde ir.
- */
 export function TaskForm({
   onSaved,
 }: {
@@ -54,8 +41,6 @@ export function TaskForm({
     void navigate({ to: "/tasks", search: { page: 1, status: "ALL" } });
 
   function enviar(evento: React.FormEvent): void {
-    // Es un `<form>` de verdad desde `redesign-parent-authoring`: escribir el
-    // título y pulsar Enter es lo que hace cualquiera, y antes no hacía nada.
     evento.preventDefault();
     setProblema(null);
 
@@ -69,8 +54,7 @@ export function TaskForm({
     const entrada: Record<string, unknown> = { title, ...seleccion };
 
     if (description.trim() !== "") entrada.description = description;
-    // Un `<input type="date">` da un día suelto. Se toma como el final de ese
-    // día en la zona de quien lo escribe, que es lo que significa «para el 24».
+
     if (dueDate !== "")
       entrada.dueDate = new Date(`${dueDate}T23:59:59`).toISOString();
 
@@ -115,11 +99,6 @@ export function TaskForm({
         </h2>
       </div>
 
-      {/*
-        LA BANDA: el formulario a la izquierda y, a la derecha, lo que pasa al
-        enviarlo. Es el reparto de su maqueta, y el `aside` sigue yendo DESPUÉS en
-        el documento — quien lo recorre con teclado llega primero al formulario.
-      */}
       <SplitLayout aside={<ComoFunciona />}>
         <Card>
           <form onSubmit={enviar} className="flex flex-col gap-4">
@@ -190,22 +169,6 @@ export function TaskForm({
   );
 }
 
-/**
- * EL CICLO DE UNA TAREA, DICHO DONDE SE REPARTE.
- *
- * Es el mecanismo central del producto y el que más se malinterpreta: que un
- * hijo marque una tarea NO le paga nada, y las monedas salen solo al aprobarla.
- * Un padre que no lo sepa cuenta con que ya cobró — o al revés, sospecha que el
- * saldo no sube cuando debería.
- *
- * Va aquí y no en la ayuda, porque aquí es donde alguien está decidiendo cuánto
- * vale algo. Es la misma razón por la que la bandeja explica su filtro en la
- * pantalla: una decisión de producto que no se explica es indistinguible de un
- * defecto.
- *
- * Y es una LISTA ORDENADA, no tres párrafos: los tres pasos ocurren en ese
- * orden, y el orden es justo lo que hay que entender.
- */
 function ComoFunciona(): React.ReactElement {
   const pasos = [
     messages.tasks.handOutEach,

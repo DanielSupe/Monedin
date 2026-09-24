@@ -3,7 +3,6 @@ import { requireParent } from "../app/guards.js";
 import { ChildForm } from "../features/children/ChildForm.js";
 import { messages } from "../lib/messages.js";
 
-/** Alta de un hijo desde la gestion del padre. */
 export const Route = createFileRoute("/children/new")({
   beforeLoad: ({ context }) => requireParent(context.queryClient),
   component: NewChildRoute,

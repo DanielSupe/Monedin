@@ -35,27 +35,6 @@ import {
 } from "./ui/index.js";
 import "./styles/tokens.css";
 
-/**
- * Catálogo vivo del sistema de diseño.
- *
- * Punto de entrada APARTE, no una ruta de la aplicación. Dos razones, y la
- * segunda no la buscábamos:
- *
- * 1. Una ruta `/ui` habría necesitado `import.meta.env.DEV` para no publicarse,
- *    y eso obligaba a una TERCERA excepción de `allowEnvAccess`, que CLAUDE.md
- *    marca como señal de que algo se está haciendo mal. Así se excluye del build
- *    de producción desde `vite.config.ts`, con el `mode` que ya recibe.
- *
- * 2. Aquí no hay `QueryClientProvider` ni router. Si una pieza necesitara un
- *    proveedor para montarse, este archivo se rompe — y ese es exactamente el
- *    aviso que queremos, porque la frontera «una pieza no conoce el dominio» es
- *    lo que permite probarlas sin servidor.
- *
- * El contenido de ejemplo vive aquí a propósito y NO en `lib/messages.ts`: no lo
- * lee ningún usuario y no viaja en la compilación publicada, así que llevarlo al
- * catálogo de mensajes solo conseguiría que alguien tradujera cadenas muertas.
- */
-
 const EJEMPLO = {
   tarea: "Sacar la basura",
   premio: "Ir al cine",
@@ -89,7 +68,6 @@ function Fila({ children }: { children: React.ReactNode }): React.ReactElement {
   return <div className="flex flex-wrap items-center gap-3">{children}</div>;
 }
 
-/** Todas las piezas, una vez. Se monta dos veces, una por escala. */
 function Piezas(): React.ReactElement {
   const [focoAbierto, setFocoAbierto] = useState(false);
   const [focoCentrado, setFocoCentrado] = useState(false);
@@ -110,16 +88,14 @@ function Piezas(): React.ReactElement {
           <Button variant="ghost">Ver más</Button>
           <Button variant="danger">Dar de baja</Button>
         </Fila>
-        {/* Las dos TALLAS, juntas y para comparar: enseñar la mayor sola no
-            enseña la diferencia, que es lo único que hay que ver. */}
+
         <Fila>
           <Button variant="primary" size="large">
             Empezar
           </Button>
           <Button variant="primary">Empezar</Button>
         </Fila>
-        {/* `contrast` se enseña SOBRE la superficie de marca, que es donde vive:
-            fuera de ella no se entiende para qué existe. */}
+
         <div
           data-surface="brand"
           className="rounded-card flex gap-3 bg-brand p-4"
@@ -139,8 +115,7 @@ function Piezas(): React.ReactElement {
           </Button>
         </Fila>
         <Fila>
-          {/* Redondo y sin texto. El tipo EXIGE `aria-label`: una flecha sola no
-              dice si envía, avanza o vuelve. */}
+
           <Button variant="primary" iconOnly aria-label="Entrar a mi cuenta">
             <svg
               viewBox="0 0 24 24"
@@ -165,8 +140,7 @@ function Piezas(): React.ReactElement {
           <Coins amount={1} />
           <Coins amount={1250} />
         </Fila>
-        {/* Las tres tallas juntas: lo que hay que mirar es que la moneda crezca
-            con la cifra y no se despegue de ella. */}
+
         <Coins amount={128} size="large" />
         <Coins amount={340} size="hero" />
       </Seccion>
@@ -246,19 +220,6 @@ function Piezas(): React.ReactElement {
           />
         </Fila>
 
-        {/*
-          LOS DOCE JUNTOS, y no cuatro de muestra.
-
-          Es lo único que enseña lo que hay que mirar de este catálogo de
-          animales: que ninguno se parece demasiado a otro a tamaño pequeño, y
-          que los doce se leen como una familia y no como doce dibujos sueltos.
-          Eso no se ve de uno en uno, y mirarlos en la pantalla que los usa —el
-          selector del alta— exige montar la aplicación entera.
-
-          Y aquí se ve la otra mitad: su color NO se reasigna con el tema. Un
-          animal es CONTENIDO, como una foto, así que un zorro naranja sigue
-          siendo naranja en oscuro. Lo que sí cambia es el círculo de debajo.
-        */}
         <Fila>
           {AVATAR_OPTIONS.map((opcion) => (
             <Avatar
@@ -295,11 +256,7 @@ function Piezas(): React.ReactElement {
       </Seccion>
 
       <Seccion titulo="Drawer">
-        {/*
-          Se monta sin router: los enlaces los pone quien la usa, así que aquí
-          van anclas sueltas. Es lo mismo que permite montarla en un test sin
-          proveedores.
-        */}
+
         <Drawer
           open={cajonAbierto}
           onOpenChange={setCajonAbierto}
@@ -324,11 +281,7 @@ function Piezas(): React.ReactElement {
       </Seccion>
 
       <Seccion titulo="Pagination">
-        {/*
-          Los dos casos que importan. La pieza NO construye sus enlaces —no puede
-          importar el router— así que aquí se le pasan anclas sueltas, que es
-          exactamente lo que la hace montable sin proveedores.
-        */}
+
         <Pagination
           page={1}
           totalPages={4}
@@ -340,19 +293,12 @@ function Piezas(): React.ReactElement {
           previous={<a href="#anterior">Anterior</a>}
           next={<a href="#siguiente">Siguiente</a>}
         />
-        {/* Con una sola página no se dibuja: aquí debajo no hay nada. */}
+
         <Pagination page={1} totalPages={1} />
       </Seccion>
 
       <Seccion titulo="DataTable">
-        {/*
-          Recibe encabezados y celdas ya compuestas, igual que `Pagination`
-          recibe sus enlaces: aquí se le pasa un `Badge` en una celda, y la pieza
-          no sabe ni qué es un canje ni por qué ese tono.
 
-          La columna de cantidades va a la derecha y con las cifras de ancho
-          fijo, que es donde una columna de números se lee comparando.
-        */}
         <DataTable
           caption="Ejemplo de historial"
           columns={[
@@ -385,8 +331,7 @@ function Piezas(): React.ReactElement {
               cells: {
                 que: "Patines",
                 cuanto: <Coins amount={350} />,
-                // Advertencia y NO peligro: que un padre diga que no a un premio
-                // no es un error del niño.
+
                 estado: <Badge tone="conflict">No esta vez</Badge>,
                 cuando: "1 sep",
               },
@@ -394,7 +339,6 @@ function Piezas(): React.ReactElement {
           ]}
         />
 
-        {/* Sin filas no dibuja nada: aquí debajo no hay tabla. */}
         <DataTable
           caption="Historial vacío"
           columns={[{ key: "a", header: "A" }]}
@@ -452,14 +396,7 @@ function Piezas(): React.ReactElement {
       </Seccion>
 
       <Seccion titulo="Spotlight">
-        {/*
-          Las DOS formas, porque la diferencia es lo único que hay que ver: con
-          algo destacado y sin nada. Sin la segunda, nadie sabría que la pieza
-          también sirve para un paso que no señala a ninguna parte.
 
-          Recibe dónde destacar y qué decir: no sabe de perfiles ni de roles, y
-          por eso se monta aquí sin proveedores.
-        */}
         <Fila>
           <Button onClick={() => setFocoAbierto(true)}>
             Con algo destacado
@@ -547,8 +484,6 @@ function Piezas(): React.ReactElement {
         </Card>
       </Seccion>
 
-      {/* Los DOS tonos, uno encima del otro: enseñar uno solo no enseña la
-          diferencia, que es lo único que hay que decidir al usarlo. */}
       <Seccion titulo="HeroPanel">
         <HeroPanel
           tone="action"
@@ -609,8 +544,6 @@ function Piezas(): React.ReactElement {
         </Mascota>
       </Seccion>
 
-      {/* Sobre la superficie de marca, que es donde vive: el aro se dibuja en
-          blanco y fuera de un panel de color no se vería. */}
       <Seccion titulo="ProgressRing">
         <HeroPanel tone="action">
           <Fila>
@@ -621,8 +554,6 @@ function Piezas(): React.ReactElement {
         </HeroPanel>
       </Seccion>
 
-      {/* Con contenido de dos alturas MUY distintas, que es donde se ve lo que
-          decide: el panel no se estira hasta el alto de la lista. */}
       <Seccion titulo="SplitLayout">
         <SplitLayout
           aside={
@@ -677,7 +608,6 @@ function Piezas(): React.ReactElement {
   );
 }
 
-/** Un icono cualquiera, para enseñar la tesela sin inventar una biblioteca. */
 function IconoEjemplo(): React.ReactElement {
   return (
     <svg
@@ -699,28 +629,6 @@ function IconoEjemplo(): React.ReactElement {
   );
 }
 
-/**
- * Las dos escalas, enfrentadas.
- *
- * El atributo lo pondrá el shell en `add-app-shell`; hasta entonces se declara
- * aquí a mano, que es lo que permite ver la diferencia sin haberlo construido.
- */
-/**
- * El conmutador de tema, y es lo único que hace revisable el oscuro.
- *
- * jsdom no aplica CSS, así que ninguna batería puede decir si el tema oscuro se
- * ve bien: lo único que se comprueba automáticamente es que no le falte ningún
- * token. Lo demás se mira, y aquí es donde se mira — con las piezas enteras,
- * en sus estados y en las dos escalas.
- *
- * Los TRES estados y no dos, igual que el mecanismo real: quitar el atributo no
- * es «claro», es «lo que diga el sistema», y hay que poder probar ese caso
- * porque es el que usa todo el mundo.
- *
- * Vive en el catálogo y NO en una pieza: el producto no tiene interruptor de
- * tema, sigue al sistema. Si algún día lo tiene, la preferencia irá dentro del
- * actor y no en el navegador.
- */
 type Tema = "sistema" | "light" | "dark";
 
 function ConmutadorDeTema(): React.ReactElement {

@@ -145,7 +145,6 @@ describe("el reparto es todo o nada", () => {
   it("con un hijo de otra familia no se crea ninguna tarea", async () => {
     const { cookies, hijos, parentId } = await familiaOperando(app, ["Ana", "Bruno"]);
 
-    // Otra familia, con su propio hijo.
     const { parentId: otroPadre } = await asParent(app, {
       email: "otra@monedin.test",
       name: "Otra madre",
@@ -161,7 +160,6 @@ describe("el reparto es todo o nada", () => {
     expect(response.status).toBe(404);
     expect(response.body.code).toBe(ERROR_CODES.NOT_FOUND);
 
-    // Ni siquiera las de sus propios hijos.
     expect(await cuantasTareasTiene(parentId)).toBe(0);
   }, 240_000);
 
@@ -193,8 +191,6 @@ describe("el reparto es todo o nada", () => {
       coins: 25,
     });
 
-    // Mismo estado y mismo código que el caso del hijo ajeno: no se puede
-    // deducir cuál de los dos era.
     expect(response.status).toBe(404);
     expect(response.body.code).toBe(ERROR_CODES.NOT_FOUND);
     expect(await cuantasTareasTiene(parentId)).toBe(0);
@@ -240,8 +236,6 @@ describe("qué entradas rechaza el alta", () => {
       );
     }
 
-    // La validación va antes que la lógica: no llegó a crearse nada, y el CHECK
-    // del motor ni siquiera tuvo que intervenir.
     expect(await cuantasTareasTiene(parentId)).toBe(0);
   }, 180_000);
 
@@ -259,8 +253,6 @@ describe("qué entradas rechaza el alta", () => {
   }, 180_000);
 
   it("sin perfil elegido no se reparte, aunque la cuenta esté acreditada", async () => {
-    // La cookie de cuenta acredita el dispositivo, no da actor. Repartir tareas
-    // no es uno de los pasos previos a ser alguien.
     const { accountCookies, hijos } = await familiaOperando(app, ["Ana"]);
 
     const response = await repartir(accountCookies, {

@@ -140,7 +140,7 @@ describe("catálogo de avatares", () => {
   it("un perfil sin avatar resuelve al de por defecto", () => {
     expect(resolveAvatarKey(null)).toBe(DEFAULT_AVATAR_KEY);
     expect(resolveAvatarKey(undefined)).toBe(DEFAULT_AVATAR_KEY);
-    // Una clave que ya no está en el catálogo tampoco deja el perfil sin cara.
+
     expect(resolveAvatarKey("clave-retirada")).toBe(DEFAULT_AVATAR_KEY);
   });
 
@@ -161,7 +161,6 @@ describe("catálogo de avatares", () => {
   });
 
   it("el esquema rechaza una clave inventada", () => {
-    // Es la ÚNICA defensa: la columna es texto libre a nivel de motor.
     expect(avatarKeySchema.safeParse("dragon").success).toBe(false);
     expect(avatarKeySchema.safeParse("").success).toBe(false);
   });
@@ -180,8 +179,6 @@ describe("paginación de los listados", () => {
   });
 
   it("rechaza un tamaño de página por encima del máximo, en vez de recortarlo", () => {
-    // Recortar en silencio escondería el error de quien llama: pediría 500,
-    // recibiría 100 y creería que hay 100.
     const result = paginationQuerySchema.safeParse({ pageSize: MAX_PAGE_SIZE + 1 });
 
     expect(result.success).toBe(false);
@@ -220,7 +217,6 @@ describe("paginación de los listados", () => {
   });
 
   it("la envoltura rechaza una respuesta sin items", () => {
-    // Sin esto, una respuesta mal formada pasaría como éxito silencioso.
     const schema = pageOf(z.object({ id: z.string() }));
 
     expect(schema.safeParse({ page: 1, pageSize: 20, total: 0, totalPages: 1 }).success).toBe(false);
@@ -239,8 +235,6 @@ describe("contratos de los perfiles de hijo", () => {
   });
 
   it("el alta NO acepta monedas: sería una impresora de monedas", () => {
-    // El alta es una ruta de solo cuenta y no pide PIN de adulto. Que un perfil
-    // recién creado no tenga saldo es lo que hace tolerable lo primero.
     expect(createChildSchema.safeParse({ ...alta, coins: 500 }).success).toBe(false);
   });
 
@@ -289,8 +283,6 @@ describe("contratos de los perfiles de hijo", () => {
   });
 
   it("el tope de hijos por familia es un número sensato", () => {
-    // Guarda contra un 1 por error de tecleo, que dejaría a las familias con un
-    // solo hijo posible.
     expect(MAX_CHILDREN_PER_FAMILY).toBeGreaterThan(1);
   });
 });
@@ -356,8 +348,6 @@ describe("contrato de las tareas", () => {
   });
 
   it("rechaza repetir al mismo hijo dentro del reparto", () => {
-    // Repetirlo crearía dos tareas idénticas, que no es lo que nadie quiere
-    // decir al elegir dos veces al mismo niño.
     expect(
       createTaskSchema.safeParse({ ...base, childIds: ["hijo-1", "hijo-1"], coins: 25 }).success,
     ).toBe(false);
@@ -408,8 +398,6 @@ describe("contrato de las tareas", () => {
   });
 
   it("la edición no reasigna la tarea a otro hijo", () => {
-    // Cambiar de hijo es borrar la pendiente y crear otra. Al ser `.strict()`,
-    // esto es 422 y no un campo que se ignora en silencio.
     expect(updateTaskSchema.safeParse({ childId: "hijo-2" }).success).toBe(false);
     expect(updateTaskSchema.safeParse({ title: "Otro", childId: "hijo-2" }).success).toBe(false);
   });
@@ -443,8 +431,6 @@ describe("contrato de las tareas", () => {
   });
 
   it("los dos listados heredan la paginación por defecto y su tope", () => {
-    // `.extend()` no puede perder lo que hereda: un tamaño por encima del
-    // máximo sigue siendo 422 y no un recorte silencioso.
     expect(listTasksQuerySchema.safeParse({ pageSize: String(MAX_PAGE_SIZE + 1) }).success).toBe(
       false,
     );
@@ -460,8 +446,6 @@ describe("contrato de las tareas", () => {
   });
 
   it("el listado del niño NO admite pedir el de otro", () => {
-    // Aquí está la garantía de que un niño no ve a su hermano: no hay ningún
-    // parámetro que pudiera apuntar a otro perfil.
     expect(listOwnTasksQuerySchema.safeParse({ childId: "hermano" }).success).toBe(false);
     expect(listOwnTasksQuerySchema.safeParse({ status: "PENDING" }).success).toBe(true);
   });
@@ -589,7 +573,6 @@ describe("contrato de los premios", () => {
   });
 
   it("el reemplazo de ofertas acepta un conjunto vacío", () => {
-    // Es cómo se retira la oferta a todos sin retirar el premio.
     expect(replaceAssignmentsSchema.safeParse({ assignments: [] }).success).toBe(true);
   });
 
@@ -613,8 +596,6 @@ describe("contrato de los premios", () => {
   });
 
   it("la query del niño NO admite pedir el escaparate de otro", () => {
-    // Es la garantía de que un niño no puede pedir el precio de su hermano:
-    // no hay ningún parámetro que pudiera apuntar a otro perfil.
     expect(listOwnRewardsQuerySchema.safeParse({ childId: "hermano" }).success).toBe(false);
     expect(listOwnRewardsQuerySchema.safeParse({}).success).toBe(true);
   });
@@ -722,9 +703,6 @@ describe("contrato de la subida de imágenes", () => {
     expect(avatarValueSchema.safeParse(DEFAULT_AVATAR_KEY).success).toBe(true);
     expect(avatarValueSchema.safeParse("https://bucket.example/avatars/x.jpg").success).toBe(true);
 
-    // Una clave cruda del almacén NO es una forma válida de lectura: si se
-    // colara, el front la pintaría como si fuera una ilustración del catálogo y
-    // acabaría enseñando el avatar por defecto sin que nadie se enterara.
     expect(avatarValueSchema.safeParse("avatars/children/hijo-1/abc.jpg").success).toBe(false);
     expect(avatarValueSchema.safeParse("").success).toBe(false);
   });
@@ -734,7 +712,6 @@ describe("contrato de la subida de imágenes", () => {
     expect(createUploadUrlSchema.safeParse({ contentType: "image/gif" }).success).toBe(false);
     expect(createUploadUrlSchema.safeParse({ contentType: "image/svg+xml" }).success).toBe(false);
 
-    // La clave la decide el servidor: mandarla es 422 y no un campo ignorado.
     expect(
       createUploadUrlSchema.safeParse({ contentType: "image/jpeg", key: "la/que/yo/quiera.jpg" })
         .success,
@@ -783,19 +760,6 @@ describe("contrato de la subida de imágenes", () => {
     ).toBe(false);
   });
 
-  /*
-   * EL PADRE ELIGE ANIMAL O SUBE FOTO, las dos formas y no una.
-   *
-   * Este caso decía «solo con la foto subida», que era la regla de
-   * `add-file-storage`. `polish-profile-and-reward-image` le dio al padre el
-   * catálogo de animales —el mismo que el hijo— y el esquema lo dice desde
-   * entonces: «las dos son EXCLUYENTES y hace falta una». El caso se quedó
-   * afirmando lo contrario, así que llevaba roto desde ese día.
-   *
-   * Lo que NO cambió es la exclusividad, y es la mitad que sigue haciendo falta
-   * comprobar: mandar las dos a la vez deja al servidor eligiendo por su cuenta
-   * cuál gana.
-   */
   it("el avatar del padre admite animal o foto, nunca las dos, nunca ninguna", () => {
     expect(updateParentAvatarSchema.safeParse({ avatarUploadKey: "avatars/parents/p/a.jpg" }).success).toBe(
       true,
@@ -811,19 +775,6 @@ describe("contrato de la subida de imágenes", () => {
     expect(updateParentAvatarSchema.safeParse({}).success).toBe(false);
   });
 
-  /*
-   * EL ALTA DE UN PREMIO SÍ ACEPTA FOTO, y este caso decía lo contrario.
-   *
-   * Estuvo prohibido desde `add-file-storage` «porque la clave lleva el
-   * rewardId», que todavía no existe al publicar. El argumento resultó ser
-   * falso: una clave para algo que aún no existe cuelga de QUIEN LA SUBE —el
-   * padre, que sí existe, porque publicar ya exige su perfil— y no de lo que se
-   * va a crear. `polish-profile-and-reward-image` cambió el esquema y dejó este
-   * caso afirmando la regla vieja, así que llevaba roto desde entonces.
-   *
-   * Sigue siendo OPCIONAL, que es lo que hay que comprobar: publicar sin foto es
-   * el camino normal y no puede pedir una.
-   */
   it("el alta de un premio acepta foto, y también prescinde de ella", () => {
     const base = { title: "Ir al cine", childIds: ["hijo-1"], coins: 200 };
 
@@ -833,8 +784,6 @@ describe("contrato de la subida de imágenes", () => {
         .success,
     ).toBe(true);
 
-    // Y lo que sigue prohibido: un campo que el esquema no conoce es 422, no un
-    // valor que se ignora en silencio, porque el objeto es estricto.
     expect(
       createRewardSchema.safeParse({ ...base, imagen: "rewards/pending/padre-1/a.jpg" }).success,
     ).toBe(false);
@@ -848,21 +797,16 @@ describe("contrato de la subida de imágenes", () => {
   });
 
   it("completar una tarea SIN CUERPO sigue siendo válido", () => {
-    // Es como se marcaba una tarea antes de que existiera la evidencia, y como
-    // la sigue marcando quien no adjunta foto. Sin esto, añadir la evidencia
-    // habría roto a todo el que no la usa: pasó, y estos tests lo cazaron.
     expect(completeTaskSchema.safeParse(undefined).success).toBe(true);
     expect(completeTaskSchema.parse(undefined)).toEqual({});
   });
 
   it("completar una tarea sin evidencia sigue siendo un cuerpo vacío válido", () => {
-    // Es el caso normal, y el que garantiza que la foto no se vuelva un peaje.
     expect(completeTaskSchema.safeParse({}).success).toBe(true);
     expect(completeTaskSchema.safeParse({ evidenceUploadKey: "tasks/t1/evidence/a.jpg" }).success).toBe(
       true,
     );
 
-    // La tarea sale de la ruta, no del cuerpo.
     expect(completeTaskSchema.safeParse({ taskId: "otra-tarea" }).success).toBe(false);
   });
 });

@@ -15,7 +15,6 @@ afterAll(async () => {
   await resetAuthData();
 });
 
-/** Qué tema dice el estado de la sesión que prefiere ese perfil. */
 async function temaDe(cookies: string[]): Promise<string> {
   const response = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
 
@@ -26,13 +25,6 @@ function cambiar(cookies: string[], theme: string) {
   return request(app).patch(`${API_PREFIX}/auth/theme`).set("Cookie", cookies).send({ theme });
 }
 
-/**
- * A QUIÉN se le guarda sale del ACTOR y nunca de la petición.
- *
- * Es lo mismo que sostiene el recorrido de bienvenida, y aquí importa más: la
- * tablet es compartida, así que un camino por el que un hijo pudiera cambiarle
- * el tema a su hermano sería un defecto que se ve todos los días.
- */
 describe("cada perfil tiene su tema", () => {
   it("un perfil recién creado sigue al sistema", async () => {
     const { cookies, hijos } = await familiaOperando(app, ["Mateo"]);
@@ -67,13 +59,6 @@ describe("cada perfil tiene su tema", () => {
   }, 120_000);
 });
 
-/**
- * LA MITAD QUE JUSTIFICA GUARDARLO EN EL PERFIL Y NO EN EL NAVEGADOR.
- *
- * Comprobar que un perfil guarda su tema no comprueba que no arrastre a los
- * demás: con una sola preferencia para toda la familia, los casos de arriba
- * seguirían en verde. Hacen falta DOS hermanos y mirar al otro.
- */
 describe("el tema de uno no arrastra a los demás", () => {
   it("un niño elige el suyo y el de su hermano NO cambia", async () => {
     const { hijos } = await familiaOperando(app, ["Mateo", "Emma"]);
@@ -102,10 +87,6 @@ describe("el tema de uno no arrastra a los demás", () => {
 });
 
 describe("la ruta exige actor y valida lo que recibe", () => {
-  /*
-   * NO es una ruta de solo cuenta: hay que saber a quién se le guarda. La lista
-   * cerrada de esas rutas sigue en cinco, y hay un test que lo cuenta.
-   */
   it("con la cuenta acreditada y sin perfil activo, no vale", async () => {
     const { cookies } = await familiaOperando(app, ["Mateo"]);
 
@@ -119,11 +100,9 @@ describe("la ruta exige actor y valida lo que recibe", () => {
 
     await cambiar(hijos[0]!.cookies, "MORADO").expect(422);
 
-    // Y no se guardó nada por el camino.
     expect(await temaDe(hijos[0]!.cookies)).toBe("SYSTEM");
   }, 120_000);
 
-  /* `.strict()`: un campo desconocido no se ignora en silencio. */
   it("un campo que el esquema no conoce también es 422", async () => {
     const { hijos } = await familiaOperando(app, ["Mateo"]);
 

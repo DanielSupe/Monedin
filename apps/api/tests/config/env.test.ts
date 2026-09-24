@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatEnvProblems, parseEnv } from "../../src/config/env.js";
 
-/** Entorno válido mínimo, del que cada test parte y estropea una sola cosa. */
 function validEnv(): Record<string, string | undefined> {
   return {
     NODE_ENV: "test",
@@ -25,9 +24,6 @@ function validEnv(): Record<string, string | undefined> {
 
 describe("el endpoint de los tests nunca puede ser el S3 real", () => {
   it("exige una URL propia: vacío no vale", () => {
-    // Vacío significa "el S3 de AWS" en `S3_ENDPOINT`. Aquí no puede
-    // significar nada: la batería VACÍA su bucket, así que no debe existir
-    // forma de apuntarla a un almacén real.
     const sinEndpoint = { ...validEnv(), TEST_S3_ENDPOINT: "" };
 
     expect(parseEnv(sinEndpoint).ok).toBe(false);
@@ -46,7 +42,7 @@ describe("el endpoint de los tests nunca puede ser el S3 real", () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.env.S3_ENDPOINT).toBeUndefined();
-      // Y los tests siguen con el suyo, sin arrastrarse detrás.
+
       expect(result.env.TEST_S3_ENDPOINT).toBe("http://localhost:9000");
     }
   });
@@ -140,7 +136,7 @@ describe("validación de la configuración de entorno", () => {
     expect(message).not.toContain(secret);
     expect(message).not.toContain("contrasena-secretisima");
     expect(message).not.toContain("usuario");
-    // Ni un prefijo: cualquier fragmento sigue siendo información del secreto.
+
     expect(message).not.toContain(secret.slice(0, 12));
   });
 });

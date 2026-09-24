@@ -6,21 +6,13 @@ export interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   title: string;
-  /** Se anuncia junto al título. Para confirmar algo irreversible, dilo aquí. */
+
   description?: string;
   children: ReactNode;
-  /** Los botones del pie. La acción destructiva NUNCA es la primera. */
+
   footer?: ReactNode;
 }
 
-/**
- * Diálogo modal, sobre Radix y a conciencia.
- *
- * Un diálogo correcto atrapa el foco, lo devuelve al cerrarse, cierra con
- * Escape, marca el resto del documento como inerte y se anuncia con su título.
- * Nada de eso se escribe bien a mano, y lo peor es que roto no se nota hasta
- * que alguien lo necesita de verdad. Ver decisión 4 del design.
- */
 export function Dialog({
   open,
   onOpenChange,
@@ -29,19 +21,6 @@ export function Dialog({
   children,
   footer,
 }: DialogProps): React.ReactElement {
-  /*
-   * A quién le devolvemos el foco al cerrar.
-   *
-   * Radix hace `preventDefault()` sobre el retorno de foco del navegador y se lo
-   * da a su `Trigger`. Aquí no hay `Trigger` —el diálogo se abre con `open`
-   * controlado, porque en esta app lo dispara la fila de una lista o el
-   * resultado de una mutación—, así que sin esto el foco se pierde en el `body`
-   * y quien navega con teclado se queda en la nada tras cada confirmación.
-   *
-   * Se captura DURANTE el render, en la transición de cerrado a abierto: un
-   * efecto llegaría tarde, porque los efectos de los hijos corren antes que los
-   * del padre y para entonces Radix ya movió el foco dentro del diálogo.
-   */
   const estabaAbierto = useRef(open);
   const abridor = useRef<HTMLElement | null>(null);
 
@@ -54,8 +33,7 @@ export function Dialog({
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       <RadixDialog.Portal>
         <RadixDialog.Overlay className="fixed inset-0 bg-ink/40" />
-        {/* Centrado con `inset-x` + `mx-auto` y no con una anchura calculada:
-            así no hace falta un valor arbitrario y cabe en cualquier pantalla. */}
+
         <RadixDialog.Content
           onCloseAutoFocus={(evento) => {
             evento.preventDefault();
@@ -70,7 +48,6 @@ export function Dialog({
               {description}
             </RadixDialog.Description>
           ) : (
-            /* Radix avisa por consola si falta. Decirle que no hay es explícito. */
             <RadixDialog.Description />
           )}
 

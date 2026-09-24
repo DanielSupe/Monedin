@@ -3,11 +3,6 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { Avatar } from "../../src/ui/Avatar.js";
 
-/**
- * El avatar se mudó a `ui/` en `add-design-system`, pero su lógica de dos formas
- * NO cambió. Estos tests son justamente el seguro de eso: si alguien reescribe
- * la distinción entre una clave del catálogo y una foto propia, aquí se nota.
- */
 describe("Avatar", () => {
   it("una clave del catálogo se dibuja, y no se pide como imagen", () => {
     render(<Avatar value="zorro" alt="Ana" />);
@@ -25,11 +20,6 @@ describe("Avatar", () => {
     expect(imagen).toHaveAttribute("src", "https://s3.example/foto.jpg?firma");
   });
 
-  /*
-   * Se comparan los DOS dibujos entre sí y no contra un trazo escrito aquí: qué
-   * forma tiene cada animal es del archivo que los dibuja, y fijarlo en un test
-   * lo ataría a cada curva.
-   */
   it("sin valor cae en el avatar por defecto", () => {
     const sinValor = render(<Avatar value={null} alt="Sin nombre" />);
     const porDefecto = render(<Avatar value={DEFAULT_AVATAR_KEY} alt="Por defecto" />);
@@ -56,13 +46,6 @@ describe("Avatar", () => {
   });
 });
 
-/**
- * La forma es una OPCIÓN de la pieza, no una clase que se pasa desde fuera.
- *
- * `cx` no fusiona utilidades de Tailwind, así que dos radios en la misma cadena
- * los resuelve el orden del CSS generado y no el del código. Eso no se ve
- * leyendo y no tiene por qué ser estable entre compilaciones.
- */
 describe("la forma del avatar", () => {
   it("sin pedir forma sigue siendo redondo, y las pantallas de hoy no cambian", () => {
     render(<Avatar value="zorro" alt="Ana" />);

@@ -15,12 +15,6 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   tone?: BadgeTone;
 }
 
-/**
- * Etiqueta de estado. La usarán los estados de una tarea y de un canje.
- *
- * El tono acompaña al texto, nunca lo sustituye: un estado que solo se
- * distingue por el color no existe para quien no distingue esos colores.
- */
 export function Badge({ tone = "neutral", className, ...rest }: BadgeProps): React.ReactElement {
   return (
     <span

@@ -29,13 +29,6 @@ import {
   useOwnTasks,
 } from "./use-tasks.js";
 
-/**
- * Las tareas de un niño.
- *
- * Sin repartos y sin hermanos: el reparto es una noción de la gestión del padre
- * y no significa nada aquí. El perfil sale de la sesión, así que esta pantalla
- * no tiene ningún identificador que pudiera apuntar a otro niño.
- */
 export function MyTasks(): React.ReactElement {
   const { data, isPending, error } = useOwnTasks();
 
@@ -60,13 +53,6 @@ export function MyTasks(): React.ReactElement {
           {messages.tasks.myTasksTitle}
         </h2>
 
-        {/*
-          Se cuentan las PENDIENTES, no las tareas.
-
-          Una lista con ocho tareas de las que siete están aprobadas no es una
-          lista de ocho cosas por hacer, y esta pantalla responde a «¿qué hago
-          ahora?». Se cuentan las filas con ese estado y NUNCA el total.
-        */}
         {tareas.length > 0 && (
           <p className="text-small text-ink-muted">
             {pendientes === 0
@@ -80,23 +66,10 @@ export function MyTasks(): React.ReactElement {
         )}
       </div>
 
-      {/*
-        LA BANDA: la lista a la izquierda y, a la derecha, cuánto lleva y cómo
-        funciona el ciclo. Es el reparto de su maqueta.
-
-        El orden del DOCUMENTO no cambia con esto: el `aside` va después, así que
-        quien recorre la pantalla con teclado sigue encontrando primero lo que
-        tiene por hacer y después lo que lo explica — que es lo que ya decía la
-        cabecera de `ComoFunciona` y sigue valiendo.
-      */}
       <SplitLayout
         aside={
           <>
-            {/*
-              Cuánto lleva, sin contar las filas. Y sin la palabra «hoy»: una tarea
-              no tiene concepto de jornada, así que decirlo sería enseñar como dato
-              algo que el modelo no sabe. Ver `design/ui/datos-derivados.md`.
-            */}
+
             {tareas.length > 0 && (
               <AvanceDelCiclo tareas={tareas} pendientes={pendientes} />
             )}
@@ -108,14 +81,6 @@ export function MyTasks(): React.ReactElement {
         {tareas.length === 0 ? (
           <EmptyState glyph="🧹" title={messages.tasks.myTasksEmpty} />
         ) : (
-          /*
-          Agrupadas por ETAPA, que es lo que decide qué se puede hacer con cada
-          una. Antes eran una columna con una insignia por fila, así que la
-          máquina de estados que el producto protege con transiciones
-          condicionales no se veía por ninguna parte.
-
-          Un grupo vacío no llega hasta aquí: `porEtapa` no lo devuelve.
-        */
           <div className="flex flex-col gap-6">
             {grupos.map((grupo) => (
               <section key={grupo.etapa} className="flex flex-col gap-3">
@@ -137,13 +102,6 @@ export function MyTasks(): React.ReactElement {
   );
 }
 
-/**
- * Cuánto lleva del ciclo, en la columna de apoyo.
- *
- * Se extrae porque el cuerpo de la pantalla ya no lo puede llevar en línea: va
- * dentro del hueco `aside`, y un bloque de veinte líneas ahí dentro esconde el
- * reparto, que es lo único que esa llamada tiene que dejar ver.
- */
 function AvanceDelCiclo({
   tareas,
   pendientes,
@@ -166,11 +124,7 @@ function AvanceDelCiclo({
         />
       }
     >
-      {/*
-            UNA frase, y la que la cabecera no dice. El título ya está en el
-            `h2` y la cuenta de pendientes justo al lado: repetir cualquiera de
-            las dos aquí sería decir lo mismo dos veces en la misma pantalla.
-          */}
+
       <p className="text-lead font-extrabold text-ink-inverted">
         {pendientes === 0
           ? messages.children.homeAllDone
@@ -180,19 +134,6 @@ function AvanceDelCiclo({
   );
 }
 
-/**
- * EL CICLO, CONTADO AL NIÑO.
- *
- * Lo mismo que explica el formulario del padre, y van los DOS a propósito: el
- * que reparte necesita saber que marcar no paga, y el que marca necesita saber
- * que su papá o su mamá lo revisan antes. Contárselo a uno solo deja al otro
- * suponiendo — y es justo donde un niño se lleva el chasco: marca, no ve subir
- * sus monedas, y cree que se perdieron.
- *
- * Va al FINAL y no arriba: lo primero que quiere ver es qué tiene por hacer, no
- * una explicación. Quien la necesita la encuentra después de mirar la lista, que
- * es cuando aparece la duda.
- */
 function ComoFunciona(): React.ReactElement {
   const pasos = [
     `${messages.tasks.howDoLead}${messages.tasks.markDone}${messages.tasks.howDoTail}`,
@@ -220,29 +161,12 @@ function ComoFunciona(): React.ReactElement {
   );
 }
 
-/**
- * Cómo se encabeza cada grupo.
- *
- * Son las mismas etapas que las insignias de cada fila, dichas como encabezado
- * de una lista y no como estado: «Por hacer» encabeza, «Pendiente» describe.
- */
 const TITULO_GRUPO: Record<Etapa, string> = {
   PENDING: messages.tasks.groupPending,
   COMPLETED: messages.tasks.groupCompleted,
   APPROVED: messages.tasks.groupApproved,
 };
 
-/**
- * Cómo se lee cada etapa del ciclo.
- *
- * Los tres estados ya tienen tono en el sistema y no se inventa paleta:
- * pendiente es neutro —está por hacer—, esperando revisión es información —no
- * hay nada que hacer, solo esperar— y aprobada es éxito.
- *
- * Antes las tres se veían igual: un rectángulo con borde gris y un párrafo. La
- * máquina de estados que el producto protege con transiciones condicionales y
- * pruebas de doble tap no se veía por ninguna parte.
- */
 const TONO: Record<OwnTask["status"], BadgeTone> = {
   PENDING: "neutral",
   COMPLETED: "info",
@@ -257,8 +181,7 @@ const ETIQUETA: Record<OwnTask["status"], string> = {
 
 function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
   const complete = useCompleteTask();
-  // La foto se sube ANTES de marcar: aquí solo se guarda su clave hasta que el
-  // niño pulsa. Si nunca la sube, se marca igual y `evidenceUploadKey` no viaja.
+
   const [evidencia, setEvidencia] = useState<string | undefined>();
 
   return (
@@ -288,27 +211,15 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
             )}
           </div>
 
-          {/*
-            Solo una tarea PENDIENTE ofrece marcarla, que es exactamente lo que
-            la API permite: la transición sale de `PENDING` y cualquier otra
-            cosa acaba en 409. Lo que se ve y lo que se puede hacer van juntos.
-          */}
           {task.status === "PENDING" && (
             <div className="flex flex-col gap-2">
-              {/* Opcional a propósito: enseñar el trabajo, no un peaje para
-                  declararlo hecho. */}
+
               <ImageUploadField
                 requestUploadUrl={(contentType) =>
                   api.requestEvidenceUploadUrl(task.id, contentType)
                 }
                 onUploaded={setEvidencia}
-                /*
-                  SIN `aspect`: una evidencia no se recorta. Se mira de una en
-                  una en la bandeja del padre, no junto a otras del mismo
-                  tamaño, y lo que hay que ver es el conjunto — la cama hecha,
-                  la mesa recogida. Es la mitad de la decisión original que
-                  `crop-reward-images` conserva.
-                */
+
                 maxDimension={PHOTO_MAX_DIMENSION}
                 label={messages.tasks.addEvidence}
               />
@@ -344,7 +255,6 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
             />
           )}
 
-          {/* Marcarla no paga: lo que sigue es que su padre la revise. */}
           {task.status === "COMPLETED" && (
             <p className="text-small text-ink-muted">
               {messages.tasks.waitingReview}
@@ -366,7 +276,6 @@ function MyTaskRow({ task }: { task: OwnTask }): React.ReactElement {
   );
 }
 
-/** El tinte de la tesela sigue a la etapa, con los tonos del sistema. */
 const TONO_TESELA: Record<OwnTask["status"], "action" | "waiting" | "saving"> =
   {
     PENDING: "action",
@@ -374,10 +283,6 @@ const TONO_TESELA: Record<OwnTask["status"], "action" | "waiting" | "saving"> =
     APPROVED: "saving",
   };
 
-/**
- * El icono de una etapa. Decorativo: lo que dice en qué punto está la tarea es
- * su insignia, que se queda.
- */
 function IconoEtapa({
   status,
 }: {

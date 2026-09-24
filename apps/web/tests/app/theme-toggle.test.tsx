@@ -10,19 +10,10 @@ afterEach(() => {
   document.documentElement.removeAttribute("data-theme");
 });
 
-/** El tema que el marco dejó escrito en la raíz, o `null` si no escribió nada. */
 function estampado(): string | null {
   return document.documentElement.getAttribute("data-theme");
 }
 
-/**
- * EL TEMA SE APLICA A LA RAÍZ, Y ESO NO ES UN DETALLE DE DÓNDE PONER UN ATRIBUTO.
- *
- * Los diálogos y el velo del recorrido salen por un PORTAL, al final del
- * documento y fuera del marco. Con el atributo puesto en el contenedor del
- * marco se quedarían con el tema contrario — en el sitio donde menos se mira y
- * más molesta.
- */
 describe("el marco aplica el tema del perfil", () => {
   it("un perfil en oscuro lo estampa en la raíz", async () => {
     await montarApp("/", { ...comoNino(), actor: { ...comoNino().actor!, theme: "DARK" } });
@@ -36,11 +27,6 @@ describe("el marco aplica el tema del perfil", () => {
     expect(estampado()).toBe("light");
   });
 
-  /*
-   * «Seguir al sistema» se escribe como AUSENCIA del atributo, no como `light`.
-   * Son dos cosas distintas: uno cambia al anochecer y el otro no, y con `light`
-   * escrito la preferencia del dispositivo dejaría de mandar.
-   */
   it("y seguir al sistema no escribe nada", async () => {
     await montarApp("/", comoNino());
 
@@ -48,19 +34,7 @@ describe("el marco aplica el tema del perfil", () => {
   });
 });
 
-/**
- * Tres estados con un solo control, y el nombre dice DÓNDE ESTÁ.
- *
- * Lo que alguien necesita al llegar al control es saber en qué tema está; a
- * dónde lleva lo descubre pulsando. Es la misma regla que el control de contraer
- * el lateral, cuyo nombre cambia con el estado porque lo que hace cambia.
- */
 describe("la cabecera ofrece cambiar de tema", () => {
-  /*
-   * SE ESPÍA DESPUÉS DE MONTAR, y hace falta decirlo: `montarApp` instala su
-   * propio doble de `fetch`, así que uno puesto antes lo pisa el ayudante y el
-   * PATCH nunca se ve. El primer intento hizo justo eso.
-   */
   function espiarGuardado(theme: "SYSTEM" | "LIGHT" | "DARK") {
     const enviados: string[] = [];
 
@@ -101,11 +75,6 @@ describe("la cabecera ofrece cambiar de tema", () => {
     expect(screen.queryByRole("button", { name: messages.nav.themeLight })).toBeNull();
   });
 
-  /*
-   * El ciclo, comprobado por lo que MANDA y no por lo que pinta: el valor
-   * siguiente es la decisión del control, y el pintado depende de que el
-   * servidor conteste.
-   */
   it("desde seguir al sistema, el siguiente paso es el claro", async () => {
     await montarApp("/", comoNino());
     const enviados = espiarGuardado("SYSTEM");
@@ -141,10 +110,6 @@ describe("la cabecera ofrece cambiar de tema", () => {
     ).toBeInTheDocument();
   });
 
-  /*
-   * Antes de elegir perfil no hay actor, así que no habría dónde guardar la
-   * elección. Es la misma razón por la que el marco de entrada no declara escala.
-   */
   it("y antes de elegir perfil no está", async () => {
     await montarApp("/profiles", { actor: null, hasAccount: true });
 

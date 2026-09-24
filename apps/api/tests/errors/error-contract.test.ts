@@ -13,14 +13,8 @@ import {
 } from "../../src/shared/errors/domain-errors.js";
 import { validate } from "../../src/shared/http/validate.js";
 
-/** Efecto observable: si la lógica de negocio corre, esto crece. */
 let businessLogicRuns = 0;
 
-/**
- * Router de pruebas que lanza cada error de dominio. No define ningún mapeo a
- * HTTP: precisamente eso es lo que se comprueba, que un módulo nuevo herede el
- * comportamiento correcto sin escribir código de traducción.
- */
 function probeRouter(): Router {
   const router = Router();
 
@@ -154,16 +148,6 @@ describe("errores de validación", () => {
 });
 
 describe("un servicio del que dependemos no puede responder", () => {
-  /*
-   * El 503 se distingue del 500 en las DOS direcciones, y las dos importan.
-   *
-   * Lo que SÍ tiene: código propio, para que el cliente pueda ofrecer
-   * «reintentar» en vez de «algo salió mal».
-   *
-   * Lo que NO tiene: identificador de incidente. Un identificador promete que
-   * hay algo registrado que investigar, y aquí no lo hay — el fallo es de otro.
-   * Emitirlo enseña a ignorarlos.
-   */
   it("responde 503 con su código y SIN identificador de incidente", async () => {
     const response = await request(app).get(`${API_PREFIX}/probe/service-unavailable`);
 
@@ -204,7 +188,6 @@ describe("errores inesperados", () => {
     expect(response.body.code).toBe(ERROR_CODES.INTERNAL_ERROR);
     expect(response.body.incidentId).toBeTruthy();
 
-    // Nada de trazas, rutas de archivos ni mensajes de librerías internas.
     expect(cuerpo).not.toContain("/var/lib/postgresql");
     expect(cuerpo).not.toContain("at ");
     expect(cuerpo).not.toContain(".ts:");

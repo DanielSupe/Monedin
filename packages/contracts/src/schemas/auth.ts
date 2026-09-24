@@ -14,15 +14,6 @@ import {
 } from "./avatar.js";
 import { uploadKeySchema } from "./uploads.js";
 
-/**
- * Contratos de autenticación, compartidos por la API y el front.
- *
- * El front valida el formulario con estos mismos esquemas antes de enviar, así
- * que un campo mal puesto se señala sin viaje al servidor y con el mismo
- * criterio que aplicará la API.
- */
-
-/** PIN: exactamente N dígitos, nada más. */
 export const pinSchema = z
   .string()
   .length(PIN_LENGTH, `El PIN tiene ${PIN_LENGTH} dígitos.`)
@@ -47,13 +38,7 @@ export const registerParentSchema = z.object({
     .max(NAME_MAX_LENGTH, "El nombre es demasiado largo."),
   email: emailSchema,
   password: passwordSchema,
-  /**
-   * PIN de adulto, pedido ya en el registro.
-   *
-   * Se pide aquí y no después para no tener que contemplar en todo el sistema
-   * el estado «cuenta sin PIN»: un campo más una sola vez sale más barato. Ver
-   * la decisión 4 del design de `add-profile-selection`.
-   */
+
   pin: pinSchema,
 });
 
@@ -61,9 +46,7 @@ export type RegisterParentInput = z.infer<typeof registerParentSchema>;
 
 export const loginParentSchema = z.object({
   email: emailSchema,
-  // A propósito NO se aplica aquí la política de longitud: rechazar por corta
-  // una contraseña al ACCEDER delataría la política a quien prueba, y además
-  // dejaría fuera a cuentas creadas con una política anterior.
+
   password: z.string().min(1, "La contraseña es obligatoria."),
 });
 
@@ -76,7 +59,6 @@ export const changePasswordSchema = z.object({
 
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
-/** Cambio del PIN de adulto indicando el actual. */
 export const changeAdultPinSchema = z.object({
   currentPin: pinSchema,
   newPin: pinSchema,
@@ -84,12 +66,6 @@ export const changeAdultPinSchema = z.object({
 
 export type ChangeAdultPinInput = z.infer<typeof changeAdultPinSchema>;
 
-/**
- * Restablecimiento del PIN de adulto con la contraseña.
- *
- * Es la vía de recuperación, y existe porque el PIN se usa a diario y la
- * contraseña casi nunca: olvidar el primero es mucho más probable.
- */
 export const resetAdultPinSchema = z.object({
   password: z.string().min(1, "La contraseña es obligatoria."),
   newPin: pinSchema,
@@ -97,13 +73,6 @@ export const resetAdultPinSchema = z.object({
 
 export type ResetAdultPinInput = z.infer<typeof resetAdultPinSchema>;
 
-/**
- * Entrada a un perfil de la rejilla.
- *
- * `profileId` es el del hijo, o `PARENT_PROFILE_ID` para el perfil del padre.
- * Un único endpoint para los dos: desde la rejilla son perfiles iguales, y
- * tener dos caminos invitaría a proteger uno y olvidar el otro.
- */
 export const PARENT_PROFILE_ID = "parent" as const;
 
 export const enterProfileSchema = z.object({
@@ -113,13 +82,6 @@ export const enterProfileSchema = z.object({
 
 export type EnterProfileInput = z.infer<typeof enterProfileSchema>;
 
-/**
- * El niño cambia SU PIN sabiendo el actual.
- *
- * No lleva identificador de perfil a propósito: el que se cambia es el de la
- * sesión y nunca uno que venga en la petición. Es lo que hace imposible por
- * construcción que un niño le cambie el PIN a un hermano.
- */
 export const changeOwnChildPinSchema = z.object({
   currentPin: pinSchema,
   newPin: pinSchema,
@@ -134,22 +96,6 @@ export const setChildPinSchema = z.object({
 
 export type SetChildPinInput = z.infer<typeof setChildPinSchema>;
 
-/**
- * El padre cambia su avatar: una ilustración del catálogo o una foto suya.
- *
- * Aceptaba SOLO la foto, y el porqué estaba escrito aquí: no había ninguna
- * pantalla donde el padre eligiera ilustración, y añadir un campo que ninguna
- * interfaz manda es inventar contrato. También estaba escrito qué haría falta
- * cuando esa pantalla existiera —«este esquema gana el `avatar` y su regla de
- * exclusión, como ya la tienen los de `children`»—, y es exactamente esto.
- *
- * La pantalla llegó en `polish-profile-and-reward-image`: la cuenta del padre
- * usa el mismo selector que «Mi perfil» del niño, así que las dos formas del
- * campo tienen ya quien las mande.
- *
- * Las dos son EXCLUYENTES y hace falta una, con la misma regla compartida que
- * usan los esquemas de `children` — la de verdad compartida, no una copia.
- */
 export const updateParentAvatarSchema = z
   .object({
     avatar: avatarKeySchema.optional(),
@@ -163,81 +109,28 @@ export const updateParentAvatarSchema = z
 
 export type UpdateParentAvatarInput = z.infer<typeof updateParentAvatarSchema>;
 
-/**
- * Marcar el recorrido de bienvenida como visto, o pedirlo otra vez.
- *
- * UN campo y no dos rutas: «verlo otra vez» es el mismo dato con el valor
- * contrario. Y una sola ruta para los dos roles, por lo mismo que entrar a un
- * perfil tiene una: tener dos invitaría a proteger una y olvidarse de la otra.
- * La rama por rol vive en el servicio.
- */
 export const updateTutorialSchema = z.object({ seen: z.boolean() }).strict();
 
 export type UpdateTutorialInput = z.infer<typeof updateTutorialSchema>;
 
-/**
- * Qué tema prefiere un perfil.
- *
- * TRES valores y no un booleano: «oscuro sí/no» no sabe decir «el que diga el
- * sistema», y ese es el valor por defecto y el que más gente va a dejar puesto.
- * Con un booleano haría falta además un nulo con significado, que es tener un
- * enumerado sin decirlo.
- */
 export const themePreferenceSchema = z.enum(["SYSTEM", "LIGHT", "DARK"]);
 
 export type ThemePreference = z.infer<typeof themePreferenceSchema>;
 
-/**
- * Cambiar el tema del perfil activo.
- *
- * UNA sola entrada para los dos roles, por lo mismo que el recorrido de
- * bienvenida: tener una por rol invita a proteger una y olvidarse de la otra.
- * La rama por rol vive en el servicio.
- *
- * `.strict()`: un campo que el esquema no conoce es 422 y no un valor que se
- * ignora en silencio.
- */
 export const updateThemeSchema = z.object({ theme: themePreferenceSchema }).strict();
 
 export type UpdateThemeInput = z.infer<typeof updateThemeSchema>;
-
-// ---------------------------------------------------------------------------
-// Respuestas
-// ---------------------------------------------------------------------------
 
 export const parentActorSchema = z.object({
   familyRole: z.literal("PARENT"),
   id: z.string(),
   name: z.string(),
   email: z.string(),
-  /**
-   * Resuelto y nunca nulo, igual que en `childActorSchema`.
-   *
-   * Faltaba: el padre elegía su avatar en la rejilla y lo perdía al entrar a su
-   * propio perfil, porque su actor no lo llevaba. Es el mismo dato en los dos
-   * sitios y ahora se comporta igual en los dos. Ver la decisión 6 del design de
-   * `add-file-storage`.
-   */
+
   avatar: avatarValueSchema,
-  /**
-   * Si a este perfil ya se le mostró el recorrido de bienvenida.
-   *
-   * Viaja CON el actor y no por un camino aparte, por lo mismo que el avatar:
-   * era el mismo dato en dos sitios comportándose distinto hasta que se metió
-   * dentro. Un segundo camino trae su propia caché, y una caché puede separarse
-   * de la del actor.
-   *
-   * Un booleano y no la fecha: quien pregunta decide con un sí o un no.
-   */
+
   tutorialSeen: z.boolean(),
 
-  /**
-   * Qué tema prefiere este perfil.
-   *
-   * Viaja CON el actor por el mismo argumento que `tutorialSeen`: el cliente lo
-   * necesita para decidir qué pintar nada más cargar, y un segundo camino trae
-   * su propia caché que puede separarse de la del actor.
-   */
   theme: themePreferenceSchema,
 });
 
@@ -245,36 +138,16 @@ export const childActorSchema = z.object({
   familyRole: z.literal("CHILD"),
   id: z.string(),
   name: z.string(),
-  // Resuelto al de por defecto, nunca nulo, igual que en `selectableProfileSchema`:
-  // eran dos formas del mismo dato en el mismo paquete. Estrechar el tipo no
-  // rompe a nadie, porque el front ya trataba el caso vacío.
+
   avatar: avatarValueSchema,
   coins: z.number().int(),
-  /**
-   * Si a este perfil ya se le mostró el recorrido de bienvenida.
-   *
-   * Viaja CON el actor y no por un camino aparte, por lo mismo que el avatar:
-   * era el mismo dato en dos sitios comportándose distinto hasta que se metió
-   * dentro. Un segundo camino trae su propia caché, y una caché puede separarse
-   * de la del actor.
-   *
-   * Un booleano y no la fecha: quien pregunta decide con un sí o un no.
-   */
+
   tutorialSeen: z.boolean(),
 
-  /**
-   * Qué tema prefiere este perfil.
-   *
-   * Viaja CON el actor por el mismo argumento que `tutorialSeen`: el cliente lo
-   * necesita para decidir qué pintar nada más cargar, y un segundo camino trae
-   * su propia caché que puede separarse de la del actor.
-   */
   theme: themePreferenceSchema,
 });
 
-/** Un perfil tal como se ofrece en la rejilla, antes de entrar. */
 export const selectableProfileSchema = z.object({
-  /** El del hijo, o `PARENT_PROFILE_ID` para el del padre. */
   id: z.string(),
   familyRole: z.enum(["PARENT", "CHILD"]),
   name: z.string(),
@@ -296,21 +169,9 @@ export const sessionActorSchema = z.discriminatedUnion("familyRole", [
 
 export type SessionActor = z.infer<typeof sessionActorSchema>;
 
-/**
- * Respuesta del estado de sesión. Responde 200 SIEMPRE.
- *
- * Distingue TRES situaciones, no dos, y la aplicación web las necesita para
- * saber qué pintar:
- *
- *   hasAccount false, actor null   ->  pantalla de acceso
- *   hasAccount true,  actor null   ->  rejilla de perfiles
- *   hasAccount true,  actor        ->  la aplicación, como ese perfil
- *
- * Ver la decisión 2 del design de `add-profile-selection`.
- */
 export const sessionStateSchema = z.object({
   actor: sessionActorSchema.nullable(),
-  /** Si el dispositivo está acreditado para una cuenta. */
+
   hasAccount: z.boolean(),
 });
 

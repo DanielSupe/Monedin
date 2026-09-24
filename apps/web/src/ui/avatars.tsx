@@ -1,27 +1,5 @@
 import { AVATAR_KEYS, type AvatarKey, resolveAvatarKey } from "@monedin/contracts";
 
-/**
- * Los doce animales del catálogo, dibujados.
- *
- * Eran emojis, y el motivo del cambio no es estético: **un emoji lo pinta cada
- * sistema operativo a su manera**, así que el mismo perfil se veía distinto en
- * la tablet compartida y en el portátil del padre. A un niño de seis años su
- * cara es cómo reconoce cuál es su perfil en la rejilla.
- *
- * Las claves salen de `@monedin/contracts`, que es la única lista: la API valida
- * contra ella y aquí solo se resuelve cada clave a algo que pintar. Añadir una
- * ilustración se hace allí y este archivo la acompaña — ni la base de datos ni
- * la validación saben cómo se pinta un avatar, que es lo que el comentario de la
- * versión con emojis ya prometía.
- *
- * LOS COLORES DE UN ANIMAL SON SUYOS y no del tema. No entran en la paleta de
- * dos tonos ni se reasignan en oscuro: un avatar es contenido, como una foto.
- * Lo que sí sigue al tema es el círculo sobre el que se dibuja, y eso lo pone
- * `Avatar`.
- *
- * Todos comparten lienzo de 40×40 y ocupan la misma caja óptica, o en una fila
- * de perfiles unos se verían mayores que otros sin que nadie lo hubiera decidido.
- */
 const DIBUJOS: Record<AvatarKey, React.ReactElement> = {
   zorro: (
     <>
@@ -136,23 +114,7 @@ const DIBUJOS: Record<AvatarKey, React.ReactElement> = {
   ),
   tucan: (
     <>
-      {/*
-        EL CUERPO NO VA EN LA TINTA DE LOS OJOS, y era el único que lo hacía.
 
-        Un tucán es negro, así que su cuerpo se dibujó con `#2F3446` —el mismo
-        valor que los ojos y los hocicos de los otros once—. Sobre el círculo de
-        arena se leía; sobre el oscuro, que está a ese mismo valor, el pájaro
-        desaparecía y quedaban flotando un ojo y un pico.
-
-        Y NO se arregla reasignándolo por tema: un animal es contenido, como una
-        foto, y esa regla es la que hace que un zorro naranja siga siendo naranja
-        de noche. Se arregla eligiendo un valor que se lea sobre los dos fondos,
-        que es lo que ya hacen los otros once. Lo que identifica a un tucán es su
-        pico, y ese no se toca.
-
-        Lo cazó abrir el catálogo en oscuro, que es justo para lo que esa tarea
-        existe: ningún test puede verlo, porque jsdom no pinta.
-      */}
       <path d="M14 12c6 0 11 4.5 11 10.5S20 33 14 33 3 28.5 3 22.5 8 12 14 12z" fill="#55658A" />
       <path d="M24 17c4-2 9-2.5 13 .5-3.5 3-8 4.5-13 4z" fill="#EE8B4A" />
       <path
@@ -229,13 +191,6 @@ const DIBUJOS: Record<AvatarKey, React.ReactElement> = {
   ),
 };
 
-/**
- * El dibujo de un avatar, listo para meter en su círculo.
- *
- * Decorativo: quien nombra al perfil es el texto que lo acompaña, y `Avatar` ya
- * pone el nombre accesible cuando hace falta. Un dibujo anunciado junto a su
- * nombre diría la misma cosa dos veces.
- */
 export function avatarDrawing(key: string | null | undefined): React.ReactElement {
   return (
     <svg viewBox="0 0 40 40" aria-hidden="true" focusable="false" className="size-3/4">
@@ -244,29 +199,8 @@ export function avatarDrawing(key: string | null | undefined): React.ReactElemen
   );
 }
 
-/**
- * Si lo que llegó es una foto propia y no una clave del catálogo.
- *
- * El servidor entrega una de las dos cosas, ya resuelta: o una clave corta o
- * una URL firmada. Ninguna clave del catálogo empieza por `http`, así que
- * distinguirlas es exactamente esto y no hace falta un campo aparte que
- * mantener sincronizado.
- */
 export function isAvatarUrl(value: string | null | undefined): boolean {
   return typeof value === "string" && value.startsWith("http");
 }
 
-/** Todas las opciones, para el selector al crear o editar un perfil. */
-/*
- * EL CATÁLOGO DE OPCIONES LLEVA SOLO LA CLAVE, y llevaba además el dibujo crudo.
- *
- * Ese `drawing` eran los `<path>` sueltos, SIN el `<svg>` que los hace visibles
- * —quien lo pone es `avatarDrawing`—, así que quien lo pintara tal cual no
- * dibujaba nada. Pasó: la rejilla de animales del alta de un perfil salía con
- * doce cajas vacías, y ningún test lo dijo porque jsdom no pinta y los botones
- * seguían teniendo su nombre.
- *
- * Exponer un fragmento a medio montar es la trampa. Quien necesite dibujar un
- * avatar usa `Avatar`, que es la única forma que hay de hacerlo.
- */
 export const AVATAR_OPTIONS = AVATAR_KEYS.map((key) => ({ key }));

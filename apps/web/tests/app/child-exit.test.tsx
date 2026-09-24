@@ -27,14 +27,6 @@ const PERFIL_PROPIO = {
   coins: 120,
 };
 
-/**
- * Monta al niño en una dirección y devuelve el espía de `fetch`.
- *
- * No sirve `montarApp`: «Mi perfil» pide `GET /children/me`, y el respaldo de
- * aquella función responde una lista paginada vacía a todo lo que no sea la
- * sesión. Un perfil que no valida deja la pantalla en su estado de error, y ahí
- * no hay ningún botón que pulsar.
- */
 async function montarNino(direccion: string, sesion: SessionState = comoNino()) {
   const espia = vi.fn((entrada: RequestInfo | URL) => {
     const url = String(entrada);
@@ -65,7 +57,6 @@ async function montarNino(direccion: string, sesion: SessionState = comoNino()) 
   return espia;
 }
 
-/** Las peticiones de salida que ha visto el espía, con su método. */
 function salidas(espia: ReturnType<typeof vi.fn>): Array<string> {
   return espia.mock.calls
     .map(([entrada, init]) => [String(entrada), (init as RequestInit | undefined)?.method] as const)
@@ -73,13 +64,6 @@ function salidas(espia: ReturnType<typeof vi.fn>): Array<string> {
     .map(([url, metodo]) => `${metodo ?? "GET"} ${url.replace(API_PREFIX, "")}`);
 }
 
-/**
- * Salir del perfil tiene que estar donde se busca.
- *
- * Estaba solo al final del inicio, por debajo de la rejilla de teselas, y «Mi
- * perfil» —la pantalla que responde a «esto es mío», y la que el marco alcanza
- * a cualquier hora— no ofrecía ninguna salida.
- */
 describe("el niño encuentra la salida de su perfil", () => {
   it("desde «Mi perfil»", async () => {
     const espia = await montarNino("/me/settings");
@@ -99,19 +83,12 @@ describe("el niño encuentra la salida de su perfil", () => {
     expect(salidas(espia)).toEqual(["POST /auth/profiles/leave"]);
   });
 
-  /*
-   * Que las dos existan no basta: si una llamara a otro sitio, las dos estarían
-   * en pantalla y el producto tendría dos salidas que no hacen lo mismo. Lo que
-   * se compara es la petición que sale, no que haya un botón.
-   */
   it("y las dos hacen exactamente lo mismo", async () => {
     const desdePerfil = await montarNino("/me/settings");
     await screen.findByText(messages.children.myProfileTitle);
     await userEvent.click(screen.getByRole("button", { name: messages.auth.changeProfile }));
     const porPerfil = salidas(desdePerfil);
 
-    // La limpieza automática ocurre ENTRE tests, no dentro de uno: sin esto los
-    // dos montajes conviven y «Cambiar de perfil» sale dos veces.
     cleanup();
     vi.unstubAllGlobals();
 
@@ -123,12 +100,6 @@ describe("el niño encuentra la salida de su perfil", () => {
   });
 });
 
-/**
- * Cerrar sesión obliga a teclear correo y contraseña, que un niño no tiene: un
- * niño que cerrase sesión dejaría a la familia fuera hasta que apareciese el
- * padre. Por eso lo que se arregla es encontrar la salida que ya existe, y no
- * darle una nueva.
- */
 describe("el niño no puede cerrar la sesión de la cuenta", () => {
   it.each([
     ["su inicio", "/"],

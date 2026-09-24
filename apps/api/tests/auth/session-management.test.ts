@@ -21,19 +21,13 @@ import {
   resetAuthData,
 } from "../support/auth.js";
 
-/**
- * Router de pruebas con una ruta de cada clase, para comprobar la protección
- * sin depender de rutas de producto que todavía no existen.
- */
 function probeRouter(): Router {
   const probe = moduleRouter();
 
-  // Definida SIN decir nada: tiene que nacer protegida.
   probe.get("/probe/default", (req, res) => {
     res.status(200).json({ actor: actorOf(req) });
   });
 
-  // Se conforma con la cuenta acreditada: es lo que hace la rejilla.
   probe.accountGet("/probe/account-only", (_req, res) => {
     res.status(200).json({ ok: true });
   });
@@ -59,9 +53,6 @@ beforeEach(async () => {
   await resetAuthData();
 });
 
-// Estos tests CONFIRMAN datos: no pueden usar transacciones deshechas porque
-// llaman a la app, que abre las suyas. Así que limpian al terminar, para no
-// dejar la base con restos que confundan a los tests de otros archivos.
 afterAll(async () => {
   await resetAuthData();
 });
@@ -81,7 +72,7 @@ describe("almacenamiento del identificador de sesión", () => {
     expect(sesiones).toHaveLength(1);
     expect(sesiones[0]?.tokenHash).not.toBe(token);
     expect(sesiones[0]?.tokenHash).not.toContain(token);
-    // Lo guardado es el hash del identificador, y solo se puede ir en un sentido.
+
     expect(sesiones[0]?.tokenHash).toBe(hashSessionToken(token));
   }, 60_000);
 
@@ -89,7 +80,7 @@ describe("almacenamiento del identificador de sesión", () => {
     const generados = new Set(Array.from({ length: 200 }, () => generateSessionToken()));
 
     expect(generados.size).toBe(200);
-    // 32 bytes en base64url.
+
     for (const token of generados) {
       expect(token.length).toBeGreaterThanOrEqual(42);
       expect(token).toMatch(/^[A-Za-z0-9_-]+$/);
@@ -142,7 +133,6 @@ describe("caducidad", () => {
   it("el uso prolonga la caducidad cuando ya ha consumido buena parte de su vida", async () => {
     const { cookies } = await registerParent(app);
 
-    // Se deja la sesión a punto de caducar.
     const casiCaducada = new Date(Date.now() + 60_000);
     await testPrisma().session.updateMany({ data: { expiresAt: casiCaducada } });
 
@@ -163,7 +153,6 @@ describe("caducidad", () => {
       .send({ profileId: hijo.id, pin: "1234" });
     const childCookie = cookieValue(entrada, PROFILE_COOKIE) ?? "";
 
-    // Caduca la sesión de CUENTA.
     await testPrisma().session.updateMany({
       where: { parentSessionId: null },
       data: { expiresAt: new Date(Date.now() - 1000) },
@@ -185,10 +174,8 @@ describe("revocación", () => {
     expect(cierre.status).toBe(204);
     expect(clearsCookie(cierre, ACCOUNT_COOKIE)).toBe(true);
 
-    // La fila ya no está...
     expect(await testPrisma().session.count()).toBe(0);
 
-    // ...así que presentar de nuevo la misma cookie no vale.
     const estado = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
     expect(estado.body).toEqual({ actor: null, hasAccount: false });
   }, 60_000);
@@ -196,7 +183,6 @@ describe("revocación", () => {
   it("una cookie conservada deja de valer en cuanto se revoca", async () => {
     const { cookies } = await registerParent(app);
 
-    // Alguien se queda una copia y la sesión se revoca por otro lado.
     await testPrisma().session.deleteMany({});
 
     const estado = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
@@ -259,8 +245,7 @@ describe("resolución del actor", () => {
     expect(response.body.actor).toEqual({
       familyRole: "CHILD",
       childProfileId: hijo.id,
-      // Sin esto, cada servicio necesitaría una consulta extra para saber de qué
-      // familia es quien llama.
+
       parentId,
     });
   }, 120_000);
@@ -285,8 +270,6 @@ describe("las rutas nacen protegidas", () => {
 
     const response = await request(app).get(`${API_PREFIX}/probe/default`).set("Cookie", cookies);
 
-    // Es la frontera del change: la cookie acredita el dispositivo, no concede
-    // poderes. Sin esto, la rejilla se rodearía llamando al endpoint.
     expect(response.status).toBe(401);
   }, 60_000);
 
@@ -363,9 +346,6 @@ describe("guardianes de rol", () => {
   });
 
   it("el rol correcto NO autoriza sobre un recurso ajeno", async () => {
-    // Un padre con el rol correcto llamando a una ruta de padre, pero sobre un
-    // perfil de otra familia: la comprobación de rol le deja pasar y la del
-    // servicio lo rechaza igualmente.
     const nuestra = await asParent(app);
     const otraFamilia = await asParent(app, { email: "otra@monedin.test" });
     const otroParentId = await parentIdByEmail("otra@monedin.test");

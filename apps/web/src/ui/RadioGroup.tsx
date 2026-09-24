@@ -4,20 +4,11 @@ import { cx } from "./cx.js";
 export interface RadioOption {
   value: string;
   label: string;
-  /** Una línea que aclara qué implica elegir esto. Opcional. */
+
   hint?: string;
 }
 
 export interface RadioGroupProps {
-  /**
-   * Qué se está eligiendo. SE VE Y SE OYE.
-   *
-   * Era solo un `aria-label`, o sea que existía para quien no mira la pantalla y
-   * no para quien la mira — el mismo defecto que el acceso a la ayuda tenía en la
-   * cabecera. Y aquí se notaba más: las dos opciones son «el mismo valor para
-   * todos» y «uno para cada uno», que sin la pregunta delante no dicen el mismo
-   * valor DE QUÉ.
-   */
   label: string;
   options: RadioOption[];
   value: string;
@@ -25,24 +16,6 @@ export interface RadioGroupProps {
   className?: string;
 }
 
-/**
- * Elegir UNA opción de varias, cuando las dos caben en pantalla.
- *
- * Sobre Radix, que es lo que aporta lo difícil: las flechas mueven la selección
- * dentro del grupo, el tabulador entra y sale del grupo entero —no opción por
- * opción—, y el grupo se anuncia con su nombre antes de leer las opciones.
- * Escribir eso a mano es donde se rompen los formularios.
- *
- * Es una pieza aparte de `Select` y no una variante suya: un desplegable esconde
- * las opciones hasta que se abre, y esto existe justo para lo contrario. Con dos
- * o tres opciones que hay que COMPARAR —«el mismo valor para todos» frente a «uno
- * para cada uno»— esconderlas obliga a abrir para decidir.
- *
- * EL NOMBRE DE CADA OPCIÓN SE ATA A MANO, igual que en `Checkbox` y por lo mismo:
- * lo que Radix dibuja es un `<button role="radio">` vacío, y el nombre de un
- * botón sale de su contenido antes que del `<label>` que lo envuelve. Sin esto,
- * las dos opciones se anuncian sin nombre.
- */
 export function RadioGroup({
   label,
   options,
@@ -50,11 +23,6 @@ export function RadioGroup({
   onValueChange,
   className,
 }: RadioGroupProps): React.ReactElement {
-  /*
-   * El nombre se dibuja Y se sigue atando con `aria-label`, que no es
-   * redundante: lo que Radix pinta es un `div[role=radiogroup]`, y un texto
-   * puesto al lado no lo nombra por estar cerca.
-   */
   return (
     <div className="flex flex-col gap-2">
       <span className="text-body font-bold text-ink">{label}</span>
@@ -86,8 +54,7 @@ export function RadioGroup({
                   elegida ? "border-primary" : "border-border-strong",
                 )}
               >
-                {/* El punto va DENTRO del indicador de Radix: así solo existe
-                  cuando la opción está elegida, y no hace falta una rama. */}
+
                 <RadixRadioGroup.Indicator className="rounded-pill block size-2.5 bg-primary" />
               </RadixRadioGroup.Item>
 

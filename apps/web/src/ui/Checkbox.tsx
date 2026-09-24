@@ -5,38 +5,12 @@ import { cx } from "./cx.js";
 export interface CheckboxProps {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
-  /** Lo que se marca. Va DENTRO de la etiqueta, así que se pulsa entero. */
+
   children: ReactNode;
   disabled?: boolean;
   className?: string;
 }
 
-/**
- * Una casilla, con su etiqueta pegada.
- *
- * La estructura viene de shadcn/ui —Radix `Root` más `Indicator`— y de ahí sale
- * lo único que de verdad se quería: el cableado accesible. Un `role="checkbox"`
- * de verdad, la barra espaciadora, el foco, el estado indeterminado si algún día
- * hace falta, y `aria-checked` sin que nadie se acuerde de ponerlo.
- *
- * El ASPECTO es entero de aquí. Lo traído venía con `dark:` —que este proyecto
- * prohíbe, porque el tema cambia el valor de los tokens y no la clase—, con
- * `cn()` —que fusiona utilidades y el `cx` de aquí no—, y con un radio y una
- * sombra escritos a mano. Quedarse su CSS habría sido traer cuatro infracciones
- * a cambio de nada.
- *
- * La etiqueta envuelve al control, así que el área tocable es la fila entera y
- * no un cuadrado de 20px. En una tablet que usa un padre con el pulgar, eso es
- * la diferencia entre marcar a la primera o a la tercera.
- *
- * Y EL NOMBRE SE ATA A MANO, con `aria-labelledby`. Envolver el control en un
- * `<label>` basta con un `<input>` nativo y NO con esto: lo que Radix dibuja es
- * un `<button role="checkbox">`, y el nombre de un botón sale de su CONTENIDO
- * antes que de su etiqueta — contenido que aquí es un visto que ni siquiera
- * existe mientras la casilla está sin marcar. La pieza se escribió en
- * `add-design-pieces` sin montarla en ninguna pantalla, así que la casilla no
- * tenía nombre y nada lo decía. Lo cazó el primer test que la buscó por él.
- */
 export function Checkbox({
   checked,
   onCheckedChange,

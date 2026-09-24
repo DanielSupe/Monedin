@@ -48,7 +48,6 @@ describe("aprobar un canje pendiente descuenta su precio congelado", () => {
     const premio = await sembrarPremio(parentId, { offers: [{ childId: ana.id, coins: 60 }] });
     const canje = await sembrarCanje({ childId: ana.id, rewardId: premio.id }, { coins: 60 });
 
-    // El padre sube el precio de la oferta después de que el niño ya pidió.
     await request(app)
       .put(`${API_PREFIX}/rewards/${premio.id}/assignments`)
       .set("Cookie", cookies)
@@ -57,7 +56,6 @@ describe("aprobar un canje pendiente descuenta su precio congelado", () => {
 
     await aprobar(cookies, canje.id).expect(200);
 
-    // Bajó 60, el precio con el que se pidió, no 90.
     expect(await saldoDe(ana.id)).toBe(40);
   }, 180_000);
 
@@ -165,7 +163,6 @@ describe("retirar el premio o la oferta no afecta un canje ya pendiente", () => 
     const premio = await sembrarPremio(parentId, { offers: [{ childId: ana.id, coins: 60 }] });
     const canje = await sembrarCanje({ childId: ana.id, rewardId: premio.id }, { coins: 60 });
 
-    // Reemplaza el conjunto de ofertas sin incluir a Ana.
     await request(app)
       .put(`${API_PREFIX}/rewards/${premio.id}/assignments`)
       .set("Cookie", cookies)

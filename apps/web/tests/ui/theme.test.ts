@@ -21,7 +21,6 @@ function archivosDe(directorio: string): string[] {
   return encontrados;
 }
 
-/** Todo lo de `src`, menos el archivo de tokens y lo generado. */
 const ARCHIVOS = archivosDe(SRC).filter(
   (ruta) => ruta !== TOKENS && !ruta.endsWith("routeTree.gen.ts"),
 );
@@ -30,21 +29,6 @@ function sinComentarios(contenido: string): string {
   return contenido.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 }
 
-/**
- * Lo único que una batería puede comprobar de un tema.
- *
- * jsdom no aplica CSS, así que el ASPECTO se verifica abriendo pantallas, igual
- * que ya pasa al tocar cualquier token. Pero que un tema esté COMPLETO sí se
- * comprueba leyendo el archivo, y es la regresión que de verdad duele: el día
- * que alguien añada un semántico nuevo y se olvide de su valor oscuro, el fallo
- * aparece como un texto negro sobre negro en la pantalla que nadie abre.
- *
- * Los dos bloques oscuros declaran la misma lista a propósito —CSS no puede
- * aplicar un mismo bloque desde dentro y desde fuera de una media query—, así
- * que hay que comprobar los DOS. Que uno esté completo no dice nada del otro.
- */
-
-/** El contenido entre llaves que abre en `desde`, contando anidamiento. */
 function bloqueDesde(css: string, desde: number): string {
   const abre = css.indexOf("{", desde);
   let nivel = 0;
@@ -70,30 +54,6 @@ function coloresDe(bloque: string): string[] {
   return [...bloque.matchAll(/^\s*(--color-[\w-]+)\s*:/gm)].map((m) => m[1] ?? "");
 }
 
-/**
- * Los que NO se reasignan, con su porqué, uno a uno.
- *
- * La lista es CERRADA y corta a propósito: cada entrada es una decisión visible
- * en una revisión, igual que la de los archivos autorizados al color de la
- * moneda. Añadirse aquí para callar un fallo es exactamente lo que no se puede
- * hacer sin que alguien lo vea.
- *
- * Los tres dicen lo mismo con distintas palabras: nombran un color que va
- * PEGADO a otro que tampoco cambia, así que cambiar con el tema los deja mal en
- * uno de los dos por construcción.
- *
- * - `--color-ink-inverted` es la tinta ENCIMA de un acento —el coral de un botón
- *   principal, el violeta de un panel de realce—. Reasignada, en oscuro salía
- *   casi negra sobre el coral, y con ella cada panel de realce del producto.
- * - `--color-on-coin` es la tinta encima del ámbar, y `--color-danger-solid` el
- *   relleno de la acción peligrosa. Los dos botones que los usan quedaban claro
- *   sobre claro en oscuro —1.14 y 1.18 de contraste— y perfectos en claro, que
- *   es lo que lo hizo invisible.
- *
- * Ninguno de los tres lo veía un test: jsdom no pinta. Los cazó abrir el
- * catálogo en oscuro y medir el contraste de cada pareja, que es exactamente
- * para lo que esa tarea manual existe.
- */
 const NO_SE_REASIGNAN = ["--color-ink-inverted", "--color-on-coin", "--color-danger-solid"];
 
 const CLARO = coloresDe(bloqueDe("@theme {")).filter(
@@ -125,15 +85,6 @@ describe("el tema oscuro reasigna la capa semántica entera", () => {
     ).toEqual([]);
   });
 
-  /*
-   * LA OTRA MITAD: los que no cambian, NO cambian.
-   *
-   * Sin esto, la lista de exenciones sería una puerta abierta — bastaría con
-   * añadir un nombre para que un token dejara de comprobarse en las dos
-   * direcciones. Aquí un token exento que APAREZCA en un bloque oscuro falla, que
-   * es la regresión de verdad: alguien lo reasigna «para que se vea bien en
-   * oscuro» y rompe el claro sin enterarse.
-   */
   it("los que no se reasignan no aparecen en ningún bloque oscuro", () => {
     const colados = NO_SE_REASIGNAN.filter(
       (token) => POR_SISTEMA.includes(token) || POR_ATRIBUTO.includes(token),
@@ -156,20 +107,10 @@ describe("el tema oscuro reasigna la capa semántica entera", () => {
     }
   });
 
-  /*
-   * Los dos bloques tienen que decir lo MISMO. Si uno declarase de más, habría
-   * un token que solo existe cuando el tema se elige a mano y no cuando lo elige
-   * el sistema — que es el caso que hoy usa todo el mundo.
-   */
   it("los dos bloques oscuros declaran lo mismo", () => {
     expect([...POR_SISTEMA].sort()).toEqual([...POR_ATRIBUTO].sort());
   });
 
-  /*
-   * Lo que el tema NO puede cambiar. El coral, el ámbar y el rojo valen lo mismo
-   * en los dos temas; el violeta solo se aclara. Es lo que hace que sea el mismo
-   * producto y no dos, y por eso se fija aquí y no en un comentario.
-   */
   it("los acentos que no cambian, no cambian", () => {
     const iguales = ["--color-primary", "--color-coin", "--color-danger"];
 
@@ -183,7 +124,6 @@ describe("el tema oscuro reasigna la capa semántica entera", () => {
       expect(oscuro, `falta el valor oscuro de ${token}`).not.toBeNull();
     }
 
-    // El coral de la acción y el ámbar de la moneda son el MISMO primitivo.
     expect(CSS).toContain("--noche-primary: var(--mnd-coral-700);");
     expect(CSS).toContain("--noche-coin: var(--mnd-amber-400);");
   });
@@ -195,20 +135,7 @@ describe("el tema oscuro reasigna la capa semántica entera", () => {
   });
 });
 
-/**
- * Una utilidad que apunta a un token que ya no existe no la ve NADIE.
- *
- * Al renombrar los tonos, el typecheck cazó todas las props —`tone="success"`—
- * y ninguna de las clases: para TypeScript `text-success` es una cadena
- * cualquiera, y para Tailwind es una utilidad que simplemente no genera nada.
- * El resultado es un texto que se queda del color heredado, sin error en
- * ninguna parte.
- *
- * Pasó: tres archivos se quedaron con `text-success` después del renombrado, y
- * lo encontró una lectura a ojo. Esto lo convierte en algo que falla.
- */
 describe("ninguna utilidad apunta a un token que ya no existe", () => {
-  /** Los que se renombraron, y las dos formas en que se escapan. */
   const RETIRADOS = ["success", "warning"];
 
   it("ningún archivo usa un color retirado del sistema", () => {
@@ -235,10 +162,6 @@ describe("ninguna utilidad apunta a un token que ya no existe", () => {
     ).toEqual([]);
   });
 
-  /*
-   * La otra mitad: que los nombres nuevos SÍ estén declarados. Sin esto, el test
-   * de arriba pasaría en verde con los tres tokens borrados del archivo.
-   */
   it("los nombres nuevos existen en los tokens", () => {
     for (const token of ["--color-done", "--color-conflict", "--color-info", "--color-danger"]) {
       expect(CSS, `falta ${token} en tokens.css`).toContain(`${token}:`);
@@ -246,14 +169,6 @@ describe("ninguna utilidad apunta a un token que ya no existe", () => {
   });
 });
 
-/**
- * Un componente de fuera usa NUESTROS tokens, o no entra.
- *
- * La capa de alias deja que shadcn escriba `bg-background` y que eso resuelva a
- * la paleta de Monedín. Lo que hay que impedir es lo contrario: que alguien
- * copie también su bloque de tema, que traería un segundo juego de valores de
- * color — la regla del origen único, rota por la puerta de atrás.
- */
 describe("un componente de fuera se adopta sin su paleta", () => {
   const AJENAS = [
     "--background",
@@ -280,8 +195,6 @@ describe("un componente de fuera se adopta sin su paleta", () => {
     for (const ruta of ARCHIVOS) {
       const contenido = readFileSync(ruta, "utf8");
 
-      // La declaración, no el uso: `--background: oklch(...)`. Los alias de
-      // `tokens.css` van con el prefijo `--color-` y no casan con esto.
       const declaradas = AJENAS.filter((nombre) =>
         new RegExp(`^\\s*${nombre}\\s*:`, "m").test(contenido),
       );
@@ -305,8 +218,6 @@ describe("un componente de fuera se adopta sin su paleta", () => {
     for (const ruta of ARCHIVOS) {
       if (!ruta.endsWith(".tsx")) continue;
 
-      // `dark:bg-…`. Aquí el tema cambia el VALOR de las variables, así que una
-      // pieza no necesita la variante: si aparece, se copió sin adaptar.
       if (/\bdark:[a-z]/.test(sinComentarios(readFileSync(ruta, "utf8")))) {
         culpables.push(relative(SRC, ruta));
       }

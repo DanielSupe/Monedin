@@ -9,7 +9,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/** Una tarea de cada etapa del ciclo. */
 const TAREAS: OwnTask[] = [
   {
     id: "t1",
@@ -70,13 +69,6 @@ function montar(tareas: OwnTask[] = TAREAS): void {
   );
 }
 
-/**
- * Las tres etapas del ciclo.
- *
- * El producto protege esas transiciones con condiciones y comprobaciones de
- * fila afectada. Presentarlas como tres párrafos iguales dentro de rectángulos
- * iguales tiraba esa distinción justo donde el niño la necesita.
- */
 describe("el estado de una tarea se distingue por su forma", () => {
   it("cada etapa lleva su etiqueta", async () => {
     montar();
@@ -86,11 +78,6 @@ describe("el estado de una tarea se distingue por su forma", () => {
     expect(screen.getByText(messages.tasks.statusApproved)).toBeInTheDocument();
   });
 
-  /*
-   * Lo que se ve y lo que se puede hacer van juntos: la transición sale de
-   * `PENDING`, así que ofrecer marcar una tarea que ya no lo está es ofrecer
-   * algo que acabaría en 409.
-   */
   it("SOLO la pendiente ofrece marcarla", async () => {
     montar();
 
@@ -114,11 +101,6 @@ describe("el estado de una tarea se distingue por su forma", () => {
   });
 });
 
-/**
- * El control de archivo nativo pide unos 360px de ancho mínimo y, en una
- * rejilla, arrastra a su columna: dos pantallas del niño desbordaban por él sin
- * tenerlo en su propio código.
- */
 describe("el control de subir imagen", () => {
   it("no enseña el control nativo, pero sigue estando", async () => {
     montar();
@@ -128,14 +110,6 @@ describe("el control de subir imagen", () => {
     const nativo = document.querySelector('input[type="file"]');
     expect(nativo).not.toBeNull();
 
-    // Sigue en el árbol y sigue siendo alcanzable: ocultar a la vista no es
-    // quitar. Lo que NO puede es ocupar sitio en la disposición, y eso lo da
-    // estar fuera del flujo.
-    //
-    // Se comprueba la CLASE y no el estilo calculado: en jsdom no hay hoja de
-    // estilos, así que `getComputedStyle` diría `static` para cualquier
-    // utilidad de Tailwind. Que la clase haga lo que dice se comprobó midiendo
-    // en el navegador —de 360px de ancho mínimo a 1—, no aquí.
     expect(nativo).not.toBeDisabled();
     expect((nativo as Element).className).toContain("absolute");
   });

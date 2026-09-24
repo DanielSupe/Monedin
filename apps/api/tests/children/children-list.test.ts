@@ -74,7 +74,7 @@ describe("el padre ve a sus hijos en un listado paginado", () => {
     expect(response.status).toBe(200);
     expect(response.body.items).toEqual([]);
     expect(response.body.total).toBe(0);
-    // Nunca cero: el front pintaría «página 1 de 0».
+
     expect(response.body.totalPages).toBe(1);
   }, 60_000);
 
@@ -129,8 +129,6 @@ describe("la paginación del listado", () => {
   }, 180_000);
 
   it("una página más allá del final es una lista vacía, no un 404", async () => {
-    // Quien acaba de dar de baja la última fila de la página 3 no debería
-    // tener que tratar un camino de error para descubrir que ya no hay página 3.
     const { cookies } = await familiaConHijos(app, ["Ana"]);
 
     const response = await listar(cookies, { page: 9 });
@@ -140,8 +138,6 @@ describe("la paginación del listado", () => {
   }, 120_000);
 
   it("un tamaño de página por encima del máximo se rechaza, no se recorta", async () => {
-    // Recortar escondería el error de quien llama: pediría 500, recibiría 100
-    // y creería que hay 100.
     const { cookies } = await asParent(app);
 
     const response = await listar(cookies, { pageSize: MAX_PAGE_SIZE + 1 });
@@ -174,9 +170,6 @@ describe("la paginación del listado", () => {
   }, 120_000);
 
   it("el orden es estable aunque varios hijos compartan el instante de creación", async () => {
-    // Este es el test que justifica el desempate por identificador en el
-    // orden: `createdAt` no es único, y sin desempate una fila puede salir en
-    // dos páginas o en ninguna.
     const { cookies, parentId, hijos } = await familiaConHijos(app, [
       "Ana",
       "Bruno",

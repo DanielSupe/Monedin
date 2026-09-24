@@ -1,61 +1,8 @@
 @import "tailwindcss";
 
-/*
- * La tipografía de la marca, AUTOALOJADA. No es un CDN: el paquete trae los
- * archivos y los sirve nuestro propio origen, así que en tiempo de ejecución no
- * sale nada a la red. Ni una IP de una familia llega a un tercero.
- *
- * `wght.css` y no un subconjunto suelto: declara cada subconjunto con su
- * `unicode-range`, así que el navegador descarga SOLO el que necesita —para el
- * español, `latin`, 38 KB— y nunca el cirílico ni el vietnamita. Sin la variante
- * itálica, que este producto no usa.
- *
- * El import va aquí y no en cada punto de entrada porque `main.tsx` y
- * `ui-catalog.tsx` ya importan este archivo. Si estuviera solo en el primero, el
- * catálogo vivo enseñaría las piezas con otra tipografía que la aplicación.
- */
 @import "@fontsource-variable/nunito/wght.css";
 
-/**
- * Tokens de Monedín. Fuente ÚNICA de todo valor visual del front.
- *
- * Mismo criterio que `constants/domain.ts` con los límites de negocio: si un
- * valor tiene significado, vive aquí y en ningún otro sitio. Ningún componente
- * escribe un color, un radio, un espaciado ni una duración literal.
- *
- * Tres capas, y un componente SOLO puede usar la de en medio:
- *
- *   CAPA 1  primitivos     --mnd-amber-400      la paleta cruda
- *   CAPA 2  semánticos     --color-coin         lo ÚNICO que usa un componente
- *   CAPA 3  escala         --text-hero          lo mismo, con otro valor por audiencia
- *
- * La capa 1 vive en `:root` a propósito y NO en `@theme`: así Tailwind no genera
- * ninguna utilidad para ella y `bg-mnd-amber-400` sencillamente no existe. La
- * regla «solo la capa 2» no depende de que nadie se despiste.
- *
- * Por qué importa: el modo oscuro será después reasignar la capa 2 y nada más.
- * Si un componente apuntara a la paleta, habría que visitarlos todos. Es la
- * misma razón por la que la API guarda la CLAVE de una imagen y nunca su URL.
- */
-
-/* ------------------------------------------------------------------ *
- * CAPA 1 — Primitivos. No se usan en un componente. No generan utilidad.
- * ------------------------------------------------------------------ */
-
 :root {
-  /*
-   * Neutros CÁLIDOS. El gris de este producto tira a arena, no a azul.
-   *
-   * Llevaban una pizca de azul para que el gris no saliera sucio, y con una
-   * paleta de índigo eso era lo correcto. Con naranja y morado ese mismo azul
-   * los enfría: el crema deja de leerse como papel y, al lado de un acento
-   * cálido, un neutro frío se ve gris de verdad. El matiz de los neutros
-   * acompaña al de los acentos, no al revés.
-   *
-   * El paso más oscuro se va al violeta y no al marrón: es la TINTA, y una
-   * tinta que tira al morado pertenece a la paleta en vez de ser un negro
-   * cualquiera apoyado encima.
-   */
   --mnd-arena-0: oklch(100% 0 0);
   --mnd-arena-50: oklch(97.9% 0.017 76);
   --mnd-arena-100: oklch(96% 0.018 81);
@@ -67,19 +14,6 @@
   --mnd-arena-700: oklch(49.6% 0.025 72);
   --mnd-arena-900: oklch(27.6% 0.037 298);
 
-  /*
-   * Coral: HACER. La acción principal, el destino activo y la voz de la
-   * mascota.
-   *
-   * Sustituye al índigo, que era la acción hasta `repaint-design-system`. El
-   * cambio no es de gusto: con dos tonos y no cinco, cada uno tiene que
-   * significar una cosa, y lo que un niño busca al abrir la aplicación es qué
-   * le toca hacer.
-   *
-   * Los pasos 100-300 son para fondos suaves y teselas; el 700 es el apagado
-   * con el que se dice que algo se cerró sin pasar —un canje rechazado, un
-   * perfil dado de baja—, y no es el rojo del error.
-   */
   --mnd-coral-100: oklch(95% 0.026 38);
   --mnd-coral-200: oklch(93.4% 0.026 42);
   --mnd-coral-300: oklch(91.4% 0.046 40);
@@ -91,14 +25,6 @@
   --mnd-coral-900: oklch(56.8% 0.171 33);
   --mnd-coral-apagado: oklch(56.1% 0.133 35);
 
-  /*
-   * Violeta: CONSEGUIDO y AHORRADO. Los premios, el progreso hacia uno, una
-   * tarea aprobada y un canje resuelto.
-   *
-   * Es también el color de la marca donde una pantalla se pinta entera: el
-   * acceso y el registro. Por eso tiene rampa y no un solo valor — los pasos
-   * oscuros pintan el panel y los claros van encima de él.
-   */
   --mnd-violeta-100: oklch(94.1% 0.027 297);
   --mnd-violeta-200: oklch(89.9% 0.048 296);
   --mnd-violeta-300: oklch(89.2% 0.051 296);
@@ -110,62 +36,14 @@
   --mnd-violeta-900: oklch(39.1% 0.164 287);
   --mnd-violeta-950: oklch(37% 0.164 286);
 
-  /*
-   * Ámbar: la MONEDA y la MASCOTA. Nada más, y por eso no cambia de valor.
-   *
-   * Es el único color que sobrevive intacto al rediseño, y es a propósito: una
-   * moneda que cambiara de color con la paleta dejaría de ser la misma moneda.
-   *
-   * DECÍA «la moneda, y SOLO la moneda», y `redesign-assistant-chat` lo
-   * reasignó a conciencia. La mascota entra y no lo diluye, porque Monedín ES
-   * una moneda: no son dos cosas que comparten color por casualidad, son la
-   * misma. Que su voz lleve el color del dinero apunta al mismo referente en
-   * vez de gastarlo.
-   *
-   * Lo que la reserva existía para impedir sigue prohibido palabra por palabra:
-   * un botón cualquiera, una tarjeta cualquiera, un aviso cualquiera. Y desde
-   * ese change lo comprueba un TEST con lista cerrada de archivos autorizados,
-   * en vez de este comentario — que es lo que hace que relajar la regla la haya
-   * dejado más fuerte que antes.
-   */
   --mnd-amber-100: oklch(97% 0.032 85);
   --mnd-amber-400: oklch(82% 0.151 82);
   --mnd-amber-600: oklch(62.3% 0.124 72);
   --mnd-amber-800: oklch(50.8% 0.103 71);
 
-  /*
-   * Rojo: el ERROR, y solo el error.
-   *
-   * Es la única excepción declarada a los dos tonos, y tampoco cambia. No es
-   * una decisión de marca: es una señal universal. Si el error llevara el coral
-   * de la acción, el mismo color diría «pulsa aquí» y «esto falló», que es
-   * justo lo que un color de peligro existe para impedir.
-   *
-   * Un 409 NO es un error y no lleva este color: va en el coral apagado, porque
-   * nadie hizo nada mal.
-   */
   --mnd-red-100: oklch(95% 0.03 25);
   --mnd-red-600: oklch(52% 0.2 27);
 
-  /*
-   * Los componentes sueltos del violeta profundo, sin envolver en `oklch()`.
-   *
-   * Una sombra necesita el color CON alfa, y la barra de alfa solo funciona
-   * dentro de la función: `var(--algo) / 0.3` no es CSS válido. Guardando los
-   * componentes se compone `oklch(var(--mnd-violeta-shadow) / 0.3)` sin repetir
-   * los números.
-   */
-  /*
-   * El tema OSCURO. Son primitivos como cualquier otro: un tema no inventa
-   * colores, elige otros de la misma paleta.
-   *
-   * El papel es tinta CÁLIDA y no negro. Con negro puro el coral vibra encima, y
-   * se pierde justo la calidez que define la marca.
-   *
-   * Y las superficies SUBEN en vez de bajar: en oscuro lo que separa una tarjeta
-   * de su fondo es su luminosidad, no su sombra. Las sombras dejan de hacer
-   * trabajo, así que la tarjeta tiene que aclararse.
-   */
   --mnd-noche-0: oklch(21.2% 0.021 312);
   --mnd-noche-100: oklch(24.2% 0.029 310);
   --mnd-noche-200: oklch(25.8% 0.032 300);
@@ -174,19 +52,10 @@
   --mnd-noche-500: oklch(37.2% 0.041 304);
   --mnd-noche-tinta: oklch(95.7% 0.01 73);
 
-  /*
-   * Los fondos suaves, invertidos DE VERDAD: cada uno conserva su tono en vez de
-   * volverse gris. Volverlos neutros borraría lo que cada estado significa, que
-   * es lo único que esos fondos existen para decir.
-   */
   --mnd-coral-noche: oklch(29.5% 0.037 35);
   --mnd-violeta-noche: oklch(30.1% 0.056 295);
   --mnd-amber-noche: oklch(32.4% 0.033 79);
 
-  /*
-   * El violeta se ACLARA y el coral no: un violeta medio se hunde sobre fondo
-   * oscuro y el coral aguanta. El ámbar hasta brilla más.
-   */
   --mnd-violeta-claro: oklch(62.4% 0.192 291);
   --mnd-amber-claro: oklch(85.7% 0.111 82);
   --mnd-coral-claro: oklch(72.9% 0.115 38);
@@ -195,98 +64,31 @@
   --mnd-arena-shadow: 27.6% 0.037 298;
 }
 
-/* ------------------------------------------------------------------ *
- * CAPA 2 — Semánticos. Lo ÚNICO que un componente tiene permitido usar.
- * ------------------------------------------------------------------ */
-
 @theme {
-  /* Superficies y tinta. */
   --color-surface: var(--mnd-arena-50);
   --color-surface-raised: var(--mnd-arena-0);
   --color-surface-sunken: var(--mnd-arena-200);
   --color-ink: var(--mnd-arena-900);
   --color-ink-muted: var(--mnd-arena-700);
-  /*
-   * LA TINTA QUE VA ENCIMA DE UN ACENTO, Y NO CAMBIA CON EL TEMA.
-   *
-   * Su nombre invita a leerla como «lo contrario de la tinta», y con esa lectura
-   * el bloque oscuro la reasignaba a casi negro. Pero lo que nombra es la tinta
-   * para ir SOBRE una superficie de acento —el coral de un botón principal, el
-   * violeta de un panel de realce—, y esas superficies valen lo mismo en los dos
-   * temas a propósito: es lo que hace que esto sea el mismo producto y no dos.
-   *
-   * Una tinta que cambia sobre un fondo que no cambia es, por construcción,
-   * incorrecta en uno de los dos temas. Y lo era: en oscuro, «Hola, Ana» salía
-   * casi negro sobre el coral, y cada panel de realce con él.
-   *
-   * Por eso vive aquí y NO tiene pareja en `--noche-*`. La lista de los que no
-   * cambian está en `tests/ui/theme.test.ts`, que ahora comprueba las dos
-   * mitades: que lo demás se reasigna y que estos no.
-   */
+
   --color-ink-inverted: var(--mnd-arena-0);
   --color-border: var(--mnd-arena-300);
   --color-border-strong: var(--mnd-arena-400);
 
-  /* Acción. */
   --color-primary: var(--mnd-coral-700);
   --color-primary-hover: var(--mnd-coral-800);
   --color-primary-soft: var(--mnd-coral-100);
 
-  /*
-   * La moneda, y la voz de la mascota. RESERVADO: si el ámbar también pinta
-   * botones o tarjetas genéricos deja de significar «monedas», que es lo único
-   * que este color existe para decir.
-   *
-   * La reserva NO vive en este comentario. La comprueba
-   * `tests/ui/style-rules.test.ts` con una lista cerrada de archivos: uno que no
-   * esté en ella y use `bg-coin-soft` hace fallar la verificación. Añadirse a la
-   * lista es una decisión visible en una revisión; acordarse de un comentario,
-   * no lo era.
-   */
-  /*
-   * El color de la MARCA como superficie, para las pantallas que se pintan
-   * enteras con él —hoy el acceso y el registro—.
-   *
-   * Es índigo profundo y NO ámbar, y esa fue la corrección grande. El acceso es
-   * la única pantalla del producto que mira un adulto: la calidez le
-   * corresponde al niño —su inicio, sus tareas, sus premios— y en la puerta se
-   * lee como juguete justo donde alguien decide si esto es de fiar.
-   *
-   * El ámbar no desaparece, cambia de papel: deja de ser el fondo y pasa a ser
-   * el ACENTO. Pintando media pantalla no decía nada; sobre índigo, un punto
-   * ámbar es dinero.
-   */
   --color-brand: var(--mnd-violeta-800);
-  /** El pie del degradado de un panel de marca: es lo que le da cuerpo. */
+
   --color-brand-deep: var(--mnd-violeta-950);
-  /** Trazos y bordes DIBUJADOS sobre la marca, que tienen que distinguirse. */
+
   --color-brand-line: var(--mnd-violeta-600);
-  /** Y el apagado, para lo que solo tiene que insinuarse: la traza de una órbita. */
+
   --color-brand-soft: var(--mnd-violeta-400);
 
-  /*
-   * El velo del recorrido de bienvenida: lo que atenúa la pantalla alrededor de
-   * lo que se está explicando. Va aquí y no en el punto de uso porque es un
-   * color, y ningún componente escribe un color.
-   */
   --color-spotlight-veil: oklch(var(--mnd-arena-shadow) / 0.72);
 
-  /*
-   * LO QUE RELLENA Y LO QUE ESCRIBE NO PUEDEN SER EL MISMO TOKEN.
-   *
-   * `--color-coin-ink` y `--color-danger` son TINTAS: van sobre la superficie de
-   * la página, así que se oscurecen en claro y se aclaran en oscuro. Eso está
-   * bien para lo que son — la cifra de `Coins`, el texto de un `Alert`.
-   *
-   * Dos botones las usaban del otro lado: `contrast` escribía con la tinta de la
-   * moneda SOBRE el ámbar, y `danger` rellenaba con la tinta del peligro. En
-   * oscuro las dos se aclaran, así que quedaron claro sobre claro: 1.14 y 1.18 de
-   * contraste, ilegibles. En claro se veían bien, que es lo que lo hizo invisible.
-   *
-   * Estos dos son los del OTRO lado y no cambian nunca, porque lo que tienen
-   * debajo o encima tampoco cambia. Es la misma regla que `--color-ink-inverted`,
-   * y están en la misma lista del test.
-   */
   --color-on-coin: var(--mnd-amber-800);
   --color-danger-solid: var(--mnd-red-600);
 
@@ -294,7 +96,6 @@
   --color-coin-soft: var(--mnd-amber-100);
   --color-coin-ink: var(--mnd-amber-800);
 
-  /* Los cuatro tonos de aviso, cada uno con su fondo suave y su tinta. */
   --color-done: var(--mnd-violeta-700);
   --color-done-soft: var(--mnd-violeta-100);
   --color-info: var(--mnd-arena-700);
@@ -304,19 +105,6 @@
   --color-danger: var(--mnd-red-600);
   --color-danger-soft: var(--mnd-red-100);
 
-  /*
-   * Familia de la marca. Redondeada, y AHORA en todos los dispositivos.
-   *
-   * Antes esto era solo una pila del sistema, y el resultado era que la marca se
-   * veía distinta en cada aparato de la familia: redondeada en Apple, y en
-   * Windows y Android lo que hubiera. Elegíamos una cosa y en la mitad de los
-   * casos se entregaba otra, incluida la tablet compartida, que es el escenario
-   * más probable del producto.
-   *
-   * La pila se queda DETRÁS y no es decorativa: si la fuente tarda o falla, lo
-   * peor que pasa es que se vea como se veía ayer. Sin ella, el navegador daría
-   * su serif por defecto — Times New Roman en una aplicación para niños.
-   */
   --font-sans: "Nunito Variable", ui-rounded, "SF Pro Rounded", "Segoe UI Variable", "Segoe UI",
     system-ui, sans-serif;
 
@@ -325,96 +113,33 @@
   --shadow-raised:
     0 2px 4px oklch(var(--mnd-arena-shadow) / 0.08), 0 12px 28px oklch(var(--mnd-arena-shadow) / 0.08);
 
-  /*
-   * QUIÉN TAPA A QUIÉN. Dos capas flotantes, y el orden se lee aquí.
-   *
-   * Hasta `add-assistant-access` esto era un `z-50` escrito a mano dentro de
-   * `Toast.tsx`, el único número de apilado del proyecto. Con una sola capa
-   * flotante nadie lo notaba; en cuanto hay dos que ocupan el MISMO píxel —la
-   * esquina inferior derecha— dos números en dos archivos distintos son dos
-   * decisiones que nadie ha comparado.
-   *
-   * Se nombran por su PAPEL y no por su valor, igual que un color: el punto de
-   * uso pide «la capa del aviso», no un número.
-   *
-   * EL AVISO VA ENCIMA, y es la decisión, no una casualidad del orden: un aviso
-   * que dice «tarea aprobada» tapando una mascota decorativa es inofensivo; una
-   * mascota tapando el aviso esconde información que alguien necesita.
-   */
   --z-index-widget: 40;
   --z-index-toast: 50;
 
-  /* Anchos con nombre, para que ninguna pieza escriba `max-w-[28rem]`. */
   --container-dialog: 28rem;
   --container-reading: 40rem;
   --container-orbit: 20rem;
-  /*
-   * El escenario de las órbitas en la puerta pública, donde son protagonistas y
-   * no un adorno lateral. Es solo el ESCENARIO: los radios de los anillos siguen
-   * siendo los que son, para no ampliar la excepción de estilo en línea que los
-   * cubre.
-   */
+
   --container-orbit-hero: 26rem;
-  /* La tesela de un premio. Con dos columnas y sin tope, a 1150px cada una
-     pasaba de 450px: una foto de producto del tamaño de media pantalla. */
+
   --container-tile: 18.75rem;
-  /* La tarjeta del catálogo del padre: la misma idea que la tesela del niño,
-     más ancha porque lleva tres controles y la lista de a quién se le ofrece. */
+
   --container-card: 24rem;
   --container-wide: 72rem;
-  /*
-   * El lateral de navegación, en DOS medidas. `max-w-full` detrás, para que a
-   * 320px no desborde.
-   *
-   * Era una sola de 17rem, la de su maqueta —264px, medidos— y por eso el ancho
-   * nunca estuvo mal en un monitor de 1440. Lo que estaba mal es que fuera FIJA:
-   * el lateral se monta a partir de `lg`, y en una ventana de 1024 esos 272px son
-   * el 27% de la pantalla, mientras que en la maqueta son el 18%. La misma medida
-   * pesa distinto según lo que haya alrededor.
-   *
-   * Así que la base es la estrecha —la que se usa donde el sitio escasea— y la
-   * ancha entra en `xl`, que es donde la maqueta está dibujada.
-   */
+
   --container-sidebar: 15rem;
   --container-sidebar-wide: 17rem;
-  /* Contraído: cabe un icono con su área de toque y nada más. */
+
   --container-sidebar-collapsed: 4.5rem;
 
-  /*
-   * El giro de las órbitas de la puerta pública. Los dos sentidos son tokens
-   * porque `animate-[girar_linear_infinite]` sería un valor arbitrario, y esos
-   * están prohibidos. La DURACIÓN la pone cada órbita, porque es geometría.
-   */
   --animate-orbit: mnd-orbit linear infinite;
   --animate-orbit-reverse: mnd-orbit-reverse linear infinite;
 
-  /*
-   * La cinta del acceso: lo mismo que orbita en la puerta pública, en línea
-   * recta. La tira se escribe DOS veces y se desplaza la mitad, así que al
-   * terminar la copia está exactamente donde empezó la primera y el salto no se
-   * ve. Aquí la duración SÍ va en el token: no es geometría, es una sola tira.
-   */
   --animate-strip: mnd-strip 32s linear infinite;
 
-  /*
-   * El disco del acceso. Los dos sentidos y la MISMA duración: el aro gira y
-   * cada emoji gira al revés a la vez, así que orbita sin ponerse cabeza abajo.
-   * Con la duración dentro del token no hace falta un valor arbitrario ni una
-   * excepción de estilos en línea, que es lo que sí necesitan las órbitas de la
-   * puerta pública porque su geometría se calcula.
-   */
   --animate-disc: mnd-orbit 44s linear infinite;
   --animate-disc-reverse: mnd-orbit-reverse 44s linear infinite;
-  /*
-   * El anillo de fuera va más lento. Es lo mismo que hacen las órbitas de la
-   * puerta pública: cuanto más fuera, más despacio, para que el conjunto se lea
-   * como un sistema y no como tres cosas girando.
-   */
-  /*
-   * La frase de Monedín al relevarse. Corta y solo de entrada: lo que sale no se
-   * despide, se sustituye, y animar la salida obligaría a mantener dos frases
-   * montadas a la vez para nada.
-   */
+
   --animate-fade-in: mnd-fade-in var(--duration-normal) ease-out;
 
   --animate-disc-slow: mnd-orbit 70s linear infinite;
@@ -445,79 +170,20 @@
   }
 }
 
-/* ------------------------------------------------------------------ *
- * Los neutros dependen de DÓNDE están.
- *
- * Es el mismo mecanismo que la escala, y por eso se eligió: un token no cambia
- * de significado —«texto secundario» sigue siendo texto secundario—, cambia de
- * VALOR según dónde está. Una pieza sigue pidiendo `text-ink` sin saber sobre
- * qué superficie la han apoyado, que es justo lo que la capa semántica existe
- * para permitir.
- *
- *   La escala                      La superficie
- *   ─────────                      ─────────────
- *   [data-scale="child"]           [data-surface="brand"]
- *   --text-hero: 4rem              --color-ink: claro
- *   --radius-card: 1.5rem          --color-surface-raised: oscuro
- *   por AUDIENCIA                  por FONDO
- *
- * SOBRE OSCURO NO BASTA CON INVERTIR LA TINTA, y esa es la trampa. Si solo
- * cambiara `--color-ink`, la etiqueta de un campo quedaría bien y el TEXTO
- * DENTRO del campo saldría claro sobre un campo blanco. Por eso la superficie
- * reasigna también las superficies: `--color-surface-raised` pasa a violeta, el
- * campo deja de ser una píldora blanca y pasa a ser un campo oscuro con texto
- * claro, y `Input` y `Field` componen solos sin enterarse.
- *
- * `Alert` NO compone, porque sus cuatro tonos traen su propio fondo claro. Lo
- * resuelve la pantalla del registro, y está explicado allí.
- *
- * NADA de esto sale de este selector, así que el resto de la aplicación no se
- * entera. Eso hay que comprobarlo abriendo pantallas, no suponerlo: es el
- * riesgo real de tocar tokens y no lo cubre ningún test.
- * ------------------------------------------------------------------ */
-
 [data-surface="brand"] {
   --color-ink: var(--mnd-arena-0);
   --color-ink-muted: var(--mnd-violeta-200);
 
-  /* Un campo sobre el panel es más CLARO que él, no blanco: sobre oscuro, una
-     píldora blanca es un agujero.
-
-     En el tema oscuro sigue la rampa del violeta igual que en el claro: el panel
-     de marca ya ES una superficie oscura, así que el tema casi no lo toca. Lo
-     que sí cambia es lo que un componente con fondo propio restituye encima. */
   --color-surface-raised: var(--mnd-violeta-800);
   --color-surface-sunken: var(--mnd-violeta-900);
   --color-border: var(--mnd-violeta-600);
   --color-border-strong: var(--mnd-violeta-500);
 
-  /* Sombras más profundas: sobre un fondo oscuro, la sombra clara del sistema
-     no separa nada. */
   --shadow-card:
     0 1px 2px oklch(var(--mnd-violeta-shadow) / 0.3), 0 4px 12px oklch(var(--mnd-violeta-shadow) / 0.25);
   --shadow-raised:
     0 2px 4px oklch(var(--mnd-violeta-shadow) / 0.35), 0 12px 28px oklch(var(--mnd-violeta-shadow) / 0.4);
 }
-
-/* ------------------------------------------------------------------ *
- * Los nombres que espera una librería externa, con NUESTROS valores.
- *
- * shadcn/ui escribe sus componentes contra unas variables propias —`background`,
- * `foreground`, `muted-foreground`…— y trae un bloque de tema con sus colores.
- * Ese bloque NO se copia: serían dos fuentes de verdad del color, que es la
- * regla que este proyecto protege con más celo.
- *
- * Con estos alias, un componente traído se repinta con la paleta de Monedín sin
- * tocarle una clase, y sigue el tema oscuro sin enterarse — porque lo que cambia
- * es el valor de los tokens de aquí, no una clase suya.
- *
- * Por eso TAMPOCO se usa su modo oscuro, que es una clase `.dark` y un
- * `@custom-variant`. Si aparece un `dark:` en el código, es que alguien copió un
- * componente sin adaptarlo, y hay un test que lo caza.
- *
- * `--color-primary` y `--color-border` ya se llaman igual en los dos sistemas y
- * significan lo mismo, así que no necesitan alias.
- * ------------------------------------------------------------------ */
 
 @theme inline {
   --color-background: var(--color-surface);
@@ -538,36 +204,7 @@
   --color-ring: var(--color-primary);
 }
 
-/* ------------------------------------------------------------------ *
- * EL TEMA. Tres estados, no dos.
- *
- * Claro explícito, oscuro explícito, y —sin atributo— lo que diga el sistema.
- * Con solo dos estados habría que escribir uno por defecto en el HTML antes del
- * primer pintado, que es de donde salen los destellos al cargar.
- *
- * Hoy nadie escribe el atributo: el producto sigue al sistema y ya está. El
- * selector existe para que el día que se quiera elegir no haya que rehacer el
- * mecanismo — y ese día la preferencia irá DENTRO del actor, como `tutorialSeen`,
- * nunca en el navegador: la tablet es compartida y el niño heredaría el tema de
- * su padre.
- *
- * Es el MISMO mecanismo que la superficie y que la escala: una pieza sigue
- * pidiendo «texto secundario» y lo que cambia es el VALOR de ese token. Ninguna
- * pieza necesita una rama, una clase ni una prop.
- *
- * LOS ACENTOS NO CAMBIAN. El coral, el ámbar y el rojo valen lo mismo en los dos
- * temas, y el violeta solo se aclara. Eso es lo que hace que sea el mismo
- * producto y no dos.
- *
- * Los DOS bloques de abajo declaran la misma lista, y esa duplicación es
- * deliberada: CSS no puede aplicar un mismo bloque desde dentro y desde fuera de
- * una media query. Lo que NO se duplica son los valores —viven una vez, en
- * `--noche-*`— y que ninguno de los dos bloques se quede corto lo comprueba un
- * test, no la memoria de quien edite.
- * ------------------------------------------------------------------ */
-
 :root {
-  /* Los valores del tema oscuro, una sola vez. */
   --noche-surface: var(--mnd-noche-0);
   --noche-surface-raised: var(--mnd-noche-200);
   --noche-surface-sunken: var(--mnd-noche-300);
@@ -670,26 +307,6 @@
   --tema-border-strong: var(--noche-border-strong);
 }
 
-/*
- * Lo que un componente con fondo propio RESTITUYE, en variables aparte.
- *
- * Antes este bloque escribía los primitivos claros, y con un solo tema eso era
- * correcto. Con dos se vuelve exactamente del revés: en oscuro el fondo de
- * `Alert` es oscuro, así que restituir la tinta clara lo dejaría claro sobre
- * claro dentro del acceso.
- *
- * Declarando el valor por defecto aparte, «volver al valor por defecto» pasa a
- * significar el del tema VIGENTE. Es la misma razón por la que ya repetía las
- * REFERENCIAS a los primitivos en vez de copiar sus valores.
- *
- * `Alert` pinta su fondo suave y su borde: es una superficie clara esté donde
- * esté. Sin esto, dentro del acceso su cuerpo heredaba la tinta clara del panel
- * y salía blanco sobre azul claro. Pasó, y no lo caza ningún test.
- *
- * Repite las referencias a los primitivos, no sus valores: si un primitivo
- * cambia, este bloque lo sigue. Es la contrapartida de que una superficie pueda
- * reasignar neutros, y hace falta en cuanto una anida dentro de otra.
- */
 :root {
   --tema-ink: var(--mnd-arena-900);
   --tema-ink-muted: var(--mnd-arena-700);
@@ -708,50 +325,9 @@
   --color-border-strong: var(--tema-border-strong);
 }
 
-/* ------------------------------------------------------------------ *
- * CAPA 3 — Escala. El MISMO token con otro valor según la audiencia.
- *
- * Monedín son dos productos en una app. La diferencia no se resuelve
- * duplicando piezas ni con una prop `size` que cada pantalla puede
- * equivocar: se declara UNA vez, en el contenedor, donde ya se sabe quién
- * está operando. Ver decisión 3 del design.
- *
- * Estos valores NO van en `@theme` para no chocar con utilidades nativas
- * —`text-balance` ya existe en Tailwind y significa otra cosa— y para que
- * cada uno tenga un solo origen. Las utilidades se declaran abajo a mano.
- *
- * `add-app-shell` pondrá el atributo. Hasta entonces lo declara el catálogo
- * vivo, y la escala del padre es la de por defecto.
- * ------------------------------------------------------------------ */
-
 :root,
-/*
- * Los pasos salen de CONTAR las maquetas del padre, no de mirarlas: su cuerpo
- * son 14px porque aparece 261 veces, y su título 19 porque es el que domina.
- */
+
 [data-scale="parent"] {
-  /*
-   * Siete pasos, nombrados por su PAPEL. Eran cuatro, y con cuatro cada pantalla
-   * elegía su píxel para lo que no encajaba: el rediseño salió con 24 tamaños
-   * distintos dibujados a mano. Los tres nuevos —micro, lead y display— son los
-   * que esas pantallas estaban inventando.
-   */
-  /*
-   * EL REGISTRO TIPOGRÁFICO DE ESTE PRODUCTO, Y NO EL DE POR DEFECTO.
-   *
-   * En los 32 artboards de `design/ui/pantallas/` hay 900 en 545 declaraciones,
-   * 800 en 339 y 700 en 266. **Ni una sola de 400.** El texto normal de este
-   * diseño son 700; lo que el navegador trae por defecto no aparece en ninguna
-   * parte.
-   *
-   * Se declara AQUÍ y no se reescribe en cien puntos de uso: una pieza sigue
-   * pidiendo «semibold», y lo que cambia es a qué apunta esa palabra en este
-   * producto — exactamente lo mismo que hizo `--color-primary` al repintarse.
-   *
-   * LA CONSECUENCIA, dicha con todas las letras: en este proyecto
-   * `font-normal` NO son 400. Una palabra que significa otra cosa sin avisar es
-   * peor que un valor raro, así que queda avisado.
-   */
   --font-weight-normal: 700;
   --font-weight-medium: 700;
   --font-weight-semibold: 800;
@@ -767,25 +343,15 @@
   --text-display: 1.625rem;
   --text-hero: 2.75rem;
 
-  /*
-   * Cinco radios, nombrados por lo que ENVUELVEN. Eran tres, y el de una píldora
-   * se escribía a mano en cada punto de uso — que es justo lo que la regla del
-   * origen único prohíbe.
-   */
   --radius-control: 0.75rem;
   --radius-card: 1.125rem;
   --radius-panel: 1.625rem;
   --radius-pill: 999px;
-  /* La lámina blanca que sube desde abajo en el acceso. */
+
   --radius-sheet: 2rem;
 
-  /* 40px: un padre usa el pulgar sobre una lista densa. */
   --tap-min: 2.5rem;
-  /*
-   * 56px: la acción de una página que CONVENCE, no la de un formulario que ya
-   * se está rellenando. En el segundo la acción ya se está mirando; en el
-   * primero hay que encontrarla.
-   */
+
   --tap-large: 3.5rem;
 
   --duration-quick: 120ms;
@@ -793,18 +359,7 @@
   --duration-slow: 320ms;
 }
 
-/* Se repite el bloque del padre porque una escala puede anidarse dentro de la
-   otra: sin esto, un panel del padre dentro de uno del niño heredaría la suya. */
 [data-scale="child"] {
-  /*
-   * Los pasos salen de CONTAR sus maquetas: 14 y 15 se reparten el cuerpo, y el
-   * niño lee un paso por encima de su padre por decisión del sistema.
-   *
-   * EL `--text-hero` NO SALE DE LA MAQUETA, y se queda: allí el saldo es una
-   * píldora de la cabecera a 34px, y aquí es el elemento más grande del inicio
-   * porque lo exige un requisito vigente. Bajarlo aquí sería cambiar una
-   * decisión de producto por la puerta de atrás.
-   */
   --text-micro: 0.75rem;
   --text-small: 0.875rem;
   --text-body: 0.9375rem;
@@ -816,39 +371,10 @@
   --radius-control: 0.875rem;
   --radius-card: 1.375rem;
 
-  /* 44px es el mínimo, no el objetivo. Lo exige la spec. */
   --tap-min: 2.75rem;
 }
 
-/*
- * La puerta pública es una audiencia propia, no una excepción.
- *
- * Sus titulares se leen de pie y de un vistazo, por alguien que todavía no es
- * nadie en el producto. Estirar la escala del niño hasta ahí la deformaría en
- * todas las pantallas que la usan por culpa de una sola — y el `--text-hero` del
- * niño está calibrado para el saldo, que es otra cosa.
- *
- * Solo hereda lo que no cambia: los radios, los toques y las duraciones salen
- * de la escala del padre, porque sus controles son los de un adulto.
- */
 [data-scale="public"] {
-  /*
-   * ESTOS PASOS ESTUVIERON UN ESCALÓN POR DEBAJO, y el error fue de AGRUPACIÓN
-   * y no de lectura.
-   *
-   * El primer recuento agrupó las maquetas por la página del lienzo, donde la
-   * portada comparte carpeta con las cinco pantallas del marco de entrada. Ésas
-   * escriben más pequeño, así que al promediarlas con la portada salió un cuerpo
-   * de 16 donde la portada usa 18 y un título de 24 donde usa 34.
-   *
-   * Contado sobre la portada SOLA, y elemento por elemento: el pie son 13, el
-   * texto secundario 16, los párrafos 18, la línea guía y los pasos 20, los tres
-   * `h2` de sección 34 y el titular 58.
-   *
-   * La lección, que vale más que las cifras: un recuento agrupa por lo que la
-   * APLICACIÓN reasigna —aquí, por `data-scale`—, no por cómo estén ordenados
-   * los archivos del diseño.
-   */
   --text-micro: 0.8125rem;
   --text-small: 1rem;
   --text-body: 1.125rem;
@@ -858,26 +384,6 @@
   --text-hero: 3.625rem;
 }
 
-/*
- * EL CAMINO DE ENTRADA ES UNA AUDIENCIA PROPIA, igual que la puerta pública.
- *
- * Hasta `tune-scale-to-mockups` estas pantallas no declaraban escala, con el
- * argumento de que la elige la audiencia y ahí todavía no se sabe quién está
- * delante. El argumento era bueno y la consecuencia no: sin declarar nada se
- * quedaban con la base, que es LA DEL PADRE —la más densa del producto, medida
- * para un adulto repasando listas largas—. O sea que «no se sabe quién está
- * delante» se resolvía eligiendo al padre en silencio, que es justo la clase de
- * valor por defecto que este proyecto no admite en ningún otro sitio.
- *
- * Y se mide. Contando sus siete maquetas elemento por elemento: la ayuda al pie
- * son 13, las etiquetas de campo 15, los botones y enlaces 16, el párrafo que
- * encabeza 18, el nombre de un perfil 22, el titular 32 y el «¿Quién eres?» 46.
- * Un paso entero por encima de lo que la escala del padre pone en cada uno.
- *
- * Lo que sigue siendo cierto de la decisión anterior: aquí NO se elige entre la
- * escala del padre y la del niño. Lo que cambia es que tampoco se hereda una de
- * las dos por descarte.
- */
 [data-scale="entry"] {
   --text-micro: 0.8125rem;
   --text-small: 0.9375rem;
@@ -888,23 +394,6 @@
   --text-hero: 2.75rem;
 }
 
-/*
- * LA ESCALA PÚBLICA BAJA EN UN TELÉFONO, y es la única que lo necesita.
- *
- * Sus dos pasos grandes están pensados para una portada a 1440, donde un titular
- * de 58px manda. A 390 ese mismo titular parte en SEIS renglones, ocupa 365px de
- * alto y empuja bajo la línea de flotación todo lo que tiene que convencer a
- * alguien — justo en la pantalla más larga del producto y en el dispositivo más
- * probable para llegar a ella.
- *
- * Baja SOLO la escala pública. Las del padre y el niño ya están medidas para que
- * la misma pieza rinda en una tablet, y tocarlas aquí cambiaría trece pantallas
- * para arreglar una.
- *
- * Y baja en el TOKEN, no en la pantalla: una portada que escribiera
- * `text-4xl sm:text-6xl` sacaría la decisión de la capa que la guarda, y la
- * siguiente página que hiciera falta la tomaría otra vez a ojo.
- */
 @media (width < 40rem) {
   [data-scale="public"] {
     --text-title: 1.5rem;
@@ -912,8 +401,6 @@
     --text-hero: 2.25rem;
   }
 }
-
-/* Las utilidades de la capa 3, para que ninguna pieza escriba una medida. */
 
 @utility text-micro {
   font-size: var(--text-micro);
@@ -959,14 +446,6 @@
   border-radius: var(--radius-control);
 }
 
-/*
- * El radio de un PANEL. `rounded-card` es el de una tarjeta de lista y se queda
- * pequeño para media pantalla: con él un panel parece una caja.
- *
- * Hasta `repaint-design-system` reutilizaba el de la lámina por no tener el
- * suyo. Ahora lo tiene, porque un panel de realce y una lámina que sube desde
- * abajo no son la misma superficie y no tienen por qué moverse juntas.
- */
 @utility rounded-panel {
   border-radius: var(--radius-panel);
 }
@@ -980,7 +459,6 @@
   border-radius: var(--radius-card);
 }
 
-/* Transicionar el tamaño sin escribir `transition-[width]` en el punto de uso. */
 @utility transition-size {
   transition-property: inline-size, block-size;
 }
@@ -990,7 +468,6 @@
   min-inline-size: var(--tap-min);
 }
 
-/* La talla mayor de una acción. La declara la pieza, nunca el punto de uso. */
 @utility tap-target-large {
   min-block-size: var(--tap-large);
   min-inline-size: var(--tap-large);
@@ -1008,24 +485,8 @@
   transition-duration: var(--duration-slow);
 }
 
-/* ------------------------------------------------------------------ *
- * CAPA BASE — Cómo se ve el marcado desnudo.
- *
- * El reinicio de Tailwind quita los estilos del navegador: sin esto, un
- * `<input>` no tiene borde y es literalmente invisible. Definir el aspecto
- * de los elementos sin vestir es parte del sistema, no un parche: cuando
- * una pantalla se vista, esta capa deja de notarse en vez de borrarse.
- * Ver decisión 1b del design.
- * ------------------------------------------------------------------ */
-
 @layer base {
   html {
-    /*
-     * Sigue al tema, o los controles NATIVOS se quedan con el contrario: las
-     * barras de desplazamiento, el autocompletado, el selector de la fecha
-     * límite de una tarea y el de archivo de una foto. Esta aplicación tiene los
-     * cuatro.
-     */
     color-scheme: light dark;
   }
 
@@ -1042,12 +503,7 @@
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: var(--text-body);
-    /*
-     * EL PESO BASE, y hace falta declararlo: los tokens de peso mueven las
-     * UTILIDADES, no el texto que no lleva ninguna. Sin esta línea, todo lo que
-     * no pide un peso se queda en el 400 del navegador — que es el único peso
-     * que no aparece ni una vez en las 32 maquetas.
-     */
+
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
   }
@@ -1078,7 +534,6 @@
     text-underline-offset: 2px;
   }
 
-  /* Un control sin vestir tiene que verse y poder tocarse. */
   input,
   select,
   textarea {
@@ -1118,17 +573,11 @@
     opacity: 0.55;
   }
 
-  /* El foco visible es un token, no una decisión de cada pantalla. */
   :focus-visible {
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
 }
-
-/* ------------------------------------------------------------------ *
- * Movimiento reducido. Se respeta AQUÍ, en el sistema, para que ninguna
- * pantalla tenga que acordarse. Lo exige la spec.
- * ------------------------------------------------------------------ */
 
 @media (prefers-reduced-motion: reduce) {
   :root,

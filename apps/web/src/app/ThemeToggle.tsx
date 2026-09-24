@@ -2,21 +2,6 @@ import type { ThemePreference } from "@monedin/contracts";
 import { messages } from "../lib/messages.js";
 import { useUpdateTheme } from "../features/auth/use-session.js";
 
-/**
- * Cambiar el tema, en la cabecera.
- *
- * UN SOLO CONTROL PARA TRES ESTADOS, y no tres ni un desplegable: la cabecera es
- * donde el sitio es caro, y son tres estados que un icono distingue. Recorre
- * sistema → claro → oscuro → sistema.
- *
- * SU NOMBRE DICE DÓNDE ESTÁ, NO A DÓNDE IRÍA. Lo que alguien necesita al llegar
- * al control es saber en qué tema está; a dónde lleva lo descubre pulsando. Y
- * cambia con el estado, porque lo que el control hace cambia — es la misma regla
- * que el de contraer el lateral.
- *
- * Vive en `app/` y no en `ui/`: sabe qué es un actor y llama a la API. Una pieza
- * del sistema no sabe de dominio.
- */
 const SIGUIENTE: Record<ThemePreference, ThemePreference> = {
   SYSTEM: "LIGHT",
   LIGHT: "DARK",
@@ -45,10 +30,6 @@ export function ThemeToggle({ theme }: { theme: ThemePreference }): React.ReactE
   );
 }
 
-/**
- * Los tres estados, dibujados. Decorativo: lo que nombra al control es su
- * `aria-label`, que además dice en cuál está.
- */
 function Icono({ theme }: { theme: ThemePreference }): React.ReactElement {
   return (
     <svg
@@ -69,11 +50,7 @@ function Icono({ theme }: { theme: ThemePreference }): React.ReactElement {
         </>
       )}
       {theme === "DARK" && <path d="M20 13.5A8 8 0 1110.5 4a6.5 6.5 0 009.5 9.5z" />}
-      {/*
-        «Sigue al sistema» se dibuja como una pantalla, no como medio sol y media
-        luna: lo que significa no es «un poco de cada» sino «lo que diga este
-        aparato».
-      */}
+
       {theme === "SYSTEM" && (
         <>
           <rect x="3" y="4" width="18" height="13" rx="2" />

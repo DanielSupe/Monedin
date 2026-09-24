@@ -10,26 +10,9 @@ import { render } from "@testing-library/react";
 import { vi } from "vitest";
 import { routeTree } from "../../src/routeTree.gen";
 
-/**
- * Montar la aplicación en una dirección concreta, con la sesión que se diga.
- *
- * Es lo que permite probar las guardas: lo que hay que comprobar es a DÓNDE
- * acaba yendo alguien, y eso solo se ve con un router de verdad. Un doble del
- * router diría que sí a todo, igual que un doble del almacén en la API.
- */
-
-/** Las tres formas de sesión que distingue `screenFor()`. */
 export const SIN_SESION: SessionState = { actor: null, hasAccount: false };
 export const SOLO_CUENTA: SessionState = { actor: null, hasAccount: true };
 
-/**
- * Un padre dentro de su perfil.
- *
- * `tutorialSeen` va en CIERTO por defecto, y no es un detalle: con falso, cada
- * test que monta el inicio se encontraría el recorrido de bienvenida encima de
- * lo que iba a comprobar. El caso común de un test es alguien establecido; los
- * del recorrido piden el contrario a propósito.
- */
 export function comoPadre(name = "Lucía", tutorialSeen = true): SessionState {
   return {
     hasAccount: true,
@@ -38,20 +21,15 @@ export function comoPadre(name = "Lucía", tutorialSeen = true): SessionState {
       id: "padre-1",
       name,
       email: "familia@ejemplo.dev",
-      // Nunca nulo: la API lo resuelve al del catálogo por defecto.
+
       avatar: DEFAULT_AVATAR_KEY,
       tutorialSeen,
-      /*
-       * SYSTEM por defecto, y no es un detalle: el caso común de un test es
-       * alguien que no ha tocado el tema. Con otro valor, cada test que monta un
-       * marco se encontraría un tema elegido encima de lo que iba a comprobar.
-       */
+
       theme: "SYSTEM",
     },
   };
 }
 
-/** Un niño dentro de su perfil. `tutorialSeen` en cierto por lo mismo. */
 export function comoNino(name = "Mateo", tutorialSeen = true): SessionState {
   return {
     hasAccount: true,
@@ -74,27 +52,12 @@ function jsonResponse(body: unknown, status = 200): Response {
   });
 }
 
-/**
- * Lo que responde una ruta de la API, para los tests que SÍ prueban contenido.
- *
- * La clave es el principio de la dirección —`/tasks/mine`— y el valor, el cuerpo
- * que se devuelve. Sin esto, una pantalla con datos había que montarla a mano
- * repitiendo el router entero.
- */
 export type Respuestas = Record<string, unknown>;
 
-/** Una página de listado, que es la forma que devuelve casi todo el producto. */
 export function pagina(items: unknown[]): unknown {
   return { items, page: 1, pageSize: 20, total: items.length, totalPages: 1 };
 }
 
-/**
- * Responde la sesión y deja cualquier otra petición en una lista vacía.
- *
- * La lista vacía por defecto es a propósito: la mayoría de estos tests prueban
- * NAVEGACIÓN, y una pantalla sin datos pinta su estado vacío en vez de reventar.
- * Cuando lo que se prueba es el contenido, se pasan las respuestas en `extra`.
- */
 export function servirSesion(
   session: SessionState,
   profiles: SelectableProfile[] = [],
@@ -127,7 +90,7 @@ export function servirSesion(
 
 export interface AppMontada {
   router: ReturnType<typeof crearRouter>;
-  /** La dirección en la que se ha quedado, ya resueltas las redirecciones. */
+
   direccion: () => string;
 }
 
@@ -139,10 +102,6 @@ function crearRouter(inicial: string, queryClient: QueryClient) {
   });
 }
 
-/**
- * Monta la aplicación en `inicial` y espera a que el router termine, incluidas
- * las redirecciones que decidan las guardas.
- */
 export async function montarApp(
   inicial: string,
   session: SessionState,

@@ -1,16 +1,3 @@
-/**
- * Las piezas del sistema de diseño de Monedín.
- *
- * Esta lista es el contrato: un test enumera lo que se exporta aquí y falla si
- * una pieza no aparece en el catálogo vivo. Es lo que impide que el catálogo
- * envejezca, que es como muere un sistema de diseño.
- *
- * Regla que ningún archivo de esta carpeta puede romper: una pieza NO importa
- * nada de `features/` ni de `api/`. Por eso se puede montar en un test sin
- * servidor, sin sesión y sin datos, y por eso el catálogo no necesita
- * proveedores. Hay un test que lo comprueba.
- */
-
 export { Accordion, type AccordionItem, type AccordionProps } from "./Accordion.js";
 export { Alert, type AlertProps, type AlertTone } from "./Alert.js";
 export { Avatar, type AvatarProps, type AvatarShape, type AvatarSize } from "./Avatar.js";

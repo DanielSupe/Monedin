@@ -64,12 +64,6 @@ describe("cliente del asistente", () => {
 });
 
 describe("cómo se cuenta cada fallo", () => {
-  /*
-   * Por el CÓDIGO y nunca por el texto. Y con el 503 en su propia rama: sin
-   * él, un fallo de Google caería en «no se pudo contactar con el servidor»,
-   * que es mentira cuando la red iba perfectamente. Ese es justamente el motivo
-   * de que el código exista.
-   */
   it.each([
     [ERROR_CODES.SERVICE_UNAVAILABLE, messages.assistant.unavailable],
     [ERROR_CODES.VALIDATION_ERROR, messages.assistant.invalidQuestion],

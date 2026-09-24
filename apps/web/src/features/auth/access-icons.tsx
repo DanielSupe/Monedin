@@ -1,15 +1,3 @@
-/**
- * Los iconos del acceso.
- *
- * Decorativos, sin excepción: lo que nombra a un campo es su etiqueta, y lo que
- * nombra al botón de envío es su `aria-label`. Por eso ninguno declara `role` ni
- * etiqueta, y el envoltorio que los coloca los oculta con `aria-hidden`.
- *
- * Trazo propio y deliberadamente simple, como el símbolo del logo: lo que tiene
- * que hacer hoy es ser nuestro y poder tirarse a la basura sin arrastrar a
- * nadie cuando llegue la identidad definitiva en `polish-brand-and-a11y`.
- */
-
 function Trazo({ d }: { d: string }): React.ReactElement {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-5">

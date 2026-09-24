@@ -2,23 +2,6 @@ import type { ThemePreference } from "@monedin/contracts";
 import { getPrisma, withTranslatedErrors } from "../../shared/database/index.js";
 import { hashSessionToken } from "../../shared/crypto/session-token.js";
 
-/**
- * Capa de datos del módulo `auth`.
- *
- * ÚNICO archivo del módulo que toca Prisma. Es el dueño de la tabla de
- * sesiones: ningún otro módulo la lee, y el middleware de sesión pasa por aquí
- * en lugar de consultar la base de datos por su cuenta.
- *
- * También lee y escribe `User` y `ChildProfile`, pero solo lo que es
- * autenticación: credenciales, bloqueo y los datos mínimos para pintar el
- * selector de perfil. Crear, listar y editar hijos como entidad de producto es
- * de `add-children`.
- */
-
-// ---------------------------------------------------------------------------
-// Padres
-// ---------------------------------------------------------------------------
-
 export interface ParentCredentials {
   id: string;
   name: string;
@@ -26,7 +9,7 @@ export interface ParentCredentials {
   passwordHash: string;
   failedLoginAttempts: number;
   lockedUntil: Date | null;
-  /** PIN de adulto. Su bloqueo se cuenta aparte del de la contraseña. */
+
   pinHash: string;
   failedPinAttempts: number;
   pinLockedUntil: Date | null;
@@ -95,7 +78,6 @@ export function findParentById(
   );
 }
 
-/** Cambia la imagen del padre. `null` la quita. */
 export function updateParentImage(id: string, image: string | null): Promise<void> {
   return withTranslatedErrors(async () => {
     await getPrisma().user.update({ where: { id }, data: { image } });
@@ -122,7 +104,6 @@ export function updateParentPasswordHash(id: string, passwordHash: string): Prom
   });
 }
 
-/** Suma un intento fallido y devuelve cuántos van. */
 export function registerFailedLogin(id: string): Promise<number> {
   return withTranslatedErrors(async () => {
     const updated = await getPrisma().user.update({
@@ -140,7 +121,6 @@ export function lockParentUntil(id: string, until: Date): Promise<void> {
   });
 }
 
-/** Un acceso correcto pone el contador a cero y levanta cualquier bloqueo. */
 export function clearParentLockout(id: string): Promise<void> {
   return withTranslatedErrors(async () => {
     await getPrisma().user.update({
@@ -150,12 +130,6 @@ export function clearParentLockout(id: string): Promise<void> {
   });
 }
 
-/**
- * Cambia el PIN de adulto y desbloquea.
- *
- * Poner un PIN nuevo desbloquea el perfil: es la vía por la que un padre se
- * rescata a sí mismo cuando lo ha olvidado y se ha quedado fuera.
- */
 export function updateParentPinHash(id: string, pinHash: string): Promise<void> {
   return withTranslatedErrors(async () => {
     await getPrisma().user.update({
@@ -191,10 +165,6 @@ export function clearParentPinLockout(id: string): Promise<void> {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Perfiles de niño
-// ---------------------------------------------------------------------------
-
 export interface ChildCredentials {
   id: string;
   name: string;
@@ -205,7 +175,6 @@ export interface ChildCredentials {
   deletedAt: Date | null;
 }
 
-/** Perfiles activos de un padre, con lo justo para pintar el selector. */
 export function findSelectableChildren(
   parentId: string,
 ): Promise<Array<{ id: string; name: string; avatar: string | null; lockedUntil: Date | null }>> {
@@ -262,13 +231,6 @@ export function findChildForSession(
   );
 }
 
-/**
- * Marca —o desmarca— el recorrido de bienvenida de un perfil.
- *
- * Dos funciones y no una con una bandera de tabla: son dos tablas distintas y
- * el repositorio no adivina cuál toca. Quién es quién lo decide el servicio, que
- * es donde vive la rama por rol.
- */
 export function setParentTutorialSeen(id: string, seenAt: Date | null): Promise<void> {
   return withTranslatedErrors(async () => {
     await getPrisma().user.update({ where: { id }, data: { tutorialSeenAt: seenAt } });
@@ -281,13 +243,6 @@ export function setChildTutorialSeen(id: string, seenAt: Date | null): Promise<v
   });
 }
 
-/**
- * El tema de cada perfil, en su propia fila.
- *
- * Dos funciones y no una con un `if`, por lo mismo que el recorrido de
- * bienvenida: el repositorio no adivina cuál toca. Quién es quién lo decide el
- * servicio, que es donde vive la rama por rol.
- */
 export function setParentTheme(id: string, theme: ThemePreference): Promise<void> {
   return withTranslatedErrors(async () => {
     await getPrisma().user.update({ where: { id }, data: { themePreference: theme } });
@@ -302,8 +257,6 @@ export function setChildTheme(id: string, theme: ThemePreference): Promise<void>
 
 export function updateChildPinHash(id: string, pinHash: string): Promise<void> {
   return withTranslatedErrors(async () => {
-    // Poner un PIN nuevo desbloquea el perfil: es el camino por el que un padre
-    // rescata a un hijo que se quedó fuera.
     await getPrisma().childProfile.update({
       where: { id },
       data: { pinHash, failedPinAttempts: 0, lockedUntil: null },
@@ -337,10 +290,6 @@ export function clearChildLockout(id: string): Promise<void> {
   });
 }
 
-// ---------------------------------------------------------------------------
-// Sesiones
-// ---------------------------------------------------------------------------
-
 export interface StoredSession {
   id: string;
   userId: string;
@@ -358,7 +307,6 @@ export function createSession(data: {
 }): Promise<StoredSession> {
   return withTranslatedErrors(() =>
     getPrisma().session.create({
-      // Se guarda el HASH del identificador, nunca el identificador.
       data: {
         tokenHash: hashSessionToken(data.token),
         userId: data.userId,
@@ -416,21 +364,12 @@ export function extendSession(id: string, expiresAt: Date): Promise<void> {
   });
 }
 
-/** Revoca una sesión. Borrar la fila se lleva por cascada las de sus hijos. */
 export function revokeSession(id: string): Promise<void> {
   return withTranslatedErrors(async () => {
     await getPrisma().session.deleteMany({ where: { id } });
   });
 }
 
-/**
- * Revoca todas las sesiones de una cuenta, salvando opcionalmente un dispositivo.
- *
- * «Salvar un dispositivo» es salvar su sesión de cuenta **y el perfil que tenga
- * activo**. Salvar solo la cuenta echaría a quien acaba de cambiar su
- * contraseña de vuelta a la rejilla, que no es conservar su sesión: es
- * expulsarlo con más pasos.
- */
 export function revokeAllSessionsOfUser(
   userId: string,
   keepAccountSessionId?: string,
@@ -458,7 +397,6 @@ export function revokeAllSessionsOfUser(
   });
 }
 
-/** Revoca todas las sesiones abiertas de un perfil de niño concreto. */
 export function revokeSessionsOfChildProfile(childProfileId: string): Promise<number> {
   return withTranslatedErrors(async () => {
     const result = await getPrisma().session.deleteMany({ where: { childProfileId } });
@@ -466,11 +404,6 @@ export function revokeSessionsOfChildProfile(childProfileId: string): Promise<nu
   });
 }
 
-/**
- * Revoca los perfiles activos que cuelgan de una sesión de cuenta.
- *
- * Se usa al entrar a un perfil, para que nunca haya dos activos a la vez.
- */
 export function revokeProfileSessionsOf(accountSessionId: string): Promise<number> {
   return withTranslatedErrors(async () => {
     const result = await getPrisma().session.deleteMany({

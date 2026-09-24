@@ -5,17 +5,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { messages } from "../../src/lib/messages.js";
 import { comoNino, comoPadre } from "../support/router.js";
 
-/**
- * `ImageUploadField` se sustituye por un marcador que expone lo que recibe.
- *
- * Lo que hay que comprobar es QUÉ PAR pide cada punto de uso —si recorta y con
- * cuánto detalle guarda— y ese par no llega al DOM de ninguna otra forma.
- *
- * NO se prueba el recorte de punta a punta, y conviene decir por qué:
- * `react-easy-crop` mide su lienzo para calcular el área, jsdom no hace layout,
- * así que su `onCropComplete` nunca dispara y la subida no llega a ocurrir. Eso
- * se comprueba abriendo la aplicación, y está escrito como tarea.
- */
 vi.mock("../../src/features/uploads/ImageUploadField.js", () => ({
   ImageUploadField: ({ aspect, maxDimension }: { aspect?: number; maxDimension: number }) => (
     <div
@@ -70,7 +59,6 @@ function montar(pantalla: React.ReactElement): void {
   render(<QueryClientProvider client={queryClient}>{pantalla}</QueryClientProvider>);
 }
 
-/** El par que pidió el campo de imagen de la pantalla. */
 function parPedido(): { aspect: string | null; max: string | null } {
   const campo = screen.getByTestId("campo-de-imagen");
   return { aspect: campo.getAttribute("data-aspect"), max: campo.getAttribute("data-max") };
@@ -98,13 +86,6 @@ const TAREA: OwnTask = {
   updatedAt: "2026-09-01T10:00:00.000Z",
 };
 
-/**
- * Lo que este change existe para quitar de en medio.
- *
- * `aspect` decidía DOS cosas: si se recortaba y —vía `forAvatar`— si el
- * resultado se reducía a 512 px o a 1280. Pedir recorte para un premio le habría
- * encogido la foto a tamaño de avatar para una tesela que ocupa media tablet.
- */
 describe("cada punto de uso pide su forma y su tamaño por separado", () => {
   it("el alta de un premio recorta y guarda detalle de FOTO", async () => {
     servir("padre", { "/children": pagina([HIJO]) });
@@ -140,14 +121,6 @@ describe("cada punto de uso pide su forma y su tamaño por separado", () => {
     expect(parPedido()).toEqual({ aspect: "sin-recorte", max: String(PHOTO_MAX_DIMENSION) });
   });
 
-  /*
-   * El caso que de verdad prueba la separación, y por eso mira DOS pantallas.
-   *
-   * El premio comparte forma con el avatar y NO su tamaño; comparte tamaño con
-   * la evidencia y NO su forma. Con las dos decisiones atadas en una sola prop,
-   * uno de esos dos pares sería imposible de expresar — que es exactamente lo
-   * que pasaba antes.
-   */
   it("el premio comparte forma con el avatar y tamaño con la evidencia", async () => {
     servir("padre", { "/children": pagina([HIJO]) });
     montar(<RewardForm onSaved={() => {}} />);
@@ -164,21 +137,12 @@ describe("cada punto de uso pide su forma y su tamaño por separado", () => {
 
     expect(premio.aspect).not.toBe(evidencia.aspect);
     expect(premio.max).toBe(evidencia.max);
-    // Y NO es el de un avatar, que es lo que le habría tocado con las dos
-    // decisiones atadas.
+
     expect(premio.max).not.toBe(String(AVATAR_MAX_DIMENSION));
   });
 });
 
-/**
- * La otra mitad del arreglo de la rejilla.
- *
- * Recortar endereza las fotos NUEVAS. Las que ya están subidas conservan su
- * proporción, así que sin una caja fija una apaisada seguiría descuadrando su
- * fila.
- */
 describe("la imagen de un premio ocupa siempre la misma caja", () => {
-  /** Solo las clases que deciden la caja. */
   const caja = (elemento: HTMLElement): string[] =>
     elemento.className.split(/\s+/).filter((clase) => /^aspect-|^h-|^max-h-|^w-/.test(clase));
 
@@ -191,11 +155,6 @@ describe("la imagen de un premio ocupa siempre la misma caja", () => {
     const { container: sinFoto } = render(<RewardImage image={null} title="Cine" />);
     const respaldo = sinFoto.firstElementChild as HTMLElement;
 
-    /*
-     * Se comparan las dos ENTRE SÍ, no se comprueba que cada una tiene caja:
-     * eran `max-h-40` y `h-40`, dos declaraciones distintas —una un máximo, la
-     * otra fija—, y mirarlas por separado no lo habría visto.
-     */
     expect(caja(foto)).toEqual(caja(respaldo));
     expect(caja(foto)).toContain("aspect-square");
   });
@@ -205,18 +164,10 @@ describe("la imagen de un premio ocupa siempre la misma caja", () => {
       <RewardImage image="https://almacen.ejemplo.dev/apaisada.jpg" title="Helado" />,
     );
 
-    // `object-cover` recorta al mostrar, que es lo que deja ver una foto vieja de
-    // otra proporción sin reprocesar nada en el almacén.
     expect((container.firstElementChild as HTMLElement).className).toContain("object-cover");
   });
 });
 
-/**
- * El contrato de `prepareImage`, que es donde vivía la bandera.
- *
- * Recibe la medida y ya no la deduce de si le dijeron que era un avatar. La
- * FIRMA es la comprobación: con la bandera eran un blob y un objeto de opciones.
- */
 describe("prepareImage usa la medida que recibe", () => {
   it("no queda ninguna bandera que la deduzca", async () => {
     const modulo = await import("../../src/features/uploads/prepare-image.js");

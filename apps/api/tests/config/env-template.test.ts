@@ -4,12 +4,6 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { ENV_KEYS } from "../../src/config/env.schema.js";
 
-/**
- * Variables que `.env.example` declara y la API NO lee: las consume
- * `docker-compose.yml` o el servidor de desarrollo del front. Se listan de forma
- * explícita para que una variable olvidada en la plantilla no pase por
- * "infraestructura" sin que nadie lo note.
- */
 const INFRASTRUCTURE_ONLY_KEYS = [
   "POSTGRES_USER",
   "POSTGRES_PASSWORD",
@@ -17,8 +11,7 @@ const INFRASTRUCTURE_ONLY_KEYS = [
   "POSTGRES_PORT",
   "ADMINER_PORT",
   "WEB_PORT",
-  // MinIO: lo levanta docker-compose, no lo lee la API. Esta habla con el
-  // almacén por S3_ENDPOINT y las credenciales, que sí están en el esquema.
+
   "MINIO_ROOT_USER",
   "MINIO_ROOT_PASSWORD",
   "MINIO_PORT",

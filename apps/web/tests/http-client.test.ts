@@ -3,7 +3,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { ApiRequestError, apiFetch } from "../src/lib/http-client.js";
 
-/** Respuesta falsa con el cuerpo de error estándar de la API. */
 function errorResponse(status: number, body: unknown): Response {
   return new Response(JSON.stringify(body), {
     status,

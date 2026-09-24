@@ -35,19 +35,6 @@ import {
   useUpdateReward,
 } from "./use-rewards.js";
 
-/**
- * El catálogo del padre: sus premios, con las ofertas de cada uno.
- *
- * El precio no se edita junto al título: es la oferta a cada hijo, y tiene su
- * propio editor, que reemplaza el conjunto ENTERO de una vez. Ver el requisito
- * «El precio no vive en el premio» y la decisión 3 del design de `add-rewards`.
- *
- * Se edita EN LÍNEA y no en una ruta propia, decidido en
- * `redesign-parent-authoring`: es un retoque pequeño y frecuente —subir un
- * precio, cambiar una foto— y sacarlo a otra pantalla obliga a ir y volver por
- * cada cambio. Queda anotada la asimetría con los perfiles de hijo, que sí se
- * editan en su propia ruta; la mira `redesign-parent-children`.
- */
 const FILTROS: Array<{ valor: "ACTIVE" | "RETIRED"; texto: string }> = [
   { valor: "ACTIVE", texto: messages.rewards.filterActive },
   { valor: "RETIRED", texto: messages.rewards.filterRetired },
@@ -79,15 +66,11 @@ export function RewardCatalog({
         </Link>
       </div>
 
-      {/* Mismo filtro que las dos bandejas: un nav de ENLACES, porque vive en la
-          dirección. Ver la decisión 3 del design de `redesign-parent-inbox`. */}
       <nav
         aria-label={messages.rewards.filterLabel}
         className="flex flex-wrap gap-1 border-b border-border"
       >
         {FILTROS.map((opcion) => (
-          // Cambiar de filtro vuelve a la página 1: cambia cuántas hay, y
-          // quedarse en la 4 enseñaría una lista vacía sin explicar por qué.
           <Link
             key={opcion.valor}
             to="/rewards"
@@ -106,16 +89,6 @@ export function RewardCatalog({
       ) : premios.length === 0 ? (
         <EmptyState glyph="🎁" title={messages.rewards.empty} />
       ) : (
-        /*
-          REJILLA, como el escaparate del niño, y por lo mismo: a ancho completo
-          la tarjeta se estiraba a los 72rem para enseñar un título, a quién se
-          le ofrece y tres botones, con el nombre de un hijo a un palmo de su
-          precio y nada en medio.
-
-          Su tope es MÁS ANCHO que el de la tesela del niño y tiene token propio:
-          el padre ve lo mismo más los controles de gestión, y 300px no dan para
-          «Cambiar quién puede pedirlo».
-        */
         <ul className="grid list-none grid-cols-1 gap-4 p-0 md:grid-cols-2 xl:grid-cols-3">
           {premios.map((premio) => (
             <RewardCard key={premio.id} reward={premio} />
@@ -160,11 +133,6 @@ export function RewardCatalog({
 }
 
 function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
-  /*
-   * Tres estados de REVELACIÓN, no de navegación: ninguno decide qué PANTALLA
-   * se enseña, que es lo que la regla prohíbe. Editar en el sitio y confirmar
-   * una baja son aperturas, y su gemela en el sistema —`Dialog`— funciona igual.
-   */
   const [editandoTitulo, setEditandoTitulo] = useState(false);
   const [editandoOfertas, setEditandoOfertas] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
@@ -208,17 +176,6 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
                 />
               </Field>
 
-              {/*
-                La otra vía de entrada de una foto de premio: esta cuelga del
-                premio y la del alta del padre. Desde
-                `polish-profile-and-reward-image` conviven — este comentario
-                decía que la foto «se añade AQUÍ y no al publicar», y dejó de ser
-                cierto ese día.
-
-                Recorta igual que el alta, y no por simetría: si una vía
-                recortara y la otra no, el catálogo acabaría con fotos de dos
-                clases según por dónde entraron.
-              */}
               <ImageUploadField
                 requestUploadUrl={(contentType) =>
                   rewardsApi.requestRewardImageUploadUrl(reward.id, contentType)
@@ -235,8 +192,6 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
                 label={messages.rewards.addImage}
               />
 
-              {/* Los tres al PIE y en una fila: `mt-auto` los alinea entre tarjetas
-              aunque una tenga descripción y otra no. */}
           <div className="mt-auto flex flex-nowrap gap-2">
                 <Button
                   type="submit"
@@ -270,20 +225,6 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
               </div>
             </form>
           ) : (
-            /*
-              LA TARJETA ES HORIZONTAL: foto pequeña a un lado y todo lo demás al
-              otro. Era vertical, con la foto arriba a todo el ancho.
-
-              El defecto solo se ve con el catálogo lleno y SIN fotos, que es el
-              estado normal de una familia que acaba de empezar: cada premio se
-              comía trescientos píxeles de alto para enseñar un cuadro vacío, así
-              que cuatro premios no cabían en una pantalla. Con la foto pequeña
-              caben en dos filas, que es lo que dibuja la maqueta.
-
-              El escaparate del niño NO cambia: allí la tesela es cuadrada a
-              propósito —se comparan dos precios de un vistazo— y la foto es lo
-              que se mira. Aquí lo que se mira es a quién y por cuánto.
-            */
             <div className="flex min-w-0 gap-3">
               <RewardImage
                 image={reward.image}
@@ -313,20 +254,6 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
             </Alert>
           )}
 
-          {/*
-            LAS OFERTAS SON PÍLDORAS EN LÍNEA, y eran una columna de filas.
-
-            Es lo que la maqueta dibuja y lo que la pantalla pide: aquí lo que se
-            mira es a quién se le ofrece y por cuánto, y en columna cada nombre
-            ocupaba un renglón entero para dos datos cortos. En línea, los tres
-            hijos caben en el ancho de la tarjeta y se comparan sin recorrer.
-
-            EL RÓTULO «Ofrecido a» DESAPARECE DE LA VISTA Y NO DEL SENTIDO: la
-            maqueta no lo dibuja —las píldoras dicen ya un nombre y un precio—
-            pero una lista sin nombre, leída en voz alta detrás del título del
-            premio, deja «Mateo 300» sin decir de qué. Se queda como nombre de la
-            lista.
-          */}
           {reward.offers.length === 0 ? (
             <p className="text-small text-ink-muted">{messages.rewards.noOffers}</p>
           ) : (
@@ -381,7 +308,6 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
             )}
           </div>
 
-          {/* Retirar es lógico, pero la interfaz lo dice ANTES y no después. */}
           <Dialog
             open={confirmando}
             onOpenChange={setConfirmando}
@@ -423,21 +349,6 @@ function RewardCard({ reward }: { reward: Reward }): React.ReactElement {
   );
 }
 
-/**
- * Reemplaza el conjunto COMPLETO de ofertas de un premio, en una sola decisión:
- * quién puede pedirlo y a qué precio, todo junto. Ver la decisión 3 del design
- * de `add-rewards`.
- *
- * Usa `ChildrenPicker` **sin selector de modo**: reasignar precios es siempre
- * uno por hijo, y ofrecer aquí «el mismo para todos» sería ofrecer algo que no
- * significa nada.
- *
- * Recibe `onOpenChange` y no `onClose`, y no es cosmética: una prop sin
- * argumentos que significa «ciérrame» empuja la navegación a quien llama, y hay
- * un test que las prohíbe. La forma correcta para una revelación es la que ya
- * usan `Dialog` y `Drawer` — lleva el estado dentro, así que dice lo que pasó y
- * no lo que hay que hacer.
- */
 function OffersEditor({
   reward,
   onOpenChange,

@@ -18,22 +18,6 @@ import type { HeroTone } from "../../ui/index.js";
 import { LeaveProfile } from "../auth/LeaveProfile.js";
 import { useParentConsole, type Recuento } from "./use-parent-console.js";
 
-/**
- * El panel del padre: qué le espera y cómo van sus hijos.
- *
- * Hasta `redesign-parent-home` esta pantalla era una lista de cinco enlaces, y
- * los cinco eran exactamente los de la barra de su marco. No estaba sin vestir:
- * estaba sin CONTENIDO. Vestirla con tarjetas la habría dejado igual de vacía,
- * solo más grande.
- *
- * Lo que un padre necesita al abrir Monedín es saber si hay algo esperándole:
- * él es la mitad autorizadora del ciclo —el niño marca, él aprueba, y solo
- * entonces se acreditan monedas—. El vocabulario ya lo decía sin que nadie lo
- * cobrara: `messages.nav.parentHome` vale «Panel», no «Inicio».
- *
- * El panel NO resuelve nada. Aprobar y rechazar es trabajo de la bandeja, y
- * cada aviso lleva a la suya con el filtro ya puesto.
- */
 export function ParentConsole({ name }: { name: string }): React.ReactElement {
   const actor = useSession().session?.actor;
   const { tasksToApprove, redemptionsWaiting, children, isPending, error } = useParentConsole();
@@ -50,41 +34,23 @@ export function ParentConsole({ name }: { name: string }): React.ReactElement {
 
   return (
     <section className="flex flex-col gap-6">
-      {/*
-        QUIÉN decide si se ve: esta pantalla, mirando el actor. El recorrido no
-        consulta la sesión — recibe su guion y avisa al terminar—, y por eso se
-        prueba montándolo con un guion cualquiera y sin servidor.
-      */}
+
       {actor?.tutorialSeen === false && <Tutorial steps={PARENT_STEPS} />}
 
       <h2 className="text-display font-extrabold">
         {messages.parents.greeting} {name}
       </h2>
 
-      {/* `data-tutorial`: el recorrido de bienvenida ilumina esta sección. Es un
-          ancla y no una referencia encadenada — quien monta el recorrido no es
-          quien dibuja cada trozo. */}
       <section data-tutorial="parent-pending" className="flex flex-col gap-3">
         <h3 className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
           {messages.parents.pendingTitle}
         </h3>
 
-        {/*
-          Un aviso con cero no se dibuja, y con las dos bandejas vacías va una
-          sola frase: leer dos ceros para concluir lo que una frase dice de un
-          vistazo es trabajo que el panel existe para ahorrar. Y estar al día es
-          la situación NORMAL, no un caso degenerado.
-        */}
         {sinNada ? (
           <Card>
             <p className="text-body text-ink-muted">{messages.parents.allClear}</p>
           </Card>
         ) : (
-          /*
-            Los dos avisos LADO A LADO donde hay ancho: son dos bandejas
-            distintas y ninguna manda sobre la otra, y apilarlas hace que la
-            segunda parezca la consecuencia de la primera.
-          */
           <ul className="grid list-none gap-4 p-0 sm:grid-cols-2">
             {tasksToApprove.value > 0 && (
               <li>
@@ -126,12 +92,6 @@ export function ParentConsole({ name }: { name: string }): React.ReactElement {
           {children.length === 0 ? (
             <p className="text-body text-ink-muted">{messages.parents.childrenEmpty}</p>
           ) : (
-            /*
-              Las filas NO son enlaces. Adónde lleva pulsar un hijo —a editarlo,
-              a sus tareas, a su historial— lo deciden `redesign-parent-children`
-              y `add-coin-history`, y elegirlo aquí sería fijarlo desde la
-              pantalla que menos sabe. El bloque entero lleva a `/children`.
-            */
             <ul className="flex list-none flex-col gap-3 p-0">
               {children.map((hijo) => (
                 <ChildBalance key={hijo.id} child={hijo} />
@@ -140,12 +100,6 @@ export function ParentConsole({ name }: { name: string }): React.ReactElement {
           )}
         </Card>
 
-        {/*
-          `self-start`: el contenedor es una columna, así que sin esto el botón se
-          estiraba a todo el ancho del panel. Dos controles a ancho completo y
-          apilados dicen que las dos cosas pesan lo mismo, y no lo pesan — la
-          maqueta pone este compacto y el de abajo como un enlace.
-        */}
         <Link
           to="/children"
           search={{ page: 1 }}
@@ -155,28 +109,11 @@ export function ParentConsole({ name }: { name: string }): React.ReactElement {
         </Link>
       </section>
 
-      {/*
-        Cambiar de perfil se queda; cerrar sesión se mudó a `/account`. Se
-        parecen y no lo son: esto devuelve a la rejilla varias veces al día y sin
-        credenciales para volver, y aquello obliga a teclear correo y contraseña.
-        Juntas e iguales es como un padre acaba tecleando su contraseña porque
-        quería pasarle la tablet a su hijo.
-      */}
       <LeaveProfile />
     </section>
   );
 }
 
-/**
- * Un aviso de bandeja: la cifra, qué es, y adónde lleva.
- *
- * Lleva al listado CON el filtro aplicado. Llevarlo sin filtro obligaría al
- * padre a repetir a mano la búsqueda que el panel acaba de hacer por él; que se
- * pueda es consecuencia de que el filtro viaje en la dirección, y este es el
- * primer sitio que lo aprovecha.
- *
- * Es UN solo elemento interactivo, como las teselas de la rejilla de perfiles.
- */
 function PendingLink({
   to,
   search,
@@ -188,7 +125,7 @@ function PendingLink({
 }: {
   to: "/tasks" | "/redemptions";
   search: { page: number; status: "COMPLETED" | "PENDING" };
-  /** Tareas en el tono de la ACCIÓN; canjes en el del AHORRO. */
+
   tone: HeroTone;
   icon: React.ReactElement;
   count: Recuento;
@@ -196,24 +133,8 @@ function PendingLink({
   many: string;
 }): React.ReactElement {
   return (
-    /*
-      EL ENLACE SE ESTIRA SOBRE EL PANEL, y sigue siendo UNO.
-
-      `HeroPanel` dibuja una `<section>` y no puede navegar, así que el enlace va
-      dentro y cubre la superficie con `after:inset-0`. Se consigue lo de siempre
-      —toda la tarjeta responde al toque— sin ninguna de las dos formas que este
-      proyecto ya descartó: un `<Link>` envolviendo un panel anidaría dos
-      interactivos, y darle a `HeroPanel` la capacidad de navegar la obligaría a
-      saber de rutas, que es justo lo que `ui/` no sabe.
-    */
     <HeroPanel tone={tone} className="motion-safe:transition-transform motion-safe:hover:scale-105">
-      {/*
-        EN FILA, y hace falta decirlo: `HeroPanel` apila su contenido en COLUMNA
-        —es lo que quiere el saludo del inicio, título encima y frase debajo— así
-        que sin esta envoltura la tesela se estiraba de lado a lado del panel y
-        la flecha caía debajo del texto. No se ve en ningún test: jsdom no aplica
-        CSS. Lo cazó abrir el panel.
-      */}
+
       <span className="flex w-full items-center gap-4">
         <IconTile tone="hero">{icon}</IconTile>
 
@@ -223,7 +144,7 @@ function PendingLink({
           className="flex min-w-0 flex-1 flex-col text-ink-inverted no-underline after:absolute after:inset-0"
         >
           <span className="text-display font-extrabold leading-none">
-            {/* El `+` dice «al menos»: la cuenta se quedó corta y no lo esconde. */}
+
             {count.value}
             {count.exact ? "" : "+"}
           </span>
@@ -238,7 +159,6 @@ function PendingLink({
   );
 }
 
-/** Las dos marcas de una lista revisada. Decorativa. */
 function IconoTareas(): React.ReactElement {
   return (
     <Glifo>
@@ -250,7 +170,6 @@ function IconoTareas(): React.ReactElement {
   );
 }
 
-/** Un vale con su muesca. Decorativa. */
 function IconoCanjes(): React.ReactElement {
   return (
     <Glifo>
@@ -260,7 +179,6 @@ function IconoCanjes(): React.ReactElement {
   );
 }
 
-/** Adónde lleva. Decorativa: lo dice el enlace. */
 function Flecha(): React.ReactElement {
   return (
     <span className="relative shrink-0 text-ink-inverted">
@@ -271,7 +189,6 @@ function Flecha(): React.ReactElement {
   );
 }
 
-/** El lienzo común de los tres dibujos de esta pantalla. */
 function Glifo({ children }: { children: React.ReactNode }): React.ReactElement {
   return (
     <svg

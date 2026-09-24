@@ -19,22 +19,6 @@ import senalaAbajo from "../assets/tutorial/senala-abajo.png";
 import senalaArriba from "../assets/tutorial/senala-arriba.png";
 import sorpresa from "../assets/tutorial/sorpresa.png";
 
-/**
- * Las veinte poses de Monedín, en un solo sitio.
- *
- * Mismo criterio que `avatars.ts`: este es el ÚNICO archivo que sabe qué imagen
- * corresponde a cada pose. Hasta ahora cuatro archivos repartidos por el
- * proyecto importaban los mismos PNG por su ruta —el widget, el recorrido, el
- * chat y la puerta pública—, así que el día que una ilustración cambie de nombre
- * hay que encontrarlos todos.
- *
- * Una pose se pide por lo que EXPRESA y no por dónde se usa: `duda` sirve igual
- * en el teclado del PIN que en un canje sin respuesta, y atarla a un sitio la
- * habría dejado inservible en el otro.
- *
- * El tipo es lo que hace cumplible que nadie invente una pose: pedir una que no
- * existe no compila.
- */
 export const POSES = {
   agobio,
   alcanzaLaMeta,

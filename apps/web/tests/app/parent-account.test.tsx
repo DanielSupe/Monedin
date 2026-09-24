@@ -8,19 +8,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/**
- * Un padre concreto, con su nombre y su correo.
- *
- * `comoPadre()` trae siempre el mismo correo, y aquí hacen falta dos distintos:
- * un test con un solo actor pasaría igual con el valor escrito a mano en la
- * pantalla, que es justo el defecto que persigue.
- */
 function padre(name: string, email: string): SessionState {
   return {
     hasAccount: true,
-    // Con FOTO y no con una ilustración del catálogo: la vista previa que
-    // duplicaba el avatar solo aparecía cuando había foto, así que un actor con
-    // animal dejaba el conteo pasando sin ver el caso real.
+
     actor: {
       familyRole: "PARENT",
       id: `padre-${email}`,
@@ -44,10 +35,6 @@ describe("la cuenta del padre dice de quién es", () => {
     expect(screen.getByText("lucia@ejemplo.dev")).toBeInTheDocument();
   });
 
-  /*
-   * Dos familias, y ninguna ve nada de la otra. Con un solo actor, una pantalla
-   * que pintara un correo escrito a mano pasaría el test anterior.
-   */
   it("y son los de quien está dentro, no unos fijos", async () => {
     await montarApp("/account", LUCIA);
     await screen.findByText("lucia@ejemplo.dev");
@@ -63,12 +50,6 @@ describe("la cuenta del padre dice de quién es", () => {
     expect(screen.queryByText("Lucía")).toBeNull();
   });
 
-  /*
-   * El orden es parte del requisito: la pantalla responde «¿en qué cuenta
-   * estoy?» ANTES de dejar tocar una credencial. Comprobar solo que ambas cosas
-   * están en pantalla dejaría pasar la identidad al final del todo, por debajo
-   * del cambio de PIN.
-   */
   it("y lo dice antes de ofrecer cambiar el PIN", async () => {
     await montarApp("/account", LUCIA);
 
@@ -80,12 +61,6 @@ describe("la cuenta del padre dice de quién es", () => {
     );
   });
 
-  /*
-   * La tarjeta de identidad y el selector enseñaban CADA UNO el avatar, así que
-   * salía dos veces separado por nada. Se cuenta, no se comprueba que «está»:
-   * con `getBy` una sola imagen y dos imágenes se distinguen, pero un `queryBy`
-   * afirmativo pasaría con las dos.
-   */
   it("y su avatar se enseña UNA sola vez", async () => {
     await montarApp("/account", LUCIA);
     await screen.findByText("lucia@ejemplo.dev");
@@ -93,19 +68,12 @@ describe("la cuenta del padre dice de quién es", () => {
     const cuenta = screen.getByRole("heading", { name: messages.nav.parentAccount })
       .closest("section") as HTMLElement;
 
-    /*
-     * Se cuentan los avatares ANUNCIADOS, no los que llevan el nombre: el que
-     * sobraba se anunciaba como «Mi foto» y no como «Lucía», así que buscar por
-     * el nombre no lo habría visto. Los del catálogo no cuentan porque van
-     * decorativos dentro de su botón, que es quien lleva el nombre del animal.
-     */
     expect(within(cuenta).getAllByRole("img")).toHaveLength(1);
   });
 
   it("y ofrece las dos formas de cambiarlo: el catálogo y una foto", async () => {
     await montarApp("/account", LUCIA);
 
-    // El catálogo del niño, ahora también aquí: la misma pieza, no una copia.
     expect(await screen.findByRole("button", { name: "koala" })).toBeInTheDocument();
     expect(screen.getByText(messages.uploads.choose)).toBeInTheDocument();
   });

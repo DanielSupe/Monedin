@@ -20,9 +20,6 @@ beforeEach(async () => {
   await resetAuthData();
 });
 
-// Estos tests CONFIRMAN datos: no pueden usar transacciones deshechas porque
-// llaman a la app, que abre las suyas. Así que limpian al terminar, para no
-// dejar la base con restos que confundan a los tests de otros archivos.
 afterAll(async () => {
   await resetAuthData();
 });
@@ -37,10 +34,9 @@ describe("registro de un padre", () => {
     });
 
     expect(response.status).toBe(201);
-    // La cuenta queda acreditada: no hay que acceder acto seguido.
+
     expect(cookieValue(response, ACCOUNT_COOKIE)).toBeTruthy();
-    // Pero NO deja perfil activo: se llega a la rejilla, como en cualquier
-    // apertura posterior.
+
     expect(response.body).toEqual({ actor: null, hasAccount: true });
   });
 
@@ -103,12 +99,11 @@ describe("registro de un padre", () => {
 
     expect(response.status).toBe(422);
     expect(response.body.details.map((d: { field: string }) => d.field)).toContain("password");
-    // Y no queda nada a medio crear.
+
     expect(await testPrisma().user.count()).toBe(0);
   });
 
   it("no existe ninguna vía pública de registro de niños", async () => {
-    // Se recorren los métodos públicos del router de auth: ninguno crea perfiles.
     const intentos = await Promise.all([
       request(app).post(`${API_PREFIX}/auth/profiles`).send({ name: "Colado", pin: "1234" }),
       request(app).post(`${API_PREFIX}/auth/profiles/enter`).send({ profileId: "x", pin: "1234" }),
@@ -133,7 +128,7 @@ describe("acceso con correo y contraseña", () => {
     });
 
     expect(response.status).toBe(200);
-    // Acredita la cuenta y manda a la rejilla; todavía no es nadie.
+
     expect(response.body).toEqual({ actor: null, hasAccount: true });
     expect(cookieValue(response, ACCOUNT_COOKIE)).toBeTruthy();
   });
@@ -142,8 +137,7 @@ describe("acceso con correo y contraseña", () => {
     const response = await login(app, { email: CREDENCIALES.correo, password: "no-es-esta-x" });
 
     expect(response.status).toBe(401);
-    // El mensaje nombra AMBOS a propósito: es lo que lo hace ambiguo. Lo que no
-    // puede hacer es señalar uno solo.
+
     expect(response.body.message).toMatch(/correo/i);
     expect(response.body.message).toMatch(/contraseñ/i);
     expect(response.body.message).not.toMatch(/no (existe|está registrad)/i);
@@ -179,8 +173,6 @@ describe("acceso con correo y contraseña", () => {
     const media = (existente + inexistente) / (2 * muestras);
     const diferencia = Math.abs(existente - inexistente) / muestras;
 
-    // Sin igualar el coste, el correo inexistente respondería casi al instante
-    // porque no habría hash que calcular, y eso permite enumerar cuentas.
     expect(diferencia).toBeLessThan(media * 0.6);
   }, 60_000);
 
@@ -291,7 +283,6 @@ describe("bloqueo por intentos fallidos", () => {
   it("el bloqueo caduca", async () => {
     await fallar(PARENT_MAX_FAILED_ATTEMPTS);
 
-    // Se adelanta el reloj poniendo el bloqueo en el pasado.
     await testPrisma().user.update({
       where: { email: CREDENCIALES.correo },
       data: { lockedUntil: new Date(Date.now() - 1000) },
@@ -311,8 +302,7 @@ describe("bloqueo por intentos fallidos", () => {
         email: "fantasma@monedin.test",
         password: `mala-${i}-xxxx`,
       });
-      // Siempre el mismo 401: nunca un 429 que revelaría que hay una cuenta
-      // detrás llevando la cuenta de los intentos.
+
       expect(response.status).toBe(401);
     }
   }, 120_000);
@@ -342,12 +332,10 @@ describe("cambio de contraseña", () => {
 
     expect(cambio.status).toBe(204);
 
-    // La sesión que hizo el cambio sigue valiendo.
     const estado = await request(app).get(`${API_PREFIX}/auth/session`).set("Cookie", cookies);
     expect(estado.body.actor?.familyRole).toBe("PARENT");
     expect(estado.body.hasAccount).toBe(true);
 
-    // Y la contraseña nueva es la que sirve.
     await expect(
       login(app, { email: CREDENCIALES.correo, password: NUEVA }).then((r) => r.status),
     ).resolves.toBe(200);

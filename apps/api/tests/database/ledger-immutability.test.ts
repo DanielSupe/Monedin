@@ -1,13 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createChild, createParent, withRollback } from "../support/database.js";
 
-/**
- * El historial de monedas es de solo escritura.
- *
- * Lo garantiza un disparador instalado por la migración, no la disciplina del
- * código: aquí se intenta modificarlo y borrarlo por la vía directa. Ver la spec
- * `coin-ledger`, requisito "El historial es inmutable".
- */
 describe("inmutabilidad del historial de monedas", () => {
   it("rechaza modificar una entrada ya escrita", () =>
     withRollback(async (db) => {
@@ -65,7 +58,6 @@ describe("inmutabilidad del historial de monedas", () => {
         orderBy: { createdAt: "asc" },
       });
 
-      // Los dos siguen visibles: el error y su corrección.
       expect(movimientos).toHaveLength(2);
       expect(movimientos.map((m) => m.amount)).toEqual([100, -100]);
     }));
@@ -94,13 +86,11 @@ describe("inmutabilidad del historial de monedas", () => {
         data: { deletedAt: new Date() },
       });
 
-      // Fuera de los listados activos...
       const activos = await db.childProfile.findMany({
         where: { parentId: padre.id, deletedAt: null },
       });
       expect(activos).toHaveLength(0);
 
-      // ...pero su historial sigue íntegro.
       const historial = await db.coinTransaction.findMany({ where: { childId: hijo.id } });
       expect(historial).toHaveLength(1);
       expect(historial[0]?.amount).toBe(10);

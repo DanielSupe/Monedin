@@ -21,14 +21,6 @@ import {
 import { z } from "zod";
 import { apiFetch } from "../lib/http-client.js";
 
-/**
- * Llamadas de autenticación.
- *
- * Los tipos NO se declaran aquí: vienen de `@monedin/contracts`, el mismo
- * paquete del que la API deriva su validación. Si el contrato cambia, esto deja
- * de compilar.
- */
-
 const emptySchema = z.unknown();
 
 export function fetchSession(): Promise<SessionState> {
@@ -72,12 +64,6 @@ export async function changeAdultPin(input: ChangeAdultPinInput): Promise<void> 
   await apiFetch("/auth/pin", emptySchema, { method: "POST", body: JSON.stringify(input) });
 }
 
-/**
- * El niño cambia el PIN de SU perfil, el de la sesión.
- *
- * No lleva identificador: el perfil sale de la sesión. Vive en `auth` y no en
- * `children` porque tocar una credencial es de este módulo.
- */
 export async function changeOwnChildPin(input: ChangeOwnChildPinInput): Promise<void> {
   await apiFetch("/auth/child-profiles/me/pin", emptySchema, {
     method: "POST",
@@ -85,7 +71,6 @@ export async function changeOwnChildPin(input: ChangeOwnChildPinInput): Promise<
   });
 }
 
-/** El padre repone el PIN de un hijo, sin conocer el anterior. */
 export async function setChildPin(input: SetChildPinInput): Promise<void> {
   await apiFetch("/auth/child-profiles/pin", emptySchema, {
     method: "POST",
@@ -93,7 +78,6 @@ export async function setChildPin(input: SetChildPinInput): Promise<void> {
   });
 }
 
-/** El padre desbloquea el perfil de un hijo bloqueado por intentos. */
 export async function unlockChildProfile(childProfileId: string): Promise<void> {
   await apiFetch(`/auth/child-profiles/${childProfileId}/unlock`, emptySchema, { method: "POST" });
 }
@@ -112,8 +96,6 @@ export async function changePassword(input: ChangePasswordInput): Promise<void> 
 export const sessionQueryKey = ["auth", "session"] as const;
 export const profilesQueryKey = ["auth", "profiles"] as const;
 
-// --- Avatar propio del padre --------------------------------------------------
-
 export function requestParentAvatarUploadUrl(contentType: ImageContentType): Promise<UploadUrl> {
   return apiFetch("/auth/avatar/upload-url", uploadUrlSchema, {
     method: "POST",
@@ -121,10 +103,6 @@ export function requestParentAvatarUploadUrl(contentType: ImageContentType): Pro
   });
 }
 
-/**
- * Las dos formas del avatar del padre, excluyentes: una del catálogo o una foto
- * ya subida. Se manda tal cual llega, sin componer nunca las dos.
- */
 export async function updateParentAvatar(input: UpdateParentAvatarInput): Promise<void> {
   await apiFetch("/auth/avatar", z.unknown(), {
     method: "PATCH",
@@ -132,13 +110,6 @@ export async function updateParentAvatar(input: UpdateParentAvatarInput): Promis
   });
 }
 
-/**
- * Marca el recorrido de bienvenida como visto, o lo pide otra vez.
- *
- * UNA ruta para los dos roles: a quién se le explicó sale del actor, así que no
- * hay identificador que mandar — y por eso un niño no puede marcar el de su
- * hermano ni queriendo.
- */
 export async function updateTutorial(input: UpdateTutorialInput): Promise<void> {
   await apiFetch("/auth/tutorial", z.unknown(), {
     method: "PATCH",
@@ -146,13 +117,6 @@ export async function updateTutorial(input: UpdateTutorialInput): Promise<void> 
   });
 }
 
-/**
- * Guarda el tema del perfil activo.
- *
- * UNA ruta para los dos roles, igual que el recorrido: a quién se le guarda sale
- * del actor, así que no hay identificador que mandar — y por eso un niño no
- * puede cambiarle el tema a su hermano ni queriendo.
- */
 export async function updateTheme(input: UpdateThemeInput): Promise<void> {
   await apiFetch("/auth/theme", z.unknown(), {
     method: "PATCH",

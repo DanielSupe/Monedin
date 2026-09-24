@@ -27,18 +27,6 @@ import {
   useTaskBatches,
 } from "./use-tasks.js";
 
-/**
- * Las tareas del padre, agrupadas por reparto.
- *
- * Filtrar por «por aprobar» es la bandeja de lo que le toca resolver: no hay un
- * endpoint aparte para eso, es el mismo listado con su filtro.
- *
- * Un reparto filtrado por estado se enseña ENTERO, así que aquí pueden aparecer
- * tareas que no casan con el filtro. Es deliberado —el padre quiere ver el
- * reparto completo aunque solo una esté para aprobar— y desde
- * `redesign-parent-inbox` se DICE en pantalla: una decisión de producto que no
- * se explica es indistinguible de un defecto.
- */
 const FILTROS: Array<{ valor: TaskStatus | "ALL"; texto: string }> = [
   { valor: "ALL", texto: messages.tasks.filterAll },
   { valor: "PENDING", texto: messages.tasks.filterPending },
@@ -46,7 +34,6 @@ const FILTROS: Array<{ valor: TaskStatus | "ALL"; texto: string }> = [
   { valor: "APPROVED", texto: messages.tasks.filterApproved },
 ];
 
-/** Los mismos tonos que ve el niño en sus tareas: un estado se lee igual en las dos pantallas. */
 const TONO: Record<TaskStatus, BadgeTone> = {
   PENDING: "neutral",
   COMPLETED: "info",
@@ -81,17 +68,8 @@ export function TaskBatchList({
         </Link>
       </div>
 
-      {/*
-        El filtro es un NAV DE ENLACES y no `Tabs`: vive en la dirección, así que
-        cada opción ES una dirección. Convertirlo en botones perdería abrirlo en
-        otra pestaña y copiar el enlace de lo que se está mirando, sin ganar
-        nada. El aspecto sale de la pieza, igual que `buttonClasses`. Ver la
-        decisión 3 del design.
-      */}
       <nav aria-label={messages.tasks.filterLabel} className="flex flex-wrap gap-1 border-b border-border">
         {FILTROS.map((opcion) => (
-          // Cambiar de filtro vuelve a la página 1: cambia cuántas hay, y
-          // quedarse en la 4 enseñaría una lista vacía sin explicar por qué.
           <Link
             key={opcion.valor}
             to="/tasks"
@@ -104,7 +82,6 @@ export function TaskBatchList({
         ))}
       </nav>
 
-      {/* Sin filtro no hay nada que explicar, y la frase sería ruido. */}
       {status !== "ALL" && (
         <p className="text-small text-ink-muted">{messages.tasks.wholeBatchNote}</p>
       )}
@@ -138,14 +115,6 @@ export function TaskBatchList({
                       </p>
                     </div>
 
-                    {/*
-                      LO QUE VALE VA EN LA CABECERA DEL REPARTO Y NO EN CADA FILA.
-
-                      Un reparto puede dar distinto a cada hijo, así que solo se
-                      enseña aquí cuando todos cobran lo MISMO — que es el caso
-                      normal—. Repetir la misma cifra en cuatro renglones era
-                      ruido; cuando no coinciden, cada fila lo dice.
-                    */}
                     {valorComun(reparto.tasks) !== null && (
                       <Coins amount={valorComun(reparto.tasks) ?? 0} className="shrink-0" />
                     )}
@@ -203,13 +172,6 @@ export function TaskBatchList({
   );
 }
 
-/**
- * Lo que vale el reparto, si vale lo mismo para todos.
- *
- * `null` cuando no coinciden: el alta permite «un valor para cada uno», así que
- * una sola cifra en la cabecera sería falsa justo en el caso que el producto
- * ofrece a propósito.
- */
 function valorComun(tareas: Task[]): number | null {
   const primera = tareas[0];
   if (primera === undefined) return null;
@@ -222,7 +184,7 @@ function TaskRow({
   conValorPropio,
 }: {
   task: Task;
-  /** Cuando el reparto NO paga lo mismo a todos, la cifra baja a la fila. */
+
   conValorPropio: boolean;
 }): React.ReactElement {
   const approve = useApproveTask();
@@ -234,33 +196,16 @@ function TaskRow({
 
   return (
     <li className="flex min-w-0 flex-col gap-2 border-t border-border py-3 last:pb-0">
-      {/*
-        EL HIJO, SU ESTADO Y LO QUE SE PUEDE HACER, EN LA MISMA FILA.
 
-        Las acciones colgaban en un bloque aparte debajo, así que cada hijo
-        ocupaba dos renglones y un reparto de tres llenaba la pantalla. Van aquí
-        dentro y el `flex-wrap` las baja solo cuando no caben — una sola
-        estructura para los dos anchos, que es lo que este proyecto exige.
-      */}
       <div className="flex min-w-0 flex-wrap items-center gap-3">
         <Avatar value={task.child.avatar} size="small" />
         <span className="min-w-0 flex-1 truncate text-body font-bold">{task.child.name}</span>
         {conValorPropio && <Coins amount={task.coins} />}
         <Badge tone={TONO[task.status]}>{describeTaskStatus(task.status)}</Badge>
 
-        {/* Lo que se ve y lo que se puede hacer van juntos: ofrecer una acción
-            que la API va a rechazar con 409 es prometer algo que no se cumple. */}
         {task.status === "COMPLETED" && (
           <span className="flex shrink-0 flex-wrap gap-2">
-            {/*
-              CADA ACCIÓN DICE SOBRE QUÉ ACTÚA.
 
-              Un reparto con cuatro hijos esperando pone cuatro botones «Aprobar»
-              seguidos, y de viva voz suenan idénticos: quien no ve la pantalla no
-              tiene el orden para distinguirlos. El nombre visible se queda corto
-              —repetir la tarea y el hijo en cada botón llenaría la fila— así que
-              el nombre COMPLETO va en `aria-label`, que es donde hace falta.
-            */}
             <Button
               variant="primary"
               aria-label={sobreQue(messages.tasks.approve, task)}
@@ -271,11 +216,6 @@ function TaskRow({
               {messages.tasks.approve}
             </Button>
 
-            {/*
-              Rechazar ACOMPAÑA y no va en peligro: devuelve la tarea a pendiente
-              y no destruye nada. El rojo le diría al padre que hizo algo grave
-              por pedirle a su hijo que la repita.
-            */}
             <Button
               variant="secondary"
               aria-label={sobreQue(messages.tasks.reject, task)}
@@ -290,10 +230,7 @@ function TaskRow({
 
         {task.status === "PENDING" && (
           <span className="flex shrink-0 flex-wrap gap-2">
-            {/*
-              Borrar SÍ va en peligro, y no contradice lo de arriba: rechazar
-              devuelve una tarea a pendiente y esto la hace desaparecer.
-            */}
+
             <Button
               variant="danger"
               aria-label={sobreQue(messages.tasks.remove, task)}
@@ -306,9 +243,6 @@ function TaskRow({
         )}
       </div>
 
-      {/* La evidencia va ANTES de los botones: es para decidir con ella, no
-          después de haber decidido. Aprobar acredita, y deshacerlo exige un
-          movimiento compensatorio. */}
       {task.evidence !== null && (
         <a href={task.evidence} target="_blank" rel="noreferrer" className="self-start">
           <img
@@ -319,30 +253,15 @@ function TaskRow({
         </a>
       )}
 
-      {/*
-        El tono lo decide el CÓDIGO del error: un 409 es «alguien se adelantó» y
-        va en advertencia, no en rojo. Es la distinción que `Alert` declara desde
-        que se escribió y que esta pantalla tiraba.
-      */}
       {fallo != null && <Alert tone={alertToneFor(fallo)}>{describeTasksError(fallo)}</Alert>}
     </li>
   );
 }
 
-/* Como en la bandeja de canjes: el formato lo decide `lib/dates`. */
-
-/**
- * «Aprobar: Tender la cama, Mateo».
- *
- * Se compone aquí y no en el catálogo porque las tres partes son datos —la
- * acción sí sale del catálogo— y lo que las une son dos signos de puntuación,
- * que no se traducen.
- */
 function sobreQue(accion: string, task: Task): string {
   return `${accion}: ${task.title}, ${task.child.name}`;
 }
 
-/** El reparto, dibujado. Decorativo: lo nombra su título. */
 function IconoReparto(): React.ReactElement {
   return (
     <Glifo>
@@ -354,7 +273,6 @@ function IconoReparto(): React.ReactElement {
   );
 }
 
-/** El visto de aprobar. Decorativo: lo nombra el botón. */
 function IconoVisto(): React.ReactElement {
   return (
     <Glifo>
@@ -363,7 +281,6 @@ function IconoVisto(): React.ReactElement {
   );
 }
 
-/** La cruz de rechazar. Decorativa: lo nombra el botón. */
 function IconoCruz(): React.ReactElement {
   return (
     <Glifo>

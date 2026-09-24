@@ -1,37 +1,6 @@
 import { messages } from "../../lib/messages.js";
 import { Avatar, Badge, Card, Coins } from "../../ui/index.js";
 
-/**
- * Las dos caras de la aplicación, sin salir de la puerta pública.
- *
- * La página no enseñaba la aplicación ni una vez: quien duda si esto le sirve
- * no veía nunca lo que va a usar, ni lo que va a usar su hijo — que es de lo que
- * va el producto.
- *
- * Se enseñan LAS DOS. Solo el panel del padre deja fuera aquello de lo que va
- * todo; solo el del niño le oculta al adulto lo que él usará a diario.
- *
- * CONSTRUIDAS con las piezas y los tokens reales, no capturadas, por dos
- * razones y la segunda es la que decide:
- *
- *   1. Una captura envejece EN SILENCIO cuando el sistema de diseño cambia. Un
- *      token nuevo repinta esto y no repinta un PNG, y nadie se entera hasta que
- *      alguien mira la landing.
- *   2. Cada maqueta lleva su `data-scale` DE VERDAD, así que la diferencia entre
- *      las dos audiencias que la página enseña es la del producto y no una
- *      imitación a ojo.
- *
- * Y por eso el test de que la puerta pública no lleva escala pasó a mirar la
- * RAÍZ: la página no adopta el marco de un rol, pero una maqueta que enseña las
- * dos escalas necesita llevarlas. Ver la decisión 3 del design de
- * `redesign-public-entry`.
- *
- * Cada maqueta se anuncia como EJEMPLO: sin eso, quien recorre la página sin
- * verla oye un saldo y dos nombres de niño y no tiene forma de saber que no son
- * de nadie.
- */
-
-/** Cifras de ejemplo. No son de nadie, y la maqueta lo dice. */
 const TAREAS_ESPERANDO = 3;
 const SALDO_MATEO = 129;
 const SALDO_EMMA = 340;
@@ -49,10 +18,7 @@ export function AppPreview(): React.ReactElement {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <Maqueta etiqueta={messages.landing.previewParentTag} pie={messages.landing.previewParentLabel}>
-            {/*
-              La escala DE VERDAD, no una imitación: es lo que hace que la
-              diferencia que se ve sea la que existe en el producto.
-            */}
+
             <div
               data-scale="parent"
               role="img"
@@ -103,11 +69,6 @@ export function AppPreview(): React.ReactElement {
                 </div>
               </Card>
 
-              {/*
-                Dos teselas y no cuatro: la maqueta enseña la ESCALA, y con
-                cuatro en media columna cada una saldría más pequeña que en el
-                producto — que es justo lo contrario de lo que hay que enseñar.
-              */}
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { glifo: "🧹", texto: messages.landing.previewChildTasks },
@@ -132,14 +93,13 @@ export function AppPreview(): React.ReactElement {
   );
 }
 
-/** El marco de una maqueta: su etiqueta encima y la pantalla debajo. */
 function Maqueta({
   etiqueta,
   pie,
   children,
 }: {
   etiqueta: string;
-  /** Qué es lo que se está enseñando. Ver el comentario de abajo. */
+
   pie: string;
   children: React.ReactNode;
 }): React.ReactElement {
@@ -147,18 +107,7 @@ function Maqueta({
     <div className="flex flex-col gap-3">
       <Badge tone="info">{etiqueta}</Badge>
       {children}
-      {/*
-        EL PIE DICE QUE ES UN EJEMPLO, y faltaba.
 
-        Estas dos maquetas están construidas con las piezas del producto y con la
-        escala de verdad, así que se parecen tanto a la aplicación que un saldo
-        de 340 monedas y un «te esperan 3 tareas» se leen como datos de alguien.
-        Lo eran de nadie, y decirlo cuesta una línea.
-
-        La frase sale de la MISMA clave que nombra la maqueta para el lector de
-        pantalla, compuesta aquí con el aviso: tenerla escrita dos veces acabaría
-        con una de las dos diciendo otra cosa.
-      */}
       <p className="text-micro text-ink-muted">{`${pie} ${messages.landing.previewNotOurs}`}</p>
     </div>
   );

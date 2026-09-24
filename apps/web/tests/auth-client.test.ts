@@ -71,9 +71,6 @@ describe("cliente de sesión", () => {
   });
 
   it("el avatar del actor llega siempre resuelto, nunca nulo", async () => {
-    // La API lo resuelve al de por defecto antes de responder, igual que en la
-    // rejilla. Eran dos formas del mismo dato y el front tenía que tratar el
-    // hueco en cada pantalla. Ver la tarea 1.6 de `add-children`.
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue(
@@ -98,8 +95,6 @@ describe("cliente de sesión", () => {
   it("maneja una respuesta 204 sin cuerpo", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(emptyResponse(204)));
 
-    // Cerrar sesión y salir de un perfil responden 204: parsearlo como JSON
-    // reventaría.
     await expect(api.logout()).resolves.toBeUndefined();
     await expect(api.leaveProfile()).resolves.toBeUndefined();
   });
@@ -251,7 +246,6 @@ describe("mensajes visibles", () => {
   it("el mensaje de credenciales no señala cuál de los dos datos falla", () => {
     const texto = messages.auth.invalidCredentials;
 
-    // Nombra ambos, que es lo que lo hace ambiguo.
     expect(texto).toMatch(/correo/i);
     expect(texto).toMatch(/contraseñ/i);
   });
@@ -264,9 +258,6 @@ describe("mensajes visibles", () => {
 
 describe("la pantalla del PIN habla el idioma de quien la ve", () => {
   it("un PIN de hijo incorrecto no dice nada de correos ni contraseñas", () => {
-    // El código es el mismo que el de una contraseña equivocada, así que esta
-    // pantalla necesita su propio mensaje. Se detectó probándolo en el
-    // navegador: al niño le salía «El correo o la contraseña no son correctos».
     expect(messages.auth.pinWrong).not.toMatch(/correo/i);
     expect(messages.auth.pinWrong).not.toMatch(/contraseñ/i);
     expect(messages.auth.pinWrong).toMatch(/PIN/i);
@@ -278,9 +269,6 @@ describe("la pantalla del PIN habla el idioma de quien la ve", () => {
   });
 
   it("el PIN del padre tiene sus propios mensajes, distintos de los del hijo", () => {
-    // Mismo código de error (401 / 429) para los dos roles, pero un padre no
-    // necesita que le digan que pida ayuda a un adulto, y a un niño no se le
-    // dice que restablezca su PIN con una contraseña.
     expect(messages.auth.adultPinWrong).not.toBe(messages.auth.pinWrong);
     expect(messages.auth.adultPinLocked).not.toBe(messages.auth.pinLocked);
     expect(messages.auth.adultPinLocked).not.toMatch(/adulto/i);
@@ -300,21 +288,6 @@ describe("el catálogo de avatares", () => {
     expect(claves.sort()).toEqual([...AVATAR_KEYS].sort());
   });
 
-  /*
-   * ESTE CASO COMPROBABA QUE CADA OPCIÓN TENÍA `drawing` DEFINIDO, Y PASABA CON
-   * LA REJILLA EN BLANCO.
-   *
-   * Su comentario decía que sin él «añadir una clave sin dibujarla saldría como
-   * un hueco en la rejilla». Lo que no podía ver es que TODAS salían como un
-   * hueco: `drawing` eran los `<path>` sueltos, sin el `<svg>` que los hace
-   * visibles, y quien los pintaba tal cual no dibujaba nada. Estaba definido, así
-   * que el test seguía en verde.
-   *
-   * La garantía que quería sigue haciendo falta y se comprueba **dibujando**, en
-   * `tests/ui/AvatarPicker.test.tsx`: se monta la rejilla y se cuenta que los
-   * doce botones tienen algo dentro. Aquí se queda lo que este archivo sí puede
-   * decir sin DOM — que el catálogo de opciones cubre las claves del contrato.
-   */
   it("el catálogo de opciones cubre exactamente las claves del contrato", () => {
     expect(AVATAR_OPTIONS.map((opcion) => opcion.key).sort()).toEqual([...AVATAR_KEYS].sort());
   });

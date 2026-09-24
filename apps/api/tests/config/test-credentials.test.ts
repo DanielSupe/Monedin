@@ -14,22 +14,8 @@ const valido = {
   GEMINI_API_KEY: "clave-de-gemini",
 };
 
-/**
- * La TERCERA separación entre la batería y el almacén real.
- *
- * El bucket y el endpoint ya estaban separados; las credenciales no, y eso se
- * notó en cuanto alguien apuntó el desarrollo al S3 real: la batería seguía
- * hablando con MinIO pero mandándole una llave de AWS, y toda la suite de
- * almacenamiento moría con `InvalidAccessKeyId`.
- *
- * Lo que este test impide es la vuelta atrás silenciosa: que alguien les ponga
- * un valor por defecto o las haga caer hacia las de producción «para que no
- * moleste». Ver `split-test-storage-credentials`.
- */
 describe("las credenciales de la batería", () => {
   it("son obligatorias y no caen hacia las de producción", () => {
-    // `as const` para que las claves sean literales y no `string`: sin eso, la
-    // desestructuración calculada no encuentra su firma de índice y no compila.
     for (const clave of ["TEST_AWS_ACCESS_KEY_ID", "TEST_AWS_SECRET_ACCESS_KEY"] as const) {
       const { [clave]: _falta, ...sinElla } = valido;
       const r = envSchema.safeParse(sinElla);

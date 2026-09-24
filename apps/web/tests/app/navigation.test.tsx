@@ -13,9 +13,6 @@ describe("una dirección que no existe", () => {
 
     expect(screen.getByText(messages.nav.notFoundTitle)).toBeInTheDocument();
 
-    // Sin salida, quien llega aquí en una tablet no tiene barra de direcciones
-    // a mano para corregirlo. Y es un ENLACE vestido de botón, no un `Link`
-    // envolviendo un `Button`: eso anida dos elementos interactivos.
     const salida = screen.getByRole("link", { name: messages.nav.notFoundBack });
     expect(salida).toBeInTheDocument();
     expect(salida.querySelector("button")).toBeNull();
@@ -26,8 +23,6 @@ describe("las guardas deciden antes de pintar", () => {
   it("sin sesión, cualquier destino acaba en la puerta pública", async () => {
     const app = await montarApp("/tasks", SIN_SESION);
 
-    // Desde `add-landing-page`: quien llega sin sesión puede no conocer el
-    // producto, y un formulario no se lo explica.
     expect(app.direccion()).toBe("/welcome");
   });
 
@@ -56,7 +51,6 @@ describe("las guardas deciden antes de pintar", () => {
   });
 
   it("a quien tiene cuenta y no perfil, el acceso lo manda a la rejilla y no al inicio", async () => {
-    // No basta con «si hay actor, fuera»: este estado pertenece a la rejilla.
     const app = await montarApp("/sign-in", SOLO_CUENTA);
 
     expect(app.direccion()).toBe("/profiles");

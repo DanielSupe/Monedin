@@ -11,21 +11,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/**
- * LA BANDA: contenido principal a la izquierda, panel de apoyo a la derecha.
- *
- * Cinco pantallas la necesitan y ninguna la tenía: su maqueta reparte en dos y la
- * aplicación apilaba. Se escapó porque el repaso que cuadró las treinta y dos
- * comparaba el TEXTO y los pasos de escala, y ese método no ve la forma — apilado
- * y en dos columnas llevan el mismo texto y la misma escala.
- *
- * LÍMITE de estos tests, dicho para que nadie les pida más: jsdom no aplica CSS,
- * así que no pueden ver dos columnas. Lo que comprueban es la ESTRUCTURA —que el
- * panel esté dentro de la banda y no suelto debajo—, que es lo que decide el
- * resultado. Que se vea repartida se mira abriendo la aplicación.
- */
-
-/** La banda de una pantalla montada, por la declaración que la define. */
 function banda(dentro: HTMLElement = document.body): HTMLElement {
   const encontrada = dentro.querySelector<HTMLElement>('[class*="lg:grid-cols-5"]');
 
@@ -129,12 +114,6 @@ describe("las pantallas con panel de apoyo lo colocan en la banda", () => {
     expect(banda().contains(explicacion)).toBe(true);
   });
 
-  /*
-   * El panel de apoyo va DESPUÉS en el documento, en los dos anchos: quien
-   * recorre la pantalla con teclado llega primero a lo que hay que hacer y
-   * después a lo que lo explica, igual que quien la mira. Colocarlo antes y
-   * moverlo con `order` separaría lo que se ve de lo que se recorre.
-   */
   it("el panel de apoyo va después del contenido en el documento", async () => {
     servir({ tareas: [tarea("t1", "PENDING")] });
     montar(<MyTasks />);
@@ -148,14 +127,6 @@ describe("las pantallas con panel de apoyo lo colocan en la banda", () => {
   });
 });
 
-/**
- * LOS CONTADORES CUENTAN LAS FILAS, no el total del listado.
- *
- * El caso está elegido para que las tres cifras sean DISTINTAS entre sí y
- * distintas del total: con 2, 3 y 1 sobre seis canjes, contar mal —devolver el
- * total en los tres, o intercambiar dos estados— da números que no coinciden.
- * Con dos estados del mismo tamaño el test pasaría con los contadores cruzados.
- */
 describe("los canjes del niño se resumen por estado", () => {
   const MEZCLA = [
     canje("p1", "PENDING"),
@@ -166,7 +137,6 @@ describe("los canjes del niño se resumen por estado", () => {
     canje("r1", "REJECTED"),
   ];
 
-  /** El bloque de un estado, por su rótulo. */
   function resumen(rotulo: string): HTMLElement {
     return screen.getByText(rotulo).closest("li") as HTMLElement;
   }
@@ -182,11 +152,6 @@ describe("los canjes del niño se resumen por estado", () => {
     expect(within(resumen(messages.redemptions.summaryRejected)).getByText("1")).toBeInTheDocument();
   });
 
-  /*
-   * El que vale cero SE DIBUJA. Un estado que desaparece al quedarse vacío
-   * convierte el resumen en tres cajas que cambian de sitio, y hay que volver a
-   * leer cuál es cuál en cada visita.
-   */
   it("un estado sin ninguno dice cero y no desaparece", async () => {
     servir({ canjes: [canje("p1", "PENDING")] });
     montar(<MyRedemptions />);

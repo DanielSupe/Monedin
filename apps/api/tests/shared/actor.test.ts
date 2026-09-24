@@ -8,14 +8,6 @@ import {
   owningParentId,
 } from "../../src/shared/actor.js";
 
-/**
- * El valor de la unión discriminada está en lo que NO compila.
- *
- * Los `@ts-expect-error` de abajo son el test de verdad: si alguien vuelve a
- * convertir `Actor` en un objeto con campos opcionales, dejan de ser errores y
- * `tsc` falla diciendo que la directiva no se usó. Por eso `typecheck` incluye
- * el directorio de tests.
- */
 describe("forma del actor", () => {
   it("no admite un actor de niño sin su perfil", () => {
     // @ts-expect-error falta childProfileId, que es obligatorio para un niño

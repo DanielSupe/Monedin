@@ -17,42 +17,15 @@ import { Alert, Avatar, Badge, Button, Card, Coins, Field, Input } from "../../u
 import { AvatarPicker } from "../profiles/AvatarPicker.js";
 import { describeChildrenError, useCreateChild, useUpdateChild } from "./use-children.js";
 
-/**
- * Alta y edición de un perfil, en un único formulario.
- *
- * Valida en el cliente con LOS MISMOS esquemas del contrato compartido que
- * aplicará la API, así que un campo mal puesto se señala sin viaje al servidor
- * y con el mismo criterio.
- *
- * El PIN solo aparece en el alta: cambiarlo después es otra operación, y de las
- * dos que hay (el padre repone, el niño cambia el suyo) ninguna encaja en un
- * formulario de datos.
- */
 export function ChildForm({
   child,
   onSaved,
   cancel,
 }: {
-  /** Si viene, se edita; si no, se crea. */
   child?: Child;
-  /**
-   * El perfil quedó guardado.
-   *
-   * Es un evento de DOMINIO, no una orden de cerrarse: este formulario se usa
-   * desde la rejilla y desde la gestión del padre, y cada una navega a un sitio
-   * distinto.
-   */
+
   onSaved: () => void;
-  /**
-   * Por dónde se sale sin guardar, como CONTENIDO y no como callback.
-   *
-   * Era `onCancel: () => void` —«ciérrame»—, que empuja la navegación a quien
-   * llama. Y no puede resolverlo el propio formulario, porque se usa desde dos
-   * sitios que salen a destinos distintos: la rejilla y la gestión del padre.
-   * Así que lo pone quien lo usa, que es quien sabe a dónde va, igual que
-   * `Pagination` recibe sus enlaces. Y de paso navegar vuelve a ser trabajo de
-   * un enlace.
-   */
+
   cancel: ReactNode;
 }): React.ReactElement {
   const editing = child !== undefined;
@@ -62,9 +35,7 @@ export function ChildForm({
   const [age, setAge] = useState(
     child?.age === null || child?.age === undefined ? "" : String(child.age),
   );
-  // Puede arrancar como una URL —si el hijo ya tiene foto— o como una clave del
-  // catálogo. Solo se manda al servidor cuando es una clave: una URL es lo que
-  // YA está guardado, no un cambio que pedir.
+
   const [avatar, setAvatar] = useState<string | undefined>(child?.avatar);
   const [fieldError, setFieldError] = useState<string | undefined>();
 
@@ -76,11 +47,8 @@ export function ChildForm({
     event.preventDefault();
     setFieldError(undefined);
 
-    // Vacío significa «sin edad», que es distinto de una edad mal escrita.
     const edad = age.trim() === "" ? undefined : Number(age);
 
-    // Solo una clave del catálogo viaja como `avatar`. Una foto se confirma por
-    // su propia vía en cuanto se sube, así que aquí nunca hay que reenviarla.
     const avatarDelCatalogo = isAvatarKey(avatar) ? avatar : undefined;
 
     if (editing) {
@@ -114,27 +82,7 @@ export function ChildForm({
 
   return (
     <section className="flex w-full max-w-md flex-col gap-4">
-      {/*
-        EL TÍTULO DICE QUÉ SE HACE Y UN BLOQUE APARTE DICE A QUIÉN, que es como
-        lo compone la maqueta — y no lo que hice en el primer intento, que fue
-        poner el nombre del hijo DE TÍTULO.
 
-        Mirar el artboard lo corrigió: su `h1` es «Editar perfil», con un
-        antetítulo que dice qué se cambia aquí, y la identidad del hijo va debajo.
-        Tiene sentido: el título de una pantalla nombra la operación, no su
-        argumento, y con el nombre de título la pantalla dejaba de decir para qué
-        servía.
-
-        Lo que sí faltaba —y era el defecto de verdad— es a QUIÉN se está
-        editando: se llega desde una lista de caras y el formulario no lo decía en
-        ninguna parte. Su nombre identifica y las dos cifras confirman que es el
-        que se quería.
-
-        `Bloqueado` va aquí como ESTADO y no como acción: explica por qué alguien
-        puede haber acabado en esta pantalla. Desbloquear sigue en UN solo sitio,
-        su fila de la lista — informar en dos pantallas está bien, tener la
-        mutación en dos serían dos caminos.
-      */}
       <div className="flex flex-col gap-1">
         {editing && (
           <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
@@ -185,12 +133,6 @@ export function ChildForm({
             />
           </Field>
 
-          {/*
-            EL PIN VA DETRÁS DE LA EDAD, como en la maqueta, y el orden dice algo:
-            primero quién es —su nombre y su edad— y solo después su secreto. Al
-            revés, el campo que interrumpe para inventarse cuatro cifras se cuela
-            en medio de dos datos que ya se saben.
-          */}
           {!editing && (
             <Field label={PIN_LABEL} help={messages.children.pinHelp}>
               <Input
@@ -203,19 +145,6 @@ export function ChildForm({
             </Field>
           )}
 
-          {/*
-            Subir foto solo al EDITAR: la clave de subida lleva dentro el
-            identificador del perfil, que no existe mientras se está creando.
-
-            Es una DEUDA CONOCIDA, no un olvido, y desde `redesign-parent-children`
-            tiene dueño: un change propio, después de que la lista de deuda de
-            estilos quede vacía. El dato que faltaba para elegir camino ya está
-            medido: los CINCO endpoints de subida del proyecto cuelgan del
-            identificador de una entidad que ya existe, así que hacerlo en un solo
-            momento exige un endpoint nuevo bajo el prefijo del padre —el primer
-            cambio de API de esta etapa— y una política para las fotos de quien
-            sube y luego no crea.
-          */}
           <AvatarPicker
             value={avatar}
             onChange={setAvatar}

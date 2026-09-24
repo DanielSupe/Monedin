@@ -11,20 +11,6 @@ import { Avatar } from "../ui/index.js";
 import { cx } from "../ui/cx.js";
 import { IconHelp } from "./nav-icons.js";
 
-/**
- * El botón que abre el cajón.
- *
- * Solo existe en la forma ESTRECHA: si la navegación está delante, un botón para
- * abrirla no tiene qué abrir.
- *
- * Reenvía props y ref porque va dentro del `Trigger` de Radix con `asChild`: es
- * Radix quien le cuelga el `onClick`, el `aria-expanded` y el ref con el que
- * luego le devuelve el foco.
- *
- * Lleva `aria-label` y no solo tres rayas: un botón que dibuja un símbolo y nada
- * más no dice qué hace. Es la misma regla que ya obliga a `Button` a exigir
- * nombre cuando es `iconOnly`.
- */
 export const MenuButton = forwardRef<
   HTMLButtonElement,
   ButtonHTMLAttributes<HTMLButtonElement>
@@ -54,22 +40,8 @@ export const MenuButton = forwardRef<
   );
 });
 
-/**
- * Si la columna está contraída, para lo que se QUITA y no solo se oculta.
- *
- * El atributo `data-collapsed` del contenedor sigue siendo el camino por defecto:
- * cada destino reacciona por CSS y el marco no tiene que pasarle el mismo booleano
- * a diez enlaces. Esto es para el caso que el CSS no puede resolver bien — lo
- * DECORATIVO, que contraído no debe quedarse ni en el árbol de accesibilidad.
- *
- * Es el mismo argumento por el que el marco monta UNA de las dos formas de la
- * navegación en vez de esconder una con estilos: lo que se esconde con CSS sigue
- * ahí para quien recorre el documento, y ningún test puede verlo — jsdom no aplica
- * CSS.
- */
 const Contraido = createContext(false);
 
-/** La flecha del botón de contraer. Decorativa: el nombre lo pone su `aria-label`. */
 function Chevron({
   pointing,
 }: {
@@ -93,80 +65,26 @@ function Chevron({
   );
 }
 
-/**
- * El aspecto de un destino del lateral, para un ENLACE.
- *
- * Tercera vez que el proyecto usa este patrón, después de `buttonClasses` y
- * `tabLinkClasses`, y por la misma razón: el destino es una dirección, así que
- * el control es un enlace y el aspecto tiene que vivir en un solo sitio.
- *
- * NO recibe si está activo, y esa es la corrección importante de este archivo.
- * El `Link` del router ya sabe cuál lo está: pone `data-status="active"` y
- * `aria-current="page"` él solo, según su `activeOptions`. Calcularlo aparte
- * daba DOS fuentes para el mismo hecho, y la del componente podía separarse de
- * la del router sin que nada fallara. Se marca con el atributo que el propio
- * enlace pone, igual que hacían las dos barras que este cajón sustituye.
- *
- * Tampoco recibe si está contraído: eso lo dice el CONTENEDOR con
- * `data-collapsed`, y cada destino reacciona por CSS. Así el marco no tiene que
- * pasarle el mismo booleano a diez enlaces.
- *
- * El color no es lo que anuncia el destino vigente: eso lo hace el
- * `aria-current` del enlace. Un destino que solo se distingue por el color no
- * existe para quien no distingue esos colores.
- */
 export function sidebarItemClasses(): string {
   return cx(
     "tap-target rounded-control text-body flex w-full items-center gap-3 px-3 font-semibold text-ink no-underline transition-colors duration-quick",
     "hover:bg-surface-sunken",
     "data-[status=active]:bg-primary-soft data-[status=active]:text-primary",
-    // Contraído, el texto sale del flujo con `sr-only` y solo queda el icono.
-    // `relative` es de quién cuelga la insignia cuando se convierte en punto.
+
     "group-data-[collapsed=true]:relative group-data-[collapsed=true]:justify-center group-data-[collapsed=true]:px-0",
   );
 }
 
-/**
- * El aspecto de una INSIGNIA de cuenta del lateral.
- *
- * Cuarta vez que el proyecto exporta el aspecto de una pieza desde donde vive
- * —después de `buttonClasses`, `tabLinkClasses` y `sidebarItemClasses`— y aquí
- * hay una razón más: lo que cambia con `collapsed` lo tiene que declarar quien
- * SABE de `collapsed`. Estaba escrito dentro de `PendingBadge`, que vive en
- * `features/parents/` y no sabe que existe una columna que se contrae; con el
- * aspecto ahí, la siguiente insignia que alguien añada se vuelve a salir.
- *
- * CONTRAÍDA SE CONVIERTE EN UN PUNTO, y las dos mitades importan:
- *
- * - **El número se va.** En 71 px no cabe, y al ocupar sitio en la fila empujaba
- *   al icono contra el borde contrario. Y el culpable no era el tamaño sino
- *   `ml-auto`: un margen automático reparte el sobrante y GANA a
- *   `justify-content`, así que la regla de centrar que ya estaba escrita no podía
- *   cumplirse. Fuera del flujo no hay nada que empujar.
- * - **El aviso se queda.** Un padre contrae la columna y la deja contraída; si la
- *   señal se fuera con la cifra, contraer significaría dejar de enterarse de que
- *   hay tres tareas por aprobar. El punto dice lo único que cabe decir ahí: hay
- *   algo. Cuántos se ve al expandir.
- *
- * Y para quien no ve la pantalla no cambia nada: la cuenta va en un texto
- * `sr-only` que se queda entero. Lo que se quita es el dibujo, no el dato.
- */
 export function sidebarBadgeClasses(): string {
   return cx(
     "rounded-pill text-micro ml-auto inline-flex min-w-6 shrink-0 items-center justify-center bg-conflict-soft px-2 py-0.5 font-extrabold text-conflict",
-    // Fuera del flujo y posada en la esquina del enlace, que por eso se declara
-    // `relative` al contraerse en `sidebarItemClasses`.
+
     "group-data-[collapsed=true]:absolute group-data-[collapsed=true]:right-2 group-data-[collapsed=true]:top-2",
-    // Un punto: sin cifra, sin relleno y con el tamaño de un punto.
+
     "group-data-[collapsed=true]:size-2 group-data-[collapsed=true]:min-w-0 group-data-[collapsed=true]:bg-conflict group-data-[collapsed=true]:p-0",
   );
 }
 
-/**
- * La cifra de una insignia, que desaparece al contraer.
- *
- * Es el hueco visible; el texto accesible lo pone quien la usa, y se queda.
- */
 export function SidebarBadgeCount({
   children,
 }: {
@@ -179,13 +97,6 @@ export function SidebarBadgeCount({
   return <span aria-hidden="true">{children}</span>;
 }
 
-/**
- * El nombre de un destino.
- *
- * Al contraer se oculta A LA VISTA y NO se borra: estos iconos son decorativos a
- * propósito —lo que nombra al destino es su texto—, así que quitarlo dejaría los
- * cinco destinos sin nombre de golpe para quien usa un lector de pantalla.
- */
 export function SidebarLabel({
   children,
 }: {
@@ -196,17 +107,6 @@ export function SidebarLabel({
   );
 }
 
-/**
- * El glifo del final de una fila, que al contraer se va DEL TODO.
- *
- * Hermano de `SidebarLabel` y con la regla contraria, que es justo lo que hay que
- * declarar en una pieza en vez de dejarlo a que cada marco se acuerde: el nombre
- * se oculta a la VISTA y se conserva para quien no mira, porque nombra el
- * destino; este glifo es decorativo y no nombra nada, así que se quita entero.
- *
- * Y hace falta: en la fila del perfil comparte 47 px con el avatar, uno pegado al
- * otro. En ancho aclara a dónde lleva la fila; contraído solo compite con la cara.
- */
 export function SidebarTrailing({
   children,
 }: {
@@ -219,20 +119,6 @@ export function SidebarTrailing({
   return <span className="flex shrink-0">{children}</span>;
 }
 
-/**
- * El contenido del lateral, en sus dos formas.
- *
- * La lista arriba y el perfil ABAJO: el perfil no es un sitio de la aplicación
- * al mismo nivel que las tareas o los premios, y ponerlo entre ellos lo hace
- * competir con lo que se usa a diario.
- *
- * `onToggleCollapse` solo llega en la forma ANCHA. En la estrecha el lateral es
- * un cajón que ocupa lo que necesita y se cierra al llegar, así que contraerlo
- * no significaría nada.
- *
- * Los enlaces los pone cada marco, no este archivo: son los que cambian por rol,
- * y sus parámetros de búsqueda están tipados por destino.
- */
 export function Sidebar({
   children,
   help,
@@ -241,48 +127,20 @@ export function Sidebar({
   onToggleCollapse,
 }: {
   children: ReactNode;
-  /** El pie, encima del perfil: la ayuda. Ver la cabecera de `HelpLink`. */
+
   help: ReactNode;
-  /** El pie: el enlace al perfil de quien está operando. */
+
   profile: ReactNode;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
 }): React.ReactElement {
   return (
-    /*
-      `data-collapsed` y `group` van en el CONTENEDOR y no en el `<nav>`, que es
-      donde estaban y por donde entró el defecto: el pie —el perfil y este
-      botón— queda fuera del `<nav>`, así que su texto no se enteraba de que
-      había que ocultarlo y desbordaba la columna contraída.
-    */
     <Contraido.Provider value={collapsed}>
       <div
         data-collapsed={collapsed ? "true" : "false"}
         className="group flex min-h-0 flex-1 flex-col"
       >
         {onToggleCollapse !== undefined && (
-          /*
-          LA CABECERA DEL LATERAL, y el control de contraer vive aquí.
-
-          Estaba al final del pie, debajo del perfil: el último sitio donde se
-          busca el control que gobierna la columna. Arriba es donde se busca, y
-          donde lo ponen las bibliotecas de las que este marco copia su forma.
-
-          Va DENTRO del lateral y no en la cabecera de la aplicación, que es la
-          otra lectura posible. La razón es la misma que ya se aplicó al botón de
-          menú: un control que gobierna la columna solo existe cuando la columna
-          está delante, y la cabecera de la aplicación se dibuja también en
-          estrecho, donde no hay nada que contraer. Allí habría que esconderlo por
-          ancho — y esconder por ancho es lo que este marco no hace.
-
-          Sin título ni logo: el logo está en la cabecera de la aplicación, justo
-          encima, y repetirlo sería un segundo sitio para el mismo hecho.
-
-          SOLO la flecha, sin texto visible: «Expandir» no cabe en el ancho de un
-          icono, y un control cuya única razón de ser es una dirección no necesita
-          palabra. El nombre NO se pierde —va en `aria-label`— y cambia con el
-          estado, porque lo que el botón hace cambia.
-        */
           <div className="flex items-center justify-end border-b border-border p-3 group-data-[collapsed=true]:justify-center">
             <button
               type="button"
@@ -308,12 +166,7 @@ export function Sidebar({
         </nav>
 
         <div className="flex flex-col gap-2 border-t border-border p-3">
-          {/*
-          La ayuda va aquí y no entre los destinos: la lista de arriba enumera
-          dónde se HACEN cosas, y la ayuda responde cómo funciona esto. El borde
-          que la separa es el mismo que separa el perfil, y es lo que dibujan las
-          maquetas.
-        */}
+
           {help}
 
           {profile}
@@ -323,19 +176,6 @@ export function Sidebar({
   );
 }
 
-/**
- * El pie del cajón: avatar y nombre, como enlace al perfil propio.
- *
- * Es un solo elemento interactivo, como las teselas de la rejilla: la foto y el
- * nombre son la misma cosa, y partirlos en dos daría dos paradas de tabulación
- * al mismo sitio.
- *
- * Convive a propósito con el avatar de la cabecera, que lleva al mismo sitio: es
- * la ÚNICA excepción declarada a «ningún destino dos veces». El avatar responde
- * además a quién está usando el dispositivo —pregunta real en una tablet que
- * comparte toda la familia—, y esta fila existe porque un destino que solo se
- * alcanza pulsando una foto sin texto no se encuentra.
- */
 export function SidebarProfile({
   name,
   avatar,
@@ -358,34 +198,6 @@ export function SidebarProfile({
   );
 }
 
-/**
- * El acceso a la ayuda, en la cabecera de los dos marcos.
- *
- * SE EXTRAE EL ENLACE Y NO LA CABECERA ENTERA, y conviene decir por qué para que
- * no parezca un olvido: las dos cabeceras difieren en el destino del avatar y en
- * el fondo del marco del padre, así que un `AppHeader` común necesitaría props
- * para las dos cosas y sería el mismo `if` mudado de sitio. Con un cuarto
- * elemento común valdrá la pena; con tres, no.
- *
- * DECÍA QUE LLEVABA NOMBRE, Y NO LO LLEVABA A LA VISTA. Esta cabecera afirmaba
- * «lleva nombre y no solo un símbolo: un interrogante suelto no dice a dónde
- * va», y lo que había era un interrogante suelto con el nombre en `aria-label`.
- * O sea: existía para quien no ve la pantalla y no para quien la mira. Una
- * afirmación falsa dentro de una pieza es peor que ninguna.
- *
- * LO QUE SÍ SEGUÍA EN PIE, y por eso se conserva: la ayuda no es un destino de
- * TRABAJO. La lista del lateral enumera dónde se hacen cosas —tareas, premios,
- * canjes, hijos— y la ayuda es meta: responde «¿cómo funciona esto?» y no «¿qué
- * tengo que hacer hoy?».
- *
- * Así que va al PIE del lateral, con su nombre, separada de la lista por el
- * mismo borde que separa el perfil — que es exactamente donde la dibujan las
- * maquetas. Ni entre los destinos de trabajo ni colgando de un icono mudo.
- *
- * Y sigue estando en UN solo sitio: se quitó de la cabecera al ponerla aquí.
- * Dejarla en los dos sería un segundo destino duplicado, y la única excepción
- * declarada a eso es el perfil.
- */
 export function HelpLink(): React.ReactElement {
   return (
     <Link to="/help" className={sidebarItemClasses()}>

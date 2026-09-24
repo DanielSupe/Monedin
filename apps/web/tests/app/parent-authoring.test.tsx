@@ -33,7 +33,6 @@ const HIJOS: Child[] = [
   },
 ];
 
-/** Lo que se envió en el último POST, ya parseado. */
 let enviado: unknown = null;
 
 function json(cuerpo: unknown, status = 200): Response {
@@ -86,36 +85,11 @@ async function montar(direccion: string, hijos: Child[] = HIJOS) {
   return router;
 }
 
-/**
- * Elige a un hijo y escribe el título. Lo mínimo para poder enviar.
- *
- * EL ORDEN IMPORTA, y es lo que cambió al traer la casilla de `Checkbox`.
- *
- * Lo que el requisito dice es «escribir el título y pulsar Enter», así que el
- * foco tiene que quedarse en el campo de texto. Antes daba igual porque una
- * casilla nativa también envía con Enter; la traída es un `<button>` de verdad
- * —es lo que le da su estado anunciado y su barra espaciadora— y Enter sobre un
- * botón lo PULSA, que es lo que hace cualquier navegador. Así que marcar al
- * hijo el último dejaba el foco donde Enter significa «marca y desmarca».
- *
- * No es un defecto que tapar: es el comportamiento correcto de un botón. Lo que
- * estaba mal era que el test comprobara el envío desde un sitio que no es el que
- * el requisito describe.
- */
 async function rellenarMinimo(etiquetaTitulo: string): Promise<void> {
-  // La lista de hijos llega DESPUÉS del formulario: se espera a ella, no al campo.
   await userEvent.click(await screen.findByRole("checkbox", { name: /Mateo/ }));
   await userEvent.type(screen.getByLabelText(etiquetaTitulo), "Recoger la mesa");
 }
 
-/**
- * Lo que este change existe para arreglar, parte 1.
- *
- * `TaskForm` y `RewardForm` eran un `<section>` con un `type="button"` que
- * llamaba a `enviar()`. Escribir el título y pulsar Enter no hacía nada, y
- * `ChildForm` sí lo hacía: la misma tecla respondía distinto según la pantalla
- * dentro del mismo producto.
- */
 describe("una pantalla de escritura es un formulario", () => {
   it("la tarea se envía con Enter", async () => {
     await montar("/tasks/new");
@@ -136,14 +110,6 @@ describe("una pantalla de escritura es un formulario", () => {
   });
 });
 
-/**
- * Lo que este change existe para arreglar, parte 2.
- *
- * «A quién y por cuánto» estaba escrito TRES veces. Ahora es una pieza, y lo
- * que se comprueba es que construye la forma que el contrato espera en cada uno
- * de sus dos modos — que es lo que de verdad se rompería si una de las copias
- * se hubiera separado de las otras.
- */
 describe("la pieza construye la forma que el contrato espera", () => {
   it("con el mismo valor para todos manda childIds y coins", async () => {
     await montar("/tasks/new");
@@ -183,23 +149,15 @@ describe("la pieza construye la forma que el contrato espera", () => {
     await userEvent.click(screen.getByRole("button", { name: messages.tasks.create }));
 
     expect(await screen.findByText(messages.children.pickAtLeastOne)).toBeInTheDocument();
-    // Lo importante no es el mensaje: es que no salió nada hacia el servidor.
+
     expect(enviado).toBeNull();
   });
 });
 
-/**
- * Editar un premio ocurre donde se ve.
- *
- * Decidido: es un retoque pequeño y frecuente, y sacarlo a otra pantalla obliga
- * a ir y volver por cada cambio.
- */
 describe("un premio se edita sin cambiar de dirección", () => {
   it("el editor se abre dentro del catálogo", async () => {
     const router = await montar("/rewards?page=1&status=ACTIVE");
 
-    // Sin premios no hay tarjeta que editar; lo que se comprueba aquí es que la
-    // pantalla no ofrece salir a otra dirección para editar.
     await screen.findByRole("heading", { name: messages.rewards.title });
 
     expect(router.state.location.pathname).toBe("/rewards");
@@ -207,9 +165,6 @@ describe("un premio se edita sin cambiar de dirección", () => {
   });
 });
 
-/**
- * Sin hijos no hay a quién repartir, y la salida es crear uno.
- */
 describe("cuando todavía no hay hijos", () => {
   it("lo dice y ofrece crear un perfil", async () => {
     await montar("/tasks/new", []);
@@ -220,9 +175,6 @@ describe("cuando todavía no hay hijos", () => {
   });
 });
 
-/**
- * Y por dónde se sale sin guardar: un ENLACE, no un callback.
- */
 describe("cancelar es una navegación", () => {
   it("el alta de un hijo ofrece salir con un enlace", async () => {
     await montar("/children/new");
@@ -232,23 +184,6 @@ describe("cancelar es una navegación", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-
-/**
- * LOS CONTROLES TRAÍDOS CAMBIAN LO QUE YA FUNCIONABA, Y ESO NO LO VE UN TEST DE
- * ASPECTO.
- *
- * Los tres eran controles NATIVOS y ahora son de Radix, que dibuja botones. Lo
- * que se gana —estado anunciado, recorrido por el grupo entero con una sola
- * parada de tabulación— se paga en que el teclado deja de ser el del navegador
- * y pasa a ser el de la librería. Si algo de eso se rompiera, la pantalla
- * seguiría viéndose bien.
- *
- * Ya se cobró una vez: marcar al hijo el ÚLTIMO dejaba el foco en un botón, y
- * ahí Enter lo pulsa en vez de enviar el formulario. No era un defecto —es lo
- * que hace cualquier navegador con un botón— pero sí un cambio de comportamiento
- * que nadie había mirado.
- */
 describe("los controles traídos siguen funcionando con el teclado", () => {
   it("la casilla de un hijo se marca con la barra espaciadora", async () => {
     await montar("/tasks/new");
@@ -262,21 +197,6 @@ describe("los controles traídos siguen funcionando con el teclado", () => {
     expect(casilla).toHaveAttribute("aria-checked", "true");
   });
 
-  /*
-   * LO QUE ESTE TEST NO PUEDE PROBAR, DICHO CON TODAS LAS LETRAS.
-   *
-   * Que las FLECHAS muevan la selección dentro del grupo es lo que `RadioGroup`
-   * aporta sobre dos botones escritos a mano, y NO se comprueba aquí: el
-   * recorrido de Radix mueve el foco con su propia maquinaria y jsdom —que no
-   * hace `layout` ni pinta— no la reproduce. Fingirlo despachando el evento a
-   * mano probaría que el evento se despacha, no que el control responde.
-   *
-   * Queda como tarea de «abrir la aplicación», igual que si caben cuatro
-   * columnas a 390px. Lo que SÍ se fija aquí es lo que se rompería en silencio:
-   * que el grupo se anuncia como tal, que sus dos opciones tienen nombre —que
-   * es justo lo que faltaba en la pieza recién traída— y que elegir la segunda
-   * cambia de verdad lo que el formulario pide.
-   */
   it("el grupo del valor se anuncia, y elegir el otro modo cambia lo que se pide", async () => {
     await montar("/tasks/new");
 
@@ -291,24 +211,11 @@ describe("los controles traídos siguen funcionando con el teclado", () => {
     await userEvent.click(porHijo);
 
     expect(porHijo).toHaveAttribute("aria-checked", "true");
-    // Y el efecto de verdad: el valor pasa a pedirse hijo por hijo.
+
     expect(screen.getByLabelText(`${messages.tasks.coins} · Mateo`)).toBeInTheDocument();
   });
 });
 
-/**
- * LO QUE UN NOMBRE SOLO EN `aria-label` NO HACE: verse.
- *
- * El grupo del valor se anunciaba —y se sigue anunciando— con «¿Cuánto vale?»,
- * pero esa pregunta vivía solo en un `aria-label`. Quien mira la pantalla veía
- * «el mismo valor para todos» y «uno para cada uno» sin saber el mismo valor DE
- * QUÉ. Es el mismo defecto que el acceso a la ayuda tenía en la cabecera.
- *
- * El test pide las dos cosas a la vez, y hacen falta las dos: que el grupo siga
- * NOMBRADO para quien no ve —un texto puesto al lado no nombra un
- * `role=radiogroup` por estar cerca— y que ese nombre ESTÉ en la pantalla. Con
- * el defecto puesto, el primero pasa solo.
- */
 describe("el nombre del grupo del valor se ve y se oye", () => {
   it("está en la pantalla y además nombra al grupo", async () => {
     await montar("/tasks/new");
@@ -319,14 +226,6 @@ describe("el nombre del grupo del valor se ve y se oye", () => {
     expect(screen.getByText(messages.tasks.valueLegend)).toBeInTheDocument();
   });
 
-  /*
-   * Y LO QUE SE VA A REPARTIR, en vivo. La cifra sola no dice a cuántos, y ahí
-   * está la duda que cuesta dinero si se entiende al revés: si esos diez son
-   * diez en total o diez para cada uno.
-   *
-   * Se comprueba con un valor de UNO, que es el caso donde componer una cifra
-   * con un texto fijo produce «1 monedas».
-   */
   it("y dice a cuántos va ese valor, declinado", async () => {
     await montar("/tasks/new");
 

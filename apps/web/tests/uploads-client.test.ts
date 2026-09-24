@@ -35,8 +35,7 @@ describe("pedir una URL de subida", () => {
     expect(url).toBe(`${API_PREFIX}/children/me/avatar/upload-url`);
     expect(init.method).toBe("POST");
     expect(init.body).toBe(JSON.stringify({ contentType: "image/jpeg" }));
-    // La clave la decide el servidor: mandarla sería inventarse la mitad del
-    // mecanismo de seguridad.
+
     expect(init.body).not.toContain("key");
   });
 
@@ -50,7 +49,6 @@ describe("pedir una URL de subida", () => {
   });
 
   it("las cuatro rutas de subida salen del contrato", async () => {
-    // Un Response nuevo por llamada: el cuerpo de uno solo se puede leer una vez.
     const fetchMock = vi.fn().mockImplementation(() => Promise.resolve(jsonResponse(200, UNA_URL)));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -79,8 +77,6 @@ describe("pedir una URL de subida", () => {
 
 describe("subir contra la URL firmada", () => {
   it("va por PUT, con el tipo pedido, y FUERA del prefijo de la API", async () => {
-    // Si pasara por `apiFetch`, la dirección llevaría el prefijo y el cuerpo
-    // iría como JSON: las dos cosas rompen la subida.
     const fetchMock = vi.fn().mockResolvedValue(new Response(null, { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -168,7 +164,6 @@ describe("confirmar lo subido", () => {
 
 describe("cómo el front decide qué pintar", () => {
   it("una clave del catálogo NO es una URL", () => {
-    // Es lo único que separa pintar un emoji de pintar una foto.
     expect(isAvatarUrl(DEFAULT_AVATAR_KEY)).toBe(false);
     expect(isAvatarUrl("zorro")).toBe(false);
   });

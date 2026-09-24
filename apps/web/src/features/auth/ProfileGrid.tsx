@@ -3,19 +3,6 @@ import { messages } from "../../lib/messages.js";
 import { Avatar, Badge, HeroPanel, Mascota, buttonClasses, cx } from "../../ui/index.js";
 import { useProfiles } from "./use-session.js";
 
-/**
- * Rejilla de perfiles. Se ve con cuenta acreditada y sin perfil elegido
- * (decisión 7 del design de `add-profile-selection`).
- *
- * Desde `add-app-shell` es solo la rejilla: el teclado de PIN, el alta de un
- * hijo y el restablecimiento del PIN de adulto son destinos propios y ya no
- * vistas de este componente.
- *
- * Desde `redesign-profile-grid` tiene un modo de ADMINISTRACIÓN, que llega en la
- * dirección y no en un estado local. Ver la decisión 1 de su design: lo que
- * decide es que la intención sobreviva al viaje al teclado de PIN, porque
- * después de acertarlo quien navega es la guarda y no este componente.
- */
 export function ProfileGrid({ manage = false }: { manage?: boolean }): React.ReactElement {
   const { data, isPending } = useProfiles(true);
 
@@ -27,41 +14,17 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
 
   return (
     <section className="flex w-full max-w-(--container-wide) flex-col items-center gap-8">
-      {/*
-        LA PREGUNTA VA EN UN PANEL DE MARCA Y CON MONEDÍN, no como un titular
-        suelto sobre el fondo.
 
-        Es la pantalla por la que se pasa cada vez que alguien coge la tablet, y
-        era la más sosa del producto: un texto negro centrado y cinco huecos
-        grises. La maqueta la abre con Monedín preguntando desde el color de la
-        acción, que es exactamente lo que esta pantalla pide — hay que elegir.
-      */}
       <HeroPanel className="w-full max-w-reading" mascot={<Mascota pose="saluda" size="medium" />}>
         <h2 className="text-hero font-extrabold text-ink-inverted">
           {manage ? messages.auth.manageProfilesTitle : messages.auth.whoIsPlaying}
         </h2>
 
-        {/*
-          El modo se anuncia con una FRASE, no solo con el lápiz de cada tesela.
-          Lo que cambió es el modo y no cada perfil, y enterarse mirando un
-          distintivo pequeño en doce sitios es el trabajo que esta línea ahorra.
-
-          Y la rejilla normal lleva la suya, que faltaba: el título pregunta
-          quién eres y no dice que después hay un PIN. La línea no era «el
-          adorno del modo administrar», era la de las dos.
-        */}
         <p className="text-lead text-ink-inverted opacity-90">
           {manage ? messages.auth.manageProfilesLead : messages.auth.whoIsPlayingLead}
         </p>
       </HeroPanel>
 
-      {/*
-        Los `li` son CONTENEDORES FLEXIBLES, y no es adorno: es lo que hace que
-        la tarjeta de dentro llene la altura de su fila. Con eso la tesela puede
-        declarar un MÍNIMO en vez de un alto fijo, y las de una misma fila se
-        igualan solas — crezca lo que crezca la más alta. Ver la decisión 3 del
-        design de `widen-profile-tiles`.
-      */}
       <ul className="flex list-none flex-wrap justify-center gap-6 p-0">
         {profiles.map((profile) => (
           <li key={profile.id} className="flex">
@@ -72,12 +35,7 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
                 to="/profiles/$profileId/pin"
                 params={{ profileId: profile.id }}
                 search={{ manage: manage || undefined }}
-                /*
-                 * Un solo elemento interactivo por tesela. El lápiz va DENTRO y
-                 * es decorativo: dos objetivos de toque solapados fallan justo
-                 * donde el dedo de un niño ya falla, y con teclado serían dos
-                 * paradas para una sola cosa. Ver la decisión 3 del design.
-                 */
+
                 aria-label={manage ? `${messages.auth.editProfile} ${profile.name}` : undefined}
                 className={tileClasses(profile.familyRole === "PARENT" ? "brand" : "primary")}
               >
@@ -86,8 +44,7 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
                   {profile.familyRole === "PARENT" && <CrownBadge />}
                   {manage && <PencilBadge />}
                 </span>
-                {/* El relleno lateral es del NOMBRE y no de la tarjeta: puesto en
-                    la tarjeta se lo quitaría al círculo, que es lo que no sobra. */}
+
                 <span className="text-title px-2 font-semibold">{profile.name}</span>
               </Link>
             )}
@@ -95,26 +52,15 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
         ))}
 
         <li className="flex">
-          {/*
-            «Agregar perfil» es una tesela más y no un enlace de texto debajo:
-            crear el primer hijo es lo que hace que el producto haga algo, y
-            enterrarlo bajo la rejilla lo escondía.
-          */}
+
           <Link
             to="/profiles/new"
-            /*
-              DE TRAZO DISCONTINUO, como en la maqueta: no es un perfil, es el
-              hueco donde cabría uno. Con el mismo borde que los demás se lee
-              como una quinta cara.
-            */
+
             className={cx(tileClasses("muted"), "border-dashed hover:bg-surface-sunken")}
           >
             <span
               aria-hidden="true"
-              // `size-28` es la misma medida que `Avatar size="xlarge"`: son la misma
-              // fila, y una tesela más baja que las demás se lee como un error.
-              // Un círculo, como los avatares que acompaña: la fila es de caras
-              // redondas y un cuadrado en medio rompe la lectura.
+
               className="rounded-pill text-hero flex size-28 items-center justify-center bg-surface-sunken text-primary leading-none"
             >
               +
@@ -135,52 +81,6 @@ export function ProfileGrid({ manage = false }: { manage?: boolean }): React.Rea
   );
 }
 
-/*
- * La caja de una tesela. Misma forma para un perfil y para «agregar».
- *
- * EL TELÉFONO FIJA EL MÍNIMO Y NADA MÁS. Con `w-40` hacían falta 344 px para dos
- * teselas y su hueco, y en una pantalla de 390 hay 343 en cuanto aparece la barra
- * de desplazamiento — que aparece justo cuando hay perfiles de sobra—. Fallaba por
- * UN píxel, y al caer a una columna la página se alargaba y la barra se quedaba:
- * un bucle. Con `w-36` hacen falta 312, con 31 de holgura.
- *
- * Ese análisis vale entero, y lo que no valía es aplicarle ese techo a un monitor:
- * a partir de `sm` no hay ninguna razón para quedarse en 144, así que la tesela
- * sube a 176 y se acerca a los 186 de su maqueta. Los 186 exactos no, porque son
- * un valor arbitrario y un test los prohíbe — la escala existe para que dos
- * pantallas no elijan dos números parecidos.
- *
- * DECÍA que la tesela mide exactamente lo que el avatar, y era el defecto: la cara
- * llegaba al borde, lo pisaba por dentro y sacaba fuera la corona del adulto. Ahora
- * la cara son 112 y la tesela nunca baja de 144.
- *
- * Y el alto es un MÍNIMO, no una medida. Fijo hacía dos cosas mal: con la cara más
- * pequeña sobraba hueco abajo, y se quedaba corto en la peor combinación que el
- * producto produce —un nombre en dos renglones MÁS la insignia de bloqueado—. Con
- * el mínimo, las teselas de una fila se igualan entre ellas y crecen solo lo que
- * pida la más alta.
- *
- * El crecimiento va bajo `motion-safe`, y el realce de fondo NO. Bajo
- * movimiento reducido el sistema pone las duraciones a 1 ms, y eso convierte
- * este crecimiento en un salto instantáneo — que es peor para quien pidió no
- * ver movimiento, no mejor. Así, con movimiento reducido la tesela sigue
- * respondiendo por color y no se mueve. Ver la decisión 3 del design.
- */
-/**
- * UNA TESELA ES UNA TARJETA CON SU BORDE, y antes era un hueco sin nada.
- *
- * Comparada con su maqueta, la rejilla salía plana: cinco rectángulos del mismo
- * gris sobre el mismo fondo, sin borde, sin tarjeta y sin nada que separara a un
- * perfil del siguiente. Es la pantalla que más se mira de todo el producto —se
- * pasa por ella cada vez que alguien coge la tablet— y era la más sosa.
- *
- * EL COLOR DEL BORDE SIGUE UNA REGLA y no un reparto: violeta para el adulto,
- * coral para los hijos. Son los dos tonos de la paleta con su significado
- * puesto —el violeta de lo guardado y lo adulto, el coral de quien hace—, así
- * que la rejilla se lee de un vistazo sin tener que aprenderse nada. La maqueta
- * alterna los dos entre los hijos; alternar es una decisión que hay que volver a
- * tomar cada vez que se añade uno, y esto no.
- */
 function tileClasses(tono: "brand" | "primary" | "muted"): string {
   return cx(
     "rounded-card flex min-h-52 w-36 flex-col items-center justify-start gap-3 border-2 bg-surface-raised px-0 py-5 text-center no-underline text-ink shadow-card transition duration-normal sm:w-44",
@@ -191,14 +91,6 @@ function tileClasses(tono: "brand" | "primary" | "muted"): string {
   );
 }
 
-/**
- * Un perfil bloqueado NO es un enlace y NO lleva lápiz.
- *
- * Sin destino al que llevar, un enlace deshabilitado no existe en HTML y un
- * botón muerto confunde menos que un enlace que no navega. Y ofrecer editarlo
- * sería ofrecer algo que el sistema va a rechazar: sin PIN no se entra, y sin
- * entrar no se edita.
- */
 function LockedTile({
   name,
   avatar,
@@ -210,26 +102,17 @@ function LockedTile({
     <span className={cx(tileClasses("muted"), "opacity-70")}>
       <Avatar value={avatar} size="xlarge" />
       <span className="text-title px-2 font-semibold">{name}</span>
-      {/* Una INSIGNIA y no letra gris: es un estado, y el producto los dibuja
-          así en todas partes. En gris se leía como parte del nombre. */}
+
       <Badge tone="conflict">{messages.auth.profileLocked}</Badge>
     </span>
   );
 }
 
-/** El lápiz del modo administrar. Decorativo: lo que se anuncia es la tesela. */
 function PencilBadge(): React.ReactElement {
   return (
     <span
       aria-hidden="true"
-      /*
-        Mismo velo que el diálogo, que es el precedente del sistema.
 
-        REDONDO, y eso cambió con el avatar: mientras fue un cuadrado redondeado
-        el velo llevaba su mismo radio, y al pasar la cara a círculo se quedó con
-        cuatro esquinas asomando por fuera. Un velo que cubre algo tiene que
-        tener su forma, no la que tenía antes.
-      */
       className="rounded-pill absolute inset-0 flex items-center justify-center bg-ink/40 text-ink-inverted"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="size-10">
@@ -244,14 +127,6 @@ function PencilBadge(): React.ReactElement {
   );
 }
 
-/**
- * La corona del adulto.
- *
- * NO es decorativa: lleva nombre. Un icono suelto hay que aprenderlo, y quien
- * no ve la pantalla no lo aprende nunca, así que la distinción existe en los
- * dos canales o no existe. Va en la esquina y no bajo el nombre para que todas
- * las teselas queden a la misma altura.
- */
 function CrownBadge(): React.ReactElement {
   return (
     <span

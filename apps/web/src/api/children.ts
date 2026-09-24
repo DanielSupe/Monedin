@@ -16,14 +16,6 @@ import {
 import { z } from "zod";
 import { apiFetch } from "../lib/http-client.js";
 
-/**
- * Llamadas de los perfiles de hijo.
- *
- * Los tipos NO se declaran aquí: vienen de `@monedin/contracts`, el mismo
- * paquete del que la API deriva su validación. Si el contrato cambia, esto deja
- * de compilar.
- */
-
 const emptySchema = z.unknown();
 
 export function createChild(input: CreateChildInput): Promise<Child> {
@@ -54,10 +46,6 @@ export function updateChild(childId: string, input: UpdateChildInput): Promise<C
   });
 }
 
-/**
- * Pide dónde subir la foto de un hijo. La clave la decide el servidor: aquí
- * solo se recibe y se devuelve al confirmar.
- */
 export function requestChildAvatarUploadUrl(
   childId: string,
   contentType: ImageContentType,
@@ -68,7 +56,6 @@ export function requestChildAvatarUploadUrl(
   });
 }
 
-/** Lo mismo para el propio niño. Sin identificador: sale de su sesión. */
 export function requestOwnAvatarUploadUrl(contentType: ImageContentType): Promise<UploadUrl> {
   return apiFetch("/children/me/avatar/upload-url", uploadUrlSchema, {
     method: "POST",
@@ -79,8 +66,6 @@ export function requestOwnAvatarUploadUrl(contentType: ImageContentType): Promis
 export async function deactivateChild(childId: string): Promise<void> {
   await apiFetch(`/children/${childId}`, emptySchema, { method: "DELETE" });
 }
-
-// --- Vista propia del niño --------------------------------------------------
 
 export function fetchOwnChild(): Promise<OwnChild> {
   return apiFetch("/children/me", ownChildSchema);

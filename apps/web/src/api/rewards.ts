@@ -17,17 +17,8 @@ import {
 import { z } from "zod";
 import { apiFetch } from "../lib/http-client.js";
 
-/**
- * Llamadas de los premios.
- *
- * Los tipos NO se declaran aquí: vienen de `@monedin/contracts`, el mismo
- * paquete del que la API deriva su validación. Si el contrato cambia, esto
- * deja de compilar.
- */
-
 const emptySchema = z.unknown();
 
-/** Query string de un listado, en el orden en que lo espera la API. */
 function queryString(query: Record<string, string | number | undefined>): string {
   const params = new URLSearchParams();
 
@@ -38,8 +29,6 @@ function queryString(query: Record<string, string | number | undefined>): string
   const cadena = params.toString();
   return cadena === "" ? "" : `?${cadena}`;
 }
-
-// --- Gestión del padre ------------------------------------------------------
 
 export function createReward(input: CreateRewardInput): Promise<Reward> {
   return apiFetch("/rewards", rewardSchema, {
@@ -72,12 +61,6 @@ export function replaceAssignments(
   });
 }
 
-/**
- * La vía del ALTA: no lleva premio porque todavía no existe.
- *
- * La clave que devuelve cuelga del padre y no de ningún premio. Ver la decisión
- * 3 del design de `polish-profile-and-reward-image`.
- */
 export function requestPendingRewardImageUploadUrl(
   contentType: ImageContentType,
 ): Promise<UploadUrl> {
@@ -101,15 +84,6 @@ export async function retireReward(rewardId: string): Promise<void> {
   await apiFetch(`/rewards/${rewardId}`, emptySchema, { method: "DELETE" });
 }
 
-// --- Escaparate propio del niño ----------------------------------------------
-
-/**
- * El escaparate del niño.
- *
- * NO admite un identificador de hijo, igual que la API: el perfil sale de la
- * sesión. Si esta función aceptara uno, la garantía dejaría de ser
- * estructural.
- */
 export function fetchOwnRewards(
   query: Partial<ListOwnRewardsQuery> = {},
 ): Promise<OwnRewardsPage> {
@@ -119,9 +93,6 @@ export function fetchOwnRewards(
   );
 }
 
-// --- Claves de consulta -----------------------------------------------------
-
-/** Raíz de todo lo de premios: invalidarla refresca las dos vistas. */
 export const rewardsQueryKey = ["rewards"] as const;
 
 export const rewardsPageQueryKey = (query: Partial<ListRewardsQuery>) =>

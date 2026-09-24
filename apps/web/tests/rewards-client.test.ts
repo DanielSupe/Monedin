@@ -131,9 +131,6 @@ describe("cliente de premios", () => {
   });
 
   it("el escaparate no lleva identificador de hijo", async () => {
-    // Si lo llevara, un niño podría apuntar al precio de su hermano. La API lo
-    // rechazaría con 422 porque su esquema es estricto, pero la garantía buena
-    // es que aquí no hay ningún parámetro que ponerlo.
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, unaPaginaPropia()));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -182,9 +179,6 @@ describe("traducción de errores de premios", () => {
   }
 
   it("un 404 es «no encontramos ese premio», y NO reutiliza el texto de tareas", () => {
-    // Es el test que impide reutilizar `describeTasksError`: allí un 404
-    // significa «esa tarea ya no está». Un mismo código HTTP no dice lo mismo
-    // en dos módulos distintos.
     const texto = describeRewardsError(errorCon(ERROR_CODES.NOT_FOUND));
 
     expect(texto).toBe(messages.rewards.notFound);

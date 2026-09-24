@@ -67,12 +67,6 @@ function pagina(items: unknown[], extra: { total?: number; totalPages?: number }
   };
 }
 
-/**
- * Sirve el panel entero.
- *
- * Va con router de verdad porque lo que hay que comprobar incluye A DÓNDE
- * llevan los avisos, y un doble del router diría que sí a todo.
- */
 async function montarPanel({
   repartos = [],
   totalPaginasDeTareas = 1,
@@ -128,57 +122,23 @@ async function montarPanel({
   return router;
 }
 
-/**
- * El aviso de una bandeja, y la cifra que lleva dentro.
- *
- * Desde `redesign-parent-screens` la cifra y su unidad son DOS elementos —el
- * número va grande encima, como manda la maqueta— así que ya no existe ningún
- * nodo cuyo texto sea «2 tareas por aprobar». Lo que sigue siendo UNA cosa es el
- * enlace, y dentro de él las dos partes se comprueban juntas.
- *
- * No se usa el nombre accesible del enlace para esto: jsdom no hace `layout`, así
- * que concatena los dos tramos sin el espacio que un navegador sí pondría, y un
- * test que dependiera de eso pasaría o fallaría por una razón que no es la suya.
- */
 async function avisoDe(etiqueta: string): Promise<HTMLElement> {
   return (await screen.findByText(etiqueta)).closest("a") as HTMLElement;
 }
 
-/** La cifra que enseña ese aviso, o `null` si el aviso no está. */
 function sinAvisoDe(etiqueta: string): boolean {
   return screen.queryByText(etiqueta) === null;
 }
 
-/**
- * La trampa de este change.
- *
- * `GET /tasks?status=COMPLETED` pagina por REPARTO y devuelve el reparto
- * ENTERO, así que las dos cuentas obvias dan números equivocados en direcciones
- * opuestas. El caso de estados MEZCLADOS es el único que las distingue: con un
- * reparto de una sola tarea completada, las tres cuentas dan 1 y el test no
- * probaría nada.
- */
 describe("las tareas por aprobar se cuentan por fila, no por reparto", () => {
   it("un reparto con tres hermanos en estados distintos cuenta DOS", async () => {
     await montarPanel({ repartos: [reparto("b1", ["COMPLETED", "COMPLETED", "PENDING"])] });
 
-    /*
-     * DOS completadas y no una, a propósito: es lo que hace que las tres
-     * cuentas den números distintos y que este test las distinga.
-     *
-     *   total (repartos)            → 1
-     *   items.flatMap(b => b.tasks) → 3
-     *   filas en COMPLETED          → 2  ✓
-     *
-     * La primera versión usaba una sola completada, y entonces las tres daban
-     * 1: el test pasaba con la cuenta equivocada puesta. Comprobado
-     * inyectándola.
-     */
     const aviso = await avisoDe(messages.parents.tasksToApprove);
 
     expect(within(aviso).getByText("2")).toBeInTheDocument();
     expect(within(aviso).queryByText("3")).toBeNull();
-    // Con UNA sola, la unidad sería la del singular y este aviso no existiría.
+
     expect(sinAvisoDe(messages.parents.taskToApprove)).toBe(true);
   });
 
@@ -190,7 +150,6 @@ describe("las tareas por aprobar se cuentan por fila, no por reparto", () => {
       ],
     });
 
-    // Aquí `total` habría dicho 2 y contar filas habría dicho 5.
     const aviso = await avisoDe(messages.parents.tasksToApprove);
 
     expect(within(aviso).getByText("4")).toBeInTheDocument();
@@ -214,7 +173,6 @@ describe("una cifra que se queda corta lo dice", () => {
 
     const aviso = await avisoDe(messages.parents.tasksToApprove);
 
-    // El `+` dice «al menos»: la cuenta se quedó corta y no lo esconde.
     expect(within(aviso).getByText("2+")).toBeInTheDocument();
     expect(within(aviso).queryByText("2")).toBeNull();
   });
@@ -235,16 +193,12 @@ describe("no tener nada pendiente es una respuesta, no dos ceros", () => {
 
     expect(within(aviso).getByText("2")).toBeInTheDocument();
     expect(screen.queryByText(messages.parents.allClear)).toBeNull();
-    // La otra bandeja no aparece a cero: con cero no se dibuja.
+
     expect(sinAvisoDe(messages.parents.tasksToApprove)).toBe(true);
     expect(sinAvisoDe(messages.parents.taskToApprove)).toBe(true);
   });
 });
 
-/**
- * Llevar al listado SIN filtro obligaría al padre a repetir a mano la búsqueda
- * que el panel acaba de hacer por él.
- */
 describe("cada aviso lleva a su listado ya filtrado", () => {
   it("el de tareas apunta a /tasks en COMPLETED", async () => {
     await montarPanel({ repartos: [reparto("b1", ["COMPLETED"])] });
@@ -269,14 +223,6 @@ describe("cada aviso lleva a su listado ya filtrado", () => {
   });
 });
 
-/**
- * El panel trae a los hijos en UNA página y no pagina.
- *
- * Eso solo es correcto mientras el máximo por familia quepa en el tamaño de
- * página. Es una relación entre dos constantes que nadie escribió a propósito, y
- * de las que se rompen en silencio: subir el máximo a 25 dejaría al panel
- * escondiendo hijos sin que fallara nada. Aquí falla.
- */
 describe("los saldos del panel cubren a toda la familia", () => {
   it("el máximo de hijos cabe en una página", () => {
     expect(MAX_CHILDREN_PER_FAMILY).toBeLessThanOrEqual(DEFAULT_PAGE_SIZE);

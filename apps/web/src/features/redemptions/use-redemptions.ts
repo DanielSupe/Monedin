@@ -8,15 +8,6 @@ import * as rewardsApi from "../../api/rewards.js";
 import { ApiRequestError } from "../../lib/http-client.js";
 import { messages } from "../../lib/messages.js";
 
-/**
- * Datos de los canjes.
- *
- * Solicitar no mueve el saldo real todavía —el descuento ocurre al aprobar—,
- * así que solo invalida la lista de canjes. Aprobar SÍ descuenta, y por eso
- * usa el mismo patrón que `useApproveTask`: refresca la sesión y el perfil
- * propio del niño, MÁS `rewardsQueryKey`, porque `affordable` en el
- * escaparate se calcula contra el saldo que este canje acaba de bajar.
- */
 function useRefreshRedemptions(): () => Promise<void> {
   const queryClient = useQueryClient();
 
@@ -33,15 +24,11 @@ function useRefreshRedemptionsAndCoins(): () => Promise<void> {
     await queryClient.invalidateQueries({ queryKey: authApi.sessionQueryKey });
     await queryClient.invalidateQueries({ queryKey: childrenApi.ownChildQueryKey });
     await queryClient.invalidateQueries({ queryKey: childrenApi.childrenQueryKey });
-    // Y el HISTORIAL: este movimiento acaba de escribir una fila en él. Sin
-    // esto, el saldo sube y la pantalla que lo explica sigue sin la fila que lo
-    // explica.
+
     await queryClient.invalidateQueries({ queryKey: coinsApi.coinHistoryQueryKey });
     await queryClient.invalidateQueries({ queryKey: rewardsApi.rewardsQueryKey });
   };
 }
-
-// --- Bandeja del padre --------------------------------------------------------
 
 export function useRedemptions(query: Partial<ListRedemptionsQuery>) {
   return useQuery({
@@ -50,7 +37,6 @@ export function useRedemptions(query: Partial<ListRedemptionsQuery>) {
   });
 }
 
-/** Aprobar DESCUENTA: es la mutación que obliga a invalidar también el saldo. */
 export function useApproveRedemption() {
   const refresh = useRefreshRedemptionsAndCoins();
 
@@ -63,8 +49,6 @@ export function useRejectRedemption() {
   return useMutation({ mutationFn: api.rejectRedemption, onSuccess: refresh });
 }
 
-// --- Alta y lista propia del niño ---------------------------------------------
-
 export function useOwnRedemptions(query: Partial<ListOwnRedemptionsQuery> = {}) {
   return useQuery({
     queryKey: api.ownRedemptionsQueryKey(query),
@@ -72,23 +56,12 @@ export function useOwnRedemptions(query: Partial<ListOwnRedemptionsQuery> = {}) 
   });
 }
 
-/** Solicitar NO descuenta todavía, así que no hace falta refrescar ningún saldo. */
 export function useCreateRedemption() {
   const refresh = useRefreshRedemptions();
 
   return useMutation({ mutationFn: api.createRedemption, onSuccess: refresh });
 }
 
-/**
- * Traduce un error de canjes a un texto para la persona.
- *
- * NO se reutiliza `describeTasksError` ni `describeRewardsError` a propósito:
- * aquí un 409 puede significar una transición perdida, un saldo que ya no
- * alcanza al aprobar, o un duplicado pendiente al solicitar, y los tres
- * casos comparten el mismo mensaje —igual que `describeTasksError` ya
- * colapsa varios casos en `messages.tasks.conflict`—. El código HTTP es
- * estable, pero no quiere decir lo mismo en dos módulos distintos.
- */
 export function describeRedemptionsError(error: unknown): string {
   if (!(error instanceof ApiRequestError)) {
     return messages.errors.network;
@@ -108,7 +81,6 @@ export function describeRedemptionsError(error: unknown): string {
   }
 }
 
-/** El estado de un canje, tal como lo lee una persona. */
 export function describeRedemptionStatus(status: "PENDING" | "APPROVED" | "REJECTED"): string {
   switch (status) {
     case "PENDING":

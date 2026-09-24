@@ -8,19 +8,7 @@ import { DomainError, ValidationError } from "./domain-errors.js";
 import { HTTP_STATUS_BY_ERROR_CODE } from "./http-status.js";
 import { zodToFieldErrors } from "./zod-to-field-errors.js";
 
-/**
- * Traductor ÚNICO de error a respuesta HTTP.
- *
- * Va al final de la cadena de middlewares. Es el único punto del sistema que
- * sabe convertir un fallo en estado y cuerpo; ningún módulo de dominio escribe
- * respuestas de error.
- *
- * Express 5 reenvía aquí también los errores lanzados dentro de handlers
- * asíncronos, así que no hace falta envolver cada controlador en un try/catch.
- */
 export const errorHandler: ErrorRequestHandler = (error, _req, res, next) => {
-  // Si la respuesta ya empezó a enviarse no se puede reescribir: que Express
-  // cierre la conexión.
   if (res.headersSent) {
     next(error);
     return;
@@ -36,8 +24,6 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, next) => {
     return;
   }
 
-  // Un ZodError que llega hasta aquí es entrada inválida que no pasó por el
-  // middleware de validación. Se trata igual: 422 con detalle por campo.
   if (error instanceof ZodError) {
     const body: ApiError = {
       code: ERROR_CODES.VALIDATION_ERROR,
@@ -48,9 +34,6 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, next) => {
     return;
   }
 
-  // El parser de JSON de Express rechaza un cuerpo malformado con un
-  // SyntaxError propio. Es entrada inválida como cualquier otra, así que sale
-  // por 422 y con el mismo cuerpo, no con el 400 en HTML del framework.
   if (isBodyParseError(error)) {
     const body: ApiError = {
       code: ERROR_CODES.VALIDATION_ERROR,
@@ -73,9 +56,6 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, next) => {
     return;
   }
 
-  // Fallo no previsto. La respuesta lleva un mensaje genérico y un
-  // identificador; el detalle completo se queda en el log del servidor bajo ese
-  // mismo identificador, para poder correlacionar el reporte de un usuario.
   const incidentId = randomUUID();
 
   logger.error("Error no controlado", {
@@ -93,7 +73,6 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, next) => {
   res.status(HTTP_STATUS_BY_ERROR_CODE[ERROR_CODES.INTERNAL_ERROR]).json(body);
 };
 
-/** Detecta el error que lanza `express.json()` ante un cuerpo no parseable. */
 function isBodyParseError(error: unknown): boolean {
   return (
     error instanceof SyntaxError &&

@@ -8,13 +8,6 @@ import { ProgressRing } from "../../src/ui/ProgressRing.js";
 
 const SRC = resolve(process.cwd(), "src");
 
-/**
- * El realce de color es UNA pieza, y su valor está en que nadie más lo escriba.
- *
- * Sale en trece de las treinta y dos pantallas del rediseño. Una receta copiada
- * trece veces son trece decisiones que nadie ha comparado, y el día que haya que
- * cambiar el degradado hay que encontrarlas todas.
- */
 describe("HeroPanel", () => {
   it("los dos tonos no comparten superficie", () => {
     const hacer = render(<HeroPanel tone="action">Hacer</HeroPanel>);
@@ -26,14 +19,6 @@ describe("HeroPanel", () => {
     expect(clasesDe(hacer)).not.toBe(clasesDe(conseguido));
   });
 
-  /*
-   * Que el tono sea un conjunto CERRADO es media pieza: si el punto de uso
-   * pudiera pasar un color, un degradado podría mezclar los dos tonos del
-   * sistema — y uno que va del coral al violeta deja de decir cuál manda.
-   *
-   * Se comprueba leyendo el archivo y no la API: en TypeScript el tipo ya lo
-   * impide, pero el tipo se puede ensanchar de un plumazo y este test lo dice.
-   */
   it("el tono es un conjunto cerrado, no un color", () => {
     const fuente = readFileSync(join(SRC, "ui", "HeroPanel.tsx"), "utf8");
 
@@ -41,11 +26,6 @@ describe("HeroPanel", () => {
     expect(fuente).not.toMatch(/\bcolor\??:\s*string/);
   });
 
-  /*
-   * La regla que de verdad protege esto: que ninguna pantalla se escriba su
-   * propio degradado. Sin ella, la pieza existiría y cada pantalla seguiría
-   * haciendo el suyo.
-   */
   it("ninguna pantalla declara un degradado por su cuenta", () => {
     const culpables: string[] = [];
 
@@ -79,13 +59,6 @@ describe("HeroPanel", () => {
   });
 });
 
-/**
- * El aro recibe sus dos cifras y no calcula ninguna.
- *
- * Los tres casos dan resultados DISTINTOS a propósito. Con 2 de 4 —la mitad— un
- * error que dibujara el complemento pasaría en verde, que es la forma silenciosa
- * de que un test no pruebe nada.
- */
 describe("ProgressRing", () => {
   it("dice su valor a quien no lo ve, en sus tres casos", () => {
     for (const [hechas, total] of [
@@ -115,11 +88,6 @@ describe("ProgressRing", () => {
     expect(new Set([vacio, medio, lleno]).size).toBe(3);
   });
 
-  /*
-   * Un total de cero no puede reventar la pieza ni dibujar un aro entero: pasa
-   * de verdad, en el primer día de un niño al que todavía no le han repartido
-   * nada.
-   */
   it("sin tareas no dibuja un aro completo", () => {
     const { container } = render(<ProgressRing done={0} total={0} />);
     const trazo = container.querySelectorAll("circle")[1]?.getAttribute("stroke-dasharray") ?? "";

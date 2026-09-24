@@ -3,18 +3,6 @@ import type { Express } from "express";
 import { CREDENCIALES, createChildProfile, enterProfile, asParent, liveCookies, login } from "./auth.js";
 import { testPrisma } from "./database.js";
 
-/**
- * Soporte para los tests de tareas.
- *
- * Lo que resuelve, y que si no se repetiría en cada archivo:
- *
- * UN PERFIL POR DISPOSITIVO. Dentro de una misma sesión de cuenta solo hay un
- * perfil activo a la vez: entrar al del hijo echa al del padre. Casi todo test
- * de tareas necesita a los dos a la vez —el niño marca, el padre aprueba—, así
- * que cada uno entra desde su propia sesión de cuenta, que es lo que en la vida
- * real es el móvil de cada uno.
- */
-
 export interface MiembroOperando {
   id: string;
   name: string;
@@ -24,19 +12,13 @@ export interface MiembroOperando {
 
 export interface FamiliaOperando {
   parentId: string;
-  /** Cookies del padre con SU perfil activo, en su propio dispositivo. */
+
   cookies: string[];
-  /** Cookies de solo cuenta, para lo que ocurre antes de elegir perfil. */
+
   accountCookies: string[];
   hijos: MiembroOperando[];
 }
 
-/**
- * Una familia con su padre y sus hijos dentro, cada uno en su dispositivo.
- *
- * Los hijos se crean EN SERIE para que su `createdAt` respete el orden de los
- * nombres, igual que en `familiaConHijos`.
- */
 export async function familiaOperando(
   app: Express,
   nombres: string[],
@@ -59,20 +41,13 @@ export async function familiaOperando(
 
   return {
     parentId,
-    // El padre vuelve a entrar en un dispositivo nuevo: los hijos de arriba le
-    // quitaron el perfil de la sesión de cuenta original.
+
     cookies: await enDispositivoPropio(app, email, PARENT_PROFILE_ID, CREDENCIALES.pin),
     accountCookies,
     hijos,
   };
 }
 
-/**
- * Abre una sesión de cuenta NUEVA y entra a un perfil desde ella.
- *
- * Es lo que hace falta para tener dos perfiles de la misma familia operando a
- * la vez: dentro de una sesión de cuenta eso es imposible por diseño.
- */
 async function enDispositivoPropio(
   app: Express,
   email: string,
@@ -88,17 +63,6 @@ async function enDispositivoPropio(
   return enterProfile(app, liveCookies(response), profileId, pin);
 }
 
-// ---------------------------------------------------------------------------
-// Datos sembrados directamente
-// ---------------------------------------------------------------------------
-
-/**
- * Crea una tarea saltándose la API.
- *
- * Sirve para colocar una tarea en un estado concreto sin recorrer las
- * transiciones que lo llevarían hasta ahí, que es lo que hace legible un test
- * de «aprobar una ya aprobada».
- */
 export async function sembrarTarea(
   owners: { parentId: string; childId: string },
   overrides: {
@@ -127,7 +91,6 @@ export async function sembrarTarea(
   return task;
 }
 
-/** El saldo que tiene ahora mismo un hijo. */
 export async function saldoDe(childId: string): Promise<number> {
   const { coins } = await testPrisma().childProfile.findUniqueOrThrow({
     where: { id: childId },
@@ -136,7 +99,6 @@ export async function saldoDe(childId: string): Promise<number> {
   return coins;
 }
 
-/** El estado en el que ha quedado una tarea. */
 export async function estadoDe(taskId: string): Promise<string> {
   const { status } = await testPrisma().task.findUniqueOrThrow({
     where: { id: taskId },
@@ -145,7 +107,6 @@ export async function estadoDe(taskId: string): Promise<string> {
   return status;
 }
 
-/** Las entradas de historial que señalan una tarea concreta. */
 export async function movimientosDe(
   taskId: string,
 ): Promise<Array<{ amount: number; balanceAfter: number; reason: string }>> {
@@ -156,7 +117,6 @@ export async function movimientosDe(
   });
 }
 
-/** Cuántas tareas hay creadas para un padre. Para comprobar el «todo o nada». */
 export function cuantasTareasTiene(parentId: string): Promise<number> {
   return testPrisma().task.count({ where: { parentId } });
 }

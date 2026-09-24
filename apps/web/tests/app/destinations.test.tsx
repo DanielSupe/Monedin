@@ -15,12 +15,6 @@ describe("el niño tiene destinos propios", () => {
     },
   );
 
-  /**
-   * El defecto que este change existe para arreglar.
-   *
-   * Antes, las cuatro pantallas del niño vivían dentro de `/` con booleanos, así
-   * que su historial tenía UNA entrada: pulsar atrás salía de Monedín.
-   */
   it("volver atrás devuelve a la pantalla anterior, no fuera de la aplicación", async () => {
     const app = await montarApp("/", comoNino());
 
@@ -60,16 +54,6 @@ describe("el rol equivocado no se queda parado donde no le toca", () => {
   );
 });
 
-/**
- * `/assistant` es el PRIMER destino compartido por los dos roles.
- *
- * Hasta `add-family-assistant`, las dos listas de arriba eran excluyentes: todo
- * destino pertenecía a uno de los dos y el otro rebotaba a su inicio. Este no
- * pertenece a ninguno, y por eso no cabía en ninguna de las dos.
- *
- * Y el caso NEGATIVO importa tanto como el positivo: si la ruta se hubiera
- * guardado con `requireParent`, el niño acabaría en `/` y esa mitad lo caza.
- */
 describe("hay destinos que son de los dos roles", () => {
   it.each([
     ["un niño en /assistant", comoNino, "/assistant"],

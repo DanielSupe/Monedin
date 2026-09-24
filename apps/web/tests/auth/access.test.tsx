@@ -9,13 +9,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/**
- * Entrar y crear cuenta son DOS destinos.
- *
- * Eran uno con `useState<"signIn" | "signUp">`, y la consecuencia visible es lo
- * que estos tests fijan: «Empezar» abría el formulario de entrar, así que quien
- * venía a registrarse aterrizaba en una pantalla que no podía usar.
- */
 describe("cada llamada a la acción lleva a lo que anuncia", () => {
   it("«Empezar» lleva al REGISTRO", async () => {
     const user = userEvent.setup();
@@ -61,10 +54,6 @@ describe("cada ruta enseña su formulario y ninguna alterna", () => {
     expect(screen.getByLabelText(PIN_LABEL)).toBeInTheDocument();
   });
 
-  /*
-   * Lo que hacía el botón de alternar. Si vuelve, vuelve el estado haciendo de
-   * router: recargar pierde cuál era y el botón atrás sale de la aplicación.
-   */
   it("desde el acceso se llega al registro por un ENLACE, no por un botón", async () => {
     const user = userEvent.setup();
     const app = await montarApp("/sign-in", SIN_SESION);
@@ -105,8 +94,6 @@ describe("el formulario dice lo que exige antes de rechazarlo", () => {
     const ayuda = campo.getAttribute("aria-describedby");
     expect(ayuda).not.toBeNull();
 
-    // El número sale de la constante del contrato, no escrito a mano: si el
-    // mínimo cambia y la pantalla no, este test lo caza.
     expect(document.getElementById(ayuda ?? "")).toHaveTextContent(String(PASSWORD_MIN_LENGTH));
   });
 
@@ -117,12 +104,6 @@ describe("el formulario dice lo que exige antes de rechazarlo", () => {
   });
 });
 
-/**
- * El disco del ciclo.
- *
- * Cinco emojis leídos en voz alta no explican nada, así que es UNA imagen con
- * su descripción, igual que las órbitas de la puerta pública.
- */
 describe("el disco del ciclo", () => {
   it("se anuncia como una sola imagen con su descripción", async () => {
     await montarApp("/sign-in", SIN_SESION);
@@ -131,19 +112,11 @@ describe("el disco del ciclo", () => {
     expect(within(disco).queryAllByRole("img")).toHaveLength(0);
   });
 
-  /*
-   * Bajar la duración a 1ms —que es lo que hace el bloque del sistema—
-   * convertiría el giro en un parpadeo, peor para quien pidió no ver
-   * movimiento. Parado, el disco sigue completo y con sus piezas en su sitio.
-   */
   it("el giro está bajo `motion-safe`, en el aro y en cada pieza", async () => {
     await montarApp("/sign-in", SIN_SESION);
 
     const disco = screen.getByRole("img", { name: messages.auth.accessDiscLabel });
 
-    // Las dos mitades del truco: el aro gira y cada pieza gira al revés. Si una
-    // sola se quedara fuera de `motion-safe`, con movimiento reducido los
-    // emojis acabarían boca abajo.
     for (const animado of disco.querySelectorAll('[class*="animate-disc"]')) {
       expect(animado.className).toMatch(/motion-safe:animate-disc/);
       expect(animado.className).not.toMatch(/(?<!motion-safe:)animate-disc/);

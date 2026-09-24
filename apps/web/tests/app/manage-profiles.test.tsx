@@ -5,14 +5,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { messages } from "../../src/lib/messages.js";
 import { SOLO_CUENTA, comoNino, comoPadre, montarApp } from "../support/router.js";
 
-/**
- * El modo de administración de la rejilla.
- *
- * Lo que hay que probar es a DÓNDE se acaba, y eso solo se ve con un router de
- * verdad: el destino después del PIN lo decide la guarda, no el componente que
- * llamó a la mutación. Ver la decisión 2 del design de `redesign-profile-grid`.
- */
-
 const PERFILES: SelectableProfile[] = [
   { id: "parent", familyRole: "PARENT", name: "Lucía", avatar: "nutria", locked: false },
   { id: "hijo-1", familyRole: "CHILD", name: "Mateo", avatar: "zorro", locked: false },
@@ -24,11 +16,6 @@ beforeEach(() => {
 });
 
 describe("a dónde se aterriza después del PIN", () => {
-  /*
-   * Se monta ya CON actor sobre la dirección del teclado. Es exactamente el
-   * estado en el que la guarda se reevalúa cuando la mutación de entrar
-   * invalida la sesión, que es el momento que decide el destino.
-   */
   it("administrando, un padre acaba donde edita lo suyo", async () => {
     const app = await montarApp("/profiles/parent/pin?manage=true", comoPadre(), PERFILES);
 
@@ -53,11 +40,6 @@ describe("a dónde se aterriza después del PIN", () => {
     expect(app.direccion()).toBe("/");
   });
 
-  /*
-   * Un valor inválido CAE al de por defecto en vez de rechazarse: quien «llama»
-   * aquí es una persona con un enlace viejo, no código. Es la convención del
-   * front y lo contrario del 422 de la API.
-   */
   it("un valor inválido deja el modo apagado, no rompe la pantalla", async () => {
     const app = await montarApp("/profiles/parent/pin?manage=platano", comoPadre(), PERFILES);
 
@@ -99,11 +81,6 @@ describe("la rejilla en modo de administración", () => {
     expect(screen.getByText(messages.auth.profileLocked)).toBeInTheDocument();
   });
 
-  /*
-   * Un lápiz como botón encima de un enlace serían dos objetivos de toque
-   * solapados justo donde el dedo de un niño ya falla, y dos paradas de teclado
-   * para una sola cosa. Ver la decisión 3 del design.
-   */
   it("cada tesela es UNA sola cosa interactiva", async () => {
     await montarApp("/profiles?manage=true", SOLO_CUENTA, PERFILES);
 
@@ -115,26 +92,12 @@ describe("la rejilla en modo de administración", () => {
     expect(within(tesela).queryByRole("link")).toBeNull();
   });
 
-  /*
-   * Lo cazó tocando la aplicación, no un test.
-   *
-   * La rejilla se guardaba con `requireAccount`, que admite un perfil ya
-   * activo, mientras el teclado se guarda con `requireProfileChoice`, que no.
-   * Con Mateo dentro, el lápiz sobre Lucía rebotaba a los ajustes de MATEO sin
-   * pedir el PIN de Lucía — y con el modo administrar eso ya no parece «no pasó
-   * nada», parece que funcionó.
-   */
   it("con un perfil ya activo, la rejilla no se pinta", async () => {
     const app = await montarApp("/profiles?manage=true", comoNino(), PERFILES);
 
     expect(app.direccion()).toBe("/");
   });
 
-  /*
-   * La corona lleva NOMBRE y no es decorativa: un icono suelto hay que
-   * aprenderlo, y quien no ve la pantalla no lo aprende nunca. Ver la decisión
-   * 2 del design de `polish-profile-tiles`.
-   */
   it("el perfil del adulto se anuncia como tal, y los de los hijos no", async () => {
     await montarApp("/profiles", SOLO_CUENTA, PERFILES);
 
@@ -145,20 +108,13 @@ describe("la rejilla en modo de administración", () => {
     expect(within(hijo).queryByRole("img", { name: messages.auth.adultProfile })).toBeNull();
   });
 
-  /*
-   * El crecimiento va bajo `motion-safe` y el realce de color NO. Bajo
-   * movimiento reducido el sistema pone las duraciones a 1 ms, y eso convierte
-   * el crecimiento en un salto instantáneo: peor para quien pidió no ver
-   * movimiento, no mejor. Es la lección de `add-landing-page`.
-   */
   it("el crecimiento al señalar solo ocurre si el movimiento está permitido", async () => {
     await montarApp("/profiles", SOLO_CUENTA, PERFILES);
 
     const tesela = await screen.findByRole("link", { name: /Mateo/ });
 
     expect(tesela.className).toContain("motion-safe:hover:scale-105");
-    // El realce que NO es movimiento se queda encendido en los dos casos, para
-    // que con movimiento reducido la tesela siga respondiendo.
+
     expect(tesela.className).toContain("hover:bg-surface-sunken");
     expect(tesela.className).not.toMatch(/(?<!motion-safe:)hover:scale/);
   });
@@ -174,19 +130,6 @@ describe("la rejilla en modo de administración", () => {
   });
 });
 
-// ---------------------------------------------------------------------------
-
-/**
- * EL MODO SE ANUNCIA, Y NO SOLO CON EL LÁPIZ DE CADA TESELA.
- *
- * Lo que cambió es el MODO, no cada perfil. Un distintivo pequeño repetido doce
- * veces obliga a deducirlo mirando; una frase arriba lo dice. Y lleva dentro el
- * precio que de verdad sorprende —editar un perfil pide el PIN DE ESE PERFIL—,
- * sin el cual pulsar la cara de un hijo acaba en un teclado que parece un error.
- *
- * Se comprueban LAS DOS mitades: que con el modo lo dice y que sin él no. Sin la
- * segunda, una frase permanente pasaría igual — y entonces no diría nada.
- */
 describe("el modo de administración se anuncia en la pantalla", () => {
   it("con el modo, dice qué hará tocar un perfil", async () => {
     await montarApp("/profiles?manage=true", SOLO_CUENTA, PERFILES);
@@ -201,14 +144,6 @@ describe("el modo de administración se anuncia en la pantalla", () => {
     expect(screen.queryByText(messages.auth.manageProfilesLead)).toBeNull();
   });
 
-  /*
-   * LA RENDIJA EXISTE EN LAS DOS, con dos frases distintas, y hay que
-   * comprobarlo: los dos casos de arriba se cumplen igual con la rejilla normal
-   * MUDA, que es como estuvo hasta que se comparó con su maqueta. Lo que dicen
-   * es que el aviso del modo no se queda puesto, no que sin modo no se diga
-   * nada — y sin decir nada el título pregunta quién eres y calla que después
-   * viene un PIN.
-   */
   it("y la rejilla normal dice la suya, que no es la misma", async () => {
     await montarApp("/profiles", SOLO_CUENTA, PERFILES);
 

@@ -18,17 +18,6 @@ import {
 } from "../../ui/index.js";
 import { describeCoinsError } from "./use-coins.js";
 
-/**
- * El historial de movimientos, para quien sea que lo mire.
- *
- * UNA pieza y no dos: lo que cambia entre el niño y el padre es el título y a
- * dónde llevan sus enlaces de paginación, no cómo se lee un movimiento. Si
- * aparecieran dos componentes cuya única diferencia es la audiencia, sería un
- * defecto —es la misma regla que gobierna la doble escala—.
- *
- * Los enlaces de paginación entran como CONTENIDO, igual que en `Pagination`:
- * esta pieza no sabe a qué ruta pertenece.
- */
 const RAZON: Record<CoinReason, string> = {
   TASK_APPROVED: messages.coins.reasonTaskApproved,
   REDEMPTION_APPROVED: messages.coins.reasonRedemptionApproved,
@@ -45,7 +34,7 @@ export function CoinHistory({
   next,
 }: {
   title: string;
-  /** Lo que hay que saber de este libro. Solo la vista del adulto la pasa. */
+
   note?: string;
   page: CoinTransactionsPage | undefined;
   isPending: boolean;
@@ -59,8 +48,6 @@ export function CoinHistory({
     <section className="flex flex-col gap-5">
       <h2 className="text-display font-extrabold">{title}</h2>
 
-      {/* Solo cuando lo mira un adulto: es él quien puede querer corregir algo,
-          y a un niño «lo impide la base de datos» no le dice nada. */}
       {note !== undefined && (
         <p className="text-small text-ink-muted">{note}</p>
       )}
@@ -72,16 +59,6 @@ export function CoinHistory({
       ) : movimientos.length === 0 ? (
         <EmptyState glyph="🪙" title={messages.coins.empty} />
       ) : (
-        /*
-          UNA tarjeta con las filas divididas, y no una tarjeta por fila. Un
-          movimiento no es una cosa que se mire por separado —no se pulsa, no se
-          edita, no se puede ni borrar—: es un renglón de un libro mayor, y lo
-          que se hace con él es recorrerlo de arriba abajo. Cada fila en su
-          propia tarjeta convierte esa lectura en doce objetos sueltos.
-
-          Es además lo que distingue esta pantalla de las otras tres del niño,
-          que ya son una rejilla, una columna ancha y una tabla.
-        */
         <Card>
           <ul className="flex list-none flex-col p-0">
             {movimientos.map((movimiento) => (
@@ -103,40 +80,14 @@ export function CoinHistory({
   );
 }
 
-/*
- * EXPORTADA para que el inicio del niño enseñe sus tres últimos movimientos con
- * la MISMA fila. Escribirla allí otra vez sería la copia que se queda atrás al
- * cambiar algo — y ya hay dos pantallas que la usan a través de `CoinHistory`.
- */
 export function MovementRow({
   movement,
   compact = false,
 }: {
   movement: CoinTransaction;
-  /**
-   * Sin fecha y sin el rótulo del saldo: la forma del RESUMEN.
-   *
-   * En el historial la fecha es lo que se viene a mirar —esa pantalla contesta
-   * «este saldo no me cuadra»—; en las tres últimas del inicio son tres líneas
-   * que solo dicen qué pasó, y su maqueta no la pone. Es una opción de la fila y
-   * no una copia: copiarla para quitarle un dato es cómo acaban existiendo dos
-   * filas que se separan.
-   */
+
   compact?: boolean;
 }): React.ReactElement {
-  /*
-   * Que sume o reste es la información MÁS importante de la fila, y `-60` frente
-   * a `60` la deja colgando de un solo carácter. Se dice con palabra y con tono.
-   *
-   * Gastar NO va en peligro: es el niño usando sus monedas en algo que quería,
-   * que es justo el ciclo que el producto enseña. Pintarlo de rojo le diría que
-   * hizo algo mal.
-   *
-   * Desde `redesign-child-screens` los dos llevan además el color de lo que son:
-   * ganar el de la MONEDA, porque es dinero entrando, y gastar el del AHORRO,
-   * porque lo que sale se convirtió en un premio. Antes compartían forma y solo
-   * cambiaba la palabra, y son lo contrario.
-   */
   const acredita = movement.amount > 0;
 
   return (
@@ -146,11 +97,7 @@ export function MovementRow({
       </IconTile>
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        {/*
-          La cantidad va DENTRO de la frase y no en una columna aparte: «Ganó 5»
-          se lee de una vez, y separarla obligaría a cruzar la fila para saber
-          cuánto fue ese «Ganó».
-        */}
+
         <p className="text-lead font-extrabold">
           {acredita ? messages.coins.earned : messages.coins.spent}{" "}
           {Math.abs(movement.amount)}
@@ -160,30 +107,12 @@ export function MovementRow({
         </p>
       </div>
 
-      {/*
-        CUÁNDO FUE, que faltaba — y en un libro mayor es lo que se viene a mirar.
-
-        Esta pantalla existe para contestar «este saldo no me cuadra», y sin
-        fecha una fila dice cuánto y por qué pero no cuándo, o sea que no se
-        puede cruzar con nada de lo que pasó en casa. El dato estaba en la
-        respuesta desde el primer día; lo que faltaba era pintarlo.
-
-        Va en su propia columna entre la frase y el saldo, como en la maqueta, y
-        en la forma CORTA: es una celda de una lista que se recorre de arriba
-        abajo, no una línea de texto.
-      */}
       {!compact && (
         <span className="shrink-0 text-small font-bold text-ink-muted">
           {fechaCorta(movement.createdAt)}
         </span>
       )}
 
-      {/*
-        El saldo viene GUARDADO en la fila y no se acumula aquí. La columna es
-        redundante desde `add-data-model` con una razón escrita, y sumar en el
-        cliente sería además incorrecto en cuanto haya paginación: la segunda
-        página no sabe con qué saldo empezó.
-      */}
       <div className="flex shrink-0 flex-col items-end">
         {!compact && (
           <span className="text-micro font-extrabold uppercase tracking-wide text-ink-muted">
@@ -196,13 +125,6 @@ export function MovementRow({
   );
 }
 
-/**
- * Entrar o salir, dibujado. Decorativa: lo que lo dice es «Ganó» o «Gastó».
- *
- * Las dos flechas y no un signo: un `-60` frente a un `60` deja la información
- * más importante de la fila colgando de un solo carácter, y esa es justamente la
- * razón por la que existen esas dos palabras.
- */
 function Flecha({ hacia }: { hacia: "arriba" | "abajo" }): React.ReactElement {
   return (
     <svg

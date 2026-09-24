@@ -57,9 +57,6 @@ describe("el niño ve su propio perfil con su saldo", () => {
   }, 120_000);
 
   it("la ruta propia NO cae en la del identificador", async () => {
-    // Si `/children/:childId` se registrara antes, «me» entraría por ahí,
-    // dispararía `requireParent` y el niño recibiría un 403 en su propia ruta.
-    // El fallo sería silencioso porque un 403 es perfectamente plausible.
     const { cookies } = await asChild(app);
 
     const response = await suPerfil(cookies);
@@ -166,11 +163,6 @@ describe("el niño elige su avatar y nada más", () => {
 
 describe("el alta bajo concurrencia respeta el tope", () => {
   it("dos altas simultáneas en el último hueco no desbordan el tope más uno", async () => {
-    // La carrera se ACEPTA a conciencia: contar e insertar no son atómicos
-    // entre sí bajo Read Committed, así que las dos pueden colarse. El tope es
-    // un límite de POLÍTICA, no un invariante: pasar de 10 a 11 no descuadra
-    // ningún saldo. Cerrarlo exigiría nivel Serializable y mapear P2034, que
-    // hoy saldría como 500. Ver la decisión 7 del design de `add-children`.
     const { cookies } = await registerParent(app);
     const parentId = await testPrisma()
       .user.findFirstOrThrow({ select: { id: true } })
@@ -191,10 +183,8 @@ describe("el alta bajo concurrencia respeta el tope", () => {
         .send({ name: "Bruno", pin: "2222" }),
     ]);
 
-    // Al menos una entra: había hueco de verdad.
     expect(respuestas.some((r) => r.status === 201)).toBe(true);
-    // Y ninguna falla por validación: si esto salta, el test está mal escrito y
-    // no está probando la carrera.
+
     expect(respuestas.every((r) => r.status !== 422)).toBe(true);
 
     const activos = await testPrisma().childProfile.count({
@@ -205,9 +195,6 @@ describe("el alta bajo concurrencia respeta el tope", () => {
   }, 180_000);
 
   it("un hijo dado de baja mientras estaba dentro deja de poder consultar", async () => {
-    // Se marca la baja directamente en la base para dejar la sesión VIVA: por
-    // el endpoint se revocaría, y aquí interesa el otro camino, el del perfil
-    // que ya no existe para el producto aunque la cookie siga siendo válida.
     const { cookies, childId } = await asChild(app);
     await testPrisma().childProfile.update({
       where: { id: childId },

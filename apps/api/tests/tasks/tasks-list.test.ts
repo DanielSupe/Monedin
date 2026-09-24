@@ -59,7 +59,6 @@ describe("el padre ve sus tareas agrupadas por reparto", () => {
     expect(grupo?.title).toBe("Sacar la basura");
     expect(grupo?.tasks).toHaveLength(2);
 
-    // Cada tarea dice de qué hijo es, cuánto vale y en qué estado está.
     const porNombre = Object.fromEntries(
       (grupo?.tasks ?? []).map((tarea) => [tarea.child.name, tarea]),
     );
@@ -70,7 +69,6 @@ describe("el padre ve sus tareas agrupadas por reparto", () => {
   it("el total cuenta REPARTOS, no filas", async () => {
     const { cookies, parentId, hijos } = await familiaOperando(app, ["Ana", "Bruno"]);
 
-    // Tres repartos que suman siete tareas.
     for (const [indice, tareas] of [3, 2, 2].entries()) {
       const reparto = `reparto-${indice}`;
       for (let n = 0; n < tareas; n += 1) {
@@ -109,7 +107,6 @@ describe("el padre ve sus tareas agrupadas por reparto", () => {
 });
 
 describe("la paginación es por reparto", () => {
-  /** Tres repartos de dos tareas cada uno, en orden conocido. */
   async function tresRepartos(
     parentId: string,
     childIds: string[],
@@ -125,7 +122,7 @@ describe("la paginación es por reparto", () => {
           {
             title: `Tarea ${indice}`,
             batchId,
-            // Fechas separadas para que el orden sea el mismo en cada corrida.
+
             createdAt: new Date(Date.UTC(2026, 7, 10 + indice, 12, 0, 0)),
           },
         );
@@ -148,7 +145,6 @@ describe("la paginación es por reparto", () => {
     expect(primera.body.items).toHaveLength(2);
     expect(segunda.body.items).toHaveLength(1);
 
-    // Cada grupo llega completo, con sus dos tareas.
     for (const grupo of [...primera.body.items, ...segunda.body.items] as RepartoEnRespuesta[]) {
       expect(grupo.tasks).toHaveLength(2);
     }
@@ -203,8 +199,6 @@ describe("los filtros del listado", () => {
   }, 180_000);
 
   it("filtrar por estado enseña el reparto ENTERO, no solo la tarea que casó", async () => {
-    // Es una decisión, no un descuido: el padre quiere ver el reparto completo
-    // aunque solo una de las dos esté para aprobar. Decisión 5 del design.
     const { cookies, parentId, hijos } = await familiaOperando(app, ["Ana", "Bruno"]);
 
     await sembrarTarea(
@@ -383,9 +377,6 @@ describe("aislamiento entre familias", () => {
   }, 120_000);
 
   it("«mine» no lo atrapa la ruta del detalle", async () => {
-    // Si `/tasks/:taskId` se registrara antes, esto buscaría una tarea llamada
-    // «mine» y el niño recibiría un 404 en su propia lista. El fallo no es
-    // ruidoso, y por eso lleva test.
     const { hijos } = await familiaOperando(app, ["Ana"]);
 
     const response = await misTareas(hijos[0]!.cookies);

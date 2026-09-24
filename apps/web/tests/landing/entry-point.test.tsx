@@ -8,14 +8,6 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-/**
- * Una regla y ninguna excepción: sin sesión, todo lleva a la puerta pública.
- *
- * Se consideró que solo la raíz lo hiciera y que los enlaces profundos siguieran
- * yendo al formulario. Se descartó porque una regla con una excepción hay que
- * recordarla. Estos tests son los que impiden que alguien reintroduzca la
- * excepción sin darse cuenta.
- */
 describe("sin sesión, todo lleva a la puerta pública", () => {
   it.each(["/", "/tasks", "/me/tasks", "/profiles", "/children", "/account"])(
     "%s acaba en /welcome",
@@ -41,7 +33,6 @@ describe("quien ya entró no vuelve a la puerta", () => {
   });
 
   it("con cuenta y sin perfil se va a la rejilla, no a la puerta", async () => {
-    // Ese estado ya pasó por la puerta: lo que le falta es elegir quién es.
     const app = await montarApp("/tasks", SOLO_CUENTA);
 
     expect(app.direccion()).toBe("/profiles");
@@ -53,8 +44,6 @@ describe("el camino de vuelta a la pantalla de acceso", () => {
     const user = userEvent.setup();
     const app = await montarApp("/welcome", SIN_SESION);
 
-    // Es el camino de quien YA es usuario y se le caducó la sesión. Si se
-    // rompe, se quedan fuera: ya no hay otra forma de llegar al formulario.
     await user.click(screen.getAllByRole("link", { name: messages.landing.signIn })[0]!);
 
     expect(app.direccion()).toBe("/sign-in");

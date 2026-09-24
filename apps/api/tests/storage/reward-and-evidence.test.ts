@@ -67,27 +67,9 @@ describe("la foto de un premio", () => {
     expect(escaparate.body.items[0].image).toMatch(/^https?:\/\//);
     expect(escaparate.body.items[0].coins).toBe(60);
 
-    /*
-     * El precio del hermano sigue sin aparecer.
-     *
-     * Esto comparaba contra `": 40"`, con espacio, sobre una cadena de
-     * `JSON.stringify`, que NO pone espacio tras los dos puntos: la comprobación
-     * no podía fallar nunca. Y su expresión regular recogía además `:43` y `:12`
-     * de un instante, que es el falso positivo del que huía.
-     *
-     * Un precio es un número, así que se miran los números.
-     */
     expect(valoresNumericos(escaparate.body.items)).not.toContain(40);
   }, 300_000);
 
-  /*
-   * Esto decía «el alta NO acepta foto: es 422» y ahora dice lo contrario.
-   *
-   * No es que la regla se relajara: lo que cambió es de qué cuelga una clave
-   * todavía sin dueño. Antes tenía que llevar el `rewardId`, que no existe
-   * mientras el premio se crea; ahora, al publicar, cuelga del PADRE. Lo que
-   * sigue igual son las dos comprobaciones, y de eso van los tests de abajo.
-   */
   it("el alta SÍ acepta una foto subida por su prefijo de padre", async () => {
     const { cookies, parentId, hijos } = await familiaOperando(app, ["Ana"]);
 
@@ -117,8 +99,6 @@ describe("la foto de un premio", () => {
   it("una clave inventada en el alta es 422 y NO crea el premio", async () => {
     const { cookies, parentId, hijos } = await familiaOperando(app, ["Ana"]);
 
-    // Prefijo correcto, pero detrás no hay ningún objeto: solo el prefijo
-    // dejaría guardar una referencia rota.
     const response = await request(app)
       .post(`${API_PREFIX}/rewards`)
       .set("Cookie", cookies)
@@ -136,13 +116,9 @@ describe("la foto de un premio", () => {
   }, 180_000);
 
   it("la clave de OTRO padre en el alta es 422 aunque exista, y NO crea el premio", async () => {
-    // Correo propio: `familiaOperando` usa uno fijo por defecto y dos familias
-    // en el mismo test chocarían con un 409 al registrar la segunda.
     const ajena = await familiaOperando(app, ["Zoe"], { email: "otra@ejemplo.dev" });
     const { cookies, hijos } = await familiaOperando(app, ["Ana"]);
 
-    // Existe de verdad, pero es de otra familia: solo la existencia dejaría
-    // publicar con la imagen de otro.
     const suya = `rewards/pending/${ajena.parentId}/${crypto.randomUUID()}.jpg`;
     await sembrarObjeto(suya);
 
@@ -168,11 +144,6 @@ describe("la foto de un premio", () => {
     expect(response.status).toBe(403);
   }, 120_000);
 
-  /*
-   * La vía sin premio no se puede confundir con el detalle de un premio que se
-   * llamara «image». Si `/rewards/:rewardId` la tapara, esto sería un 404 —
-   * perfectamente plausible, que es lo que hace el fallo silencioso.
-   */
   it("pedir la vía del alta no se interpreta como un premio llamado «image»", async () => {
     const { cookies } = await familiaOperando(app, ["Ana"]);
 
@@ -184,7 +155,6 @@ describe("la foto de un premio", () => {
     expect(via.status).toBe(200);
     expect(via.body.uploadUrl).toMatch(/^https?:\/\//);
 
-    // Y el detalle de un premio inexistente sigue respondiendo lo suyo.
     const detalle = await request(app)
       .get(`${API_PREFIX}/rewards/image`)
       .set("Cookie", cookies);
@@ -257,7 +227,6 @@ describe("la foto de un premio", () => {
 
 describe("la evidencia de una tarea", () => {
   it("completar SIN evidencia funciona igual que siempre", async () => {
-    // Es la garantía de que la foto no se volvió un peaje.
     const { parentId, hijos } = await familiaOperando(app, ["Ana"]);
     const ana = hijos[0]!;
     const tarea = await sembrarTarea({ parentId, childId: ana.id });
@@ -293,7 +262,6 @@ describe("la evidencia de una tarea", () => {
     expect(completada.status).toBe(200);
     expect(completada.body.evidence).toMatch(/^https?:\/\//);
 
-    // Y el padre la ve en su detalle, que es para lo que está.
     const detalle = await request(app)
       .get(`${API_PREFIX}/tasks/${tarea.id}`)
       .set("Cookie", cookies);
@@ -302,8 +270,6 @@ describe("la evidencia de una tarea", () => {
   }, 180_000);
 
   it("una evidencia que no se subió da 422 y la tarea SIGUE PENDIENTE", async () => {
-    // Es preferible que el niño reintente a que quede marcada con una foto que
-    // no está.
     const { parentId, hijos } = await familiaOperando(app, ["Ana"]);
     const ana = hijos[0]!;
     const tarea = await sembrarTarea({ parentId, childId: ana.id });

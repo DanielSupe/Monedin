@@ -101,7 +101,6 @@ describe("Dialog", () => {
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).toBeNull();
 
-    // El foco vuelve tras desmontar, no en el mismo tick.
     await waitFor(() => {
       expect(abridor).toHaveFocus();
     });

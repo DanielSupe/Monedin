@@ -12,12 +12,6 @@ const TONES: Record<ToastTone, string> = {
   danger: "border-danger bg-danger-soft",
 };
 
-/**
- * El proveedor de avisos efímeros. Va una sola vez, en el shell.
- *
- * Está aquí y no en el shell porque el shell llega en `add-app-shell`: hasta
- * entonces lo monta el catálogo vivo.
- */
 export function ToastProvider({ children }: { children: ReactNode }): React.ReactElement {
   return (
     <RadixToast.Provider swipeDirection="right">
@@ -35,13 +29,6 @@ export interface ToastProps {
   description?: string;
 }
 
-/**
- * Aviso efímero.
- *
- * Lo que confirma que algo pasó —«tarea aprobada»— sin ocupar la pantalla. Lo
- * que NO puede ir aquí es un error que hay que leer para decidir algo: eso es un
- * `Alert`, que se queda. Un aviso que se va solo no sirve para contar un 409.
- */
 export function Toast({
   open,
   onOpenChange,

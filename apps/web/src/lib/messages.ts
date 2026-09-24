@@ -1,54 +1,24 @@
 import { CHILD_AGE_MAX, CHILD_AGE_MIN, PIN_LENGTH } from "@monedin/contracts";
 
-/**
- * Catálogo de textos visibles del front.
- *
- * Mismo criterio que en la API: ni un string visible incrustado en un
- * componente. Ver decisión 10 del design.
- */
 export const messages = {
   app: {
     title: "Monedín",
-    /**
-     * Con qué convenciones se formatea un número.
-     *
-     * Está aquí y no en un componente porque es una decisión de producto —el
-     * primer mercado es Latinoamérica hispanohablante— y porque dejarla al
-     * idioma del navegador haría que el mismo saldo se escribiera «1.250» o
-     * «1,250» según el dispositivo de cada hijo.
-     */
+
     locale: "es",
   },
 
-  /**
-   * La puerta pública: lo único que ve alguien que todavía no es nadie.
-   *
-   * Recibe a DOS personas distintas —quien no conoce el producto y quien lo usa
-   * y perdió la sesión—, y por eso las dos acciones pesan igual.
-   */
   landing: {
-    /** El titular. Se escribe solo, pero el texto completo siempre está en el DOM. */
     headline: "Sus tareas valen monedas. Sus premios cuestan monedas.",
     subhead:
       "Monedín le enseña a tu hijo el ciclo completo: se esfuerza, gana, y decide en qué gastarlo. Tú apruebas cada paso.",
 
-    /** Las dos acciones. Ninguna escondida detrás de la otra. */
     start: "Empezar",
     signIn: "Entrar",
     signInHint: "¿Ya tienes cuenta?",
 
-    /** El centro de la visualización. La cifra es un ejemplo, no un dato real. */
     balanceLabel: "sus monedas",
     orbitLabel: "El ciclo de Monedín: tareas, premios y los perfiles de la familia",
 
-    /**
-     * La franja de confianza, entre el héroe y las tarjetas.
-     *
-     * Contesta lo primero que piensa un adulto al leer «monedas» y «premios» en
-     * una aplicación para su hijo, y que la página no decía en ninguna parte.
-     * Todo lo que afirma es cierto de lo construido: no hay pagos, el saldo es
-     * cerrado a la familia, y el historial existe desde `add-coin-history`.
-     */
     aboutTitle: "Dinero de mentira, decisiones de verdad",
     aboutBody:
       "Las monedas de Monedín no salen de tu cuenta ni llegan a ninguna. No hay pagos, no hay " +
@@ -57,15 +27,6 @@ export const messages = {
       "Lo que sí es real es lo que aprende. Ve cuánto tiene, cuánto le falta para lo que quiere, y " +
       "qué pasó con cada moneda que gastó.",
 
-    /**
-     * El ciclo, contado como FLUJO y no como una lista de tres.
-     *
-     * Sustituye a las tres tarjetas de promesa, que decían estas mismas ideas:
-     * tenerlas las dos era decirlo dos veces. Al fundirlas aparece lo que a la
-     * lista le faltaba —el ORDEN—, y con él el paso que se caía: aprobar no es
-     * el tercero de tres cosas, va ENTRE la tarea y las monedas, porque aprobar
-     * es lo que acredita.
-     */
     howTitle: "Así funciona, de principio a fin",
     howStepTaskTitle: "Hace una tarea",
     howStepTaskBody: "Recoger la mesa, la cama, los deberes. Vale lo que tú decidas.",
@@ -75,32 +36,20 @@ export const messages = {
     howStepCoinsBody: "Se le acreditan al aprobar, y ve de dónde salió cada una.",
     howStepRewardTitle: "Elige su premio",
     howStepRewardBody: "Del cine a una hora más de consola, con el precio que le pongas.",
-    /** El ciclo vuelve a empezar, y aprobar aparece otra vez al canjear. */
+
     howLoop: "Y vuelta a empezar. Canjear también pasa por ti.",
 
-    /**
-     * La sección que enseña la aplicación.
-     *
-     * Las maquetas se anuncian como EJEMPLOS: sin eso, quien recorre la página
-     * sin verla oye un saldo y dos nombres de niño y no tiene forma de saber
-     * que no son de nadie.
-     */
     previewTitle: "Las dos caras de Monedín",
     previewBody:
       "Tú gestionas y apruebas; tu hijo ve lo suyo, en grande. Es la misma aplicación con dos " +
       "medidas distintas, porque un niño de seis años y tú no leéis una pantalla igual.",
-    /*
-     * Nombra la maqueta para quien no la ve Y se pinta como su pie. Una sola
-     * clave para las dos cosas: es la misma afirmación, y escrita dos veces
-     * acabaría con una de las dos diciendo otra cosa.
-     */
+
     previewParentLabel: "Ejemplo del panel del padre.",
     previewChildLabel: "Ejemplo del inicio del niño.",
     previewNotOurs: "Los datos no son de nadie.",
     previewParentTag: "Lo que ves tú",
     previewChildTag: "Lo que ve tu hijo",
 
-    /** Contenido de las maquetas. Son ejemplos, y así se anuncian. */
     previewPending: "Te esperan",
     previewPendingTasks: "tareas por aprobar",
     previewChildren: "Tus hijos",
@@ -111,29 +60,17 @@ export const messages = {
     previewChildTasks: "Mis tareas",
     previewChildRewards: "Mis premios",
 
-    /**
-     * El cierre. Sin argumentar y sin formulario.
-     *
-     * Quien llega hasta aquí ya leyó los argumentos, y un formulario en una
-     * página que no puede validar nada es una pantalla de acceso disfrazada.
-     */
     closingTitle: "Empieza esta semana",
     closingBody: "Crea tu cuenta, añade a tus hijos y pon la primera tarea. Se tarda menos que leer esto.",
     closingAction: "Crear mi cuenta",
   },
 
-  /**
-   * Textos de la navegación: los destinos de cada marco y la pantalla de una
-   * dirección que no existe.
-   */
   nav: {
-    /** Los destinos de la barra del niño. Cortos: caben debajo de un icono. */
     childHome: "Inicio",
     childTasks: "Tareas",
     childRewards: "Premios",
     childRedemptions: "Canjes",
 
-    /** Los de la cabecera del padre. */
     parentHome: "Panel",
     parentTasks: "Tareas",
     parentRewards: "Premios",
@@ -141,72 +78,28 @@ export const messages = {
     parentChildren: "Hijos",
     parentAccount: "Mi cuenta",
 
-    /*
-     * Los tres estados del tema, dichos como ESTADO y no como acción.
-     *
-     * «Tema oscuro» y no «cambiar a claro»: lo que el control anuncia es dónde
-     * está, porque eso es lo que hace falta al llegar a él. A dónde lleva se
-     * descubre pulsando, y el nombre cambia entonces.
-     */
     themeSystem: "Tema: el del sistema",
     themeLight: "Tema: claro",
     themeDark: "Tema: oscuro",
-    /** Lo que encabeza la cuenta del padre, antes del título. */
-    /*
-     * Dice lo que esta pantalla NO es, que es la confusión real en una tablet
-     * compartida: aquí se cambia lo del adulto, no lo de un hijo. Decía «tu
-     * foto, tu PIN y tu sesión», que enumeraba el contenido sin avisar de eso.
-     */
+
     parentAccountLead: "Lo tuyo, no lo de tus hijos",
 
-    /*
-     * Lo que la cifra de una insignia significa, para quien no ve la pantalla.
-     * Sin esto se oiría «Tareas 3», que no dice tres de qué.
-     */
     pendingSuffix: "esperando",
 
-    /** Qué es cada marco, para quien no ve la disposición. */
     childNavLabel: "Dónde ir",
     parentNavLabel: "Secciones",
 
-    /*
-     * El cajón lateral, desde `add-sidebar-nav`.
-     *
-     * `menu` nombra al BOTÓN que lo abre —un botón que solo dibuja tres rayas no
-     * dice nada sin él— y `drawerLabel` nombra al panel, que Radix exige y va
-     * oculto a la vista porque lo que se ve es la lista.
-     */
     menu: "Menú",
     drawerLabel: "Navegación",
 
-    /*
-     * Contraer el lateral, desde `pin-sidebar-on-desktop`.
-     *
-     * Dos textos y no uno con el estado dentro: lo que el botón hace cambia, y
-     * un solo texto obligaría a leer su `aria-expanded` para saber qué va a
-     * pasar al pulsarlo.
-     */
     collapseSidebar: "Contraer",
     expandSidebar: "Expandir",
 
-    /** Una dirección que no corresponde a ningún destino. */
     notFoundTitle: "Aquí no hay nada",
     notFoundBody: "Esa dirección no existe o dejó de existir.",
     notFoundBack: "Volver al inicio",
   },
 
-  /**
-   * El panel del padre: lo primero que ve al entrar a su perfil.
-   *
-   * `greeting` se compone con el nombre en el punto de uso, igual que el del
-   * niño. Estaba incrustado en `routes/index.tsx` —«Hola, {actor.name}» escrito
-   * a mano— y sobrevivió porque al vestir la rama del niño nadie miró la del
-   * padre.
-   *
-   * Las dos bandejas llevan singular y plural porque «1 tareas por aprobar» en
-   * la pantalla que un padre abre a diario se lee como un producto descuidado,
-   * y la mayoría de los días la cifra es 1.
-   */
   parents: {
     greeting: "Hola,",
 
@@ -216,7 +109,6 @@ export const messages = {
     redemptionsWaiting: "canjes esperando respuesta",
     redemptionWaiting: "canje esperando respuesta",
 
-    /** Estar al día es lo normal, no un caso degenerado: se dice, no se cuenta. */
     allClear: "Todo al día. No hay nada esperando por ti.",
 
     childrenTitle: "Tus hijos",
@@ -226,59 +118,25 @@ export const messages = {
     consoleFailed: "No pudimos cargar tu panel.",
   },
 
-  /**
-   * Textos de las piezas del sistema de diseño.
-   *
-   * Una pieza no incrusta un texto visible, igual que una pantalla. Lo que la
-   * distingue es que aquí casi todo es para tecnologías de asistencia: la
-   * cifra de monedas se VE, pero «25 monedas» hay que decirlo.
-   */
   ui: {
     coinsUnit: "monedas",
     coinsUnitSingular: "moneda",
     progressLabel: "Progreso",
-    /* El aro dice su valor a quien no lo ve: «dos de cinco hechas». */
+
     progressOf: "de",
     progressDone: "hechas",
     dismiss: "Cerrar",
     loading: "Cargando…",
 
-    /*
-     * La paginación es UNA pieza, así que su texto es uno.
-     *
-     * Estos dos estaban declarados CUATRO veces —uno por módulo— con el mismo
-     * valor, porque cuatro pantallas reescribían el mismo bloque. Desde
-     * `redesign-parent-inbox` el bloque es `ui/Pagination` y el texto vive donde
-     * viven los de las piezas.
-     */
     previousPage: "Anterior",
     nextPage: "Siguiente",
     paginationLabel: "Páginas",
   },
 
-  /**
-   * El historial de monedas.
-   *
-   * `earned` y `spent` son lo que hace que una fila se lea sin fijarse en el
-   * signo: un `-60` frente a un `60` deja la información más importante de la
-   * fila colgando de un solo carácter.
-   *
-   * Gastar NO es un error ni algo malo: es el niño usando sus monedas en algo
-   * que quería, que es justo lo que el producto enseña. Por eso no va en tono de
-   * peligro.
-   */
   coins: {
     title: "De dónde salieron tus monedas",
     parentTitle: "Historial de monedas",
-    /*
-     * QUÉ HACER CON UN MOVIMIENTO EQUIVOCADO, que es la pregunta que trae a
-     * alguien a esta pantalla después de encontrar uno.
-     *
-     * El libro es append-only y lo impone un disparador de PostgreSQL, no la
-     * buena voluntad del código: aquí no hay botón de borrar y no lo va a haber.
-     * Sin decirlo, la pantalla parece incompleta; diciéndolo, explica además la
-     * salida — registrar otro movimiento que lo compense.
-     */
+
     ledgerNote:
       "El historial no se edita ni se borra, ni siquiera desde aquí: lo impide la base de datos. " +
       "Un movimiento equivocado se corrige registrando otro que lo compense.",
@@ -298,37 +156,18 @@ export const messages = {
     forbidden: "No puedes ver este historial.",
   },
 
-  /**
-   * El recorrido de bienvenida, uno por rol.
-   *
-   * SON DOS GUIONES y no uno con ramas: a un adulto que gestiona hay que
-   * decirle dónde aprueba, dónde crea y dónde ve a sus hijos; a un niño de seis
-   * a once años, qué son esas monedas y cómo consigue más. Uno que sirviera a
-   * los dos no serviría a ninguno.
-   */
   tutorial: {
-    /** Los controles, compartidos por los dos guiones. */
     next: "Seguir",
     finish: "Empezar",
     skip: "Saltar",
     replay: "Ver el recorrido otra vez",
-    /*
-     * Qué se está ofreciendo. «Otra vez» solo tiene sentido para quien lo vio, y
-     * a quien lo saltó —que es quien más ganaría volviendo— no le dice nada.
-     */
-    /*
-     * SIN «tu panel», que es lo que puse primero copiando la maqueta del padre —y
-     * esta tarjeta la monta TAMBIÉN el perfil del niño, que no tiene panel—. Una
-     * frase tomada de una maqueta hay que leerla en las dos pantallas que la van
-     * a usar antes de darla por buena.
-     */
+
     replayLead: "Te enseño dónde está cada cosa.",
     replayAction: "Verlo",
     replayFailed: "No pudimos volver a abrir el recorrido.",
-    /** Se compone con el paso y el total en el punto de uso, nunca aquí. */
+
     stepOf: "de",
 
-    /** El del padre, sobre su panel. */
     parentWelcomeTitle: "Bienvenido a Monedín",
     parentWelcomeBody:
       "Soy Monedín. En un momento te enseño dónde está cada cosa de tu panel.",
@@ -344,7 +183,6 @@ export const messages = {
     parentDoneTitle: "Ya está",
     parentDoneBody: "Empieza creando a tu primer hijo y ponle una tarea. Lo demás sale solo.",
 
-    /** El del niño, sobre su inicio. Frases cortas: tiene entre seis y once años. */
     childWelcomeTitle: "¡Hola! Soy Monedín",
     childWelcomeBody: "Te enseño esto en un momento.",
     childBalanceTitle: "Tus monedas",
@@ -367,7 +205,6 @@ export const messages = {
   },
 
   auth: {
-    /** Título de la pantalla de acceso. */
     signInTitle: "Entrar",
     signUpTitle: "Crear cuenta",
     name: "Tu nombre",
@@ -376,115 +213,66 @@ export const messages = {
     signIn: "Entrar",
     signUp: "Crear cuenta",
     signOut: "Cerrar sesión",
-    /*
-     * Lo que pasa al pulsar, no que sea distinto de salir del perfil. Decir «no
-     * es lo mismo» obliga a adivinar en qué; decir que habrá que teclear el
-     * correo y la contraseña lo contesta.
-     */
+
     signOutConsequence:
       "No es lo mismo que cambiar de perfil. Cerrar sesión desvincula este dispositivo: " +
       "para volver habrá que teclear el correo y la contraseña.",
-    /* Por qué hay dos credenciales, junto a donde se cambia una. */
+
     pinVsPassword:
       "El PIN es lo que tecleas para entrar a tu perfil. La contraseña, solo al vincular un " +
       "dispositivo nuevo.",
-    /** Solo para quien escucha la pantalla: el correo se lee tal cual. */
+
     accountEmailLabel: "Correo de la cuenta:",
     toSignUp: "¿Todavía no tienes cuenta? Créala",
     toSignIn: "¿Ya tienes cuenta? Entra",
     working: "Un momento…",
 
-    /**
-     * Credenciales incorrectas. Ambiguo a propósito, igual que en la API: no
-     * dice cuál de los dos datos falla.
-     */
     invalidCredentials: "El correo o la contraseña no son correctos.",
     emailTaken: "Ese correo ya está registrado.",
     invalidData: "Revisa los datos e inténtalo de nuevo.",
-    /** Bloqueo. Distinto de una credencial incorrecta, y por eso otro mensaje. */
+
     tooManyAttempts: "Demasiados intentos. Espera unos minutos antes de volver a probar.",
 
-    /* La cifra sale de `PIN_LENGTH` y se compone al usarla. */
     pinLead: "PIN de",
     pinTail: "dígitos",
     pinHelp: "Lo usarás cada vez que entres a tu perfil. La contraseña solo al vincular un dispositivo.",
 
-    /**
-     * Lo que el formulario no decía y ahora dice ANTES de rechazar.
-     *
-     * `passwordHelp` lleva el número dentro compuesto en el punto de uso, desde
-     * la constante del contrato: escribirlo aquí a mano sería tener el mínimo en
-     * dos sitios, y el día que cambie uno se quedaría mintiendo el otro.
-     */
     passwordMinHelp: "Al menos",
     passwordMinHelpTail: "caracteres.",
-    /** Por qué son DOS credenciales. Sin esto parece un error del producto. */
+
     twoKeysTitle: "Dos claves, para dos cosas distintas",
     twoKeysBody:
       "La contraseña solo la usarás al vincular un dispositivo nuevo. El PIN es lo que teclearás cada vez que entres a tu perfil.",
 
-    /** El saludo del acceso, y la cinta que lo acompaña. */
     accessGreeting: "¡Bienvenido!",
-    /*
-     * Son TÍTULOS y no líneas de apoyo, desde que la jerarquía del acceso se
-     * puso como la maqueta: se leen antes que el saludo, porque son lo que
-     * distingue una de las dos pantallas.
-     */
+
     accessSignInLead: "Entra a tu cuenta",
     accessSignUpLead: "Crea tu cuenta",
-    /** La frase del panel de presentación, una por pantalla. */
+
     accessSignInTagline: "Tu casa, sus monedas. Entra y sigue el ciclo.",
     accessSignUpTagline: "Empieza a repartir tareas y a ver crecer sus monedas.",
     accessDiscLabel:
       "El ciclo de Monedín: se hace una tarea, se gana una moneda, se gasta en un premio",
-    /** El envío es una flecha, así que su nombre no es opcional. */
+
     submitSignIn: "Entrar a mi cuenta",
     submitSignUp: "Crear mi cuenta",
 
-    /** Rejilla de perfiles. */
     whoIsPlaying: "¿Quién eres?",
-    /*
-     * La rejilla normal también lleva su línea, y no solo el modo administrar.
-     * La maqueta la tiene en las dos, y hacía falta: la pregunta del título no
-     * dice CÓMO se responde, y lo que sigue —un PIN— no se adivina tocando.
-     */
+
     whoIsPlayingLead: "Toca tu cara y escribe tu PIN.",
     createProfile: "Crear perfil",
-    /**
-     * Distintivo de la tesela del adulto. Es su NOMBRE ACCESIBLE, no un adorno:
-     * un icono suelto hay que aprenderlo, y quien no ve la pantalla no lo
-     * aprende nunca.
-     */
+
     adultProfile: "Adulto",
 
-    /**
-     * Modo de administración de la rejilla.
-     *
-     * `editProfile` se compone con el nombre en el punto de uso —«Editar
-     * Mateo»— porque es el nombre ACCESIBLE de la tesela entera: quien no ve la
-     * pantalla tiene que oír a quién edita, no un «editar» suelto repetido
-     * cuatro veces.
-     */
     manageProfiles: "Administrar perfiles",
     manageProfilesTitle: "Administrar perfiles",
 
-    /*
-     * QUÉ HARÁ TOCAR UN PERFIL, dicho una vez y en la pantalla.
-     *
-     * El lápiz sobre cada tesela dice que ALGO cambió, no qué. Y lo que cambió
-     * es el MODO, no cada perfil: enterarse mirando un distintivo pequeño en
-     * doce sitios es justo el trabajo que una frase arriba ahorra.
-     *
-     * Lleva dentro el precio, que es lo que de verdad sorprende: editar un
-     * perfil exige el PIN DE ESE PERFIL. Sin decirlo, pulsar la cara de un hijo
-     * para cambiarle la foto acaba en un teclado que parece un error.
-     */
     manageProfilesLead: "Toca un perfil para editarlo. Te pedirá su PIN.",
     manageDone: "Listo",
     editProfile: "Editar",
-    /** Título del teclado de PIN cuando se viene a administrar. */
+
     pinPromptToEdit: "Escribe tu PIN para editar tu perfil",
-    /** Borrar el último dígito tecleado. Es un icono, así que necesita nombre. */
+
     pinDelete: "Borrar",
 
     changeProfile: "Cambiar de perfil",
@@ -494,12 +282,10 @@ export const messages = {
     adultPinWrong: "Ese PIN no es correcto.",
     adultPinLocked: "Demasiados intentos. Espera unos minutos o restablece el PIN con tu contraseña.",
     pinLocked: "Este perfil está bloqueado. Pídele a un adulto que lo desbloquee.",
-    /** El identificador de la dirección no está en la rejilla. */
+
     profileNotFound: "Ese perfil ya no está disponible.",
     back: "Volver",
 
-    /** Cambiar el PIN sabiendo el actual. Requiere perfil de padre activo. */
-    /* En paralelo con el del PIN: las dos secciones hacen lo mismo con dos cosas. */
     myAvatarTitle: "Cambiar mi foto",
     changePinTitle: "Cambiar mi PIN",
     currentPin: "PIN actual",
@@ -507,18 +293,10 @@ export const messages = {
     changePinSubmit: "Guardar PIN",
     pinChanged: "PIN actualizado.",
 
-    /** Restablecer el PIN con la contraseña. Es la vía de rescate sin perfil activo. */
     forgotPin: "¿Olvidaste tu PIN?",
     resetPinTitle: "Restablecer PIN",
     resetPinSubmit: "Restablecer",
-    /*
-     * Las DOS credenciales de la vía de rescate, explicadas.
-     *
-     * Mismo caso que el registro, y misma regla: cuando se piden dos en la misma
-     * pantalla hay que decir para qué sirve cada una, o parece que te están
-     * pidiendo lo mismo dos veces. Y quien llega aquí está bloqueado fuera de su
-     * propio perfil, o sea nervioso.
-     */
+
     resetPinLead: "Estás bloqueado fuera de tu perfil. Con tu contraseña puedes ponerte un PIN nuevo.",
     resetPinPasswordHelp: "La de tu cuenta. Es lo que demuestra que eres tú.",
     resetPinNewPinHelp: "Lo que teclearás para entrar a tu perfil a partir de ahora.",
@@ -528,32 +306,18 @@ export const messages = {
   },
 
   children: {
-    /** Gestión de los perfiles desde el lado del padre. */
     title: "Perfiles de la familia",
     empty: "Todavía no has creado ningún perfil.",
     addChild: "Añadir un perfil",
     newChildTitle: "Nuevo perfil",
     editChildTitle: "Editar perfil",
-    /** Qué se cambia aquí, encima del título. Solo al editar. */
+
     editChildLead: "Su nombre, su cara y su clave",
     name: "Nombre",
     ageOptional: "Edad (opcional)",
-    // «Elige tu animal», no «Animal»: es una rejilla de caras para tocar, no un
-    // campo que se rellena, y la maqueta la nombra por lo que hay que hacer.
+
     avatar: "Elige tu animal",
 
-    /*
-     * DÓNDE SÍ SE PUEDE PONER LA FOTO.
-     *
-     * En el alta no se puede, y es deuda conocida con dueño: la clave de subida
-     * cuelga del identificador del hijo, que todavía no existe. Hasta hoy el
-     * hueco estaba sin explicar, así que el padre que buscaba la foto concluía
-     * que el producto no la tiene.
-     *
-     * La frase dice las DOS cosas a propósito. Decir solo «aquí no» deja a quien
-     * lo lee sin saber qué hacer, que es la peor forma de documentar un límite:
-     * una limitación sin salida se lee como un defecto.
-     */
     photoLater: "La foto se pone después, al editar este perfil.",
     pinHelp: "Es el que usará para entrar a su perfil.",
     coins: "Monedas",
@@ -566,16 +330,6 @@ export const messages = {
     locked: "Bloqueado",
     unlock: "Desbloquear",
 
-    /*
-     * LAS ETIQUETAS DE LA FILA VAN CORTAS, y el nombre completo va aparte.
-     *
-     * La fila de un perfil BLOQUEADO lleva un control más que las otras, y es la
-     * que se sale: con «Ver su historial» y «Cambiar su PIN» enteras, cinco
-     * controles no caben. Cortarlas resuelve el ancho y crea el otro problema
-     * —cuatro «Editar» seguidos suenan idénticos para quien no ve la pantalla—,
-     * así que cada acción se anuncia con el nombre del hijo, igual que en las dos
-     * bandejas del padre.
-     */
     resetPin: "Su PIN",
     resetPinFull: "Cambiar el PIN de",
     historyShort: "Historial",
@@ -584,163 +338,72 @@ export const messages = {
     unlockFull: "Desbloquear el perfil de",
     deactivateFull: "Dar de baja el perfil de",
 
-    /*
-     * BAJA Y BLOQUEO NO SON LO MISMO, y confundirlos cuesta caro justo aquí.
-     *
-     * Un perfil bloqueado es un niño que falló el PIN varias veces y se arregla
-     * con un toque; una baja no se deshace. Sin esta frase, la fila enseña las
-     * dos cosas juntas y la palabra «Bloqueado» invita a resolverlo con el botón
-     * rojo que tiene al lado.
-     */
     lockedVsDeactivated:
       "Dar de baja no se puede deshacer. Bloqueado es otra cosa: pasa cuando alguien falla el PIN varias veces, y se quita desde aquí.",
-    /** Lo que encabeza la pantalla, antes del título. */
+
     listLead: "Cada uno con su PIN y su saldo",
-    /*
-     * Lo que distingue las dos acciones que se parecen. Sin esta línea, «dar de
-     * baja» y «desbloquear» se leen como variantes de lo mismo, y una de las dos
-     * no se puede deshacer.
-     */
-    /*
-     * LA MAQUETA DICE AQUÍ QUE EL HISTORIAL «SE VA CON EL PERFIL», Y ES FALSO.
-     *
-     * La copié tal cual y hubo que corregirla: la baja de un hijo es LÓGICA
-     * —una marca de borrado—, así que la fila no se destruye, y su historial de
-     * monedas ni siquiera podría borrarse: un disparador de PostgreSQL impide
-     * tocar esa tabla. Lo que sí es cierto, y es lo que hay que avisar, es que
-     * desde la aplicación no hay forma de traerlo de vuelta.
-     *
-     * Una maqueta manda en el ASPECTO y no en los hechos del modelo de datos. Si
-     * su texto afirma algo del producto, se comprueba antes de copiarlo.
-     */
+
     deactivateVsLock:
       "Dar de baja un perfil NO se deshace desde aquí: desaparece de tus listas con su saldo. " +
       "Bloquear es otra cosa —pasa solo si alguien falla el PIN varias veces— y se quita en un toque.",
 
-    /** La baja es definitiva: la interfaz tiene que decirlo antes, no después. */
     deactivate: "Dar de baja",
     deactivateConfirm:
       "Este perfil dejará de aparecer y no se puede recuperar. Su historial de monedas se conserva. ¿Seguro?",
-    /*
-     * LA SALIDA, para el caso que de verdad trae a un padre hasta aquí.
-     *
-     * Un perfil bloqueado es un niño que falló el PIN, y la fila enseña «Dar de
-     * baja» a un dedo de distancia. Un diálogo que solo avisa de que no se
-     * deshace no ataja ese error: hay que decir cuál es la otra cosa, y
-     * ofrecerla.
-     */
+
     deactivateLockedHint:
       "Este perfil solo está bloqueado porque alguien falló el PIN. Eso se quita con un toque y no borra nada.",
     deactivateSubmit: "Sí, dar de baja",
 
-    /**
-     * Lo que falta cuando no se ha elegido ningún hijo.
-     *
-     * Vive en `children` y no en `tasks` ni en `rewards` porque lo dice la pieza
-     * compartida que elige hijos, y esa pieza es una desde
-     * `redesign-parent-authoring`.
-     */
-    /*
-     * Lo que se va a repartir, en vivo. La cifra sola no dice A CUÁNTOS, y ahí
-     * está la duda de quien reparte: si esos ocho son ocho en total o ocho para
-     * cada uno.
-     */
     coinsEachChosen: "a cada hijo elegido",
     pickAtLeastOne: "Elige al menos un hijo.",
 
-    /** Lo que el niño ve y puede cambiar de lo suyo. */
     myProfileTitle: "Mi perfil",
     myProfileLead: "Tu cara y tu clave",
 
-    /**
-     * El inicio del niño.
-     *
-     * `greeting` se compone con el nombre en el punto de uso, que es el patrón
-     * de la casa. `balanceLabel` acompaña al saldo: la cifra la dibuja `Coins`,
-     * que ya la anuncia como «120 monedas», así que esto es lo que explica de
-     * QUIÉN es ese número.
-     */
     homeGreeting: "Hola,",
-    /*
-     * SOLO LA UNIDAD, como en la maqueta. Decía «tus monedas» y el inicio pasó a
-     * tener ese mismo texto DOS veces: aquí bajo la cifra, y encabezando el
-     * bloque de los últimos movimientos. Bajo un número que ya es suyo, el
-     * posesivo no añade nada.
-     */
+
     homeBalanceLabel: "monedas",
 
-    /*
-     * Lo que Monedín dice al entrar, y por qué son TRES frases y no una con un
-     * número dentro.
-     *
-     * «Hoy te esperan N tareas» no se puede decir: una tarea no tiene concepto
-     * de jornada. Lo que sí es cierto es cuántas le quedan por hacer, y eso se
-     * compone en el punto de uso con la cifra — nunca escrita aquí.
-     */
     homeGreetingLead: "¡Hola! Soy Monedín.",
     homeNothingPending: "No te queda nada por hacer. ¡Disfruta!",
     homeAllDone: "Ya hiciste todo lo tuyo. Te aviso cuando haya algo nuevo.",
     homePendingOne: "tarea por hacer",
     homePendingMany: "tareas por hacer",
-    /* Marcar NO paga: lo que sigue es que un adulto la mire. */
+
     homeMarkExplains: "Cuando marques una, aviso a tu papá o a tu mamá.",
 
     homeTasksTitle: "Tus tareas",
-    /* El bloque de las últimas monedas, en el inicio. */
+
     homeCoinsTitle: "Tus monedas",
     homeCoinsAll: "Ver todo",
     homeTasksAll: "Ver todas",
-
 
     myCoins: "Mis monedas",
     chooseAvatar: "Elige tu animal",
     avatarSaved: "¡Listo!",
     changeMyPin: "Cambiar mi PIN",
 
-    /*
-     * Qué es el PIN, dicho para quien lo teclea. Va partido porque lleva una
-     * cifra dentro y ninguna cadena del catálogo puede llevarla: se compone
-     * abajo, desde la constante del contrato, igual que `PIN_LABEL`.
-     *
-     * La segunda mitad importa tanto como la primera: un niño que se olvida su
-     * PIN y no sabe que hay salida, deja de entrar.
-     */
     myPinLead: "Son tus",
     myPinTail: "números secretos. Si se te olvidan, un adulto puede ponerte otros.",
 
-    /** La edad, en la tarjeta de identidad. La cifra se compone al usarla. */
     yearsOne: "año",
     yearsMany: "años",
 
-    /** Errores. Un 409 aquí NO es «correo ya registrado». */
     maxReached: "Esta familia ya tiene el máximo de perfiles. Da de baja alguno para crear otro.",
     notFound: "No encontramos ese perfil.",
     forbidden: "No puedes hacer esto desde este perfil.",
     invalidData: "Revisa los datos: algo no es válido.",
-
   },
 
   tasks: {
-    /** Gestión del padre. */
     title: "Tareas",
     empty: "Todavía no has repartido ninguna tarea.",
     newTask: "Repartir una tarea",
     newTaskTitle: "Nueva tarea",
-    /** Qué se decide en esta pantalla, encima del título. */
+
     newTaskLead: "Tú decides lo que vale",
 
-    /*
-     * EL CICLO DE UNA TAREA, EXPLICADO DONDE SE REPARTE.
-     *
-     * Es el mecanismo central del producto y el que más se malinterpreta: que un
-     * hijo marque una tarea NO le paga nada, y las monedas salen solo al
-     * aprobarla. Un padre que no lo sepa cuenta con que ya cobró, o al revés
-     * sospecha que el saldo no sube.
-     *
-     * Va aquí y no en la ayuda, porque aquí es donde alguien está decidiendo
-     * cuánto vale algo. La frase de «Por aprobar» compone el nombre del filtro
-     * desde donde ya vive, para que renombrarlo no deje esta mintiendo.
-     */
     handOutTitle: "Qué pasa al repartir",
     handOutEach:
       "Cada hijo elegido recibe SU tarea. Son independientes: que uno la marque no afecta a los otros.",
@@ -754,23 +417,16 @@ export const messages = {
     dueDate: "Fecha límite (opcional)",
     dueDateHelp: "Solo se muestra: no caduca ni avisa.",
     dueLabel: "Para el",
-    /** Cuándo se repartió. La fecha va aparte: ninguna cadena lleva cifras. */
+
     handedOutLabel: "Repartida el",
-    /** Lo que encabeza la pantalla, antes del título. */
+
     inboxLead: "Lo que tus hijos han marcado",
     forWhom: "¿Para quién?",
     noChildren: "Primero crea un perfil de hijo.",
     sameCoins: "El mismo valor para todos",
     coinsPerChild: "Un valor para cada uno",
     coins: "Monedas",
-    /*
-     * EL NOMBRE DEL GRUPO DE MODOS, que no tenía el suyo.
-     *
-     * El grupo de «el mismo valor para todos / uno para cada uno» se anunciaba
-     * con el nombre del conjunto entero, «¿Para quién?», que es de lo que NO va:
-     * ese grupo decide cuánto. Quien lo recorre con un lector de pantalla oía la
-     * pregunta equivocada antes de las dos opciones.
-     */
+
     valueLegend: "¿Cuánto vale?",
     create: "Repartir",
     working: "Guardando…",
@@ -780,38 +436,16 @@ export const messages = {
     approve: "Aprobar",
     reject: "Rechazar",
 
-    /** Filtro del listado. Filtrar por completadas es la bandeja de aprobación. */
     filterAll: "Todas",
     filterPending: "Pendientes",
     filterCompleted: "Por aprobar",
     filterApproved: "Aprobadas",
     filterLabel: "Filtrar por estado",
 
-    /*
-     * Por qué un reparto filtrado enseña tareas que no casan con el filtro.
-     *
-     * Es deliberado —el padre quiere ver el grupo completo aunque solo una esté
-     * para aprobar— y hasta `redesign-parent-inbox` solo estaba dicho en un
-     * comentario del código. En pantalla, filtrar por «Por aprobar» y ver
-     * pendientes se leía como un filtro roto: una decisión de producto que no se
-     * explica es indistinguible de un defecto.
-     */
-    /*
-     * LA SEGUNDA MITAD ES LA QUE EXPLICA, y faltaba. Decía solo que el reparto se
-     * muestra completo —el QUÉ—, y quien lo lee sigue sin saber por qué: porque
-     * lo que se filtra son los REPARTOS y no las filas. Sin eso, la frase se lee
-     * como una disculpa por un filtro que no funciona.
-     */
     wholeBatchNote:
       "Cada reparto se muestra completo, incluso las tareas que no casan con el filtro: " +
       "lo que se filtra son los repartos, no las filas.",
 
-    /** Estados, tal como los lee una persona. */
-    /*
-     * Los tres GRUPOS de la pantalla del niño. Son las mismas etapas que las
-     * insignias, dichas como encabezado de una lista y no como estado de una
-     * fila: «Por hacer» encabeza, «Pendiente» describe.
-     */
     groupPending: "Por hacer",
     groupCompleted: "Esperando revisión",
     groupApproved: "Hechas",
@@ -820,27 +454,15 @@ export const messages = {
     statusCompleted: "Hecha, esperando revisión",
     statusApproved: "Aprobada",
 
-    /** Lo que ve el niño. */
     myTasksTitle: "Mis tareas",
-    /** Las dos formas, SIN cifra. Cuenta PENDIENTES, no tareas. */
+
     pendingCountOne: "pendiente",
     pendingCountMany: "pendientes",
-    /** Cuando no queda ninguna: una cuenta en cero se lee como si fuera trabajo. */
+
     nothingPending: "Nada pendiente",
     myTasksEmpty: "No tienes tareas ahora mismo. ¡Disfruta!",
     markDone: "¡Ya la hice!",
 
-    /*
-     * EL CICLO, CONTADO AL NIÑO.
-     *
-     * Es lo mismo que explica el formulario del padre y por eso van los dos, no
-     * uno: el que reparte necesita saber que marcar no paga, y el que marca
-     * necesita saber que su papá o su mamá lo revisan antes. Contárselo a uno
-     * solo deja al otro suponiendo.
-     *
-     * El primer paso NOMBRA el botón desde donde ya vive, para que renombrarlo
-     * no deje esta frase señalando a un botón que no existe.
-     */
     howTitle: "Cómo funciona",
     howDoLead: "Haces la tarea y tocas «",
     howDoTail: "».",
@@ -854,62 +476,32 @@ export const messages = {
     earned: "¡Ganaste estas monedas!",
     myTasks: "Ver mis tareas",
 
-    /**
-     * Errores. Un 409 aquí NO es el tope de perfiles: es que alguien se te
-     * adelantó, o que la pantalla lleva un rato abierta.
-     */
     conflict: "Esa tarea ya no está pendiente. Vuelve a cargar la lista para verla como está ahora.",
     notFound: "No encontramos esa tarea.",
     forbidden: "No puedes hacer esto desde este perfil.",
     invalidData: "Revisa los datos: algo no es válido.",
-
   },
 
   rewards: {
-    /** Lo que encabeza el catálogo del padre, antes del título. */
-    /*
-     * Nombra también el PRECIO, que es la otra mitad de lo que hay en esta
-     * pantalla y la que cambia de un hijo a otro. Decía solo qué pueden pedir.
-     */
     catalogLead: "Lo que pueden pedir, y a qué precio",
-    /** Gestión del padre. */
+
     title: "Premios",
     empty: "Todavía no has publicado ningún premio.",
     newReward: "Publicar un premio",
     newRewardTitle: "Nuevo premio",
-    /** Qué se decide en esta pantalla, encima del título. */
+
     newRewardLead: "Tú pones el precio",
     rewardTitle: "¿Qué premio es?",
     description: "Detalles (opcional)",
-    /*
-     * Las DOS decisiones en una, porque en un premio van juntas: a quién se le
-     * ofrece y por cuánto. «¿Para quién?» dejaba la segunda sin anunciar, y es
-     * la que cambia de un hijo a otro.
-     */
+
     forWhom: "¿A quién se lo ofreces, y por cuánto?",
     noChildren: "Primero crea un perfil de hijo.",
     sameCoins: "El mismo precio para todos",
     coinsPerChild: "Un precio para cada uno",
     valueLegend: "¿Cuánto cuesta?",
-    /*
-     * Aquí se queda la UNIDAD y no la pregunta, al contrario que en una tarea.
-     * No es una incoherencia: allí el conjunto pregunta «¿Para quién?» y el
-     * precio necesita su propia pregunta; aquí el conjunto ya pregunta «¿a quién
-     * se lo ofreces, y por cuánto?», así que repetirla dentro sería decirlo dos
-     * veces seguidas.
-     */
+
     coins: "Monedas",
 
-    /*
-     * EL CICLO DE UN PREMIO, DICHO DONDE SE PUBLICA.
-     *
-     * Dos cosas que la API hace y la interfaz no contaba en ninguna parte: que
-     * un hijo VE lo que no puede pagar todavía —con cuánto le falta, que es lo
-     * que convierte un saldo en una decisión de ahorro— y que el precio se
-     * CONGELA al pedirlo. Lo segundo importa de verdad: si se sube el precio
-     * después, un canje pendiente mantiene el suyo, y sin saberlo eso parece un
-     * error de cuentas.
-     */
     publishTitle: "Qué pasa al publicar",
     publishShows:
       "Aparece en el escaparate de los hijos a los que se lo ofreces, cada uno con SU precio.",
@@ -923,62 +515,44 @@ export const messages = {
     cancel: "Cancelar",
     back: "Volver",
 
-    /** Edición del premio: solo título y descripción. */
     edit: "Editar",
     editRewardTitle: "Editar premio",
     addImage: "Ponerle una foto",
-    /** En el alta la foto es opcional, y decirlo evita que parezca obligatoria. */
+
     optionalImage: "Foto (opcional)",
-    /* Por qué el marco del recorte es cuadrado. La razón vive en otra pantalla. */
+
     imageSquare: "Se recorta cuadrada: en el escaparate van en rejilla y si no, se dentea.",
     imageReady: "Foto lista. Se guardará al publicar el premio.",
-    /** Decorativo: va con `aria-hidden`, así que nadie lo escucha. */
+
     imageFallbackGlyph: "🎁",
     removeImage: "Quitar la foto",
     save: "Guardar",
 
-    /** Reemplazo del conjunto de ofertas. */
     editOffers: "Cambiar ofertas",
     offeredTo: "Ofrecido a",
     noOffers: "Sin ofertas todavía.",
     saveOffers: "Guardar ofertas",
 
-    /** La baja es lógica: la interfaz tiene que decirlo antes, no después. */
     retire: "Retirar",
-    /*
-     * Corto, y con la vuelta atrás DENTRO: retirar se revierte publicando el
-     * premio otra vez, así que no es una decisión que haya que pensarse. Decirlo
-     * es lo que separa este diálogo del de dar de baja, que sí es definitivo.
-     */
+
     retireConfirm:
       "Dejará de poder pedirse y desaparecerá del escaparate de tus hijos. " +
       "Los canjes que ya te hayan pedido siguen su curso. " +
       "Sigue en tu catálogo: publicándolo otra vez vuelve. ¿Seguro?",
     retireSubmit: "Sí, retirar",
 
-    /** Filtro del catálogo. */
     filterLabel: "Filtrar por estado",
     filterActive: "Activos",
     filterRetired: "Retirados",
 
-    /** Lo que ve el niño. */
     myRewardsTitle: "Mis premios",
     myRewardsLead: "Canjea lo que ganaste",
 
-    /*
-     * La meta más cercana. Va en `rewards` y no en `children` porque habla de
-     * premios, y la usan DOS pantallas: el inicio y el escaparate.
-     */
-    /*
-     * El separador de la fracción, SOLO el separador: la cifra que tiene y la que
-     * cuesta se componen en el punto de uso, porque ninguna cadena del catálogo
-     * lleva un número dentro.
-     */
     goalOf: "/",
     nextRewardTitle: "Tu próximo premio",
     allAffordableTitle: "¡Te alcanza para todo!",
     allAffordableBody: "Elige el que más te guste, que ya lo tienes.",
-    /** Las dos formas, SIN cifra: la compone `contar()` donde se usa. */
+
     countOne: "premio",
     countMany: "premios",
     myRewardsEmpty: "Todavía no hay premios para ti.",
@@ -986,36 +560,18 @@ export const messages = {
     affordable: "¡Ya te alcanza!",
     missingPrefix: "Te faltan",
 
-    /**
-     * Errores. Un 404 aquí NO es «esa tarea ya no está pendiente»: es que ese
-     * premio ya no está, retirado o nunca existió.
-     */
     notFound: "No encontramos ese premio.",
     forbidden: "No puedes hacer esto desde este perfil.",
     invalidData: "Revisa los datos: algo no es válido.",
-
   },
 
   redemptions: {
-    /** Bandeja del padre. */
     title: "Canjes",
-    /** Lo que encabeza la pantalla, antes del título. */
+
     inboxLead: "Lo que tus hijos han pedido",
-    /** Cuándo se pidió. La fecha va aparte: ninguna cadena lleva cifras. */
+
     requestedLabel: "Pedido el",
 
-    /*
-     * LAS TRES REGLAS DEL CANJE, EN LA PROPIA BANDEJA.
-     *
-     * Son TRES cadenas y no un párrafo, y eso no es un capricho de formato: un
-     * test comprueba que las tres están, y con una sola cadena bastaría con que
-     * el párrafo existiera para pasar aunque le faltara una de las reglas.
-     *
-     * Las tres responden a preguntas que un padre se hace ANTES de pulsar y que
-     * hasta hoy solo estaban escritas en `CLAUDE.md`: cuándo se cobra, qué
-     * precio se aplica y qué cuesta decir que no. La tercera es la que más
-     * tranquiliza y la que menos se adivina.
-     */
     ruleDiscountOnApprove: "Las monedas se descuentan al aprobar, no al pedir.",
     rulePriceFrozen:
       "El precio se congela el día de la solicitud: si luego subes el del premio, este canje mantiene el que tenía.",
@@ -1026,53 +582,32 @@ export const messages = {
     back: "Volver",
     coins: "Monedas",
 
-    /** Filtro de la bandeja. */
     filterAll: "Todos",
     filterPending: "Pendientes",
     filterApproved: "Aprobados",
     filterRejected: "Rechazados",
     filterLabel: "Filtrar por estado",
 
-    /** Estados, tal como los lee una persona. */
     statusPending: "Pendiente",
     statusApproved: "Aprobado",
     statusRejected: "Rechazado",
 
-    /** Lo que ve el niño: sus propias solicitudes y el botón de pedir. */
     myRedemptionsTitle: "Mis canjes",
-    /** Nombre de la tabla del historial: se anuncia, no se ve. */
+
     historyCaption: "Lo que he pedido",
     columnReward: "Premio",
     columnCoins: "Monedas",
     columnStatus: "Estado",
     columnWhen: "Cuándo",
-    /**
-     * Las dos formas de la palabra, SIN la cifra: la compone `contar()` en el
-     * punto de uso. Una cadena con el número dentro se salta la regla que
-     * `close-style-debt` puso, y un test la caza.
-     */
+
     countOne: "canje",
     countMany: "canjes",
     myRedemptionsEmpty: "No has pedido ningún premio todavía.",
-    /**
-     * LO QUE UNA TABLA DE ESTADOS NO DICE, y un niño no puede deducir.
-     *
-     * Los dos hechos son los que la API implementa con más cuidado: el descuento
-     * ocurre al APROBAR, y el precio se congela al pedir. El producto ya se los
-     * cuenta a quien reparte, en las dos altas del padre; contárselo solo a él
-     * deja suponiendo a quien pide, que es donde se lleva el chasco.
-     */
+
     myRedemptionsExplainTitle: "Las monedas se van cuando lo aprueban, no cuando lo pides.",
     myRedemptionsExplainBody:
       "Y si dicen que no, no pierdes nada: el precio se guarda tal como estaba el día que lo pediste.",
-    /**
-     * Los rótulos del resumen por estado.
-     *
-     * Dicen que es de ESTA PÁGINA porque eso es lo que cuentan: las filas que la
-     * pantalla tiene delante. El listado pagina por fila, así que su total cuenta
-     * canjes y no estados — un resumen que dijera «3 aprobados» sobre un total
-     * mayor estaría afirmando algo que no ha contado.
-     */
+
     summaryPending: "esperando",
     summaryApproved: "aprobados",
     summaryRejected: "rechazados",
@@ -1082,28 +617,20 @@ export const messages = {
     requesting: "Pidiendo…",
     alreadyRequested: "Ya lo pediste, espera a que te respondan.",
 
-    /**
-     * Errores. Un 409 aquí cubre tres casos —una transición perdida, el saldo
-     * que ya no alcanza al aprobar, o un duplicado al solicitar— con el mismo
-     * texto, porque el código HTTP es el contrato y no el mensaje.
-     */
     notFound: "No encontramos ese canje.",
     forbidden: "No puedes hacer esto desde este perfil.",
     invalidData: "Revisa los datos: algo no es válido.",
     conflict: "Ese canje ya no se puede resolver así. Vuelve a cargar la lista para verlo actualizado.",
-
-    /** Paginación de la bandeja. */
   },
 
   uploads: {
-    /** Selector y recorte. */
     choose: "Elegir una foto",
-    /* La otra opción, nombrada: encima hay animales y esto es lo que sigue. */
+
     orYourOwnPhoto: "O ponte una foto tuya",
     change: "Cambiar la foto",
     remove: "Quitar la foto",
     crop: "Ajusta el encuadre",
-    /* Por qué el marco es cuadrado. La razón vive en otra pantalla. */
+
     cropLead: "La foto de un premio va cuadrada, para que la rejilla no se dentee.",
     cropConfirm: "Usar esta foto",
     cancel: "Cancelar",
@@ -1111,28 +638,15 @@ export const messages = {
     uploading: "Subiendo…",
     zoom: "Acercar",
 
-    /** Lo que puede salir mal, en el idioma de quien lo lee. */
     failed: "No se pudo subir la foto. Vuelve a intentarlo.",
     network: "No pudimos conectar para subir la foto. Revisa tu conexión.",
     tooLarge: "Esa imagen es demasiado grande, incluso comprimida.",
     wrongType: "Solo se admiten imágenes JPG, PNG o WEBP.",
   },
 
-  /**
-   * Las preguntas frecuentes.
-   *
-   * UNA SOLA LISTA para los dos roles, decidido a conciencia. Se acepta que un
-   * niño lea enunciados escritos para toda la familia; si al usarla se ve que no
-   * encuentra su duda, se parte entonces y con el motivo medido, no antes.
-   *
-   * Las respuestas que llevan una CIFRA no están aquí enteras: se componen abajo
-   * desde su constante, como `PIN_LABEL`. El test que prohíbe dígitos dentro de
-   * una cadena recorre también los arrays, y aquí se habla de edades y de
-   * dígitos de un PIN — que es justo el caso que ese test existe para cazar.
-   */
   help: {
     title: "Preguntas frecuentes",
-    /* Antetítulo, como en las demás pantallas: dice qué es esta lista. */
+
     lead: "Lo que más se pregunta",
 
     coinsQ: "¿Qué son las monedas?",
@@ -1170,7 +684,6 @@ export const messages = {
       "No. Cada niño ve solo lo suyo: sus tareas, sus premios y su saldo. Ni siquiera " +
       "preguntándomelo a mí, porque yo tampoco lo sé.",
 
-    /** Compuestas abajo: llevan cifras y no pueden vivir enteras aquí. */
     ageQLead: "¿Para qué edades es Monedín? De",
     ageQTail: "años",
     ageA:
@@ -1183,23 +696,6 @@ export const messages = {
       "Un adulto puede reponer el PIN de un hijo desde su perfil. Y si el que se olvida es el " +
       "del adulto, se restablece con el correo y la contraseña de la cuenta.",
 
-    /*
-     * DOS LISTAS Y NO UNA, y esto revierte una decisión escrita.
-     *
-     * Aquí había NUEVE preguntas para los dos roles, con la cabecera de la
-     * pantalla diciendo «una sola para los dos». El argumento de entonces era que
-     * el marco ya reasigna la escala, así que la misma pantalla sirve — y eso
-     * sigue siendo cierto de la PANTALLA. Lo que no es cierto es del CONTENIDO:
-     * «subí el precio de un premio que ya me habían pedido» no es una duda que un
-     * niño pueda tener, y las nueve estaban escritas en tercera persona —«el niño
-     * lo pide y un adulto lo aprueba»—, que es un manual para el padre.
-     *
-     * Una lista de preguntas sirve para encontrar la propia. La mitad que no
-     * puede ser tuya no es neutral: estorba, y a los siete años estorba el doble.
-     *
-     * Las de abajo son las del NIÑO, en su voz y sobre lo que él hace. Las de
-     * arriba se quedan como las del padre, que es para quien estaban escritas.
-     */
     childCoinsQ: "¿Qué son las monedas?",
     childCoinsA:
       "Son de mentira: no se compran ni se cambian por dinero de verdad. Sirven para pedir los " +
@@ -1224,7 +720,6 @@ export const messages = {
     childPinQ: "Se me olvidó mi PIN.",
     childPinA: "Pídele ayuda a un adulto: desde su perfil puede ponerte uno nuevo.",
 
-    /* Las dos del padre que faltaban, y las dos sobre dinero ya movido. */
     frozenQ: "Subí el precio de un premio que ya me habían pedido.",
     frozenA:
       "Ese canje mantiene el precio del día en que se pidió. El precio nuevo vale para los " +
@@ -1235,31 +730,12 @@ export const messages = {
       "No. Retirar lo quita del escaparate de todos; cambiar ofertas decide a quién se le ofrece " +
       "y a qué precio.",
 
-    /*
-     * EL PIE LO DICE MONEDÍN EN PRIMERA PERSONA, y antes era un «¿más dudas?»
-     * con el nombre del destino al lado. La diferencia no es de tono: lo que
-     * convence de pulsar ahí es que quien va a contestar CONOCE tus tareas, tus
-     * premios y tus monedas, y eso no lo decía en ninguna parte.
-     */
     moreDoubts: "¿Tu duda no está aquí?",
     moreDoubtsLead: "Pregúntamela a mí: conozco tus tareas, tus premios y tus monedas.",
     askMonedin: "Pregúntale a Monedín",
   },
 
-  /**
-   * Lo que dice Monedín flotando en la esquina.
-   *
-   * Agrupadas por ROL y por ÁREA, con el mismo nombre que usa
-   * `app/widget-lines.ts`: quien añada un área ahí encuentra aquí dónde escribir
-   * sus frases sin tener que inventarse una convención.
-   *
-   * Son un ANZUELO, no una explicación: dicen lo justo para que a alguien le
-   * apetezca preguntar. Lo que explica de verdad son las preguntas frecuentes y
-   * el chat, y meter aquí la respuesta entera convertiría un bocadillo en un
-   * cartel que hay que leer cada ocho segundos.
-   */
   widget: {
-    /** El nombre del destino. FIJO: es lo que oye quien no ve la pantalla. */
     openChat: "Pregúntale a Monedín",
 
     childHomeBalance: "¿Quieres saber de dónde salieron tus monedas?",
@@ -1285,63 +761,22 @@ export const messages = {
     parentRedemptionsReject: "¿Rechazar devuelve monedas? Pregúntame.",
     parentChildrenPin: "¿Alguien olvidó su PIN? Te digo cómo reponerlo.",
     parentChildrenBalance: "¿Quieres repasar cómo va cada uno?",
-    /*
-     * DEJÓ DE DECIR LO QUE LA PANTALLA YA DICE.
-     *
-     * Decía «salir del perfil y cerrar sesión no son lo mismo», y esa frase está
-     * ahora al lado del botón, con su consecuencia entera. Repetirla en el globo
-     * gastaba uno de los dos turnos del asistente en esta pantalla para no
-     * añadir nada — y el globo es lo que hay que ABRIR, así que era además el
-     * peor sitio de los dos para decirlo.
-     *
-     * Lo que ofrece ahora es lo que la pantalla no puede: que cambiar el PIN no
-     * echa a nadie del dispositivo, que es la duda que frena a quien va a
-     * tocarlo.
-     */
+
     parentAccountLeave: "¿Cambiar el PIN te echa de aquí? Te lo cuento.",
     parentAccountAsk: "¿Alguna duda sobre tu cuenta?",
     parentHelp: "Si tu duda no está aquí, pregúntamela.",
   },
 
-  /**
-   * El chat con Monedín.
-   *
-   * Un solo juego de textos para los dos roles, igual que la pantalla: el marco
-   * ya declara la escala, y dos catálogos cuya única diferencia fuera la
-   * audiencia serían el defecto que la doble escala existe para evitar.
-   *
-   * Lo que NO está aquí es el guion de sistema del modelo. Vive en la API, en
-   * `assistant.prompts.ts`, y es la única excepción declarada a «ni un string
-   * visible fuera del catálogo»: un guion no se traduce, se reescribe, y
-   * reescribirlo cambia el comportamiento del producto. Ver CLAUDE.md §1.
-   */
   assistant: {
     title: "Pregúntale a Monedín",
-    /*
-     * DOS FRASES, una por rol, y antes había UNA escrita en segunda persona de
-     * niño: a un padre le decía que Monedín conoce «tus tareas» y «tus monedas»,
-     * cuando las tareas las reparte él y las monedas son de sus hijos.
-     */
+
     leadChild: "Monedín conoce tus tareas, tus premios y tus monedas. Pregúntale lo que quieras.",
     leadParent:
       "Monedín conoce las tareas, los premios y las monedas de tu familia. Pregúntale lo que quieras.",
 
-    /** Marca de quién habla en cada turno. No basta con distinguirlos por color. */
     you: "Tú",
     monedin: "Monedín",
 
-    /**
-     * Lo que ocupa el hueco del hilo mientras esta vacio.
-     *
-     * En gris tenue y sin accion: no es un aviso ni un error, es la pantalla
-     * diciendo para que sirve el hueco que se ve. Antes ese espacio estaba en
-     * blanco y el campo de abajo era lo unico que sugeria que se podia escribir.
-     */
-
-    /*
-     * EL SALUDO CON LO QUE HAY. En trozos porque las cifras se componen donde se
-     * usan: ninguna cadena del catálogo lleva un número dentro.
-     */
     greetHave: "Tienes",
     greetAnd: "y",
     greetAskChild: "¿Te cuento algo?",
@@ -1353,79 +788,45 @@ export const messages = {
     thinking: "Monedín está pensando…",
     retry: "Volver a intentarlo",
 
-    /**
-     * Arranques sugeridos.
-     *
-     * Desde `redesign-assistant-chat` NO desaparecen al empezar a conversar:
-     * dejan de ser el remedio del folio en blanco y pasan a ser el atajo para
-     * cambiar de tema sin escribir. Para quien todavía escribe despacio —un niño
-     * de seis años— eso es la diferencia entre seguir preguntando y cerrar.
-     */
     ideasTitle: "Explora con Monedín",
     ideaBalance: "¿Cómo consigo más monedas?",
-    /*
-     * Y LAS IDEAS TAMBIÉN VAN POR ROL. Las tres de arriba son preguntas de niño
-     * —«¿qué me falta por hacer?», «¿para qué premio me alcanza?»— y a un padre
-     * se le ofrecían tal cual. Las suyas son las que solo él puede hacer.
-     */
+
     ideaPriceGlyph: "🎁",
     ideaPrice: "¿Qué precio le pongo a un premio?",
     ideaRetireGlyph: "📦",
     ideaRetire: "¿Retirar un premio o dejar de ofrecerlo?",
     ideaCreditedGlyph: "🪙",
     ideaCredited: "¿Cuánto le he acreditado a cada hijo?",
-    /** Los tres glifos de las sugerencias. Decorativos: lo que dice es el texto. */
+
     ideaBalanceGlyph: "🪙",
     ideaTasksGlyph: "🧹",
     ideaRewardsGlyph: "🎁",
     ideaTasks: "¿Qué me falta por hacer?",
     ideaRewards: "¿Para qué premio me alcanza?",
 
-    /**
-     * El proveedor no pudo responder. Se cuenta como ADVERTENCIA y no como
-     * error: nadie hizo nada mal, y lo único que hay que hacer es esperar.
-     */
     unavailable: "Monedín está descansando ahora mismo. Vuelve a preguntarle en un rato.",
-    /** 422: la pregunta no cumple los límites. */
+
     invalidQuestion: "Esa pregunta no se pudo enviar. Prueba a escribirla más corta.",
-    /** 401: la sesión caducó mientras se conversaba. */
+
     signedOut: "Se cerró tu sesión. Vuelve a entrar para seguir preguntando.",
   },
 
   errors: {
-    /** La respuesta no se pudo interpretar como el cuerpo de error estándar. */
     unreadableResponse: "La respuesta del servidor no se pudo interpretar.",
-    /** La respuesta correcta no cumple el contrato compartido. */
+
     unexpectedShape: "La respuesta del servidor no tiene la forma esperada.",
-    /** No hubo respuesta: red caída o API apagada. */
+
     network: "No se pudo contactar con el servidor.",
   },
 } as const;
 
-/**
- * «PIN de 4 dígitos», con el 4 saliendo de su constante.
- *
- * Se compone AQUÍ y no en cada pantalla porque lo necesitan tres, y tres
- * composiciones idénticas son tres sitios donde se puede separar una. Es el
- * mismo patrón que el mínimo de la contraseña, con la diferencia de que aquel
- * tiene un solo punto de uso.
- */
 export const PIN_LABEL = `${messages.auth.pinLead} ${PIN_LENGTH} ${messages.auth.pinTail}`;
 
-/**
- * Las dos preguntas frecuentes que llevan una cifra dentro.
- *
- * Se componen AQUÍ y no en la pantalla, por lo mismo que `PIN_LABEL`: el número
- * sale de la constante del contrato, así que el día que el PIN pase a cinco
- * dígitos o el rango de edad cambie, el texto cambia solo. Tenerlo escrito a
- * mano acaba con la pantalla diciendo una cosa y la validación exigiendo otra.
- */
 export const HELP_AGE_QUESTION =
   `${messages.help.ageQLead} ${CHILD_AGE_MIN} a ${CHILD_AGE_MAX} ${messages.help.ageQTail}`;
 
 export const HELP_PIN_QUESTION =
   `${messages.help.pinQLead} ${PIN_LENGTH} ${messages.help.pinQTail}`;
 
-/** «Son tus 4 números secretos…», con el 4 saliendo de la misma constante. */
 export const MY_PIN_EXPLAINER =
   `${messages.children.myPinLead} ${PIN_LENGTH} ${messages.children.myPinTail}`;

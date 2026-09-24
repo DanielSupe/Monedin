@@ -34,7 +34,6 @@ function premio(id: string, title: string, coins: number, affordable: boolean): 
   };
 }
 
-/** El saldo del actor de prueba, que es lo que la pantalla pinta en grande. */
 const SALDO = 120;
 
 async function montar(tareas: OwnTask[], premios: OwnReward[]): Promise<void> {
@@ -44,21 +43,6 @@ async function montar(tareas: OwnTask[], premios: OwnReward[]): Promise<void> {
   });
 }
 
-/**
- * EL SALDO, DESPUÉS DE REVERTIR LA MITAD DE SU REQUISITO.
- *
- * Este bloque decía «se pinta en la talla mayor, y ninguna otra cifra la usa»:
- * el requisito exigía que el saldo fuera el elemento MÁS GRANDE de la pantalla.
- * `match-child-home-header` lo revierte con las dos pantallas delante — la
- * tarjeta gastaba el tercio superior y empujaba las tareas por debajo del
- * pliegue, así que lo primero que veía un niño al entrar era cuánto tiene.
- *
- * Lo que sustituye al tamaño es el SITIO, y eso no se puede probar aquí: jsdom no
- * aplica CSS. Lo que SÍ se prueba es la mitad del requisito que no se cae, y que
- * es justo la que un rediseño se llevaría por delante sin enterarse: que el saldo
- * sigue siendo el camino al historial —que no tiene destino propio en la
- * navegación del niño— y que se anuncia con su unidad.
- */
 describe("el saldo sigue siendo el camino a su historial", () => {
   it("se toca y lleva a de dónde salieron", async () => {
     await montar([tarea("t1", "Tender la cama", "PENDING")], []);
@@ -70,10 +54,6 @@ describe("el saldo sigue siendo el camino a su historial", () => {
     expect(enlace).toHaveAttribute("href", expect.stringContaining("/me/coins"));
   });
 
-  /*
-   * La cifra sola diría «120» a quien no ve la pantalla, que no dice de qué. La
-   * unidad la pone la pieza de cantidades, que es quien sabe qué dibuja.
-   */
   it("se anuncia con su unidad y no como un número suelto", async () => {
     await montar([], []);
 
@@ -85,33 +65,11 @@ describe("el saldo sigue siendo el camino a su historial", () => {
   it("el marco no lo repite: el saldo vive aquí y en su historial", async () => {
     await montar([], []);
 
-    // Una sola vez en la pantalla. Si el marco lo llevara, saldría dos.
     expect(await screen.findAllByText(String(SALDO))).toHaveLength(1);
   });
 });
 
-/**
- * Lo que la pantalla gana, y lo que NO dice.
- *
- * Era un número y cuatro destinos: un niño que entraba a ver qué le tocaba tenía
- * que dar un paso más para averiguarlo.
- */
 describe("el inicio contesta «¿qué hago ahora?»", () => {
-  /*
-   * ESTE CASO DECÍA «y no lo que ya hizo», Y ESO CAMBIÓ A PROPÓSITO.
-   *
-   * El inicio enseñaba solo las pendientes, con el argumento de que una lista con
-   * lo aprobado dentro contesta «qué hice» y no «qué hago ahora». Es un buen
-   * argumento para una lista de TRABAJO y el equivocado para esta pantalla, que
-   * es donde el ciclo se cierra: hice la tarea, la marqué, me la aprobaron, aquí
-   * están mis monedas. Con solo las pendientes, el paso que da sentido a los
-   * otros tres no se ve en ninguna parte del inicio.
-   *
-   * Lo que el argumento sí acertaba —y es lo que este caso pasa a garantizar— es
-   * el ORDEN: lo que se puede hacer ahora va primero. Se comprueba con las tres
-   * posiciones y no solo con la primera, porque «la pendiente está arriba» se
-   * cumple igual con las otras dos en cualquier orden entre ellas.
-   */
   it("enseña las tres etapas, y lo que se puede hacer ahora va primero", async () => {
     await montar(
       [
@@ -130,12 +88,6 @@ describe("el inicio contesta «¿qué hago ahora?»", () => {
     expect(marcada.compareDocumentPosition(aprobada)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  /*
-   * Y sin nada pendiente se dicen LAS DOS cosas: que no le queda nada —lo dice
-   * Monedín, arriba— y lo que sí hizo, que es lo que esa lista enseña ahora.
-   * Antes se escondía la lista entera, así que quien lo tenía todo hecho veía el
-   * inicio más vacío cuanto más había trabajado.
-   */
   it("sin nada pendiente lo dice, y aun así enseña lo que hizo", async () => {
     await montar([tarea("t1", "Sacar la basura", "APPROVED")], []);
 
@@ -143,11 +95,6 @@ describe("el inicio contesta «¿qué hago ahora?»", () => {
     expect(screen.getByText("Sacar la basura")).toBeInTheDocument();
   });
 
-  /*
-   * «Hoy» no aparece en ninguna parte, y es una regla y no un detalle: una tarea
-   * no tiene concepto de jornada, así que decirlo sería enseñar como dato algo
-   * que el modelo no sabe.
-   */
   it("no habla de «hoy» en ningún sitio", async () => {
     await montar([tarea("t1", "Tender la cama", "PENDING")], []);
     await screen.findByText("Tender la cama");
@@ -156,12 +103,6 @@ describe("el inicio contesta «¿qué hago ahora?»", () => {
   });
 });
 
-/**
- * El aro y la meta se prueban aparte de la pantalla, con casos que DISTINGUEN.
- *
- * Es donde están los errores de verdad: el caso feliz de una lista se ve a ojo,
- * y un desempate que falla no.
- */
 describe("lo que el inicio calcula", () => {
   it("el avance cuenta lo marcado como hecho, y da tres cifras distintas", () => {
     const cinco = [
@@ -172,8 +113,6 @@ describe("lo que el inicio calcula", () => {
       tarea("t5", "e", "APPROVED"),
     ];
 
-    // 2 de 5: ni la mitad ni cero ni el total, así que un cálculo equivocado
-    // —contar solo las aprobadas, o contar las pendientes— da otro número.
     expect(avanceDeTareas(cinco)).toEqual({ done: 2, total: 5 });
     expect(avanceDeTareas([])).toEqual({ done: 0, total: 0 });
     expect(avanceDeTareas(cinco.slice(3))).toEqual({ done: 2, total: 2 });
@@ -189,11 +128,6 @@ describe("lo que el inicio calcula", () => {
     expect(meta?.title).toBe("El más cerca");
   });
 
-  /*
-   * El desempate, que es lo que impide que el panel cambie de premio entre dos
-   * recargas sin que haya pasado nada. Se comprueba con las dos ÓRDENES de
-   * entrada: sin desempate, cada una devolvería un premio distinto.
-   */
   it("con dos al mismo precio, el desempate es estable", () => {
     const a = premio("r-a", "Uno", 200, false);
     const b = premio("r-b", "Otro", 200, false);
@@ -207,13 +141,6 @@ describe("lo que el inicio calcula", () => {
   });
 });
 
-/**
- * Los dos casos sin meta son CONTRARIOS y se leen distinto.
- *
- * Que le alcancen todos se celebra; no tener ninguno ofrecido no se dibuja.
- * Tratarlos igual diría que no hay nada que conseguir cuando lo que pasa es lo
- * opuesto.
- */
 describe("la meta y sus dos ausencias", () => {
   it("con una meta pendiente, la enseña con lo que le falta", async () => {
     await montar([], [premio("r1", "Noche de pelis", 300, false)]);
@@ -238,14 +165,6 @@ describe("la meta y sus dos ausencias", () => {
   });
 });
 
-/**
- * El agrupado por etapa, con un caso que DISTINGUE.
- *
- * Las cantidades son 2, 1 y 2 a propósito: con 1, 1 y 1 un error de agrupación
- * —mezclar dos etapas, o contar el total en cada grupo— daría el mismo número
- * en los tres y pasaría en verde. Es el error que ya se pagó una vez contando
- * tareas por aprobar en el panel del padre.
- */
 describe("las tareas se agrupan por su etapa del ciclo", () => {
   const CINCO = [
     tarea("t1", "Tender la cama", "PENDING"),
@@ -269,11 +188,6 @@ describe("las tareas se agrupan por su etapa del ciclo", () => {
     expect(soloHechas[0]?.etapa).toBe("APPROVED");
   });
 
-  /*
-   * El orden NO depende del volumen. Con una etapa que acumula la mayoría, una
-   * ordenación por cantidad la pondría primera — y la pantalla cambiaría de
-   * forma cada día, que es justo lo que se aprende de una pantalla.
-   */
   it("el orden no cambia aunque una etapa acumule casi todo", () => {
     const desequilibrada = [
       tarea("t1", "a", "APPROVED"),
@@ -286,13 +200,6 @@ describe("las tareas se agrupan por su etapa del ciclo", () => {
   });
 });
 
-/**
- * El escaparate destaca su meta en la TESELA, no en un panel.
- *
- * Un panel encima repetiría el título de un premio que la rejilla ya enseña. Lo
- * que hacía falta era contestar «¿a cuál llego antes?» sin comparar seis barras,
- * y para eso basta con marcar cuál es.
- */
 describe("el escaparate marca a cuál llega antes", () => {
   it("solo una tesela lleva la marca, y es la del más barato que no alcanza", async () => {
     await montarApp("/me/rewards", comoNino(), [], {

@@ -66,8 +66,6 @@ describe("cliente de perfiles de hijo", () => {
   });
 
   it("el alta va por POST y NO envía el padre dueño", async () => {
-    // El padre sale de la sesión. Mandarlo sería además un 422, porque el
-    // esquema del alta es estricto.
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(201, UN_HIJO));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -92,7 +90,6 @@ describe("cliente de perfiles de hijo", () => {
   });
 
   it("la vista propia del niño no lleva identificador", async () => {
-    // Si lo llevara, un niño podría apuntar al perfil de un hermano.
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(200, UN_HIJO));
     vi.stubGlobal("fetch", fetchMock);
 
@@ -131,8 +128,6 @@ describe("traducción de errores de perfiles", () => {
   }
 
   it("un conflicto es el tope de perfiles, NO un correo repetido", () => {
-    // Es el test que impide reutilizar `describeAuthError`: allí el mismo
-    // código significa «ese correo ya está registrado».
     const texto = describeChildrenError(errorCon(ERROR_CODES.CONFLICT));
 
     expect(texto).toBe(messages.children.maxReached);
@@ -166,7 +161,6 @@ describe("traducción de errores de perfiles", () => {
 
 describe("catálogo de textos de perfiles", () => {
   it("la confirmación de baja avisa de que no se puede deshacer", () => {
-    // La baja es definitiva: decirlo DESPUÉS no sirve de nada.
     expect(messages.children.deactivateConfirm).toMatch(/no se puede recuperar/i);
   });
 

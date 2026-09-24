@@ -26,21 +26,11 @@ describe("la puerta pública", () => {
   it("el titular completo está en el DOM aunque se escriba solo", async () => {
     await montarApp("/welcome", SIN_SESION);
 
-    // Lo que se escribe letra a letra va oculto a los lectores. Nadie debería
-    // oír un título deletreándose.
     expect(screen.getByRole("heading", { level: 1 })).toHaveAccessibleName(
       messages.landing.headline,
     );
   });
 
-  /*
-   * Las tres promesas eran una LISTA y ahora son un FLUJO, porque son un ciclo.
-   *
-   * Se comprueba el ORDEN y no solo que los cuatro pasos están: una lista de
-   * cuatro cajas en cualquier orden pasaría eso, y lo que hay que entender aquí
-   * es la secuencia. Aprobar va ENTRE la tarea y las monedas, que es donde
-   * ocurre — aprobar es lo que acredita.
-   */
   it("explica el ciclo como un flujo, y en orden", async () => {
     await montarApp("/welcome", SIN_SESION);
 
@@ -67,23 +57,6 @@ describe("la puerta pública", () => {
     expect(screen.getByText(messages.landing.aboutLearns)).toBeInTheDocument();
   });
 
-  /*
-   * EL ORDEN IMPORTA, Y ESTE TEST LO TENÍA AL REVÉS DE SU PROPIO COMENTARIO.
-   *
-   * Decía, palabra por palabra, «la franja contesta una duda ANTES de que las
-   * tarjetas resuman el ciclo» — y después comprobaba que iba DESPUÉS. Lo que
-   * estaba escrito era la intención; lo que se comprobaba era lo contrario, y
-   * así llegó a la aplicación.
-   *
-   * La intención es la correcta y es la que dibuja la maqueta. Un adulto lee
-   * «monedas» y «premios» en algo para su hijo y su primera pregunta no es cómo
-   * funciona el ciclo, sino si esto mueve dinero de verdad. Explicarle el
-   * mecanismo antes de contestar eso es explicarle cómo se usa algo de lo que
-   * todavía desconfía.
-   *
-   * Comprobar solo que la franja existe dejaría pasar cualquiera de los dos
-   * órdenes, que es justo lo que hay que distinguir aquí.
-   */
   it("y lo despeja ANTES de contar el ciclo, no después", async () => {
     await montarApp("/welcome", SIN_SESION);
 
@@ -93,32 +66,17 @@ describe("la puerta pública", () => {
     expect(franja.compareDocumentPosition(flujo)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  /*
-   * La ilustración de la franja NO se anuncia: acompaña a un texto que ya lo
-   * dice todo, y oírla sería la misma frase dos veces.
-   *
-   * Se CUENTAN las imágenes con nombre y no se mira su atributo: comprobar que
-   * «la ilustración no tiene nombre» pasaría igual si la ilustración no
-   * estuviera. Dos, el logo y las órbitas, y tienen que seguir siendo dos.
-   */
   it("lo que solo ilustra no se anuncia", async () => {
     await montarApp("/welcome", SIN_SESION);
 
     await screen.findByText(messages.landing.aboutTitle);
 
-    // CUATRO con nombre: el logo, las órbitas y las dos maquetas. La
-    // ilustración de la franja no está entre ellas porque es decorativa, y
-    // tampoco los glifos de los pasos ni las teselas de las maquetas.
-    //
-    // Se cuenta y no se mira el atributo: comprobar que «la ilustración no
-    // tiene nombre» pasaría igual si la ilustración no estuviera.
     expect(screen.getAllByRole("img")).toHaveLength(4);
   });
 
   it("la visualización se anuncia como una imagen con significado", async () => {
     await montarApp("/welcome", SIN_SESION);
 
-    // Doce emojis leídos en voz alta no explican nada; una frase sí.
     expect(screen.getByRole("img", { name: messages.landing.orbitLabel })).toBeInTheDocument();
   });
 
@@ -128,23 +86,6 @@ describe("la puerta pública", () => {
     expect(screen.getByRole("img", { name: messages.app.title })).toBeInTheDocument();
   });
 
-  /*
-   * La RAÍZ, y lo que se afirma de ella se ha estrechado DOS veces.
-   *
-   * Primero decía «ningún `[data-scale]` en la página». Envejeció en cuanto la
-   * página enseñó las dos caras de la aplicación: cada maqueta lleva su escala DE
-   * VERDAD, que es lo que hace que la diferencia que se ve sea la del producto y
-   * no una imitación.
-   *
-   * Después decía «la raíz no declara ninguna escala». Envejeció con
-   * `repaint-design-system`, que le dio a esta página una audiencia PROPIA: se
-   * lee de pie y de un vistazo, y sus titulares no caben ni en la escala del
-   * padre ni en la del niño. Estirar una de ellas la habría deformado en toda la
-   * aplicación por culpa de una sola pantalla.
-   *
-   * Lo que la afirmación quería decir desde el principio, y ahora dice: la página
-   * no adopta el marco de un ROL. Todavía no se sabe de quién sería.
-   */
   it("no adopta el marco de un rol: todavía no se sabe de quién sería", async () => {
     await montarApp("/welcome", SIN_SESION);
 
@@ -166,16 +107,12 @@ describe("la puerta pública", () => {
     const delPadre = screen.getByRole("img", { name: messages.landing.previewParentLabel });
     const delNino = screen.getByRole("img", { name: messages.landing.previewChildLabel });
 
-    // Comparadas ENTRE SÍ: con las dos en la misma escala, la sección no
-    // enseñaría lo único que existe para enseñar.
     expect(delPadre.getAttribute("data-scale")).not.toBe(delNino.getAttribute("data-scale"));
   });
 
   it("y las maquetas se anuncian como ejemplos, no como datos de nadie", async () => {
     await montarApp("/welcome", SIN_SESION);
 
-    // Sin esto, quien recorre la página sin verla oye un saldo y dos nombres de
-    // niño sin forma de saber que no son de nadie.
     expect(
       screen.getByRole("img", { name: messages.landing.previewParentLabel }),
     ).toBeInTheDocument();
@@ -185,57 +122,27 @@ describe("la puerta pública", () => {
   });
 });
 
-/**
- * El cierre, desde `redesign-public-entry`.
- *
- * Antes no había: después de la última tarjeta, nada. La única llamada a la
- * acción estaba arriba, así que quien había leído la página entera tenía que
- * volver a subir — justo cuando está más convencido.
- */
 describe("la página cierra con su acción", () => {
   it("la acción principal está arriba Y abajo, y las dos llevan al registro", async () => {
     await montarApp("/welcome", SIN_SESION);
 
     const acciones = screen.getAllByRole("link", { name: messages.landing.start });
 
-    // DOS al menos —la cabecera, el héroe y el cierre—, y todas al mismo sitio:
-    // una que llevara a otro lado sería el defecto que `redesign-access` ya
-    // arregló en el héroe.
     expect(acciones.length).toBeGreaterThan(1);
     for (const accion of acciones) {
       expect(accion).toHaveAttribute("href", "/sign-up");
     }
   });
 
-  /*
-   * LA ACCIÓN DEL CIERRE TIENE SU PROPIO NOMBRE, y este test perseguía el otro.
-   *
-   * Buscaba la ÚLTIMA «Empezar» de la página y comprobaba que iba detrás del
-   * cierre. Dejó de valer en cuanto el cierre pasó a decir «Crear mi cuenta»:
-   * la última «Empezar» volvió a ser la del héroe, o sea una que está ARRIBA, y
-   * el test empezó a medir la distancia equivocada.
-   *
-   * Ahora nombra la del cierre, que es la que el requisito quiere: al final de
-   * la página ya no hace falta invitar a empezar —eso lo hicieron la cabecera y
-   * el héroe— y lo que queda por decir es qué va a pasar al pulsar.
-   */
   it("y el cierre no vuelve a argumentar", async () => {
     await montarApp("/welcome", SIN_SESION);
 
     const cierre = screen.getByText(messages.landing.closingTitle);
     const accion = screen.getByRole("link", { name: messages.landing.closingAction });
 
-    // La acción va DESPUÉS del cierre: si estuviera antes, el cierre sería un
-    // párrafo más y no un cierre.
     expect(cierre.compareDocumentPosition(accion)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  /*
-   * Y las tres acciones de la página llevan al MISMO sitio, aunque dos se
-   * llamen «Empezar» y la del cierre no. Lo que no puede pasar es que un nombre
-   * distinto sea además un destino distinto, que es el defecto que
-   * `redesign-access` ya arregló una vez en el héroe.
-   */
   it("y aunque se llame distinto, lleva donde las otras", async () => {
     await montarApp("/welcome", SIN_SESION);
 
@@ -249,15 +156,12 @@ describe("las dos acciones pesan lo mismo", () => {
   it("empezar y entrar están las dos, y ninguna escondida", async () => {
     await montarApp("/welcome", SIN_SESION);
 
-    // La mitad de quien llega aquí ya es usuario con la sesión caducada: si
-    // entrar cuesta encontrarlo, eso se paga a diario.
     const empezar = screen.getAllByRole("link", { name: messages.landing.start });
     const entrar = screen.getAllByRole("link", { name: messages.landing.signIn });
 
     expect(empezar.length).toBeGreaterThan(0);
     expect(entrar.length).toBeGreaterThan(0);
 
-    // Enlaces, no botones anidados en enlaces: navegar es trabajo de un enlace.
     for (const accion of [...empezar, ...entrar]) {
       expect(accion.querySelector("button")).toBeNull();
     }
@@ -280,8 +184,6 @@ describe("la landing no consulta datos de nadie", () => {
     const fetchMock = globalThis.fetch as unknown as { mock: { calls: unknown[][] } };
     const urls = fetchMock.mock.calls.map((llamada) => String(llamada[0]));
 
-    // La sesión la resuelve el router para saber qué marco pintar. Cualquier
-    // otra petición sería un dato de una familia en una página pública.
     expect(urls.filter((url) => !url.includes("/auth/session"))).toEqual([]);
   });
 });

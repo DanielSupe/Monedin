@@ -38,21 +38,6 @@ import {
   ParentSessionRequiredError,
 } from "./auth.errors.js";
 
-/**
- * Reglas de negocio y autorización del módulo `auth`.
- *
- * Aquí conviven dos niveles: acreditar la CUENTA con la contraseña, y activar
- * un PERFIL con su PIN. La rejilla de perfiles vive en este módulo y no en uno
- * aparte porque listar, entrar y salir de un perfil es comportamiento de
- * sesión: un módulo separado necesitaría exactamente este repositorio.
- *
- * Ver la decisión 1 del design de `add-profile-selection`.
- */
-
-// ---------------------------------------------------------------------------
-// Utilidades de tiempo y bloqueo
-// ---------------------------------------------------------------------------
-
 function minutesFromNow(minutes: number): Date {
   return new Date(Date.now() + minutes * 60_000);
 }
@@ -65,27 +50,16 @@ function daysFromNow(days: number): Date {
   return new Date(Date.now() + days * 86_400_000);
 }
 
-/** Si hay un bloqueo vigente, devuelve cuándo caduca. */
 function activeLockout(lockedUntil: Date | null): Date | undefined {
   if (lockedUntil === null) return undefined;
   return lockedUntil.getTime() > Date.now() ? lockedUntil : undefined;
 }
 
-/**
- * Iguala el coste de un intento contra algo que no existe.
- *
- * Sin esto, un correo o un perfil inexistentes responderían mucho antes —no
- * habría hash que calcular— y eso permite enumerarlos cronometrando.
- */
 const DUMMY_HASH_PROMISE = hashCredential("credencial-inexistente-para-igualar-tiempos");
 
 async function burnEquivalentTime(candidate: string): Promise<void> {
   await verifyCredential(candidate, await DUMMY_HASH_PROMISE);
 }
-
-// ---------------------------------------------------------------------------
-// Cuenta: registro, acceso y contraseña
-// ---------------------------------------------------------------------------
 
 export interface ParentSummary {
   id: string;
@@ -93,12 +67,11 @@ export interface ParentSummary {
   email: string;
 }
 
-/** Lo mismo, más el avatar YA resuelto: lo que hace falta para armar el actor. */
 export interface ParentProfileSummary extends ParentSummary {
   avatar: AvatarValue;
-  /** Si a este perfil ya se le mostró el recorrido. El CUÁNDO no sale de aquí. */
+
   tutorialSeen: boolean;
-  /** Qué tema prefiere este perfil. `SYSTEM` es seguir al dispositivo. */
+
   theme: ThemePreference;
 }
 
@@ -107,13 +80,6 @@ export interface IssuedSession {
   expiresAt: Date;
 }
 
-/**
- * Registro público de un padre. Acredita la CUENTA.
- *
- * NO deja ningún perfil activo: al terminar se llega a la rejilla, igual que en
- * cualquier apertura posterior. El PIN se pide aquí para no arrastrar por todo
- * el sistema el estado «cuenta sin PIN». Ver la decisión 4 del design.
- */
 export async function registerParent(input: {
   name: string;
   email: string;
@@ -136,7 +102,6 @@ export async function registerParent(input: {
   return { parent, session: await issueAccountSession(parent.id) };
 }
 
-/** Acceso con correo y contraseña. Acredita la cuenta; no activa ningún perfil. */
 export async function loginParent(input: {
   email: string;
   password: string;
@@ -178,7 +143,6 @@ export async function loginParent(input: {
   };
 }
 
-/** Cambio de contraseña. Revoca las demás sesiones y conserva la actual. */
 export async function changePassword(
   actor: Actor,
   accountSessionId: string,
@@ -215,11 +179,6 @@ async function issueAccountSession(userId: string): Promise<IssuedSession> {
   return { token, expiresAt };
 }
 
-// ---------------------------------------------------------------------------
-// PIN de adulto
-// ---------------------------------------------------------------------------
-
-/** Cambio del PIN indicando el actual. Exige tener el perfil de padre activo. */
 export async function changeAdultPin(
   actor: Actor,
   input: { currentPin: string; newPin: string },
@@ -241,12 +200,6 @@ export async function changeAdultPin(
   await repository.updateParentPinHash(found.id, await hashCredential(input.newPin));
 }
 
-/**
- * Restablecimiento del PIN con la contraseña.
- *
- * NO exige perfil activo, a propósito: es la vía por la que un padre bloqueado
- * fuera de su propio perfil se rescata. Exigirlo lo dejaría encerrado.
- */
 export async function resetAdultPin(
   accountUserId: string,
   input: { password: string; newPin: string },
@@ -261,33 +214,18 @@ export async function resetAdultPin(
     throw new InvalidCredentialsError();
   }
 
-  // Poner un PIN nuevo desbloquea: es justo para lo que se viene aquí.
   await repository.updateParentPinHash(found.id, await hashCredential(input.newPin));
 }
 
-// ---------------------------------------------------------------------------
-// Rejilla de perfiles
-// ---------------------------------------------------------------------------
-
 export interface SelectableProfile {
-  /** El del hijo, o `PARENT_PROFILE_ID` para el del padre. */
   id: string;
   familyRole: "PARENT" | "CHILD";
   name: string;
-  /** Clave del catálogo o URL firmada, ya resuelta. */
+
   avatar: AvatarValue;
   locked: boolean;
 }
 
-/**
- * Los perfiles de la familia: el del padre y el de cada hijo activo.
- *
- * Recibe el identificador de la CUENTA y no un actor, porque se llama justo
- * antes de ser nadie: de eso va la rejilla.
- *
- * Solo nombre y avatar. El saldo o la edad de un niño no tienen por qué verse
- * antes de entrar.
- */
 export async function listProfiles(accountUserId: string): Promise<SelectableProfile[]> {
   const parent = await repository.findParentCredentialsById(accountUserId);
   if (parent === null) {
@@ -324,22 +262,16 @@ export interface ActiveProfile {
   id: string;
   name: string;
   avatar: AvatarValue;
-  /** Solo en un perfil de niño. */
+
   coins?: number;
-  /** Solo en el perfil del padre. */
+
   email?: string;
-  /** Si a este perfil ya se le mostró el recorrido de bienvenida. */
+
   tutorialSeen: boolean;
-  /** Qué tema prefiere este perfil. `SYSTEM` es seguir al dispositivo. */
+
   theme: ThemePreference;
 }
 
-/**
- * Activa un perfil de la rejilla, sea el del padre o el de un hijo.
- *
- * Un único camino para los dos: desde la rejilla son perfiles iguales, y tener
- * dos endpoints invitaría a proteger uno y olvidarse del otro.
- */
 export async function enterProfile(
   accountUserId: string,
   accountSessionId: string,
@@ -385,7 +317,6 @@ async function enterParentProfile(
 
   const profile = await repository.findParentById(accountUserId);
 
-  // Cambiar de perfil no deja dos activos: se retira el anterior.
   await repository.revokeProfileSessionsOf(accountSessionId);
   const session = await issueProfileSession(accountUserId, accountSessionId, undefined);
 
@@ -411,8 +342,6 @@ async function enterChildProfile(
 ): Promise<{ profile: ActiveProfile; session: IssuedSession }> {
   const found = await repository.findChildCredentials(childProfileId);
 
-  // Inexistente, de otra familia o dado de baja: la MISMA respuesta en los tres
-  // casos, para que no se pueda descubrir qué perfiles existen.
   if (found === null || found.parentId !== accountUserId || found.deletedAt !== null) {
     await burnEquivalentTime(pin);
     throw new InvalidPinError();
@@ -481,19 +410,9 @@ async function issueProfileSession(
   return { token, expiresAt };
 }
 
-/**
- * Sale del perfil activo y vuelve a la rejilla.
- *
- * Solo revoca el perfil. La sesión de cuenta no se toca, así que elegir otro no
- * exige la contraseña.
- */
 export async function leaveProfile(profileSessionId: string): Promise<void> {
   await repository.revokeSession(profileSessionId);
 }
-
-// ---------------------------------------------------------------------------
-// Gestión del PIN de los hijos
-// ---------------------------------------------------------------------------
 
 export async function setChildPin(
   actor: Actor,
@@ -504,7 +423,7 @@ export async function setChildPin(
   }
 
   const found = await repository.findChildCredentials(input.childProfileId);
-  // Existe pero no es suyo: 404 y no 403, para no confirmar que existe.
+
   if (found === null || found.deletedAt !== null || found.parentId !== actor.userId) {
     throw new NotFoundError();
   }
@@ -513,21 +432,6 @@ export async function setChildPin(
   await repository.revokeSessionsOfChildProfile(found.id);
 }
 
-/**
- * El niño cambia SU PIN, demostrando el actual.
- *
- * Distinta de `setChildPin` en las dos cosas que importan: el perfil sale del
- * ACTOR y no de la petición, y hay que conocer el PIN anterior. La otra es la
- * vía de rescate del padre y por eso no lo exige.
- *
- * Fallar el actual cuenta para el MISMO bloqueo que fallar al entrar. Sin eso,
- * quien recibe la tablet con el perfil de otro abierto podría probar
- * combinaciones sin coste hasta cambiarle el PIN y dejarlo fuera.
- *
- * NO revoca ninguna sesión, ni la propia ni la de otro dispositivo: un perfil
- * ya abierto sigue siendo el mismo perfil de la misma persona. Ver la decisión
- * 10 del design de `add-children`, que corrige la spec en ese punto.
- */
 export async function changeOwnChildPin(
   actor: Actor,
   input: { currentPin: string; newPin: string },
@@ -575,10 +479,6 @@ export async function unlockChildProfile(actor: Actor, childProfileId: string): 
   await repository.clearChildLockout(found.id);
 }
 
-// ---------------------------------------------------------------------------
-// Descripción de quien está dentro
-// ---------------------------------------------------------------------------
-
 export async function describeParent(userId: string): Promise<ParentProfileSummary | null> {
   const parent = await repository.findParentById(userId);
   if (parent === null) return null;
@@ -593,21 +493,6 @@ export async function describeParent(userId: string): Promise<ParentProfileSumma
   };
 }
 
-/**
- * Marca el recorrido de bienvenida como visto, o lo pide otra vez.
- *
- * UNA operación para los dos roles, y la rama por rol AQUÍ y no en el
- * controlador: un `if` sobre el rol en la capa de HTTP está en la capa
- * equivocada. Es el mismo reparto que el detalle de un premio.
- *
- * Es IDEMPOTENTE, y conviene decirlo: no mueve dinero ni cambia de estado, así
- * que dos toques dejan lo mismo. No hay transición condicional que proteger
- * aquí — copiar el patrón de aprobar una tarea sería añadir ceremonia a algo
- * que no la necesita.
- *
- * Qué perfil se toca sale del ACTOR y nunca de la petición: es lo que hace
- * imposible por construcción que un niño marque el de su hermano.
- */
 export async function updateTutorialSeen(actor: Actor, input: UpdateTutorialInput): Promise<void> {
   const cuando = input.seen ? new Date() : null;
 
@@ -619,13 +504,6 @@ export async function updateTutorialSeen(actor: Actor, input: UpdateTutorialInpu
   await repository.setParentTutorialSeen(actor.userId, cuando);
 }
 
-/**
- * Cambiar el tema del perfil activo.
- *
- * Qué perfil se toca sale del ACTOR y nunca de la petición, igual que el
- * recorrido: es lo que hace imposible por construcción que un niño cambie el
- * tema de su hermano.
- */
 export async function updateTheme(actor: Actor, input: UpdateThemeInput): Promise<void> {
   if (actor.familyRole === "CHILD") {
     await repository.setChildTheme(actor.childProfileId, input.theme);
@@ -635,20 +513,10 @@ export async function updateTheme(actor: Actor, input: UpdateThemeInput): Promis
   await repository.setParentTheme(actor.userId, input.theme);
 }
 
-// ---------------------------------------------------------------------------
-// Avatar propio del padre
-// ---------------------------------------------------------------------------
-
-/**
- * El avatar del padre vive aquí y no en `children` porque `User.image` es de
- * este módulo: nadie más lee ni escribe esa columna. Ver la decisión 6 del
- * design de `add-file-storage`.
- */
 function parentAvatarPrefix(userId: string): string {
   return `avatars/parents/${userId}/`;
 }
 
-/** La foto que se confirma tiene que ser de ESTE padre y estar subida de verdad. */
 async function confirmedParentAvatarKey(userId: string, key: string): Promise<string> {
   if (!(await isConfirmableUpload(getStorageProvider(), key, parentAvatarPrefix(userId)))) {
     throw new InvalidAvatarUploadError();
@@ -680,11 +548,6 @@ export async function updateParentAvatar(
     throw new ParentSessionRequiredError();
   }
 
-  /*
-   * Dos formas del mismo campo, excluyentes, y el esquema ya garantiza que
-   * llega exactamente una. La del catálogo no necesita comprobar nada contra el
-   * almacén: es un enum cerrado, así que validarla ES el esquema.
-   */
   const image =
     input.avatar !== undefined
       ? input.avatar
@@ -694,7 +557,6 @@ export async function updateParentAvatar(
 
   const updated = await describeParent(actor.userId);
   if (updated === null) {
-    // Inalcanzable: el actor sale de una sesión viva.
     throw new NotFoundError();
   }
 
@@ -706,9 +568,9 @@ export interface ChildSummary {
   name: string;
   avatar: string | null;
   coins: number;
-  /** Si a este perfil ya se le mostró el recorrido. El CUÁNDO no sale de aquí. */
+
   tutorialSeen: boolean;
-  /** Qué tema prefiere este perfil. `SYSTEM` es seguir al dispositivo. */
+
   theme: ThemePreference;
 }
 
@@ -726,11 +588,6 @@ export async function describeChild(childProfileId: string): Promise<ChildSummar
   };
 }
 
-// ---------------------------------------------------------------------------
-// Cierre de sesión
-// ---------------------------------------------------------------------------
-
-/** Cierra la sesión de cuenta. La cascada se lleva el perfil activo. */
 export async function logout(accountSessionId: string): Promise<void> {
   await repository.revokeSession(accountSessionId);
 }

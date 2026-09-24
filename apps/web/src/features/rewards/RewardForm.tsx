@@ -26,28 +26,6 @@ import {
 import { ImageUploadField } from "../uploads/ImageUploadField.js";
 import { describeRewardsError, useCreateReward } from "./use-rewards.js";
 
-/**
- * Alta de un premio para uno o varios hijos.
- *
- * Mismo patrón que `TaskForm`, y desde `redesign-parent-authoring` mismo CÓDIGO
- * en la parte que de verdad era idéntica: `ChildrenPicker`. Lo que no se funde
- * es el resto —esta tiene foto y aquella fecha de vencimiento—, porque fundir
- * dos pantallas legibles en una con banderas no arregla nada.
- *
- * La FOTO sí está aquí desde `polish-profile-and-reward-image`, y es opcional.
- * Antes no podía: su clave llevaba dentro el identificador del premio, que no
- * existe mientras se crea. Ahora la vía del alta pide una clave que cuelga del
- * PADRE, que sí existe, porque publicar ya exige su perfil.
- *
- * La subida ocurre ANTES de publicar, así que quien elija una foto y luego
- * cancele deja un objeto huérfano. Está aceptado por la decisión cerrada de no
- * borrarlos: equivocarse borrando pesa más que guardar de más.
- *
- * Sigue SIN resolver la foto al crear un perfil de HIJO, y no de rebote: aquella
- * alta ocurre sin perfil activo, que es justo lo que aquí no pasa.
- *
- * NAVEGA ella misma al cancelar, como su gemela.
- */
 export function RewardForm({
   onSaved,
 }: {
@@ -122,11 +100,6 @@ export function RewardForm({
         </h2>
       </div>
 
-      {/*
-        LA BANDA: el formulario a la izquierda y, a la derecha, lo que pasa al
-        enviarlo. Es el reparto de su maqueta, y el `aside` sigue yendo DESPUÉS en
-        el documento — quien lo recorre con teclado llega primero al formulario.
-      */}
       <SplitLayout aside={<ComoFunciona />}>
         <Card>
           <form onSubmit={enviar} className="flex flex-col gap-4">
@@ -147,27 +120,9 @@ export function RewardForm({
               />
             </Field>
 
-            {/*
-            Los tres estados de la subida —elegir, subiendo, error— los pone
-            `ImageUploadField`, que ya existía. Aquí solo se guarda la clave
-            hasta que se publica.
-
-            ESTE COMENTARIO DECÍA «sin `aspect`», y debajo hay un `aspect={1}`.
-            Era cierto hasta `crop-reward-images`, que lo cambió con su razón
-            escrita —las fotos van en rejilla en el escaparate y sin recortar la
-            dentean, y el recortador es interactivo, así que quien sube encuadra
-            hasta que el juguete cabe—. La frase se quedó afirmando lo contrario
-            de la línea siguiente, que es la clase de comentario que manda al
-            próximo a «arreglar» algo que está bien.
-          */}
             <ImageUploadField
               label={messages.rewards.optionalImage}
-              /*
-              RECORTA en cuadrado y guarda con detalle de FOTO, no de avatar.
-              Las dos cosas por separado: atadas, pedir recorte le habría
-              encogido la imagen a 512 px para una tesela que ocupa media
-              tablet. Ver la decisión 2 del design de `crop-reward-images`.
-            */
+
               aspect={1}
               maxDimension={PHOTO_MAX_DIMENSION}
               cropNote={messages.uploads.cropLead}
@@ -175,14 +130,6 @@ export function RewardForm({
               onUploaded={setImageUploadKey}
             />
 
-            {/*
-            POR QUÉ SE RECORTA CUADRADA, dicho donde se sube.
-
-            El recorte es interactivo, así que quien sube ve un marco cuadrado y
-            no sabe por qué. La razón está en el escaparate del niño, que es otra
-            pantalla: van en rejilla, y sin recortar la dentean. Sin esta línea,
-            el marco parece un capricho del subidor.
-          */}
             <p className="text-small text-ink-muted">
               {messages.rewards.imageSquare}
             </p>
@@ -229,20 +176,6 @@ export function RewardForm({
   );
 }
 
-/**
- * EL CICLO DE UN PREMIO, DICHO DONDE SE PUBLICA.
- *
- * Dos cosas que la API hace desde el principio y la interfaz no contaba en
- * ninguna parte. Que un hijo VE lo que todavía no puede pagar, con cuánto le
- * falta — que es lo que convierte un saldo en una decisión de ahorro y es de lo
- * que va el producto. Y que el precio se CONGELA al pedirlo: si se sube después,
- * un canje pendiente mantiene el suyo, y sin saberlo eso parece un descuadre.
- *
- * Gemela de la del reparto de tareas y deliberadamente NO la misma pieza: lo que
- * comparten es la forma —tres pasos y una nota—, no el contenido, y una pieza
- * común con dos juegos de textos sería un contenedor con un nombre que no dice
- * nada. Si aparece una tercera, entonces sí.
- */
 function ComoFunciona(): React.ReactElement {
   const pasos = [
     messages.rewards.publishShows,

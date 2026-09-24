@@ -30,8 +30,6 @@ function crear(cookies: string[], body: Record<string, unknown>): request.Test {
 
 describe("un hijo se crea desde la rejilla, sin haber elegido perfil", () => {
   it("se crea el primer hijo de la familia sin pedir el PIN de adulto", async () => {
-    // `registerParent` deja la CUENTA acreditada y NINGÚN perfil activo: es
-    // exactamente el estado de la rejilla.
     const { cookies } = await registerParent(app);
 
     const response = await crear(cookies, { name: "Mateo", pin: "1234" });
@@ -55,7 +53,6 @@ describe("un hijo se crea desde la rejilla, sin haber elegido perfil", () => {
     const { cookies } = await registerParent(app);
     const creado = await crear(cookies, { name: "Mateo", pin: "1234" }).expect(201);
 
-    // Si esto no lanza, el perfil quedó utilizable desde el primer momento.
     const conPerfil = await enterProfile(app, cookies, creado.body.id, "1234");
 
     const suyo = await request(app).get(`${API_PREFIX}/children/me`).set("Cookie", conPerfil);
@@ -93,7 +90,6 @@ describe("un hijo se crea desde la rejilla, sin haber elegido perfil", () => {
     await registerParent(app, { email: "otra@monedin.test" });
     const otroId = await parentIdByEmail("otra@monedin.test");
 
-    // `parentId` es un campo desconocido: el esquema es estricto.
     const response = await crear(nuestra.cookies, {
       name: "Mateo",
       pin: "1234",
@@ -105,8 +101,6 @@ describe("un hijo se crea desde la rejilla, sin haber elegido perfil", () => {
   }, 120_000);
 
   it("el alta no puede fijar el saldo inicial", async () => {
-    // Si esto dejara de fallar, un alta que no pide PIN de adulto se
-    // convertiría en una impresora de monedas.
     const { cookies } = await registerParent(app);
 
     const response = await crear(cookies, { name: "Mateo", pin: "1234", coins: 500 });
@@ -132,7 +126,7 @@ describe("crear un perfil exige cuenta, y no vale cualquiera que la traiga", () 
 
     expect(response.status).toBe(403);
     expect(response.body.code).toBe(ERROR_CODES.FORBIDDEN);
-    // Y no queda ninguna fila: se rechaza ANTES de escribir.
+
     expect(await testPrisma().childProfile.count({ where: { parentId } })).toBe(1);
   }, 120_000);
 });
@@ -170,7 +164,6 @@ describe("una familia tiene un tope de hijos activos", () => {
       .set("Cookie", cookies)
       .expect(204);
 
-    // Con el hueco libre, el alta vuelve a funcionar desde la rejilla.
     await crear(accountCookies, { name: "El que entra", pin: "1234" }).expect(201);
   }, 180_000);
 
@@ -188,7 +181,6 @@ describe("una familia tiene un tope de hijos activos", () => {
       await request(app).delete(`${API_PREFIX}/children/${hijo.id}`).set("Cookie", cookies);
     }
 
-    // Tres bajas, tres huecos.
     for (let i = 0; i < 3; i += 1) {
       await crear(cookies, { name: `Nuevo ${i}`, pin: "1234" }).expect(201);
     }
