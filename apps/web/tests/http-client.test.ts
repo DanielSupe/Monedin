@@ -33,6 +33,19 @@ describe("cliente HTTP", () => {
     expect(fetchMock).toHaveBeenCalledWith(`${API_PREFIX}/health`, expect.anything());
   });
 
+  it("con una ruta base, llama a la API bajo ella y no en la raíz del dominio", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(okResponse({ status: "ok" }));
+    vi.stubGlobal("fetch", fetchMock);
+    vi.stubGlobal("__WEB_BASE_PATH__", "/monedin/");
+    vi.resetModules();
+    const { apiFetch: apiFetchBajoBase } = await import("../src/lib/http-client.js");
+
+    await apiFetchBajoBase("/health", schema);
+
+    expect(fetchMock).toHaveBeenCalledWith(`/monedin${API_PREFIX}/health`, expect.anything());
+    vi.resetModules();
+  });
+
   it("devuelve la respuesta validada contra el esquema compartido", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(okResponse({ status: "ok" })));
 

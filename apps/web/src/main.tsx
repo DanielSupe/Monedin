@@ -2,11 +2,16 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { ROUTER_BASEPATH } from "./lib/base-path.js";
 import { queryClient } from "./lib/query-client.js";
 import { routeTree } from "./routeTree.gen";
 import "./styles/tokens.css";
 
-const router = createRouter({ routeTree, context: { queryClient } });
+const router = createRouter({
+  routeTree,
+  basepath: ROUTER_BASEPATH,
+  context: { queryClient },
+});
 
 declare module "@tanstack/react-router" {
   interface Register {

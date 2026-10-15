@@ -24,10 +24,14 @@
         "vite.config.ts",
         "index.html",
         "public/**",
-        "prisma/schema.prisma"
+        "prisma/schema.prisma",
+        "$TURBO_ROOT$/.env"
       ],
       "outputs": [
         "dist/**"
+      ],
+      "env": [
+        "WEB_BASE_PATH"
       ]
     },
     "dev": {
@@ -36,7 +40,10 @@
         "db:generate"
       ],
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": [
+        "WEB_BASE_PATH"
+      ]
     },
     "lint": {
       "dependsOn": [

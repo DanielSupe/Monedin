@@ -1,5 +1,6 @@
-import { API_PREFIX, ERROR_CODES, apiErrorSchema, type FieldError } from "@monedin/contracts";
+import { ERROR_CODES, apiErrorSchema, type FieldError } from "@monedin/contracts";
 import type { ZodType } from "zod";
+import { apiUrl } from "./base-path.js";
 import { messages } from "./messages.js";
 
 export class ApiRequestError extends Error {
@@ -76,7 +77,7 @@ export async function apiFetch<T>(
   let response: Response;
 
   try {
-    response = await fetch(`${API_PREFIX}${path}`, { ...init, headers });
+    response = await fetch(apiUrl(path), { ...init, headers });
   } catch {
     throw new ApiRequestError({
       status: 0,

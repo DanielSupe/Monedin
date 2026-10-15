@@ -338,5 +338,36 @@ Nginx sirve la SPA en `/` y reenvía `/api/v1/*` a la API — la misma topologí
 desarrollo, para que los problemas de cookies y orígenes aparezcan mientras programas y no en el
 primer despliegue.
 
+### Bajo una ruta, detrás de Apache
+
+Cuando el dominio lo comparten varias aplicaciones y Monedín no puede ocupar la raíz, se sirve bajo
+una ruta con `WEB_BASE_PATH`. **Se fija al compilar**: un artefacto compilado con `/monedin` solo
+funciona bajo `/monedin/`, y servido en otra ruta pinta una página en blanco.
+
+```bash
+WEB_BASE_PATH=/monedin pnpm build     # o declarada en el .env
+```
+
+La API no cambia y sigue en `/api/v1`: quien recorta la ruta es el proxy. Dentro del `VirtualHost`
+del 443 que ya existe (`a2enmod proxy proxy_http headers`):
+
+```apache
+RedirectMatch ^/monedin$ /monedin/
+
+ProxyPass        /monedin/api/v1/ http://127.0.0.1:3000/api/v1/
+ProxyPassReverse /monedin/api/v1/ http://127.0.0.1:3000/api/v1/
+RequestHeader set X-Forwarded-Proto "https"
+
+Alias /monedin /ruta/a/monedin/apps/web/dist
+<Directory /ruta/a/monedin/apps/web/dist>
+    Require all granted
+    FallbackResource /monedin/index.html
+</Directory>
+```
+
+`FallbackResource` es lo que hace que recargar `/monedin/tasks` entregue la aplicación y no un 404.
+El puerto del `ProxyPass` es el `API_PORT` del `.env`. En desarrollo, `pnpm dev` honra la misma
+variable, así que un defecto de rutas aparece en local antes que en el servidor.
+
 **Adminer no se despliega nunca.** Es un cliente de base de datos con acceso total; está en el
 compose de desarrollo y solo ahí.

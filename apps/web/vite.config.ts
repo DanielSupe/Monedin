@@ -5,6 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from "vite";
+import { normalizeBasePath } from "./src/lib/base-path.js";
 
 const appRoot = path.dirname(fileURLToPath(import.meta.url));
 
@@ -15,6 +16,8 @@ export default defineConfig(({ mode }) => {
 
   const apiPort = Number(env.API_PORT ?? 3000);
   const webPort = Number(env.WEB_PORT ?? 5173);
+  const basePath = normalizeBasePath(env.WEB_BASE_PATH);
+  const basePrefix = basePath.slice(0, -1);
 
   const esProduccion = mode === "production";
 
@@ -27,6 +30,10 @@ export default defineConfig(({ mode }) => {
 
   return {
     envDir: repositoryRoot,
+
+    base: basePath,
+
+    define: { __WEB_BASE_PATH__: JSON.stringify(basePath) },
 
     build: {
       rollupOptions: { input: entradas },
@@ -44,9 +51,10 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
 
       proxy: {
-        [API_PREFIX]: {
+        [`${basePrefix}${API_PREFIX}`]: {
           target: `http://localhost:${apiPort}`,
           changeOrigin: false,
+          rewrite: (url) => url.slice(basePrefix.length),
         },
       },
     },
